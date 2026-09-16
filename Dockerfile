@@ -35,11 +35,6 @@ RUN docker-php-ext-configure gd \
         pdo_pgsql \
         pgsql \
         gd \
-        mbstring \
-        xml \
-        ctype \
-        fileinfo \
-        tokenizer \
         bcmath \
         opcache
 
