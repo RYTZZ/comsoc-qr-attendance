@@ -15,6 +15,7 @@ WORKDIR /var/www/html
 RUN apk add --no-cache \
     nginx \
     supervisor \
+    gettext \
     postgresql-dev \
     freetype-dev \
     libjpeg-turbo-dev \

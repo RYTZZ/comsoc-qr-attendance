@@ -12,5 +12,4 @@ phpunit.xml
 README.md
 Homestead.json
 Homestead.yaml
-docker
 storage/logs/*.log
