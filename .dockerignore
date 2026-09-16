@@ -1,0 +1,16 @@
+.git
+.env
+.env.*
+.gitignore
+.editorconfig
+.phpunit.result.cache
+.phpunit.cache
+node_modules
+npm-debug.log
+tests
+phpunit.xml
+README.md
+Homestead.json
+Homestead.yaml
+docker
+storage/logs/*.log

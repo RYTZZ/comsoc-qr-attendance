@@ -22,6 +22,7 @@ use App\Http\Controllers\Kiosk\SnackKioskController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\PublicRegistrationController;
 use App\Http\Controllers\Student\DashboardController as StudentDashboard;
+use App\Http\Controllers\Student\PasswordController as StudentPasswordController;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', fn() => redirect()->route('login'));
@@ -67,7 +68,9 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
 
-    Route::middleware(['role:student'])->prefix('my')->name('student.')->group(function () {
+    Route::middleware(['role:student', 'require_password_change'])->prefix('my')->name('student.')->group(function () {
+        Route::get('/password/change', [StudentPasswordController::class, 'showChangeForm'])->name('password.change')->withoutMiddleware('require_password_change');
+        Route::post('/password/change', [StudentPasswordController::class, 'update'])->name('password.update')->withoutMiddleware('require_password_change');
         Route::get('/dashboard', [StudentDashboard::class, 'index'])->name('dashboard');
         Route::get('/qr', [StudentDashboard::class, 'qr'])->name('qr');
         Route::get('/qr/download', [StudentDashboard::class, 'downloadQr'])->name('qr.download');
@@ -131,6 +134,11 @@ Route::middleware(['auth', 'verified'])->group(function () {
 
         Route::resource('students', StudentController::class)->only(['index', 'show']);
         Route::post('students/{student}/create-account', [StudentController::class, 'createAccount'])->name('students.create-account');
+        Route::post('students/{student}/activate-account', [StudentController::class, 'activateAccount'])->name('students.activate-account');
+        Route::post('students/{student}/suspend-account', [StudentController::class, 'suspendAccount'])->name('students.suspend-account');
+        Route::post('students/{student}/deactivate-account', [StudentController::class, 'deactivateAccount'])->name('students.deactivate-account');
+        Route::post('students/{student}/reset-password', [StudentController::class, 'resetPassword'])->name('students.reset-password');
+        Route::post('students/bulk-create-accounts', [StudentController::class, 'bulkCreateAccounts'])->name('students.bulk-create-accounts')->middleware('role:super_admin');
 
         Route::get('memberships', [MembershipController::class, 'index'])->name('memberships.index');
         Route::post('memberships/bulk-activate', [MembershipController::class, 'bulkActivate'])->name('memberships.bulk-activate');

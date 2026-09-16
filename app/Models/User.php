@@ -22,6 +22,7 @@ class User extends Authenticatable
         'student_id',
         'created_by',
         'is_active',
+        'must_change_password',
         'last_activity_at',
     ];
 
@@ -36,6 +37,7 @@ class User extends Authenticatable
             'email_verified_at' => 'datetime',
             'password' => 'hashed',
             'is_active' => 'boolean',
+            'must_change_password' => 'boolean',
             'last_activity_at' => 'datetime',
         ];
     }

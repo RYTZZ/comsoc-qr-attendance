@@ -16,6 +16,8 @@ class AttendanceSession extends Model
 
     protected $casts = ['is_active' => 'boolean'];
 
+    protected $appends = ['label'];
+
     public function event(): BelongsTo
     {
         return $this->belongsTo(Event::class);
