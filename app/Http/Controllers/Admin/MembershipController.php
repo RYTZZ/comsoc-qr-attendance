@@ -1,0 +1,226 @@
+<?php
+
+namespace App\Http\Controllers\Admin;
+
+use App\Http\Controllers\Controller;
+use App\Models\AcademicYear;
+use App\Models\Membership;
+use App\Models\QrCode;
+use App\Models\Student;
+use App\Services\AuditLogger;
+use App\Services\QrCodeService;
+use Illuminate\Http\RedirectResponse;
+use Illuminate\Http\Request;
+use Illuminate\View\View;
+
+class MembershipController extends Controller
+{
+    public function __construct(private QrCodeService $qrService) {}
+
+    public function index(Request $request): View
+    {
+        $academicYears = AcademicYear::orderByDesc('year_start')->get();
+        $activeYear = AcademicYear::active();
+
+        $filterYearId = $request->academic_year_id ?? $activeYear?->id;
+
+        $query = Membership::with(['student', 'academicYear', 'activeQrCode.card', 'latestQrCode'])
+            ->when($request->academic_year_id, fn($q) => $q->where('academic_year_id', $request->academic_year_id))
+            ->when(!$request->academic_year_id && $activeYear, fn($q) => $q->where('academic_year_id', $activeYear->id))
+            ->when($request->status, fn($q) => $q->where('status', $request->status))
+            ->when($request->search, fn($q) => $q->whereHas('student', fn($s) => $s->where('student_number', 'like', "%{$request->search}%")
+                ->orWhere('last_name', 'ilike', "%{$request->search}%")
+                ->orWhere('first_name', 'ilike', "%{$request->search}%")
+            ));
+
+        $memberships = $query->orderBy('created_at')->paginate(20)->withQueryString();
+
+        $missingQrCount = Membership::where('status', 'active')
+            ->when($filterYearId, fn($q) => $q->where('academic_year_id', $filterYearId))
+            ->whereDoesntHave('qrCodes', fn($q) => $q->where('status', 'active'))
+            ->count();
+
+        return view('admin.memberships.index', compact('memberships', 'academicYears', 'activeYear', 'missingQrCount', 'filterYearId'));
+    }
+
+    public function activate(Membership $membership): RedirectResponse
+    {
+        $membership->update(['status' => 'active']);
+
+        if (!$membership->activeQrCode) {
+            $lastBatch = QrCode::whereHas('membership', fn($q) => $q->where('academic_year_id', $membership->academic_year_id))
+                ->max('batch_number') ?? 0;
+            $this->qrService->generateForMembership($membership, $lastBatch + 1);
+        }
+
+        AuditLogger::log('membership.activated', $membership, ['status' => 'inactive'], ['status' => 'active']);
+        return back()->with('success', 'Membership activated.');
+    }
+
+    public function deactivate(Membership $membership): RedirectResponse
+    {
+        $membership->update(['status' => 'inactive']);
+        $membership->activeQrCode()?->update(['status' => 'expired', 'expired_at' => now()]);
+        AuditLogger::log('membership.deactivated', $membership, ['status' => 'active'], ['status' => 'inactive']);
+        return back()->with('success', 'Membership deactivated.');
+    }
+
+    public function generateQr(Membership $membership): RedirectResponse
+    {
+        if ($membership->status !== 'active') {
+            return back()->with('error', 'Cannot generate QR for an inactive membership.');
+        }
+
+        if ($membership->activeQrCode) {
+            return back()->with('info', 'This membership already has an active QR code.');
+        }
+
+        $lastBatch = QrCode::whereHas('membership', fn($q) => $q->where('academic_year_id', $membership->academic_year_id))
+            ->max('batch_number') ?? 0;
+
+        $this->qrService->generateForMembership($membership, $lastBatch + 1);
+
+        AuditLogger::log('qr.generated_for_membership', $membership, [], ['membership_id' => $membership->id]);
+        return back()->with('success', 'QR code generated successfully.');
+    }
+
+    public function generateMissingQrs(Request $request): RedirectResponse
+    {
+        $request->validate([
+            'academic_year_id' => 'nullable|exists:academic_years,id',
+        ]);
+
+        $activeYear = AcademicYear::active();
+        $yearId = $request->academic_year_id ?? $activeYear?->id;
+
+        $memberships = Membership::where('status', 'active')
+            ->when($yearId, fn($q) => $q->where('academic_year_id', $yearId))
+            ->whereDoesntHave('qrCodes', fn($q) => $q->where('status', 'active'))
+            ->get();
+
+        $lastBatch = QrCode::when($yearId, fn($q) => $q->whereHas('membership', fn($m) => $m->where('academic_year_id', $yearId)))
+            ->max('batch_number') ?? 0;
+        $batchNumber = $lastBatch + 1;
+
+        $generated = 0;
+        $failed = [];
+
+        foreach ($memberships as $membership) {
+            try {
+                $this->qrService->generateForMembership($membership, $batchNumber);
+                $generated++;
+            } catch (\Throwable $e) {
+                $failed[] = $membership->student->student_number ?? $membership->id;
+            }
+        }
+
+        AuditLogger::log('qr.batch_generated_missing', null, [], [
+            'academic_year_id' => $yearId,
+            'batch_number' => $batchNumber,
+            'generated' => $generated,
+            'failed' => count($failed),
+        ]);
+
+        $message = "QR Codes Generated: {$generated}. Already Existing: 0. Failed: " . count($failed) . '.';
+        if (!empty($failed)) {
+            $message .= ' Failed students: ' . implode(', ', $failed);
+        }
+
+        return back()->with('success', $message);
+    }
+
+    public function bulkActivate(Request $request): RedirectResponse
+    {
+        $request->validate([
+            'file' => 'required|file|mimes:xlsx,xls,csv|max:10240',
+            'academic_year_id' => 'required|exists:academic_years,id',
+            'fee_paid' => 'nullable|numeric|min:0',
+        ]);
+
+        $rows = \Maatwebsite\Excel\Facades\Excel::toArray(
+            new \App\Imports\MasterlistImport,
+            $request->file('file')
+        );
+
+        $data = $rows[0] ?? [];
+        $count = 0;
+
+        $lastBatch = QrCode::whereHas('membership', fn($q) => $q->where('academic_year_id', $request->academic_year_id))
+            ->max('batch_number') ?? 0;
+        $batchNumber = $lastBatch + 1;
+
+        foreach ($data as $row) {
+            $rowClean = array_change_key_case((array) $row, CASE_LOWER);
+            $sn = trim(
+                $rowClean['student_number']
+                ?? $rowClean['student number']
+                ?? $rowClean['student_id']
+                ?? $rowClean['student id']
+                ?? $rowClean['id']
+                ?? ''
+            );
+            if (!$sn) continue;
+
+            $student = Student::where('student_number', $sn)->first();
+            if (!$student) {
+                $lastName = trim($rowClean['last_name'] ?? $rowClean['last name'] ?? $rowClean['lastname'] ?? '');
+                $firstName = trim($rowClean['first_name'] ?? $rowClean['first name'] ?? $rowClean['firstname'] ?? '');
+                $middleName = trim($rowClean['middle_name'] ?? $rowClean['middle name'] ?? $rowClean['middlename'] ?? '');
+                $rawName = trim($rowClean['name'] ?? $rowClean['full_name'] ?? $rowClean['full name'] ?? '');
+
+                if (!empty($lastName) || !empty($firstName)) {
+                    $student = Student::create([
+                        'student_number' => $sn,
+                        'last_name' => $lastName ?: $sn,
+                        'first_name' => $firstName ?: $sn,
+                        'middle_name' => $middleName ?: null,
+                    ]);
+                } elseif (!empty($rawName)) {
+                    $parts = array_map('trim', explode(',', $rawName, 2));
+                    $rest = isset($parts[1]) ? array_map('trim', explode(' ', $parts[1], 2)) : [];
+                    $student = Student::create([
+                        'student_number' => $sn,
+                        'last_name' => $parts[0] ?: $sn,
+                        'first_name' => $rest[0] ?? $sn,
+                        'middle_name' => $rest[1] ?? null,
+                    ]);
+                }
+            }
+
+            if (!$student) continue;
+
+            $membership = Membership::firstOrCreate([
+                'student_id' => $student->id,
+                'academic_year_id' => $request->academic_year_id,
+            ], [
+                'status' => 'active',
+                'fee_paid' => $request->fee_paid,
+                'paid_at' => now()->toDateString(),
+            ]);
+
+            if ($membership) {
+                $membership->update([
+                    'status' => 'active',
+                    'fee_paid' => $request->fee_paid ?? $membership->fee_paid,
+                    'paid_at' => $membership->paid_at ?? now()->toDateString(),
+                ]);
+
+                if (!$membership->activeQrCode) {
+                    try {
+                        $this->qrService->generateForMembership($membership, $batchNumber);
+                    } catch (\Throwable $e) {
+                    }
+                }
+
+                $count++;
+            }
+        }
+
+        AuditLogger::log('membership.bulk_activated', null, [], [
+            'count' => $count,
+            'academic_year_id' => $request->academic_year_id,
+        ]);
+
+        return back()->with('success', "{$count} memberships activated.");
+    }
+}
