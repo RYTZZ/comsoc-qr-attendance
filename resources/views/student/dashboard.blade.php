@@ -67,7 +67,14 @@
     @else
     <div class="card text-center">
         <div class="empty-state py-6">
-            <div class="empty-state-icon">📱</div>
+            <div class="empty-state-icon flex items-center justify-center">
+                <svg class="w-8 h-8 text-slate-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <rect x="3" y="3" width="7" height="7" rx="1" stroke-width="1.5"></rect>
+                    <rect x="14" y="3" width="7" height="7" rx="1" stroke-width="1.5"></rect>
+                    <rect x="3" y="14" width="7" height="7" rx="1" stroke-width="1.5"></rect>
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M14 14h3m4 0v3m-3 4h4m-4-3v3"></path>
+                </svg>
+            </div>
             <p class="empty-state-title text-base font-semibold">No Active QR Code</p>
             <p class="empty-state-body text-xs text-slate-400 mt-1">Your QR code will activate once society membership is confirmed for the current academic year.</p>
         </div>

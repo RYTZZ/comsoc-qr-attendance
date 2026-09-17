@@ -23,12 +23,19 @@
 @php $creds = session('student_credentials'); @endphp
 <div class="mb-4 rounded-2xl border border-emerald-500/30 bg-emerald-950/20 p-5 space-y-3" x-data="{ copied: false }">
     <div class="flex items-center gap-2">
-        <span class="text-emerald-400 text-lg">✅</span>
+        <svg class="w-5 h-5 text-emerald-400 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
+        </svg>
         <h2 class="font-bold text-white text-sm">
             {{ isset($creds['is_reset']) ? 'Password Reset' : 'Account Created' }} — {{ $creds['student_name'] }}
         </h2>
     </div>
-    <p class="text-xs text-amber-400 font-semibold">⚠ These credentials are shown only once. Share them securely.</p>
+    <div class="flex items-center gap-2 text-xs text-amber-400 font-semibold">
+        <svg class="w-4 h-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/>
+        </svg>
+        <span>These credentials are shown only once. Share them securely.</span>
+    </div>
     <div class="bg-slate-950 rounded-xl p-4 space-y-2 font-mono text-sm">
         <div class="flex items-center justify-between gap-4">
             <div>
@@ -45,7 +52,10 @@
                     x-on:click="navigator.clipboard.writeText('{{ $creds['username'] }}\n{{ $creds['password'] }}'); copied = true; setTimeout(() => copied = false, 2000)"
                     class="btn-secondary btn-sm shrink-0">
                 <span x-show="!copied">Copy</span>
-                <span x-show="copied">Copied ✓</span>
+                <span x-show="copied" class="flex items-center gap-1">
+                    <svg class="w-3.5 h-3.5 text-emerald-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"/></svg>
+                    Copied
+                </span>
             </button>
         </div>
     </div>
@@ -161,7 +171,11 @@
 
             @else
             <div class="text-center py-4 mb-4">
-                <div class="text-3xl mb-2">👤</div>
+                <div class="w-12 h-12 rounded-2xl bg-slate-800 flex items-center justify-center mx-auto mb-2 text-slate-400">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.75" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+                    </svg>
+                </div>
                 <p class="text-sm font-semibold text-slate-300">No Account</p>
                 <p class="text-xs text-slate-500 mt-1">This student does not have a system account.</p>
             </div>
@@ -182,7 +196,11 @@
             <h2 class="section-title">Membership History</h2>
             @if($student->memberships->isEmpty())
             <div class="empty-state py-6">
-                <div class="empty-state-icon">🏷️</div>
+                <div class="empty-state-icon flex items-center justify-center">
+                    <svg class="w-8 h-8 text-slate-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M7 7h.01M7 3h5a1.99 1.99 0 011.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V5a2 2 0 012-2z" />
+                    </svg>
+                </div>
                 <p class="empty-state-title">No memberships</p>
             </div>
             @else

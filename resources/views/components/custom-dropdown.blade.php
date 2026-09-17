@@ -6,6 +6,9 @@
     'placeholder' => 'Select an option',
     'required' => false,
     'searchable' => false,
+    'autoSubmit' => false,
+    'class' => '',
+    'buttonClass' => '',
 ])
 
 @php
@@ -17,9 +20,10 @@
         name: '{{ $name }}',
         value: '{{ addslashes($initialValue) }}',
         placeholder: '{{ addslashes($placeholder) }}',
-        options: {{ json_encode($options) }}
+        options: {{ json_encode($options) }},
+        autoSubmit: {{ $autoSubmit ? 'true' : 'false' }}
     })"
-    class="relative w-full text-left"
+    class="relative text-left {{ $class ?: 'w-full' }}"
     @click.away="open = false"
     @keydown.escape.window="open = false">
 
@@ -34,8 +38,10 @@
             @keydown.arrow-down.prevent="navigateOptions(1)"
             @keydown.arrow-up.prevent="navigateOptions(-1)"
             @keydown.enter.prevent="selectHighlighted()"
+            :aria-expanded="open.toString()"
+            aria-haspopup="listbox"
             :class="open ? 'ring-2 ring-[#7A1618] border-transparent shadow-md' : 'border-slate-700 hover:border-slate-600'"
-            class="w-full flex items-center justify-between gap-2 rounded-xl bg-[#12141c] border px-3.5 py-2.5 text-sm text-left transition focus:outline-none focus:ring-2 focus:ring-[#7A1618] focus:border-transparent">
+            class="w-full flex items-center justify-between gap-2 rounded-xl bg-[#12141c] border px-3.5 py-2.5 text-sm text-left transition focus:outline-none focus:ring-2 focus:ring-[#7A1618] focus:border-transparent {{ $buttonClass }}">
         <span class="truncate block"
               :class="value ? 'text-white font-medium' : 'text-slate-500'"
               x-text="displayLabel">

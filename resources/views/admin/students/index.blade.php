@@ -31,32 +31,60 @@
     <input type="search" name="search" value="{{ request('search') }}"
            placeholder="Search name or student #…"
            class="input w-full sm:w-56 text-sm">
-    <select name="account_status" class="select text-sm">
-        <option value="">All Account Statuses</option>
-        <option value="no_account" @selected(request('account_status') === 'no_account')>No Account</option>
-        <option value="active" @selected(request('account_status') === 'active')>Active</option>
-        <option value="inactive" @selected(request('account_status') === 'inactive')>Suspended / Deactivated</option>
-    </select>
-    <select name="membership_status" class="select text-sm">
-        <option value="">All Membership</option>
-        <option value="active" @selected(request('membership_status') === 'active')>Active</option>
-        <option value="pending" @selected(request('membership_status') === 'pending')>Pending</option>
-        <option value="none" @selected(request('membership_status') === 'none')>None</option>
-    </select>
-    <select name="qr_status" class="select text-sm">
-        <option value="">All QR</option>
-        <option value="active" @selected(request('qr_status') === 'active')>QR Active</option>
-        <option value="missing" @selected(request('qr_status') === 'missing')>QR Missing</option>
-        <option value="none" @selected(request('qr_status') === 'none')>No QR</option>
-    </select>
-    <select name="academic_year_id" class="select text-sm">
-        <option value="">All Academic Years</option>
-        @foreach($academicYears as $year)
-        <option value="{{ $year->id }}" @selected(request('academic_year_id') === $year->id || (!request('academic_year_id') && $year->id === $yearId))>
-            {{ $year->label }}{{ $year->is_active ? ' (Active)' : '' }}
-        </option>
-        @endforeach
-    </select>
+    <div class="w-full sm:w-44">
+        <x-custom-dropdown
+            name="account_status"
+            :options="[
+                '' => 'All Account Statuses',
+                'no_account' => 'No Account',
+                'active' => 'Active',
+                'inactive' => 'Suspended / Deactivated',
+            ]"
+            :value="request('account_status', '')"
+            placeholder="All Account Statuses"
+            buttonClass="py-2 text-xs sm:text-sm" />
+    </div>
+    <div class="w-full sm:w-40">
+        <x-custom-dropdown
+            name="membership_status"
+            :options="[
+                '' => 'All Membership',
+                'active' => 'Active',
+                'pending' => 'Pending',
+                'none' => 'None',
+            ]"
+            :value="request('membership_status', '')"
+            placeholder="All Membership"
+            buttonClass="py-2 text-xs sm:text-sm" />
+    </div>
+    <div class="w-full sm:w-36">
+        <x-custom-dropdown
+            name="qr_status"
+            :options="[
+                '' => 'All QR',
+                'active' => 'QR Active',
+                'missing' => 'QR Missing',
+                'none' => 'No QR',
+            ]"
+            :value="request('qr_status', '')"
+            placeholder="All QR"
+            buttonClass="py-2 text-xs sm:text-sm" />
+    </div>
+    <div class="w-full sm:w-48">
+        @php
+            $yearOpts = ['' => 'All Academic Years'];
+            foreach($academicYears as $year) {
+                $yearOpts[$year->id] = $year->label . ($year->is_active ? ' (Active)' : '');
+            }
+            $selectedYear = request('academic_year_id') ?: ($yearId ?? '');
+        @endphp
+        <x-custom-dropdown
+            name="academic_year_id"
+            :options="$yearOpts"
+            :value="$selectedYear"
+            placeholder="All Academic Years"
+            buttonClass="py-2 text-xs sm:text-sm" />
+    </div>
     <button type="submit" class="btn-secondary text-sm">Filter</button>
     <a href="{{ route('admin.students.index') }}" class="btn-secondary text-sm">Reset</a>
 </form>
@@ -124,7 +152,11 @@
             <tr>
                 <td colspan="7">
                     <div class="empty-state">
-                        <div class="empty-state-icon">👥</div>
+                        <div class="empty-state-icon flex items-center justify-center">
+                            <svg class="w-8 h-8 text-slate-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
+                            </svg>
+                        </div>
                         <p class="empty-state-title">No students found</p>
                         <p class="empty-state-body">Try adjusting your filters or upload a masterlist.</p>
                     </div>

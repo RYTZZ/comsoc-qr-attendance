@@ -59,7 +59,14 @@
         <h2 class="section-title">Upcoming Events</h2>
         @if($stats['upcoming_events']->isEmpty())
         <div class="empty-state py-8">
-            <div class="empty-state-icon">📅</div>
+            <div class="empty-state-icon flex items-center justify-center">
+                <svg class="w-8 h-8 text-slate-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <rect x="3" y="4" width="18" height="18" rx="2" ry="2" stroke-width="1.5"></rect>
+                    <line x1="16" y1="2" x2="16" y2="6" stroke-width="1.5" stroke-linecap="round"></line>
+                    <line x1="8" y1="2" x2="8" y2="6" stroke-width="1.5" stroke-linecap="round"></line>
+                    <line x1="3" y1="10" x2="21" y2="10" stroke-width="1.5"></line>
+                </svg>
+            </div>
             <p class="empty-state-title">No upcoming events</p>
             <p class="empty-state-body">Create an event to get started.</p>
         </div>
@@ -89,20 +96,46 @@
         <div class="grid grid-cols-2 gap-2 sm:gap-3">
             @if(auth()->user()->isSuperAdmin())
             <a href="{{ route('admin.masterlist.upload') }}" class="p-3 sm:p-4 rounded-xl bg-slate-800 hover:bg-slate-700 active:scale-[0.98] transition text-center group flex flex-col items-center justify-center min-h-[90px]">
-                <div class="text-xl sm:text-2xl mb-1.5">📋</div>
+                <div class="mb-1.5 flex items-center justify-center text-slate-400 group-hover:text-white transition">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.75" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4" />
+                    </svg>
+                </div>
                 <p class="text-xs font-medium text-slate-300 group-hover:text-white leading-tight">Upload Masterlist</p>
             </a>
             <a href="{{ route('admin.qr-codes.index') }}" class="p-3 sm:p-4 rounded-xl bg-slate-800 hover:bg-slate-700 active:scale-[0.98] transition text-center group flex flex-col items-center justify-center min-h-[90px]">
-                <div class="text-xl sm:text-2xl mb-1.5">📱</div>
+                <div class="mb-1.5 flex items-center justify-center text-slate-400 group-hover:text-white transition">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <rect x="3" y="3" width="7" height="7" rx="1" stroke-width="1.75"></rect>
+                        <rect x="14" y="3" width="7" height="7" rx="1" stroke-width="1.75"></rect>
+                        <rect x="3" y="14" width="7" height="7" rx="1" stroke-width="1.75"></rect>
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.75" d="M14 14h3m4 0v3m-3 4h4m-4-3v3"></path>
+                    </svg>
+                </div>
                 <p class="text-xs font-medium text-slate-300 group-hover:text-white leading-tight">QR Management</p>
             </a>
             @endif
             <a href="{{ route('admin.events.create') }}" class="p-3 sm:p-4 rounded-xl bg-slate-800 hover:bg-slate-700 active:scale-[0.98] transition text-center group flex flex-col items-center justify-center min-h-[90px]">
-                <div class="text-xl sm:text-2xl mb-1.5">🗓️</div>
+                <div class="mb-1.5 flex items-center justify-center text-slate-400 group-hover:text-white transition">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <rect x="3" y="4" width="18" height="18" rx="2" ry="2" stroke-width="1.75"></rect>
+                        <line x1="16" y1="2" x2="16" y2="6" stroke-width="1.75" stroke-linecap="round"></line>
+                        <line x1="8" y1="2" x2="8" y2="6" stroke-width="1.75" stroke-linecap="round"></line>
+                        <line x1="3" y1="10" x2="21" y2="10" stroke-width="1.75"></line>
+                        <line x1="12" y1="14" x2="12" y2="18" stroke-width="1.75" stroke-linecap="round"></line>
+                        <line x1="10" y1="16" x2="14" y2="16" stroke-width="1.75" stroke-linecap="round"></line>
+                    </svg>
+                </div>
                 <p class="text-xs font-medium text-slate-300 group-hover:text-white leading-tight">New Event</p>
             </a>
             <a href="{{ route('admin.attendance.index') }}" class="p-3 sm:p-4 rounded-xl bg-slate-800 hover:bg-slate-700 active:scale-[0.98] transition text-center group flex flex-col items-center justify-center min-h-[90px]">
-                <div class="text-xl sm:text-2xl mb-1.5">📊</div>
+                <div class="mb-1.5 flex items-center justify-center text-slate-400 group-hover:text-white transition">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <line x1="18" y1="20" x2="18" y2="10" stroke-width="1.75" stroke-linecap="round"></line>
+                        <line x1="12" y1="20" x2="12" y2="4" stroke-width="1.75" stroke-linecap="round"></line>
+                        <line x1="6" y1="20" x2="6" y2="14" stroke-width="1.75" stroke-linecap="round"></line>
+                    </svg>
+                </div>
                 <p class="text-xs font-medium text-slate-300 group-hover:text-white leading-tight">Attendance Logs</p>
             </a>
         </div>

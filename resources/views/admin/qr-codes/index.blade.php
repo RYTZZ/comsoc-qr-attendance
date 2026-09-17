@@ -6,12 +6,21 @@
     </div>
     <div class="flex flex-col sm:flex-row gap-2 w-full sm:w-auto">
         <form method="GET" class="flex gap-2 w-full sm:w-auto">
-            <select name="academic_year_id" class="select w-full sm:w-40" onchange="this.form.submit()">
-                <option value="">All Years</option>
-                @foreach($academicYears as $year)
-                <option value="{{ $year->id }}" {{ request('academic_year_id') == $year->id ? 'selected' : '' }}>{{ $year->label }}</option>
-                @endforeach
-            </select>
+            @php
+                $yearOpts = ['' => 'All Years'];
+                foreach($academicYears as $year) {
+                    $yearOpts[$year->id] = $year->label;
+                }
+            @endphp
+            <div class="w-full sm:w-44">
+                <x-custom-dropdown
+                    name="academic_year_id"
+                    :options="$yearOpts"
+                    :value="request('academic_year_id', '')"
+                    placeholder="All Years"
+                    :autoSubmit="true"
+                    buttonClass="py-2 text-xs" />
+            </div>
         </form>
         <a href="{{ route('admin.qr-codes.download', ['academic_year_id' => $filterYearId]) }}" class="btn-secondary text-xs w-full sm:w-auto text-center flex items-center gap-2 justify-center">
             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/></svg>
@@ -24,9 +33,6 @@
                     onclick="return confirm('Generate missing QR codes for active memberships in the selected academic year?')">
                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
                 Generate Missing QR Codes
-                @if($missingQrCount > 0)
-                <span class="ml-1 bg-amber-500/20 text-amber-300 rounded px-1.5 py-0.5 text-[10px] font-bold">{{ $missingQrCount }}</span>
-                @endif
             </button>
         </form>
     </div>
@@ -35,7 +41,9 @@
 @if($missingQrCount > 0)
 <div class="mb-4 flex items-center justify-between gap-4 rounded-xl border border-amber-500/30 bg-amber-950/30 px-5 py-3">
     <div class="flex items-center gap-3">
-        <span class="text-amber-400 text-lg">⚠</span>
+        <svg class="w-5 h-5 text-amber-400 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/>
+        </svg>
         <div>
             <p class="text-sm font-semibold text-amber-300">{{ $missingQrCount }} active membership(s) are missing a QR code.</p>
             <p class="text-xs text-slate-400">Click "Generate Missing QR Codes" to create them.</p>

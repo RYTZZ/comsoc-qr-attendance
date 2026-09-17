@@ -75,13 +75,25 @@
                         <td class="py-3 px-4 text-slate-400 font-mono">{{ $card->qrCode?->membership?->student?->student_number ?? '—' }}</td>
                         <td class="py-3 px-4">
                             @if($card->status === 'claimed')
-                                <span class="badge badge-active">✓ Claimed</span>
+                                <span class="badge badge-active inline-flex items-center gap-1">
+                                    <svg class="w-3 h-3 text-emerald-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"/></svg>
+                                    Claimed
+                                </span>
                             @elseif($card->status === 'lost')
-                                <span class="badge badge-rejected">✕ Lost</span>
+                                <span class="badge badge-rejected inline-flex items-center gap-1">
+                                    <svg class="w-3 h-3 text-red-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+                                    Lost
+                                </span>
                             @elseif($card->status === 'reissued')
-                                <span class="badge bg-purple-950 text-purple-300 ring-1 ring-purple-500/30">↻ Reissued</span>
+                                <span class="badge bg-purple-950 text-purple-300 ring-1 ring-purple-500/30 inline-flex items-center gap-1">
+                                    <svg class="w-3 h-3 text-purple-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/></svg>
+                                    Reissued
+                                </span>
                             @else
-                                <span class="badge badge-pending">⏱ For Claiming</span>
+                                <span class="badge badge-pending inline-flex items-center gap-1">
+                                    <svg class="w-3 h-3 text-amber-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10" stroke-width="2"></circle><polyline points="12 6 12 12 16 14" stroke-width="2"></polyline></svg>
+                                    For Claiming
+                                </span>
                             @endif
                         </td>
                         <td class="py-3 px-4 text-right space-x-1">

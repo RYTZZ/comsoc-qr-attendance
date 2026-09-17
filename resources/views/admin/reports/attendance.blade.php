@@ -14,14 +14,20 @@
 
 <div class="card mb-6">
     <form method="GET" class="flex flex-wrap items-end gap-3">
-        <div>
+        <div class="w-full sm:w-56">
             <label class="label text-[11px]">Event</label>
-            <select name="event_id" class="input py-1.5 text-xs">
-                <option value="">-- All Events --</option>
-                @foreach($events as $event)
-                    <option value="{{ $event->id }}" {{ request('event_id') == $event->id ? 'selected' : '' }}>{{ $event->name }}</option>
-                @endforeach
-            </select>
+            @php
+                $eventOpts = ['' => 'All Events'];
+                foreach($events as $event) {
+                    $eventOpts[$event->id] = $event->name;
+                }
+            @endphp
+            <x-custom-dropdown
+                name="event_id"
+                :options="$eventOpts"
+                :value="request('event_id', '')"
+                placeholder="All Events"
+                buttonClass="py-1.5 text-xs" />
         </div>
         <div>
             <label class="label text-[11px]">From Date</label>

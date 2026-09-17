@@ -14,24 +14,35 @@
 
 <div class="card mb-6">
     <form method="GET" class="flex flex-wrap items-end gap-3">
-        <div>
+        <div class="w-full sm:w-48">
             <label class="label text-[11px]">Academic Year</label>
-            <select name="academic_year_id" class="input py-1.5 text-xs">
-                <option value="">-- All Years --</option>
-                @foreach($academicYears as $ay)
-                    <option value="{{ $ay->id }}" {{ request('academic_year_id') == $ay->id ? 'selected' : '' }}>{{ $ay->label }}</option>
-                @endforeach
-            </select>
+            @php
+                $ayOpts = ['' => 'All Years'];
+                foreach($academicYears as $ay) {
+                    $ayOpts[$ay->id] = $ay->label;
+                }
+            @endphp
+            <x-custom-dropdown
+                name="academic_year_id"
+                :options="$ayOpts"
+                :value="request('academic_year_id', '')"
+                placeholder="All Years"
+                buttonClass="py-1.5 text-xs" />
         </div>
-        <div>
+        <div class="w-full sm:w-40">
             <label class="label text-[11px]">Status</label>
-            <select name="status" class="input py-1.5 text-xs">
-                <option value="">-- All Statuses --</option>
-                <option value="active" {{ request('status') === 'active' ? 'selected' : '' }}>Active</option>
-                <option value="inactive" {{ request('status') === 'inactive' ? 'selected' : '' }}>Inactive</option>
-            </select>
+            <x-custom-dropdown
+                name="status"
+                :options="[
+                    '' => 'All Statuses',
+                    'active' => 'Active',
+                    'inactive' => 'Inactive',
+                ]"
+                :value="request('status', '')"
+                placeholder="All Statuses"
+                buttonClass="py-1.5 text-xs" />
         </div>
-        <button type="submit" class="btn-secondary text-xs py-1.5">Filter</button>
+        <button type="submit" class="btn-secondary text-xs py-1.5 mt-2 sm:mt-0">Filter</button>
     </form>
 </div>
 

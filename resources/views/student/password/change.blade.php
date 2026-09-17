@@ -22,8 +22,14 @@
 
     @if(session('force_change') || auth()->user()->must_change_password)
     <div class="rounded-xl border border-amber-500/30 bg-amber-950/20 px-4 py-3">
-        <p class="text-amber-300 text-sm font-semibold">🔐 You must set a new password before continuing.</p>
-        <p class="text-amber-400/70 text-xs mt-1">Your account was created with a temporary password.</p>
+        <div class="flex items-center gap-2">
+            <svg class="w-4 h-4 text-amber-400 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <rect x="3" y="11" width="18" height="11" rx="2" ry="2" stroke-width="2"></rect>
+                <path d="M7 11V7a5 5 0 0110 0v4" stroke-width="2"></path>
+            </svg>
+            <p class="text-amber-300 text-sm font-semibold">You must set a new password before continuing.</p>
+        </div>
+        <p class="text-amber-400/70 text-xs mt-1 pl-6">Your account was created with a temporary password.</p>
     </div>
     @endif
 

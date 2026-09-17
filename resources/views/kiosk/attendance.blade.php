@@ -48,7 +48,11 @@
 
     <main class="w-full my-auto py-2 space-y-4">
         <div x-show="!isOnline" class="kiosk-feedback-offline animate-fade-in" x-cloak>
-            <div class="text-3xl sm:text-4xl mb-2">📡</div>
+            <div class="w-12 h-12 rounded-2xl bg-amber-500/10 border border-amber-500/20 text-amber-400 flex items-center justify-center mx-auto mb-2">
+                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M1 1l22 22M16.72 11.06A10.94 10.94 0 0119 12.55M5 12.55a10.94 10.94 0 015.17-2.39M10.71 5.05A16 16 0 0122.56 9M1.42 9a15.91 15.91 0 014.7-2.88m3.6-1.07A16.03 16.03 0 0112 5c.81 0 1.6.06 2.37.18M8.53 16.11a6 6 0 016.95 0M12 20h.01"/>
+                </svg>
+            </div>
             <p class="font-bold text-slate-200 text-base sm:text-lg">Connection Lost</p>
             <p class="text-slate-400 text-xs sm:text-sm mt-1">Attendance scanning is paused. Checking connection...</p>
         </div>
@@ -57,14 +61,47 @@
             <div class="card space-y-3">
                 <div>
                     <label class="label text-xs font-semibold text-slate-300">Active Event *</label>
-                    <select x-model="selectedEventId" @change="onEventChanged()" class="select text-xs sm:text-sm bg-slate-950">
-                        <option value="">-- Choose an Event --</option>
-                        @foreach($events as $event)
-                        <option value="{{ $event->id }}" data-sessions="{{ json_encode($event->attendanceSessions) }}">
-                            {{ $event->name }} ({{ $event->event_date ? $event->event_date->format('M d') : 'Date TBA' }})
-                        </option>
-                        @endforeach
-                    </select>
+                    <div class="relative" x-data="{ open: false }">
+                        <button type="button"
+                                @click="open = !open"
+                                @keydown.escape.window="open = false"
+                                :class="open ? 'ring-2 ring-[#7A1618] border-transparent shadow-md' : 'border-slate-700 hover:border-slate-600'"
+                                class="w-full flex items-center justify-between gap-2 rounded-xl bg-[#12141c] border px-3.5 py-2.5 text-xs sm:text-sm text-left transition focus:outline-none focus:ring-2 focus:ring-[#7A1618]">
+                            <span class="truncate block"
+                                  :class="selectedEventId ? 'text-white font-medium' : 'text-slate-500'"
+                                  x-text="eventsData[selectedEventId] ? eventsData[selectedEventId].name : '-- Choose an Event --'">
+                            </span>
+                            <span class="pointer-events-none flex items-center text-slate-400 transition-transform duration-200"
+                                  :class="open ? 'rotate-180 text-[#cc7478]' : ''">
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+                                </svg>
+                            </span>
+                        </button>
+                        <div x-show="open"
+                             @click.away="open = false"
+                             x-transition:enter="transition ease-out duration-100"
+                             x-transition:enter-start="transform opacity-0 scale-95"
+                             x-transition:enter-end="transform opacity-100 scale-100"
+                             x-transition:leave="transition ease-in duration-75"
+                             x-transition:leave-start="transform opacity-100 scale-100"
+                             x-transition:leave-end="transform opacity-0 scale-95"
+                             x-cloak
+                             class="absolute z-50 mt-1.5 w-full rounded-xl bg-[#1e222d] border border-slate-700/80 shadow-2xl py-1 text-xs sm:text-sm max-h-60 overflow-y-auto focus:outline-none">
+                            <template x-for="(ev, evId) in eventsData" :key="evId">
+                                <div @click="selectedEventId = evId; open = false; onEventChanged()"
+                                     :class="selectedEventId === evId ? 'bg-[#7A1618] text-white font-semibold' : 'text-slate-300 hover:bg-[#303644] hover:text-white'"
+                                     class="flex items-center justify-between px-3.5 py-2.5 cursor-pointer transition select-none">
+                                    <span x-text="ev.name" class="truncate"></span>
+                                    <span x-show="selectedEventId === evId" class="text-white ml-2">
+                                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7" />
+                                        </svg>
+                                    </span>
+                                </div>
+                            </template>
+                        </div>
+                    </div>
                 </div>
 
                 <div x-show="sessions.length > 0">
@@ -121,14 +158,16 @@
                                     </div>
                                 </div>
 
-                                <div x-show="cameraStatus === 'requesting'" class="absolute inset-0 bg-[#0f1117]/90 flex flex-col items-center justify-center p-4 text-center z-10">
+                                <div x-show="cameraStatus === 'starting'" class="absolute inset-0 bg-[#171a23]/95 flex flex-col items-center justify-center p-6 text-center z-10" x-cloak>
                                     <div class="w-10 h-10 border-4 border-indigo-500 border-t-transparent rounded-full animate-spin mb-3"></div>
                                     <p class="font-bold text-white text-sm">Starting Camera...</p>
                                     <p class="text-xs text-slate-400 mt-1">Please allow camera permissions if prompted by browser</p>
                                 </div>
 
                                 <div x-show="cameraStatus === 'permission_denied'" class="absolute inset-0 bg-[#171a23]/95 flex flex-col items-center justify-center p-6 text-center z-10 space-y-3" x-cloak>
-                                    <div class="w-12 h-12 rounded-full bg-red-500/10 text-red-400 flex items-center justify-center text-2xl mx-auto border border-red-500/20">📷</div>
+                                    <div class="w-12 h-12 rounded-full bg-red-500/10 text-red-400 flex items-center justify-center mx-auto border border-red-500/20">
+                                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 13a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
+                                    </div>
                                     <h3 class="font-bold text-white text-base">Camera Permission Denied</h3>
                                     <p class="text-xs text-slate-300 max-w-xs leading-relaxed">
                                         Camera access is blocked. Please tap the lock/camera icon near your browser address bar and enable camera permissions, then try again.
@@ -139,7 +178,9 @@
                                 </div>
 
                                 <div x-show="cameraStatus === 'not_found'" class="absolute inset-0 bg-[#171a23]/95 flex flex-col items-center justify-center p-6 text-center z-10 space-y-3" x-cloak>
-                                    <div class="w-12 h-12 rounded-full bg-amber-500/10 text-amber-400 flex items-center justify-center text-2xl mx-auto border border-amber-500/20">⚠️</div>
+                                    <div class="w-12 h-12 rounded-full bg-amber-500/10 text-amber-400 flex items-center justify-center mx-auto border border-amber-500/20">
+                                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/></svg>
+                                    </div>
                                     <h3 class="font-bold text-white text-base">No Camera Detected</h3>
                                     <p class="text-xs text-slate-300 max-w-xs leading-relaxed">
                                         No camera device found on this system. You can connect a webcam or use the keyboard/scanner input below.
@@ -214,8 +255,11 @@
                             </template>
 
                             <template x-if="!latestScan">
-                                <div class="py-8 text-center text-slate-500 space-y-1">
-                                    <div class="text-3xl opacity-40">⏱</div>
+                                <div class="py-8 text-center text-slate-500 space-y-2 flex flex-col items-center justify-center">
+                                    <svg class="w-8 h-8 opacity-40 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <circle cx="12" cy="12" r="10" stroke-width="1.5"></circle>
+                                        <polyline points="12 6 12 12 16 14" stroke-width="1.5"></polyline>
+                                    </svg>
                                     <p class="text-xs">No scan recorded yet</p>
                                     <p class="text-[11px] text-slate-600">Scan QR codes to see real-time updates</p>
                                 </div>
@@ -261,10 +305,25 @@
                                 'kiosk-feedback-success': feedback?.type === 'success',
                                 'kiosk-feedback-error': feedback?.type === 'error',
                                 'kiosk-feedback-duplicate': feedback?.type === 'duplicate'
-                            }" class="kiosk-feedback shadow-2xl py-3 px-4">
-                                <div class="text-2xl mb-1" x-text="feedback?.icon"></div>
-                                <p class="font-bold text-sm text-white" x-text="feedback?.name || feedback?.message"></p>
-                                <p x-show="feedback?.name" class="text-xs text-slate-300 mt-0.5" x-text="feedback?.message"></p>
+                            }" class="kiosk-feedback shadow-2xl py-3 px-4 flex flex-col items-center">
+                                <div class="w-10 h-10 rounded-full flex items-center justify-center mb-1.5"
+                                     :class="{
+                                         'bg-emerald-500/20 text-emerald-400': feedback?.type === 'success',
+                                         'bg-red-500/20 text-red-400': feedback?.type === 'error',
+                                         'bg-amber-500/20 text-amber-400': feedback?.type === 'duplicate'
+                                     }">
+                                    <template x-if="feedback?.type === 'success'">
+                                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"/></svg>
+                                    </template>
+                                    <template x-if="feedback?.type === 'error'">
+                                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M6 18L18 6M6 6l12 12"/></svg>
+                                    </template>
+                                    <template x-if="feedback?.type === 'duplicate'">
+                                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/></svg>
+                                    </template>
+                                </div>
+                                <p class="font-bold text-sm text-white text-center" x-text="feedback?.name || feedback?.message"></p>
+                                <p x-show="feedback?.name" class="text-xs text-slate-300 mt-0.5 text-center" x-text="feedback?.message"></p>
                             </div>
                         </div>
                     </div>
@@ -299,6 +358,15 @@ function kioskApp() {
         lastScannedToken: '',
         lastScanTimestamp: 0,
 
+        eventsData: {
+            @foreach($events as $event)
+            '{{ $event->id }}': {
+                name: '{{ addslashes($event->name) }} ({{ $event->event_date ? $event->event_date->format('M d') : 'Date TBA' }})',
+                sessions: {!! json_encode($event->attendanceSessions) !!}
+            },
+            @endforeach
+        },
+
         init() {
             this.updateTime();
             setInterval(() => this.updateTime(), 1000);
@@ -306,9 +374,9 @@ function kioskApp() {
             setInterval(() => this.checkConnectivity(), 5000);
 
             this.$nextTick(() => {
-                const select = document.querySelector('select');
-                if (select && select.options.length === 2 && !this.selectedEventId) {
-                    this.selectedEventId = select.options[1].value;
+                const eventIds = Object.keys(this.eventsData);
+                if (eventIds.length === 1 && !this.selectedEventId) {
+                    this.selectedEventId = eventIds[0];
                     this.onEventChanged();
                 }
             });
@@ -341,20 +409,8 @@ function kioskApp() {
         loadSessions() {
             this.sessions = [];
             this.selectedSessionId = '';
-            if (!this.selectedEventId) return;
-            const selectEl = document.querySelector('select');
-            if (selectEl) {
-                for (const opt of selectEl.options) {
-                    if (opt.value === this.selectedEventId && opt.dataset.sessions) {
-                        try {
-                            this.sessions = JSON.parse(opt.dataset.sessions);
-                        } catch (e) {
-                            this.sessions = [];
-                        }
-                        break;
-                    }
-                }
-            }
+            if (!this.selectedEventId || !this.eventsData[this.selectedEventId]) return;
+            this.sessions = this.eventsData[this.selectedEventId].sessions || [];
             if (this.sessions.length > 0) {
                 this.selectedSessionId = this.sessions[0].id;
             }
@@ -552,8 +608,7 @@ function kioskApp() {
         },
 
         showFeedback(type, name, message, status = null) {
-            const icons = { success: '✅', error: '❌', duplicate: '⚠️' };
-            this.feedback = { type, icon: icons[type], name, message, status };
+            this.feedback = { type, name, message, status };
 
             if (this.feedbackTimer) clearTimeout(this.feedbackTimer);
             this.feedbackTimer = setTimeout(() => { this.feedback = null; }, 4000);

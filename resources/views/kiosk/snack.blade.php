@@ -43,7 +43,11 @@
 
     <div class="w-full my-auto py-2 space-y-3 sm:space-y-4">
         <div x-show="!isOnline" class="kiosk-feedback-offline animate-fade-in">
-            <div class="text-3xl sm:text-4xl mb-2">📡</div>
+            <div class="w-12 h-12 rounded-2xl bg-amber-500/10 border border-amber-500/20 text-amber-400 flex items-center justify-center mx-auto mb-2">
+                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M1 1l22 22M16.72 11.06A10.94 10.94 0 0119 12.55M5 12.55a10.94 10.94 0 015.17-2.39M10.71 5.05A16 16 0 0122.56 9M1.42 9a15.91 15.91 0 014.7-2.88m3.6-1.07A16.03 16.03 0 0112 5c.81 0 1.6.06 2.37.18M8.53 16.11a6 6 0 016.95 0M12 20h.01"/>
+                </svg>
+            </div>
             <p class="font-bold text-slate-200 text-base sm:text-lg">Connection Lost</p>
             <p class="text-slate-400 text-xs sm:text-sm mt-1">Snack scanning is paused.</p>
         </div>
@@ -51,15 +55,48 @@
         <div x-show="isOnline" class="space-y-3 sm:space-y-4">
             <div class="card space-y-3">
                 <div>
-                    <label class="label text-xs">Snack Session *</label>
-                    <select x-model="selectedSessionId" @change="loadInventories()" class="select text-xs sm:text-sm">
-                        <option value="">-- Select a Snack Session --</option>
-                        @foreach($sessions as $session)
-                        <option value="{{ $session->id }}" data-inventories="{{ json_encode($session->inventories) }}">
-                            {{ $session->event->name }} — {{ $session->name }}
-                        </option>
-                        @endforeach
-                    </select>
+                    <label class="label text-xs font-semibold text-slate-300">Snack Session *</label>
+                    <div class="relative" x-data="{ open: false }">
+                        <button type="button"
+                                @click="open = !open"
+                                @keydown.escape.window="open = false"
+                                :class="open ? 'ring-2 ring-amber-500 border-transparent shadow-md' : 'border-slate-700 hover:border-slate-600'"
+                                class="w-full flex items-center justify-between gap-2 rounded-xl bg-[#12141c] border px-3.5 py-2.5 text-xs sm:text-sm text-left transition focus:outline-none focus:ring-2 focus:ring-amber-500">
+                            <span class="truncate block"
+                                  :class="selectedSessionId ? 'text-white font-medium' : 'text-slate-500'"
+                                  x-text="sessionsData[selectedSessionId] ? sessionsData[selectedSessionId].name : '-- Select a Snack Session --'">
+                            </span>
+                            <span class="pointer-events-none flex items-center text-slate-400 transition-transform duration-200"
+                                  :class="open ? 'rotate-180 text-amber-400' : ''">
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+                                </svg>
+                            </span>
+                        </button>
+                        <div x-show="open"
+                             @click.away="open = false"
+                             x-transition:enter="transition ease-out duration-100"
+                             x-transition:enter-start="transform opacity-0 scale-95"
+                             x-transition:enter-end="transform opacity-100 scale-100"
+                             x-transition:leave="transition ease-in duration-75"
+                             x-transition:leave-start="transform opacity-100 scale-100"
+                             x-transition:leave-end="transform opacity-0 scale-95"
+                             x-cloak
+                             class="absolute z-50 mt-1.5 w-full rounded-xl bg-[#1e222d] border border-slate-700/80 shadow-2xl py-1 text-xs sm:text-sm max-h-60 overflow-y-auto focus:outline-none">
+                            <template x-for="(ses, sId) in sessionsData" :key="sId">
+                                <div @click="selectedSessionId = sId; open = false; loadInventories()"
+                                     :class="selectedSessionId == sId ? 'bg-amber-600 text-white font-semibold' : 'text-slate-300 hover:bg-[#303644] hover:text-white'"
+                                     class="flex items-center justify-between px-3.5 py-2.5 cursor-pointer transition select-none">
+                                    <span x-text="ses.name" class="truncate"></span>
+                                    <span x-show="selectedSessionId == sId" class="text-white ml-2">
+                                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7" />
+                                        </svg>
+                                    </span>
+                                </div>
+                            </template>
+                        </div>
+                    </div>
                 </div>
 
                 <div x-show="inventories.length > 0">
@@ -110,9 +147,24 @@
                     'kiosk-feedback-success': feedback?.type === 'success',
                     'kiosk-feedback-error': feedback?.type === 'error',
                     'kiosk-feedback-duplicate': feedback?.type === 'duplicate'
-                }" class="kiosk-feedback shadow-2xl">
-                    <div class="text-4xl sm:text-5xl mb-2 sm:mb-3" x-text="feedback?.icon"></div>
-                    <p class="font-bold text-lg sm:text-xl text-white" x-text="feedback?.message"></p>
+                }" class="kiosk-feedback shadow-2xl flex flex-col items-center">
+                    <div class="w-12 h-12 rounded-full flex items-center justify-center mb-2"
+                         :class="{
+                             'bg-emerald-500/20 text-emerald-400': feedback?.type === 'success',
+                             'bg-red-500/20 text-red-400': feedback?.type === 'error',
+                             'bg-amber-500/20 text-amber-400': feedback?.type === 'duplicate'
+                         }">
+                        <template x-if="feedback?.type === 'success'">
+                            <svg class="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"/></svg>
+                        </template>
+                        <template x-if="feedback?.type === 'error'">
+                            <svg class="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M6 18L18 6M6 6l12 12"/></svg>
+                        </template>
+                        <template x-if="feedback?.type === 'duplicate'">
+                            <svg class="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/></svg>
+                        </template>
+                    </div>
+                    <p class="font-bold text-lg sm:text-xl text-white text-center" x-text="feedback?.message"></p>
                 </div>
             </div>
         </div>
@@ -129,7 +181,14 @@ function snackKiosk() {
         token: '',
         scanning: false,
         feedback: null,
-        isOnline: true,
+        sessionsData: {
+            @foreach($sessions as $session)
+            '{{ $session->id }}': {
+                name: '{{ addslashes($session->event->name . " — " . $session->name) }}',
+                inventories: @json($session->inventories)
+            },
+            @endforeach
+        },
         selectedSessionId: '',
         selectedInventoryId: '',
         inventories: [],
@@ -150,8 +209,8 @@ function snackKiosk() {
         },
 
         loadInventories() {
-            const select = document.querySelector(`option[value="${this.selectedSessionId}"]`);
-            this.inventories = select ? JSON.parse(select.dataset.inventories || '[]') : [];
+            const ses = this.sessionsData[this.selectedSessionId];
+            this.inventories = ses ? (ses.inventories || []) : [];
             this.selectedInventoryId = '';
         },
 
@@ -175,9 +234,8 @@ function snackKiosk() {
                 });
 
                 const data = await res.json();
-                const icon = data.success ? '🍪' : (data.code === 'duplicate' ? '⚠️' : '❌');
                 const type = data.success ? 'success' : (data.code === 'duplicate' ? 'duplicate' : 'error');
-                this.showFeedback(type, icon, data.message);
+                this.showFeedback(type, data.message);
             } catch {
                 this.isOnline = false;
             } finally {
@@ -187,8 +245,8 @@ function snackKiosk() {
             }
         },
 
-        showFeedback(type, icon, message) {
-            this.feedback = { type, icon, message };
+        showFeedback(type, message) {
+            this.feedback = { type, message };
             if (this.feedbackTimer) clearTimeout(this.feedbackTimer);
             this.feedbackTimer = setTimeout(() => { this.feedback = null; }, 3500);
         },

@@ -21,12 +21,17 @@
                 @csrf
                 <div>
                     <label class="label">Type *</label>
-                    <select name="type" class="select" required>
-                        <option value="morning_in">Morning IN</option>
-                        <option value="morning_out">Morning OUT</option>
-                        <option value="afternoon_in">Afternoon IN</option>
-                        <option value="afternoon_out">Afternoon OUT</option>
-                    </select>
+                    <x-custom-dropdown
+                        name="type"
+                        :options="[
+                            'morning_in' => 'Morning IN',
+                            'morning_out' => 'Morning OUT',
+                            'afternoon_in' => 'Afternoon IN',
+                            'afternoon_out' => 'Afternoon OUT',
+                        ]"
+                        value="morning_in"
+                        :required="true"
+                        placeholder="Select type…" />
                 </div>
                 <div>
                     <label class="label">Opens At *</label>
@@ -80,11 +85,15 @@
                 </div>
                 <div>
                     <label class="label">Type</label>
-                    <select name="type" class="select">
-                        <option value="morning">Morning</option>
-                        <option value="afternoon">Afternoon</option>
-                        <option value="other">Other</option>
-                    </select>
+                    <x-custom-dropdown
+                        name="type"
+                        :options="[
+                            'morning' => 'Morning',
+                            'afternoon' => 'Afternoon',
+                            'other' => 'Other',
+                        ]"
+                        value="morning"
+                        placeholder="Select type…" />
                 </div>
                 <div>
                     <label class="label">Item Name</label>

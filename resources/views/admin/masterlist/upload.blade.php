@@ -44,14 +44,23 @@
             @csrf
             <div>
                 <label for="academic_year_id" class="label">Academic Year *</label>
-                <select name="academic_year_id" id="academic_year_id" class="select" required>
-                    <option value="">Select academic year…</option>
-                    @foreach($academicYears as $year)
-                    <option value="{{ $year->id }}" {{ $year->is_active ? 'selected' : '' }}>
-                        {{ $year->label }}{{ $year->is_active ? ' (Active)' : '' }}
-                    </option>
-                    @endforeach
-                </select>
+                @php
+                    $yearOpts = [];
+                    $activeYearId = '';
+                    foreach($academicYears as $year) {
+                        $yearOpts[$year->id] = $year->label . ($year->is_active ? ' (Active)' : '');
+                        if ($year->is_active && !$activeYearId) {
+                            $activeYearId = $year->id;
+                        }
+                    }
+                @endphp
+                <x-custom-dropdown
+                    name="academic_year_id"
+                    id="academic_year_id"
+                    :options="$yearOpts"
+                    :value="old('academic_year_id', $activeYearId)"
+                    :required="true"
+                    placeholder="Select academic year…" />
             </div>
 
             <div>

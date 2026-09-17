@@ -12,28 +12,39 @@
 
         <div>
             <label for="event_id" class="label">Associated Event (Optional)</label>
-            <select id="event_id" name="event_id" class="input">
-                <option value="">-- No Specific Event --</option>
-                @foreach($events as $event)
-                    <option value="{{ $event->id }}" {{ old('event_id') == $event->id ? 'selected' : '' }}>
-                        {{ $event->name }} ({{ $event->date ? $event->date->format('M d, Y') : 'TBA' }})
-                    </option>
-                @endforeach
-            </select>
+            @php
+                $evOpts = ['' => '-- No Specific Event --'];
+                foreach($events as $event) {
+                    $evDate = $event->date ? $event->date->format('M d, Y') : 'TBA';
+                    $evOpts[$event->id] = "{$event->name} ({$evDate})";
+                }
+            @endphp
+            <x-custom-dropdown
+                name="event_id"
+                id="event_id"
+                :options="$evOpts"
+                :value="old('event_id', '')"
+                placeholder="-- No Specific Event --" />
             @error('event_id')<p class="text-red-400 text-xs mt-1">{{ $message }}</p>@enderror
         </div>
 
         <div>
             <label for="category" class="label">Incident Category <span class="text-red-400">*</span></label>
-            <select id="category" name="category" required class="input">
-                <option value="qr_identity_issue" {{ old('category') === 'qr_identity_issue' ? 'selected' : '' }}>QR / Identity Mismatch or Fake Token</option>
-                <option value="attendance_issue" {{ old('category') === 'attendance_issue' ? 'selected' : '' }}>Attendance Discrepancy</option>
-                <option value="disruptive_conduct" {{ old('category') === 'disruptive_conduct' ? 'selected' : '' }}>Disruptive Conduct</option>
-                <option value="harassment_bullying" {{ old('category') === 'harassment_bullying' ? 'selected' : '' }}>Harassment / Bullying</option>
-                <option value="property_issue" {{ old('category') === 'property_issue' ? 'selected' : '' }}>Property Damage / Theft</option>
-                <option value="safety_concern" {{ old('category') === 'safety_concern' ? 'selected' : '' }}>Safety / Health Concern</option>
-                <option value="other" {{ old('category') === 'other' ? 'selected' : '' }}>Other</option>
-            </select>
+            <x-custom-dropdown
+                name="category"
+                id="category"
+                :options="[
+                    'qr_identity_issue' => 'QR / Identity Mismatch or Fake Token',
+                    'attendance_issue' => 'Attendance Discrepancy',
+                    'disruptive_conduct' => 'Disruptive Conduct',
+                    'harassment_bullying' => 'Harassment / Bullying',
+                    'property_issue' => 'Property Damage / Theft',
+                    'safety_concern' => 'Safety / Health Concern',
+                    'other' => 'Other',
+                ]"
+                :value="old('category', 'qr_identity_issue')"
+                :required="true"
+                placeholder="Select category…" />
             @error('category')<p class="text-red-400 text-xs mt-1">{{ $message }}</p>@enderror
         </div>
 

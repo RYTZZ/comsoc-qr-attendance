@@ -3,17 +3,34 @@
     <h1 class="page-title">Memberships</h1>
     <div class="flex flex-col sm:flex-row flex-wrap gap-2 w-full sm:w-auto">
         <form method="GET" class="flex flex-col sm:flex-row gap-2 w-full sm:w-auto">
-            <select name="academic_year_id" class="select w-full sm:w-40" onchange="this.form.submit()">
-                <option value="">All Years</option>
-                @foreach($academicYears as $year)
-                <option value="{{ $year->id }}" {{ request('academic_year_id') == $year->id ? 'selected' : '' }}>{{ $year->label }}</option>
-                @endforeach
-            </select>
-            <select name="status" class="select w-full sm:w-32" onchange="this.form.submit()">
-                <option value="">All Status</option>
-                <option value="active" {{ request('status') === 'active' ? 'selected' : '' }}>Active</option>
-                <option value="inactive" {{ request('status') === 'inactive' ? 'selected' : '' }}>Inactive</option>
-            </select>
+            @php
+                $yearOpts = ['' => 'All Years'];
+                foreach($academicYears as $year) {
+                    $yearOpts[$year->id] = $year->label;
+                }
+            @endphp
+            <div class="w-full sm:w-44">
+                <x-custom-dropdown
+                    name="academic_year_id"
+                    :options="$yearOpts"
+                    :value="request('academic_year_id', '')"
+                    placeholder="All Years"
+                    :autoSubmit="true"
+                    buttonClass="py-2 text-xs" />
+            </div>
+            <div class="w-full sm:w-36">
+                <x-custom-dropdown
+                    name="status"
+                    :options="[
+                        '' => 'All Status',
+                        'active' => 'Active',
+                        'inactive' => 'Inactive',
+                    ]"
+                    :value="request('status', '')"
+                    placeholder="All Status"
+                    :autoSubmit="true"
+                    buttonClass="py-2 text-xs" />
+            </div>
             <div class="flex gap-2">
                 <input type="search" name="search" value="{{ request('search') }}" placeholder="Search…" class="input flex-1 sm:w-48">
                 <button type="submit" class="btn-secondary shrink-0">Filter</button>
@@ -31,7 +48,9 @@
 @if($missingQrCount > 0)
 <div class="mb-4 flex items-center justify-between gap-4 rounded-xl border border-amber-500/30 bg-amber-950/30 px-5 py-3">
     <div class="flex items-center gap-3">
-        <span class="text-amber-400 text-lg">⚠</span>
+        <svg class="w-5 h-5 text-amber-400 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/>
+        </svg>
         <div>
             <p class="text-sm font-semibold text-amber-300">QR Codes Missing: {{ $missingQrCount }}</p>
             <p class="text-xs text-slate-400">Active memberships without a QR code in the current filter.</p>
@@ -115,7 +134,11 @@
             @empty
             <tr><td colspan="7">
                 <div class="empty-state">
-                    <div class="empty-state-icon">🏷️</div>
+                    <div class="empty-state-icon flex items-center justify-center">
+                        <svg class="w-8 h-8 text-slate-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M7 7h.01M7 3h5a1.99 1.99 0 011.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V5a2 2 0 012-2z" />
+                        </svg>
+                    </div>
                     <p class="empty-state-title">No memberships found</p>
                     <p class="empty-state-body">Upload a masterlist first to create membership records.</p>
                 </div>

@@ -10,7 +10,9 @@
 <div class="mb-6">
     <div class="flex items-center justify-between p-3 rounded-xl bg-slate-900 border border-slate-800 text-xs">
         <div class="flex items-center gap-2 text-emerald-400 font-semibold">
-            <span class="w-6 h-6 rounded-full bg-emerald-600/30 border border-emerald-500/50 text-emerald-300 flex items-center justify-center text-[11px]">✓</span>
+            <span class="w-6 h-6 rounded-full bg-emerald-600/30 border border-emerald-500/50 text-emerald-300 flex items-center justify-center">
+                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"/></svg>
+            </span>
             <span>Upload</span>
         </div>
         <div class="h-0.5 flex-1 mx-3 bg-emerald-500/30"></div>

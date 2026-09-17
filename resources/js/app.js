@@ -11,6 +11,7 @@ Alpine.data('customDropdown', (config) => ({
     value: config.value || '',
     placeholder: config.placeholder || 'Select an option',
     options: config.options || [],
+    autoSubmit: config.autoSubmit || false,
     open: false,
     highlightedIndex: -1,
 
@@ -43,6 +44,12 @@ Alpine.data('customDropdown', (config) => ({
         this.$dispatch('input', val);
         this.$dispatch('change', val);
         this.$dispatch('dropdown-selected', { name: this.name, value: val });
+        if (this.autoSubmit) {
+            this.$nextTick(() => {
+                const form = this.$el.closest('form');
+                if (form) form.submit();
+            });
+        }
     },
 
     navigateOptions(direction) {

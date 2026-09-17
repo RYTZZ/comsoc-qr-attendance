@@ -61,12 +61,17 @@
                 </div>
                 <div>
                     <label for="assigned_user_id" class="label">Assigned Staff Operator</label>
-                    <select id="assigned_user_id" name="assigned_user_id" class="input">
-                        <option value="">-- Any Staff / Unrestricted --</option>
-                        @foreach(\App\Models\User::whereIn('role', ['staff', 'admin', 'super_admin'])->get() as $u)
-                            <option value="{{ $u->id }}">{{ $u->name }} ({{ $u->role }})</option>
-                        @endforeach
-                    </select>
+                    @php
+                        $userOpts = ['' => '-- Any Staff / Unrestricted --'];
+                        foreach(\App\Models\User::whereIn('role', ['staff', 'admin', 'super_admin'])->get() as $u) {
+                            $userOpts[$u->id] = "{$u->name} ({$u->role})";
+                        }
+                    @endphp
+                    <x-custom-dropdown
+                        name="assigned_user_id"
+                        id="assigned_user_id"
+                        :options="$userOpts"
+                        placeholder="-- Any Staff / Unrestricted --" />
                 </div>
                 <div class="pt-2">
                     <button type="submit" class="w-full btn-primary">Create Kiosk</button>
