@@ -7,5 +7,5 @@
     :otp="$otp ?? null"
     :notice="$notice ?? null"
 >
-    {!! $body !!}
+    {!! $body ?? '' !!}
 </x-layouts.email>
