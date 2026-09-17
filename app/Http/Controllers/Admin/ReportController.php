@@ -88,29 +88,57 @@ class ReportController extends Controller
         return view('admin.reports.qr-card', compact('data', 'academicYears'));
     }
 
-    public function snacks(Request $request): View
+    public function snacks(Request $request): View|StreamedResponse
     {
         $events = Event::orderByDesc('event_date')->get();
-        $data = SnackClaim::with(['snackSession.event', 'snackInventory', 'kiosk', 'distributedByUser'])
+        $query = SnackClaim::with(['snackSession.event', 'snackInventory', 'kiosk', 'distributedByUser', 'student', 'eventRegistration'])
             ->when($request->event_id, fn($q) => $q->whereHas('snackSession', fn($s) => $s->where('event_id', $request->event_id)))
             ->when($request->date_from, fn($q) => $q->whereDate('claimed_at', '>=', $request->date_from))
             ->when($request->date_to, fn($q) => $q->whereDate('claimed_at', '<=', $request->date_to))
-            ->orderByDesc('claimed_at')
-            ->get();
+            ->orderByDesc('claimed_at');
+
+        $data = $query->get();
+
+        if ($request->export === 'csv') {
+            $eventName = 'Snack_Distribution';
+            if ($request->event_id) {
+                $selectedEvent = $events->firstWhere('id', $request->event_id) ?? Event::find($request->event_id);
+                if ($selectedEvent && !empty($selectedEvent->name)) {
+                    $eventName = $selectedEvent->name . '_Snacks';
+                }
+            }
+
+            $sanitizedFilename = trim(preg_replace('/[^A-Za-z0-9_\-]+/', '_', $eventName), '_');
+            return $this->exportSnacksCsv($data, $sanitizedFilename ?: 'Snack_Report');
+        }
 
         return view('admin.reports.snacks', compact('data', 'events'));
     }
 
-    public function incidents(Request $request): View
+    public function incidents(Request $request): View|StreamedResponse
     {
         $events = Event::orderByDesc('event_date')->get();
-        $data = Incident::with(['reportedByUser', 'resolvedByUser', 'event'])
+        $query = Incident::with(['reportedByUser', 'resolvedByUser', 'event'])
             ->when($request->status, fn($q) => $q->where('status', $request->status))
             ->when($request->event_id, fn($q) => $q->where('event_id', $request->event_id))
             ->when($request->date_from, fn($q) => $q->whereDate('created_at', '>=', $request->date_from))
             ->when($request->date_to, fn($q) => $q->whereDate('created_at', '<=', $request->date_to))
-            ->orderByDesc('created_at')
-            ->get();
+            ->orderByDesc('created_at');
+
+        $data = $query->get();
+
+        if ($request->export === 'csv') {
+            $eventName = 'Incidents_Report';
+            if ($request->event_id) {
+                $selectedEvent = $events->firstWhere('id', $request->event_id) ?? Event::find($request->event_id);
+                if ($selectedEvent && !empty($selectedEvent->name)) {
+                    $eventName = $selectedEvent->name . '_Incidents';
+                }
+            }
+
+            $sanitizedFilename = trim(preg_replace('/[^A-Za-z0-9_\-]+/', '_', $eventName), '_');
+            return $this->exportIncidentsCsv($data, $sanitizedFilename ?: 'Incidents_Report');
+        }
 
         return view('admin.reports.incidents', compact('data', 'events'));
     }
@@ -195,6 +223,121 @@ class ReportController extends Controller
                     $scanTime,
                     $kioskName,
                     $scannedBy,
+                ]);
+            }
+
+            fclose($handle);
+        };
+
+        return response()->stream($callback, 200, $headers);
+    }
+
+    private function exportSnacksCsv($records, string $filename): StreamedResponse
+    {
+        $headers = [
+            'Content-Type' => 'text/csv; charset=UTF-8',
+            'Content-Disposition' => "attachment; filename=\"{$filename}.csv\"",
+            'Pragma' => 'no-cache',
+            'Cache-Control' => 'must-revalidate, post-check=0, pre-check=0',
+            'Expires' => '0',
+        ];
+
+        $callback = function () use ($records) {
+            $handle = fopen('php://output', 'w');
+            fprintf($handle, chr(0xEF).chr(0xBB).chr(0xBF));
+
+            fputcsv($handle, [
+                'Student ID',
+                'Claimant Name',
+                'Program',
+                'Year Level',
+                'Event',
+                'Snack Session',
+                'Item Claimed',
+                'Quantity',
+                'Claimed At',
+                'Kiosk',
+                'Distributed By',
+            ]);
+
+            foreach ($records as $claim) {
+                $student = $claim->student;
+                $reg = $claim->eventRegistration;
+
+                $studentId = $student?->student_number ?? ($reg ? 'GUEST-' . substr($reg->id, 0, 8) : 'N/A');
+                $fullName = $student?->full_name ?? $reg?->full_name ?? 'N/A';
+                $program = $student?->program ?? $reg?->program ?? 'N/A';
+                $yearLevel = $student?->year_level ?? $reg?->year_level ?? 'N/A';
+                $eventName = $claim->snackSession?->event?->name ?? 'N/A';
+                $sessionName = $claim->snackSession?->name ?? 'N/A';
+                $item = $claim->snackInventory?->item_name ?? 'Standard Ration';
+                $quantity = $claim->quantity ?? 1;
+                $claimedAt = $claim->claimed_at ? $claim->claimed_at->format('Y-m-d H:i:s') : 'N/A';
+                $kioskName = $claim->kiosk?->name ?? 'N/A';
+                $distributedBy = $claim->distributedByUser?->name ?? 'Kiosk';
+
+                fputcsv($handle, [
+                    $studentId,
+                    $fullName,
+                    $program,
+                    $yearLevel,
+                    $eventName,
+                    $sessionName,
+                    $item,
+                    $quantity,
+                    $claimedAt,
+                    $kioskName,
+                    $distributedBy,
+                ]);
+            }
+
+            fclose($handle);
+        };
+
+        return response()->stream($callback, 200, $headers);
+    }
+
+    private function exportIncidentsCsv($records, string $filename): StreamedResponse
+    {
+        $headers = [
+            'Content-Type' => 'text/csv; charset=UTF-8',
+            'Content-Disposition' => "attachment; filename=\"{$filename}.csv\"",
+            'Pragma' => 'no-cache',
+            'Cache-Control' => 'must-revalidate, post-check=0, pre-check=0',
+            'Expires' => '0',
+        ];
+
+        $callback = function () use ($records) {
+            $handle = fopen('php://output', 'w');
+            fprintf($handle, chr(0xEF).chr(0xBB).chr(0xBF));
+
+            fputcsv($handle, [
+                'Incident ID',
+                'Date',
+                'Event',
+                'Category',
+                'Severity',
+                'Status',
+                'Title / Summary',
+                'Description',
+                'Reported By',
+                'Resolved By',
+                'Resolution Notes',
+            ]);
+
+            foreach ($records as $inc) {
+                fputcsv($handle, [
+                    'INC-' . substr($inc->id, 0, 8),
+                    $inc->created_at ? $inc->created_at->format('Y-m-d H:i:s') : 'N/A',
+                    $inc->event?->name ?? 'General',
+                    ucwords(str_replace('_', ' ', $inc->category ?? 'General')),
+                    strtoupper($inc->severity ?? 'LOW'),
+                    ucwords(str_replace('_', ' ', $inc->status ?? 'Open')),
+                    $inc->title ?? 'N/A',
+                    $inc->description ?? '',
+                    $inc->reportedByUser?->name ?? 'N/A',
+                    $inc->resolvedByUser?->name ?? 'Unresolved',
+                    $inc->resolution_notes ?? '',
                 ]);
             }
 

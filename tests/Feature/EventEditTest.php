@@ -44,13 +44,17 @@ class EventEditTest extends TestCase
             'semester' => '1st',
             'is_active' => true,
         ]);
+        $eventDate = now()->addDays(5)->format('Y-m-d');
+        $startsAt = now()->addDays(5)->setTime(13, 0)->format('Y-m-d H:i:s');
+        $endsAt = now()->addDays(5)->setTime(17, 0)->format('Y-m-d H:i:s');
+
         $event = Event::create([
             'academic_year_id' => $ay->id,
             'created_by' => $admin->id,
             'name' => 'CICT Congress 2027',
-            'event_date' => '2026-09-19',
-            'starts_at' => '2026-09-19 13:24:00',
-            'ends_at' => '2026-09-19 13:24:00',
+            'event_date' => $eventDate,
+            'starts_at' => $startsAt,
+            'ends_at' => $endsAt,
             'status' => 'draft',
             'is_published' => false,
             'requires_registration' => true,
@@ -60,9 +64,9 @@ class EventEditTest extends TestCase
         $response = $this->actingAs($admin)->post(route('admin.events.configure.save', $event), [
             'name' => 'CICT Congress 2027',
             'academic_year_id' => $ay->id,
-            'event_date' => '2026-09-19',
-            'starts_at' => '2026-09-19T13:24',
-            'ends_at' => '2026-09-19T13:24',
+            'event_date' => $eventDate,
+            'starts_at' => now()->addDays(5)->setTime(13, 0)->format('Y-m-d\TH:i'),
+            'ends_at' => now()->addDays(5)->setTime(17, 0)->format('Y-m-d\TH:i'),
             'registration_opens_at' => now()->addDays(1)->format('Y-m-d\TH:i'),
             'registration_deadline' => now()->addDays(2)->format('Y-m-d\TH:i'),
             'status' => 'registration_open',

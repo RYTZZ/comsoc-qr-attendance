@@ -29,10 +29,10 @@
                 @forelse($data as $claim)
                     <tr class="hover:bg-slate-800/30 transition">
                         <td class="py-3 px-4 font-medium text-white">
-                            {{ $claim->student?->display_name ?? ('QR: ' . substr($claim->qr_token, 0, 10)) }}
+                            {{ $claim->student?->display_name ?? $claim->eventRegistration?->full_name ?? ('QR: ' . substr($claim->qr_token, 0, 10)) }}
                         </td>
                         <td class="py-3 px-4 text-slate-300">{{ $claim->snackSession?->event?->name ?? '—' }}</td>
-                        <td class="py-3 px-4 text-slate-300">{{ $claim->snackSession?->session_name ?? '—' }}</td>
+                        <td class="py-3 px-4 text-slate-300">{{ $claim->snackSession?->name ?? '—' }}</td>
                         <td class="py-3 px-4 text-brand-300 font-medium">{{ $claim->snackInventory?->item_name ?? 'Standard Ration' }}</td>
                         <td class="py-3 px-4 text-slate-400">{{ $claim->claimed_at ? $claim->claimed_at->format('M j, Y H:i:s') : '—' }}</td>
                         <td class="py-3 px-4 text-slate-400">{{ $claim->distributedByUser?->name ?? 'Kiosk' }}</td>

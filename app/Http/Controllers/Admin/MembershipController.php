@@ -64,7 +64,7 @@ class MembershipController extends Controller
     public function deactivate(Membership $membership): RedirectResponse
     {
         $membership->update(['status' => 'inactive']);
-        $membership->activeQrCode()?->update(['status' => 'expired', 'expired_at' => now()]);
+        $membership->activeQrCode()->update(['status' => 'expired', 'expired_at' => now()]);
         AuditLogger::log('membership.deactivated', $membership, ['status' => 'active'], ['status' => 'inactive']);
         return back()->with('success', 'Membership deactivated.');
     }
