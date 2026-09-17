@@ -102,30 +102,30 @@
                             </span>
                             @if($event->starts_at)
                                 <span class="flex items-center gap-1.5 text-slate-400">
-                                    <svg class="w-4 h-4 text-slate-500 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
-                                    </svg>
-                                    {{ $event->starts_at->format('g:i A') }}@if($event->ends_at) — {{ $event->ends_at->format('g:i A') }}@endif
-                                </span>
+                                     <svg class="w-4 h-4 text-slate-500 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                     </svg>
+                                     {{ $event->starts_at->format('g:i A') }}@if($event->ends_at && $event->ends_at->format('g:i A') !== $event->starts_at->format('g:i A')) — {{ $event->ends_at->format('g:i A') }}@endif
+                                 </span>
                             @endif
                             @if($event->effective_venue)
                                 <span class="flex items-center gap-1.5 text-slate-300">
-                                    <svg class="w-4 h-4 text-slate-400 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
-                                    </svg>
-                                    {{ $event->effective_venue }}
-                                </span>
+                                     <svg class="w-4 h-4 text-slate-400 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
+                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
+                                     </svg>
+                                     {{ $event->effective_venue }}
+                                 </span>
                             @endif
                         </div>
 
                         @if($event->venue_address || $event->venue_details)
                             <div class="mt-2.5 p-2.5 rounded-xl bg-slate-950/60 border border-slate-800/80 text-xs text-slate-400 space-y-1">
                                 @if($event->venue_address)
-                                    <p><span class="text-slate-500 font-medium">Address:</span> {{ $event->venue_address }}</p>
+                                     <p><span class="text-slate-500 font-medium">Address:</span> {{ $event->venue_address }}</p>
                                 @endif
                                 @if($event->venue_details)
-                                    <p><span class="text-slate-500 font-medium">Venue Details:</span> {{ $event->venue_details }}</p>
+                                     <p><span class="text-slate-500 font-medium">Venue Details:</span> {{ $event->venue_details }}</p>
                                 @endif
                             </div>
                         @endif
@@ -139,7 +139,7 @@
                             </div>
                         @endif
 
-                        @if($deadline)
+                        @if($isOpen && $deadline && now()->lt($deadline))
                             <div class="mt-4 rounded-xl p-3 sm:p-4 bg-slate-950/70 border border-slate-800"
                                  x-data="registrationCountdown('{{ $deadline->toIso8601String() }}')">
                                 <div class="flex items-center justify-between gap-2 mb-1.5">
@@ -175,7 +175,7 @@
 
                                 <template x-if="isExpired">
                                     <div class="p-2.5 rounded-lg bg-red-500/10 border border-red-500/20 text-center">
-                                        <span class="text-xs font-semibold text-red-400">Registration Closed</span>
+                                        <span class="text-xs font-semibold text-red-400">Registration Expired</span>
                                     </div>
                                 </template>
                             </div>

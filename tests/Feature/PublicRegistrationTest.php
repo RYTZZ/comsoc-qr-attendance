@@ -158,4 +158,73 @@ class PublicRegistrationTest extends TestCase
         $response->assertSessionHas('error', 'You have already registered for this event.');
         $this->assertEquals(1, EventRegistration::where('email', 'maria.santos@gmail.com')->count());
     }
+
+    public function test_public_registration_page_reflects_registration_open_status(): void
+    {
+        $year = AcademicYear::create([
+            'label' => 'AY 2026-2027',
+            'year_start' => 2026,
+            'year_end' => 2027,
+            'semester' => '1st',
+            'is_active' => true,
+        ]);
+
+        $user = \App\Models\User::factory()->create(['role' => 'superadmin']);
+
+        $event = Event::create([
+            'name' => 'CICT Congress 2027',
+            'academic_year_id' => $year->id,
+            'created_by' => $user->id,
+            'event_date' => Carbon::now()->addDays(2),
+            'starts_at' => Carbon::now()->addDays(2)->setHour(13)->setMinute(24)->setSecond(0),
+            'ends_at' => Carbon::now()->addDays(2)->setHour(13)->setMinute(24)->setSecond(0),
+            'allow_non_students' => true,
+            'is_published' => true,
+            'status' => 'registration_open',
+            'requires_registration' => true,
+            'registration_deadline' => Carbon::now()->addDays(2)->setHour(21)->setMinute(25)->setSecond(0),
+        ]);
+
+        $response = $this->get('/register');
+
+        $response->assertStatus(200);
+        $response->assertSee('Registration Open');
+        $response->assertDontSee('Registration Not Open');
+        $response->assertDontSee('Registration Closed');
+        $response->assertSee('Time Left to Register');
+        $response->assertSee('1:24 PM');
+        $response->assertDontSee('1:24 PM — 1:24 PM');
+    }
+
+    public function test_public_registration_page_reflects_manually_closed_status_and_hides_countdown(): void
+    {
+        $year = AcademicYear::create([
+            'label' => 'AY 2026-2027',
+            'year_start' => 2026,
+            'year_end' => 2027,
+            'semester' => '1st',
+            'is_active' => true,
+        ]);
+
+        $user = \App\Models\User::factory()->create(['role' => 'superadmin']);
+
+        $event = Event::create([
+            'name' => 'CICT Congress 2027',
+            'academic_year_id' => $year->id,
+            'created_by' => $user->id,
+            'event_date' => Carbon::now()->addDays(2),
+            'allow_non_students' => true,
+            'is_published' => true,
+            'status' => 'registration_closed',
+            'requires_registration' => true,
+            'registration_deadline' => Carbon::now()->addDays(2),
+        ]);
+
+        $response = $this->get('/register');
+
+        $response->assertStatus(200);
+        $response->assertSee('Registration Closed');
+        $response->assertDontSee('Registration Open');
+        $response->assertDontSee('Time Left to Register');
+    }
 }
