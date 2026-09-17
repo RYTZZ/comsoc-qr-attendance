@@ -18,11 +18,48 @@ class AttendanceService
         $participant = $this->qrService->resolveParticipant($token);
 
         if (!$participant) {
-            return ['success' => false, 'message' => 'Invalid or expired QR code.', 'code' => 'invalid_qr'];
+            $inactiveQr = \App\Models\QrCode::where('token', $token)->first();
+            if ($inactiveQr) {
+                return [
+                    'success' => false,
+                    'message' => 'This membership QR code is ' . ($inactiveQr->status ?? 'inactive') . '.',
+                    'code' => 'inactive_qr'
+                ];
+            }
+
+            $reg = \App\Models\EventRegistration::where('qr_token', $token)->first();
+            if ($reg) {
+                if ($reg->status !== 'approved') {
+                    return [
+                        'success' => false,
+                        'message' => 'Event registration is ' . $reg->status . '.',
+                        'code' => 'inactive_qr'
+                    ];
+                }
+                if ($reg->qr_expires_at && now()->gte($reg->qr_expires_at)) {
+                    return [
+                        'success' => false,
+                        'message' => 'This event QR code has expired.',
+                        'code' => 'expired_qr'
+                    ];
+                }
+            }
+
+            return ['success' => false, 'message' => 'Invalid or unrecognized QR code.', 'code' => 'invalid_qr'];
         }
 
         if ($session->event_id !== $event->id) {
             return ['success' => false, 'message' => 'Session does not belong to this event.', 'code' => 'session_mismatch'];
+        }
+
+        if ($participant['type'] === 'non_student' && isset($participant['registration'])) {
+            if ($participant['registration']->event_id !== $event->id) {
+                return [
+                    'success' => false,
+                    'message' => 'This QR pass is registered for a different event.',
+                    'code' => 'event_mismatch'
+                ];
+            }
         }
 
         $action = $session->isInSession() ? 'in' : 'out';
@@ -70,6 +107,7 @@ class AttendanceService
                 'message' => ucfirst($action) . ' recorded — ' . ucfirst($status),
                 'action' => $action,
                 'status' => $status,
+                'participant_type' => $participant['type'],
                 'name' => $participant['name'],
                 'student_number' => $studentNumber,
                 'record' => $record,

@@ -48,15 +48,32 @@ class AttendanceKioskController extends Controller
     {
         abort_unless($kiosk->is_active, 404);
 
-        $token = trim($request->input('token', ''));
-        if (preg_match('/[A-Za-z0-9]{48}/', $token, $matches)) {
+        $rawToken = trim((string) $request->input('token', ''));
+        $token = $rawToken;
+
+        if (str_starts_with($rawToken, '{') && str_ends_with($rawToken, '}')) {
+            $decodedJson = json_decode($rawToken, true);
+            if (is_array($decodedJson) && !empty($decodedJson['token'])) {
+                $token = trim((string) $decodedJson['token']);
+            }
+        }
+
+        if (preg_match('/[A-Za-z0-9]{40,64}/', $token, $matches)) {
             $token = $matches[0];
+        } elseif (str_contains($token, 'token=')) {
+            $parsedUrl = parse_url($token);
+            if (isset($parsedUrl['query'])) {
+                parse_str($parsedUrl['query'], $queryParams);
+                if (!empty($queryParams['token'])) {
+                    $token = trim((string) $queryParams['token']);
+                }
+            }
         }
 
         $request->merge(['token' => $token]);
 
         $request->validate([
-            'token' => 'required|string|size:48',
+            'token' => 'required|string|min:16|max:64',
             'event_id' => 'required|exists:events,id',
             'session_id' => 'required|exists:attendance_sessions,id',
         ]);

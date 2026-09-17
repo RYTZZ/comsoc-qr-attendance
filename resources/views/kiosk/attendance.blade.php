@@ -222,6 +222,16 @@
                                     </button>
                                 </div>
 
+                                <div x-show="cameraStatus === 'insecure_context'" class="absolute inset-0 bg-[#171a23]/95 flex flex-col items-center justify-center p-6 text-center z-10 space-y-3" x-cloak>
+                                    <div class="w-12 h-12 rounded-full bg-amber-500/10 text-amber-400 flex items-center justify-center mx-auto border border-amber-500/20">
+                                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m0 0v2m0-2h2m-2 0H10m11-6V7a4 4 0 00-8 0v2M5 9h14a2 2 0 012 2v8a2 2 0 01-2 2H5a2 2 0 01-2-2V11a2 2 0 012-2z"/></svg>
+                                    </div>
+                                    <h3 class="font-bold text-white text-base">HTTPS / Secure Connection Required</h3>
+                                    <p class="text-xs text-slate-300 max-w-xs leading-relaxed">
+                                        Modern mobile and desktop browsers only allow camera access on HTTPS or localhost. Please access the kiosk using HTTPS.
+                                    </p>
+                                </div>
+
                                 <div x-show="cameraStatus === 'not_found'" class="absolute inset-0 bg-[#171a23]/95 flex flex-col items-center justify-center p-6 text-center z-10 space-y-3" x-cloak>
                                     <div class="w-12 h-12 rounded-full bg-amber-500/10 text-amber-400 flex items-center justify-center mx-auto border border-amber-500/20">
                                         <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/></svg>
@@ -275,13 +285,20 @@
                             <template x-if="latestScan">
                                 <div class="space-y-3 animate-fade-in">
                                     <div>
-                                        <p class="text-xs text-slate-500">Student Name</p>
+                                        <div class="flex items-center justify-between">
+                                            <p class="text-xs text-slate-500">Attendee Name</p>
+                                            <span x-show="latestScan.participant_type"
+                                                  :class="latestScan.participant_type === 'student' ? 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20' : 'bg-blue-500/10 text-blue-400 border-blue-500/20'"
+                                                  class="text-[10px] font-semibold px-2 py-0.5 rounded border"
+                                                  x-text="latestScan.participant_type === 'student' ? 'Membership QR' : 'Event Pass QR'">
+                                            </span>
+                                        </div>
                                         <p class="text-lg font-bold text-white font-brand-display" x-text="latestScan.name || 'Attendee'"></p>
                                     </div>
                                     <div class="grid grid-cols-2 gap-2">
                                         <div>
-                                            <p class="text-xs text-slate-500">Student Number</p>
-                                            <p class="text-sm font-semibold text-slate-200 font-mono" x-text="latestScan.student_number || '—'"></p>
+                                            <p class="text-xs text-slate-500" x-text="latestScan.participant_type === 'student' ? 'Student Number' : 'Pass ID'"></p>
+                                            <p class="text-sm font-semibold text-slate-200 font-mono" x-text="latestScan.student_number || 'Guest'"></p>
                                         </div>
                                         <div>
                                             <p class="text-xs text-slate-500">Time</p>
@@ -306,7 +323,7 @@
                                         <polyline points="12 6 12 12 16 14" stroke-width="1.5"></polyline>
                                     </svg>
                                     <p class="text-xs">No scan recorded yet</p>
-                                    <p class="text-[11px] text-slate-600">Scan QR codes to see real-time updates</p>
+                                    <p class="text-[11px] text-slate-600">Scan membership or event QR codes to record attendance</p>
                                 </div>
                             </template>
                         </div>
@@ -318,9 +335,13 @@
 
                             <template x-if="previousScan">
                                 <div class="space-y-2 text-xs animate-fade-in">
-                                    <div>
-                                        <p class="text-[11px] text-slate-500">Student Name</p>
+                                    <div class="flex items-center justify-between">
                                         <p class="font-semibold text-white text-sm font-brand-display" x-text="previousScan.name || 'Attendee'"></p>
+                                        <span x-show="previousScan.participant_type"
+                                              :class="previousScan.participant_type === 'student' ? 'text-emerald-400' : 'text-blue-400'"
+                                              class="text-[10px] font-medium"
+                                              x-text="previousScan.participant_type === 'student' ? 'Membership' : 'Event Pass'">
+                                        </span>
                                     </div>
                                     <div class="flex items-center justify-between pt-1">
                                         <div>
@@ -366,6 +387,9 @@
                                     <template x-if="feedback?.type === 'duplicate'">
                                         <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/></svg>
                                     </template>
+                                </div>
+                                <div x-show="feedback?.badge" class="mb-1">
+                                    <span :class="feedback?.badge === 'Membership' ? 'bg-emerald-500/20 text-emerald-300' : 'bg-blue-500/20 text-blue-300'" class="text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-full" x-text="feedback?.badge"></span>
                                 </div>
                                 <p class="font-bold text-sm text-white text-center" x-text="feedback?.name || feedback?.message"></p>
                                 <p x-show="feedback?.name" class="text-xs text-slate-300 mt-0.5 text-center" x-text="feedback?.message"></p>
@@ -486,16 +510,16 @@ function kioskApp() {
 
             await this.stopScanner();
 
-            this.cameraStatus = 'requesting';
-
-            try {
-                const devices = await window.Html5Qrcode.getCameras();
-                if (!devices || devices.length === 0) {
-                    this.cameraStatus = 'not_found';
+            if (window.location.protocol !== 'https:' && window.location.hostname !== 'localhost' && window.location.hostname !== '127.0.0.1') {
+                if (window.isSecureContext === false) {
+                    this.cameraStatus = 'insecure_context';
                     return;
                 }
+            }
 
-                this.cameras = devices;
+            this.cameraStatus = 'starting';
+
+            try {
                 this.qrScanner = new window.Html5Qrcode('qr-camera-reader', {
                     experimentalFeatures: {
                         useBarCodeDetectorIfSupported: true
@@ -503,27 +527,45 @@ function kioskApp() {
                     verbose: false
                 });
 
-                let selectedCamera = devices[0].id;
-                const backCamera = devices.find(d => /back|rear|environment/i.test(d.label));
-                if (backCamera) {
-                    selectedCamera = backCamera.id;
+                let devices = [];
+                try {
+                    devices = await window.Html5Qrcode.getCameras();
+                } catch (camErr) {
+                    devices = [];
                 }
-                this.activeCameraId = selectedCamera;
+
+                this.cameras = devices || [];
+
+                let cameraIdOrConfig = { facingMode: 'environment' };
+
+                if (this.cameras.length > 0) {
+                    let selectedCamera = this.cameras[0].id;
+                    const backCamera = this.cameras.find(d => /back|rear|environment/i.test(d.label));
+                    if (backCamera) {
+                        selectedCamera = backCamera.id;
+                    }
+                    this.activeCameraId = selectedCamera;
+                    cameraIdOrConfig = selectedCamera;
+                }
+
+                const qrboxFunction = (viewfinderWidth, viewfinderHeight) => {
+                    const edge = Math.floor(Math.min(viewfinderWidth, viewfinderHeight) * 0.75);
+                    return { width: Math.max(edge, 220), height: Math.max(edge, 220) };
+                };
 
                 const scanConfig = {
-                    fps: 20,
+                    fps: 15,
+                    qrbox: qrboxFunction,
                     aspectRatio: 1.0,
                     videoConstraints: {
-                        deviceId: selectedCamera,
-                        focusMode: 'continuous',
-                        advanced: [{ focusMode: 'continuous' }],
-                        width: { min: 640, ideal: 1280 },
-                        height: { min: 480, ideal: 720 }
+                        facingMode: 'environment',
+                        width: { ideal: 1280 },
+                        height: { ideal: 720 }
                     }
                 };
 
                 await this.qrScanner.start(
-                    selectedCamera,
+                    cameraIdOrConfig,
                     scanConfig,
                     (decodedText) => {
                         this.handleDecodedQr(decodedText);
@@ -536,19 +578,19 @@ function kioskApp() {
                 const errStr = String(err).toLowerCase();
                 if (errStr.includes('notallowed') || errStr.includes('permission')) {
                     this.cameraStatus = 'permission_denied';
-                } else if (errStr.includes('notfound') || errStr.includes('device')) {
+                } else if (errStr.includes('notfound') || errStr.includes('device') || (this.cameras.length === 0 && errStr.includes('no camera'))) {
                     this.cameraStatus = 'not_found';
                 } else {
                     try {
                         await this.qrScanner.start(
-                            { facingMode: 'environment' },
+                            { facingMode: 'user' },
                             {
-                                fps: 20,
-                                aspectRatio: 1.0,
-                                videoConstraints: {
-                                    focusMode: 'continuous',
-                                    advanced: [{ focusMode: 'continuous' }]
-                                }
+                                fps: 15,
+                                qrbox: (w, h) => {
+                                    const edge = Math.floor(Math.min(w, h) * 0.75);
+                                    return { width: Math.max(edge, 220), height: Math.max(edge, 220) };
+                                },
+                                aspectRatio: 1.0
                             },
                             (decodedText) => this.handleDecodedQr(decodedText),
                             () => {}
@@ -565,29 +607,31 @@ function kioskApp() {
             this.activeCameraId = cameraId;
             if (this.qrScanner) {
                 await this.stopScanner();
+                this.cameraStatus = 'starting';
                 this.qrScanner = new window.Html5Qrcode('qr-camera-reader', {
                     experimentalFeatures: {
                         useBarCodeDetectorIfSupported: true
                     },
                     verbose: false
                 });
-                await this.qrScanner.start(
-                    cameraId,
-                    {
-                        fps: 20,
-                        aspectRatio: 1.0,
-                        videoConstraints: {
-                            deviceId: cameraId,
-                            focusMode: 'continuous',
-                            advanced: [{ focusMode: 'continuous' }],
-                            width: { min: 640, ideal: 1280 },
-                            height: { min: 480, ideal: 720 }
-                        }
-                    },
-                    (decodedText) => this.handleDecodedQr(decodedText),
-                    () => {}
-                );
-                this.cameraStatus = 'ready';
+                try {
+                    await this.qrScanner.start(
+                        cameraId,
+                        {
+                            fps: 15,
+                            qrbox: (w, h) => {
+                                const edge = Math.floor(Math.min(w, h) * 0.75);
+                                return { width: Math.max(edge, 220), height: Math.max(edge, 220) };
+                            },
+                            aspectRatio: 1.0
+                        },
+                        (decodedText) => this.handleDecodedQr(decodedText),
+                        () => {}
+                    );
+                    this.cameraStatus = 'ready';
+                } catch {
+                    this.cameraStatus = 'permission_denied';
+                }
             }
         },
 
@@ -612,7 +656,16 @@ function kioskApp() {
             if (!decodedText) return;
             let cleanToken = decodedText.trim();
 
-            const tokenMatch = cleanToken.match(/[A-Za-z0-9]{48}/);
+            if (cleanToken.startsWith('{') && cleanToken.endsWith('}')) {
+                try {
+                    const parsed = JSON.parse(cleanToken);
+                    if (parsed && parsed.token) {
+                        cleanToken = String(parsed.token).trim();
+                    }
+                } catch {}
+            }
+
+            const tokenMatch = cleanToken.match(/[A-Za-z0-9]{40,64}/);
             if (tokenMatch) {
                 cleanToken = tokenMatch[0];
             } else if (cleanToken.includes('token=')) {
@@ -674,11 +727,13 @@ function kioskApp() {
                     this.latestScan = {
                         name: data.name,
                         student_number: data.student_number || 'N/A',
+                        participant_type: data.participant_type,
                         status: data.status,
                         time: scanTime,
                         message: data.message
                     };
-                    this.showFeedback('success', data.name, data.message, data.status);
+                    const badge = data.participant_type === 'student' ? 'Membership' : 'Event Pass';
+                    this.showFeedback('success', data.name, data.message, data.status, badge);
                 } else if (data.code === 'duplicate') {
                     this.showFeedback('duplicate', null, data.message);
                 } else {
@@ -693,8 +748,8 @@ function kioskApp() {
             }
         },
 
-        showFeedback(type, name, message, status = null) {
-            this.feedback = { type, name, message, status };
+        showFeedback(type, name, message, status = null, badge = null) {
+            this.feedback = { type, name, message, status, badge };
             this.playTone(type);
 
             if (this.feedbackTimer) clearTimeout(this.feedbackTimer);
