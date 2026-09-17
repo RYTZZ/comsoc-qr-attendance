@@ -31,7 +31,7 @@ Route::get('/dashboard', function () {
     $user = auth()->user();
     if (!$user) return redirect()->route('login');
     if (!$user->is_active) {
-        auth()->logout();
+        auth('web')->logout();
         return redirect()->route('login')->withErrors(['email' => 'Your account has been deactivated.']);
     }
     if ($user->role === 'student') {
