@@ -57,10 +57,10 @@
                 @forelse($data as $rec)
                     <tr class="hover:bg-slate-800/30 transition">
                         <td class="py-3 px-4 font-medium text-white">
-                            {{ $rec->membership?->student?->display_name ?? $rec->eventRegistration?->full_name ?? substr($rec->qr_token, 0, 12) }}
+                            {{ $rec->student?->display_name ?? $rec->eventRegistration?->full_name ?? substr($rec->qr_token, 0, 12) }}
                         </td>
                         <td class="py-3 px-4 text-slate-300">{{ $rec->event->name ?? '—' }}</td>
-                        <td class="py-3 px-4 text-slate-300">{{ $rec->attendanceSession->session_name ?? '—' }}</td>
+                        <td class="py-3 px-4 text-slate-300">{{ $rec->attendanceSession->label ?? $rec->attendanceSession->type ?? '—' }}</td>
                         <td class="py-3 px-4 text-slate-400">{{ $rec->scanned_at ? $rec->scanned_at->format('M j, Y H:i:s') : '—' }}</td>
                         <td class="py-3 px-4">
                             @if($rec->is_late)

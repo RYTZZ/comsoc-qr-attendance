@@ -58,4 +58,14 @@ class AttendanceRecord extends Model
     {
         return $this->belongsTo(User::class, 'corrected_by');
     }
+
+    public function student(): BelongsTo
+    {
+        return $this->belongsTo(Student::class, 'participant_id');
+    }
+
+    public function eventRegistration(): BelongsTo
+    {
+        return $this->belongsTo(EventRegistration::class, 'participant_id');
+    }
 }
