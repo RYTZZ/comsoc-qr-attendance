@@ -101,7 +101,7 @@
                     <td class="py-3.5 px-4 text-slate-300 font-mono text-[11px]">
                         @if($event->starts_at)
                             {{ $event->starts_at->format('g:i A') }}
-                            @if($event->ends_at)
+                            @if($event->ends_at && $event->ends_at->format('g:i A') !== $event->starts_at->format('g:i A'))
                                 <span class="text-slate-500">—</span> {{ $event->ends_at->format('g:i A') }}
                             @endif
                         @else

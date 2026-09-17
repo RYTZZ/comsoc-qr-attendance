@@ -132,10 +132,6 @@ class Event extends Model
         }
 
         if ($this->status === 'registration_open') {
-            if ($this->registration_opens_at && now()->lt($this->registration_opens_at)) {
-                return 'draft';
-            }
-
             if ($this->registration_deadline && now()->gte($this->registration_deadline)) {
                 return 'registration_closed';
             }
@@ -213,10 +209,6 @@ class Event extends Model
             return false;
         }
 
-        if ($this->registration_opens_at && now()->lt($this->registration_opens_at)) {
-            return false;
-        }
-
         if ($this->isFull()) {
             return false;
         }
@@ -227,6 +219,10 @@ class Event extends Model
 
         if ($this->status === 'registration_open') {
             return true;
+        }
+
+        if ($this->registration_opens_at && now()->lt($this->registration_opens_at)) {
+            return false;
         }
 
         $deadline = $this->effectiveRegistrationDeadline();
@@ -260,10 +256,6 @@ class Event extends Model
             return 'Registration Closed';
         }
 
-        if ($this->registration_opens_at && now()->lt($this->registration_opens_at)) {
-            return 'Registration Not Open';
-        }
-
         if ($this->isFull()) {
             return 'Registration Full';
         }
@@ -273,12 +265,19 @@ class Event extends Model
             return 'Registration Closed';
         }
 
-        if ($deadline && now()->diffInHours($deadline, false) <= 24 && now()->lt($deadline)) {
-            return 'Closing Soon';
+        if ($this->status === 'registration_open') {
+            if ($deadline && now()->diffInHours($deadline, false) <= 24 && now()->lt($deadline)) {
+                return 'Closing Soon';
+            }
+            return 'Registration Open';
         }
 
-        if ($this->status === 'registration_open') {
-            return 'Registration Open';
+        if ($this->registration_opens_at && now()->lt($this->registration_opens_at)) {
+            return 'Registration Not Open';
+        }
+
+        if ($deadline && now()->diffInHours($deadline, false) <= 24 && now()->lt($deadline)) {
+            return 'Closing Soon';
         }
 
         if ($this->isRegistrationOpen()) {
