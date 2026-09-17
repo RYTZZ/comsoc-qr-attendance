@@ -119,24 +119,36 @@ class Event extends Model
             return $this->status;
         }
 
-        if (!$this->is_published || $this->status === 'draft') {
-            return 'draft';
-        }
-
         if ($this->ends_at && now()->gt($this->ends_at)) {
             return 'completed';
+        }
+
+        if (!$this->is_published || $this->status === 'draft') {
+            return 'draft';
         }
 
         if ($this->status === 'registration_closed') {
             return 'registration_closed';
         }
 
-        if ($this->isRegistrationOpen()) {
+        if ($this->status === 'registration_open') {
+            if ($this->registration_opens_at && now()->lt($this->registration_opens_at)) {
+                return 'draft';
+            }
+
+            if ($this->registration_deadline && now()->gte($this->registration_deadline)) {
+                return 'registration_closed';
+            }
+
             return 'registration_open';
         }
 
-        if ($this->registration_opens_at && now()->lt($this->registration_opens_at)) {
-            return 'draft';
+        if ($this->status === 'ongoing') {
+            return 'ongoing';
+        }
+
+        if ($this->isRegistrationOpen()) {
+            return 'registration_open';
         }
 
         if ($this->starts_at && now()->gte($this->starts_at) && (!$this->ends_at || now()->lte($this->ends_at))) {
@@ -197,12 +209,24 @@ class Event extends Model
             return false;
         }
 
+        if ($this->isEnded()) {
+            return false;
+        }
+
         if ($this->registration_opens_at && now()->lt($this->registration_opens_at)) {
             return false;
         }
 
         if ($this->isFull()) {
             return false;
+        }
+
+        if ($this->registration_deadline && now()->gte($this->registration_deadline)) {
+            return false;
+        }
+
+        if ($this->status === 'registration_open') {
+            return true;
         }
 
         $deadline = $this->effectiveRegistrationDeadline();
@@ -219,14 +243,6 @@ class Event extends Model
             return $this->registration_deadline;
         }
 
-        if ($this->starts_at) {
-            return $this->starts_at;
-        }
-
-        if ($this->event_date) {
-            return $this->event_date->copy()->endOfDay();
-        }
-
         return null;
     }
 
@@ -236,7 +252,7 @@ class Event extends Model
             return 'Registration Not Open';
         }
 
-        if ($this->status === 'archived' || $this->status === 'completed') {
+        if (in_array($this->status, ['archived', 'completed']) || $this->isEnded()) {
             return 'Registration Closed';
         }
 
@@ -261,7 +277,15 @@ class Event extends Model
             return 'Closing Soon';
         }
 
-        return 'Registration Open';
+        if ($this->status === 'registration_open') {
+            return 'Registration Open';
+        }
+
+        if ($this->isRegistrationOpen()) {
+            return 'Registration Open';
+        }
+
+        return 'Registration Closed';
     }
 
     public function isEnded(): bool

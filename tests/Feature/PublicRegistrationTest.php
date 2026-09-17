@@ -227,4 +227,38 @@ class PublicRegistrationTest extends TestCase
         $response->assertDontSee('Registration Open');
         $response->assertDontSee('Time Left to Register');
     }
+
+    public function test_registration_open_without_deadline_remains_open(): void
+    {
+        $year = AcademicYear::create([
+            'label' => 'AY 2026-2027',
+            'year_start' => 2026,
+            'year_end' => 2027,
+            'semester' => '1st',
+            'is_active' => true,
+        ]);
+
+        $user = \App\Models\User::factory()->create(['role' => 'superadmin']);
+
+        $event = Event::create([
+            'name' => 'CICT Tech Meetup',
+            'academic_year_id' => $year->id,
+            'created_by' => $user->id,
+            'event_date' => Carbon::now(),
+            'starts_at' => Carbon::now()->subHours(1),
+            'allow_non_students' => true,
+            'is_published' => true,
+            'status' => 'registration_open',
+            'requires_registration' => true,
+            'registration_deadline' => null,
+        ]);
+
+        $this->assertTrue($event->isRegistrationOpen());
+        $this->assertEquals('Registration Open', $event->registration_status);
+        $this->assertEquals('registration_open', $event->effective_status);
+
+        $response = $this->get('/register');
+        $response->assertStatus(200);
+        $response->assertSee('Registration Open');
+    }
 }
