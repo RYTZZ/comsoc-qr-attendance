@@ -53,7 +53,7 @@
         </form>
         <form method="POST" action="{{ route('admin.memberships.bulk-activate') }}" enctype="multipart/form-data" class="flex flex-col sm:flex-row gap-2 w-full sm:w-auto pt-2 sm:pt-0 sm:border-l sm:border-slate-800 sm:pl-2">
             @csrf
-            <input type="hidden" name="academic_year_id" value="{{ request('academic_year_id') ?? $activeYear?->id }}">
+            <input type="hidden" name="academic_year_id" value="{{ request('academic_year_id') ?? $activeYear?->id ?? '' }}">
             <input type="file" name="file" accept=".xlsx,.xls,.csv" class="input w-full sm:w-48 py-1 text-xs" required>
             <button type="submit" class="btn-success w-full sm:w-auto" onclick="return confirm('Bulk activate from this file?')">Bulk Activate</button>
         </form>
@@ -89,6 +89,7 @@
                 <th>Student</th>
                 <th>Student #</th>
                 <th>Program & Year</th>
+                <th>Account</th>
                 <th>Membership #</th>
                 <th>Academic Year</th>
                 <th>Status</th>
@@ -98,17 +99,30 @@
         </thead>
         <tbody>
             @forelse($memberships as $membership)
+            @php
+                $student = $membership->student;
+                $user = $student?->user;
+            @endphp
             <tr>
-                <td class="font-medium text-white">{{ $membership->student->display_name }}</td>
-                <td class="font-mono text-sm">{{ $membership->student->student_number }}</td>
+                <td class="font-medium text-white">{{ $student?->display_name ?? 'Unknown Student' }}</td>
+                <td class="font-mono text-sm">{{ $student?->student_number ?? '—' }}</td>
                 <td>
                     <div class="flex flex-col">
-                        <span class="text-white text-xs font-semibold">{{ $membership->student->year_level ?? '—' }}</span>
-                        <span class="text-slate-400 text-[11px]">{{ $membership->student->program ?? 'BSIT' }}</span>
+                        <span class="text-white text-xs font-semibold">{{ $student?->year_level ?? 'Not assigned' }}</span>
+                        <span class="text-slate-400 text-[11px]">{{ $student?->program ?? 'None' }}</span>
                     </div>
                 </td>
+                <td>
+                    @if(!$user)
+                        <span class="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-semibold bg-slate-800 text-slate-400 border border-slate-700">No Account</span>
+                    @elseif($user->is_active)
+                        <span class="badge-active text-xs">Active</span>
+                    @else
+                        <span class="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-semibold bg-red-500/10 text-red-400 border border-red-500/20">Suspended</span>
+                    @endif
+                </td>
                 <td class="font-mono text-xs text-slate-400">{{ $membership->membership_number ?? '—' }}</td>
-                <td class="text-slate-400 text-xs">{{ $membership->academicYear->label }}</td>
+                <td class="text-slate-400 text-xs">{{ $membership->academicYear?->label ?? '—' }}</td>
                 <td>
                     <span class="badge {{ $membership->status === 'active' ? 'badge-active' : 'badge-inactive' }}">
                         {{ ucfirst($membership->status) }}
@@ -118,7 +132,7 @@
                     @if($membership->activeQrCode)
                         <div class="flex flex-col gap-0.5">
                             <span class="badge-active text-xs">QR Available</span>
-                            @if($membership->activeQrCode->card)
+                            @if($membership->activeQrCode->card?->status)
                                 <span class="text-[10px] text-slate-400">
                                     {{ ucfirst(str_replace('_', ' ', $membership->activeQrCode->card->status)) }}
                                 </span>
@@ -154,7 +168,7 @@
                 </td>
             </tr>
             @empty
-            <tr><td colspan="8">
+            <tr><td colspan="9">
                 <div class="empty-state">
                     <div class="empty-state-icon flex items-center justify-center">
                         <svg class="w-8 h-8 text-slate-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">

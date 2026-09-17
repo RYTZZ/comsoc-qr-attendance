@@ -24,17 +24,18 @@ class MembershipController extends Controller
 
         $filterYearId = $request->academic_year_id ?? $activeYear?->id;
 
-        $query = Membership::with(['student', 'academicYear', 'activeQrCode.card', 'latestQrCode'])
+        $query = Membership::with(['student.user', 'academicYear', 'activeQrCode.card', 'latestQrCode'])
             ->when($request->academic_year_id, fn($q) => $q->where('academic_year_id', $request->academic_year_id))
             ->when(!$request->academic_year_id && $activeYear, fn($q) => $q->where('academic_year_id', $activeYear->id))
             ->when($request->status, fn($q) => $q->where('status', $request->status))
             ->when($request->filled('year_level'), fn($q) => $q->whereHas('student', fn($s) => $s->where('year_level', $request->year_level)))
-            ->when($request->search, fn($q) => $q->whereHas('student', fn($s) => $s->where('student_number', 'like', "%{$request->search}%")
-                ->orWhere('last_name', 'ilike', "%{$request->search}%")
-                ->orWhere('first_name', 'ilike', "%{$request->search}%")
-            ));
+            ->when($request->search, fn($q) => $q->whereHas('student', fn($s) => $s->where(function ($sub) use ($request) {
+                $sub->where('student_number', 'ilike', "%{$request->search}%")
+                    ->orWhere('last_name', 'ilike', "%{$request->search}%")
+                    ->orWhere('first_name', 'ilike', "%{$request->search}%");
+            })));
 
-        $memberships = $query->orderBy('created_at')->paginate(20)->withQueryString();
+        $memberships = $query->orderBy('memberships.created_at', 'desc')->paginate(20)->withQueryString();
 
         $missingQrCount = Membership::where('status', 'active')
             ->when($filterYearId, fn($q) => $q->where('academic_year_id', $filterYearId))

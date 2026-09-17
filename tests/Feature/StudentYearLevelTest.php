@@ -244,4 +244,33 @@ class StudentYearLevelTest extends TestCase
         $this->assertNotEmpty($png);
         $this->assertStringStartsWith("\x89PNG\r\n\x1a\n", $png);
     }
+
+    public function test_admin_memberships_index_handles_missing_related_data_safely(): void
+    {
+        $studentWithoutData = Student::create([
+            'student_number' => '2026-9999',
+            'first_name' => 'Edge',
+            'last_name' => 'Case',
+            'program' => null,
+            'year_level' => null,
+        ]);
+
+        $membership = Membership::create([
+            'student_id' => $studentWithoutData->id,
+            'academic_year_id' => $this->academicYear->id,
+            'status' => 'active',
+            'membership_number' => 'MEM-2026-9999',
+        ]);
+
+        $response = $this->actingAs($this->admin)
+            ->get(route('admin.memberships.index'));
+
+        $response->assertOk();
+        $response->assertSee('2026-9999');
+        $response->assertSee('Edge Case');
+        $response->assertSee('No Account');
+        $response->assertSee('Not assigned');
+        $response->assertSee('None');
+        $response->assertSee('QR Missing');
+    }
 }
