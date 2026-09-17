@@ -96,12 +96,16 @@ class EventRegistrationController extends Controller
             }
         }
 
-        $latestEvent = Event::where('allow_non_students', true)->latest('event_date')->first();
+        $latestEvent = Event::where('allow_non_students', true)->latest('event_date')->first()
+            ?? Event::latest('event_date')->first();
+
         if ($latestEvent) {
             return redirect()->route('admin.event-registrations.index', array_merge(['event' => $latestEvent], $request->all()));
         }
 
-        abort(404, 'No events available for non-student registration.');
+        $events = collect();
+        $registrations = collect();
+        return view('admin.event-registrations.no-events');
     }
 
     public function show(EventRegistration $registration): View
