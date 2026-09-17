@@ -78,20 +78,51 @@
                 <thead>
                     <tr>
                         <th>Student Number</th>
-                        <th>Last Name</th>
-                        <th>First Name</th>
-                        <th>Middle Name</th>
-                        @if($section === 'invalid')<th>Reason</th>@endif
+                        <th>Name</th>
+                        <th>Program</th>
+                        <th>Year Level</th>
+                        @if($section === 'invalid')<th>Reason / Action</th>@endif
                     </tr>
                 </thead>
                 <tbody>
                     @foreach(array_slice($preview[$section], 0, 50) as $row)
+                    @php
+                        $fullName = trim(($row['last_name'] ?? '') . ', ' . ($row['first_name'] ?? '') . ' ' . ($row['middle_name'] ?? ''));
+                        if ($fullName === ',') $fullName = '—';
+                    @endphp
                     <tr>
                         <td class="font-mono">{{ $row['student_number'] ?? '—' }}</td>
-                        <td>{{ $row['last_name'] ?? '—' }}</td>
-                        <td>{{ $row['first_name'] ?? '—' }}</td>
-                        <td>{{ $row['middle_name'] ?? '—' }}</td>
-                        @if($section === 'invalid')<td class="text-red-400 text-xs">{{ $row['reason'] ?? '—' }}</td>@endif
+                        <td class="font-medium text-white">{{ $fullName }}</td>
+                        <td class="text-xs text-slate-300">{{ $row['program'] ?? '—' }}</td>
+                        <td>
+                            @if(!empty($row['year_level']))
+                                <span class="badge badge-active text-xs">{{ $row['year_level'] }}</span>
+                            @else
+                                <span class="badge badge-rejected text-xs">Missing</span>
+                            @endif
+                        </td>
+                        @if($section === 'invalid')
+                        <td>
+                            <div class="flex flex-col gap-1.5 py-1">
+                                <span class="text-red-400 text-xs">{{ $row['reason'] ?? 'Invalid record' }}</span>
+                                @if(!empty($row['student_number']) && !empty($row['first_name']))
+                                <div class="w-48">
+                                    <x-custom-dropdown
+                                        name="corrections[{{ $row['student_number'] }}][year_level]"
+                                        :options="[
+                                            '' => 'Select Correct Year Level',
+                                            '1st Year' => '1st Year',
+                                            '2nd Year' => '2nd Year',
+                                            '3rd Year' => '3rd Year',
+                                            '4th Year' => '4th Year',
+                                        ]"
+                                        placeholder="Set Year Level…"
+                                        buttonClass="py-1.5 text-xs" />
+                                </div>
+                                @endif
+                            </div>
+                        </td>
+                        @endif
                     </tr>
                     @endforeach
                 </tbody>
@@ -109,16 +140,15 @@
     @endforeach
 </div>
 
-@if(count($preview['new']) + count($preview['existing']) > 0)
 <div class="card border-indigo-500/30 bg-indigo-950/20">
     <h2 class="section-title">Confirm Import</h2>
     <p class="text-sm text-slate-400 mb-4">
         This will import <strong class="text-white">{{ count($preview['new']) }} new students</strong>
         and link <strong class="text-white">{{ count($preview['existing']) }} existing students</strong>
         to <strong class="text-white">{{ $academicYear->label }}</strong>.
-        Duplicates and invalid records will be skipped.
+        Any invalid records corrected above will also be processed. Duplicates and uncorrected invalid records will be skipped.
     </p>
-    <form method="POST" action="{{ route('admin.masterlist.import') }}">
+    <form method="POST" action="{{ route('admin.masterlist.import') }}" id="import-form">
         @csrf
         <button type="submit" class="btn-primary"
                 onclick="return confirm('Confirm masterlist import for {{ $academicYear->label }}? This cannot be undone.')">
@@ -127,5 +157,17 @@
         </button>
     </form>
 </div>
-@endif
+<script>
+document.getElementById('import-form').addEventListener('submit', function(e) {
+    document.querySelectorAll('[name^="corrections["]').forEach(function(input) {
+        if (input.value) {
+            var hidden = document.createElement('input');
+            hidden.type = 'hidden';
+            hidden.name = input.name;
+            hidden.value = input.value;
+            e.target.appendChild(hidden);
+        }
+    });
+});
+</script>
 </x-layouts.admin>

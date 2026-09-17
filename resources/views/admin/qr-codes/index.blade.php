@@ -78,6 +78,7 @@
                 <tr>
                     <th class="py-3 px-4">Student</th>
                     <th class="py-3 px-4">Student #</th>
+                    <th class="py-3 px-4">Program & Year</th>
                     <th class="py-3 px-4">Academic Year</th>
                     <th class="py-3 px-4">Membership</th>
                     <th class="py-3 px-4">Token Preview</th>
@@ -87,9 +88,21 @@
             </thead>
             <tbody class="divide-y divide-slate-800/60">
                 @forelse($qrCodes as $qr)
+                @php
+                    $qrStudent = $qr->membership?->student;
+                @endphp
                     <tr class="hover:bg-slate-800/30 transition">
-                        <td class="py-3 px-4 font-semibold text-white">{{ $qr->membership?->student?->display_name ?? '—' }}</td>
-                        <td class="py-3 px-4 text-slate-400 font-mono">{{ $qr->membership?->student?->student_number ?? '—' }}</td>
+                        <td class="py-3 px-4 font-semibold text-white">{{ $qrStudent?->display_name ?? '—' }}</td>
+                        <td class="py-3 px-4 text-slate-400 font-mono">{{ $qrStudent?->student_number ?? '—' }}</td>
+                        <td class="py-3 px-4 text-slate-300">
+                            @if($qrStudent)
+                                <span class="text-white font-medium">{{ $qrStudent->year_level ?? '—' }}</span>
+                                <span class="text-slate-500">•</span>
+                                <span class="text-slate-400 text-[11px]">{{ $qrStudent->program ?: 'BSIT' }}</span>
+                            @else
+                                —
+                            @endif
+                        </td>
                         <td class="py-3 px-4 text-slate-300">{{ $qr->membership?->academicYear?->label ?? '—' }}</td>
                         <td class="py-3 px-4">
                             @if($qr->membership)
@@ -134,7 +147,7 @@
                     </tr>
                 @empty
                     <tr>
-                        <td colspan="7" class="py-8 text-center text-slate-500">
+                        <td colspan="8" class="py-8 text-center text-slate-500">
                             @if($missingQrCount > 0)
                                 No QR codes generated yet for this filter. Click "Generate Missing QR Codes" above.
                             @else

@@ -62,6 +62,7 @@
                     <th class="py-3 px-4">Card / Batch UID</th>
                     <th class="py-3 px-4">Student</th>
                     <th class="py-3 px-4">Student #</th>
+                    <th class="py-3 px-4">Program & Year</th>
                     <th class="py-3 px-4">Status</th>
                     <th class="py-3 px-4">Claimed At</th>
                     <th class="py-3 px-4 text-right">Actions</th>
@@ -69,10 +70,22 @@
             </thead>
             <tbody class="divide-y divide-slate-800/60">
                 @forelse($cards as $card)
+                @php
+                    $cardStudent = $card->qrCode?->membership?->student;
+                @endphp
                     <tr class="hover:bg-slate-800/30 transition">
                         <td class="py-3 px-4 font-mono font-semibold text-white">{{ $card->card_uid ?? 'CARD-' . str_pad($card->id, 5, '0', STR_PAD_LEFT) }}</td>
-                        <td class="py-3 px-4 text-slate-200">{{ $card->qrCode?->membership?->student?->display_name ?? '—' }}</td>
-                        <td class="py-3 px-4 text-slate-400 font-mono">{{ $card->qrCode?->membership?->student?->student_number ?? '—' }}</td>
+                        <td class="py-3 px-4 text-slate-200">{{ $cardStudent?->display_name ?? '—' }}</td>
+                        <td class="py-3 px-4 text-slate-400 font-mono">{{ $cardStudent?->student_number ?? '—' }}</td>
+                        <td class="py-3 px-4">
+                            @if($cardStudent)
+                                <span class="text-white font-medium">{{ $cardStudent->program ?: 'BSIT' }}</span>
+                                <span class="text-slate-500">•</span>
+                                <span class="text-slate-400">{{ $cardStudent->year_level ?: '—' }}</span>
+                            @else
+                                <span class="text-slate-500">—</span>
+                            @endif
+                        </td>
                         <td class="py-3 px-4">
                             @if($card->status === 'claimed')
                                 <span class="badge badge-active inline-flex items-center gap-1">
@@ -123,7 +136,7 @@
                     </tr>
                 @empty
                     <tr>
-                        <td colspan="6" class="py-8 text-center text-slate-500">No physical cards generated yet.</td>
+                        <td colspan="7" class="py-8 text-center text-slate-500">No physical cards generated yet.</td>
                     </tr>
                 @endforelse
             </tbody>

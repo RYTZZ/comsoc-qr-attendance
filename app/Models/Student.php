@@ -12,7 +12,51 @@ class Student extends Model
 {
     use HasFactory, HasUuids;
 
+    public const YEAR_LEVELS = [
+        '1st Year',
+        '2nd Year',
+        '3rd Year',
+        '4th Year',
+    ];
+
     protected $fillable = ['student_number', 'last_name', 'first_name', 'middle_name', 'program', 'year_level'];
+
+    public static function normalizeYearLevel(?string $raw): ?string
+    {
+        if ($raw === null) {
+            return null;
+        }
+
+        $trimmed = trim($raw);
+        if ($trimmed === '') {
+            return null;
+        }
+
+        $clean = strtolower($trimmed);
+        $clean = preg_replace('/\s+/', ' ', $clean);
+
+        if (in_array($clean, ['1', '1st', '1st year', '1st yr', 'first', 'first year', 'first yr', '1st yr.', 'yr 1', 'year 1'], true)) {
+            return '1st Year';
+        }
+
+        if (in_array($clean, ['2', '2nd', '2nd year', '2nd yr', 'second', 'second year', 'second yr', '2nd yr.', 'yr 2', 'year 2'], true)) {
+            return '2nd Year';
+        }
+
+        if (in_array($clean, ['3', '3rd', '3rd year', '3rd yr', 'third', 'third year', 'third yr', '3rd yr.', 'yr 3', 'year 3'], true)) {
+            return '3rd Year';
+        }
+
+        if (in_array($clean, ['4', '4th', '4th year', '4th yr', 'fourth', 'fourth year', 'fourth yr', '4th yr.', 'yr 4', 'year 4'], true)) {
+            return '4th Year';
+        }
+
+        if (in_array($trimmed, self::YEAR_LEVELS, true)) {
+            return $trimmed;
+        }
+
+        return null;
+    }
 
     public function memberships(): HasMany
     {

@@ -31,8 +31,23 @@
                     :autoSubmit="true"
                     buttonClass="py-2 text-xs" />
             </div>
+            <div class="w-full sm:w-36">
+                @php
+                    $yearLevelOptions = ['' => 'All Year Levels'];
+                    foreach($yearLevels as $yl) {
+                        $yearLevelOptions[$yl] = $yl;
+                    }
+                @endphp
+                <x-custom-dropdown
+                    name="year_level"
+                    :options="$yearLevelOptions"
+                    :value="request('year_level', '')"
+                    placeholder="All Year Levels"
+                    :autoSubmit="true"
+                    buttonClass="py-2 text-xs" />
+            </div>
             <div class="flex gap-2">
-                <input type="search" name="search" value="{{ request('search') }}" placeholder="Search…" class="input flex-1 sm:w-48">
+                <input type="search" name="search" value="{{ request('search') }}" placeholder="Search…" class="input flex-1 sm:w-40">
                 <button type="submit" class="btn-secondary shrink-0">Filter</button>
             </div>
         </form>
@@ -73,6 +88,7 @@
             <tr>
                 <th>Student</th>
                 <th>Student #</th>
+                <th>Program & Year</th>
                 <th>Membership #</th>
                 <th>Academic Year</th>
                 <th>Status</th>
@@ -85,6 +101,12 @@
             <tr>
                 <td class="font-medium text-white">{{ $membership->student->display_name }}</td>
                 <td class="font-mono text-sm">{{ $membership->student->student_number }}</td>
+                <td>
+                    <div class="flex flex-col">
+                        <span class="text-white text-xs font-semibold">{{ $membership->student->year_level ?? '—' }}</span>
+                        <span class="text-slate-400 text-[11px]">{{ $membership->student->program ?? 'BSIT' }}</span>
+                    </div>
+                </td>
                 <td class="font-mono text-xs text-slate-400">{{ $membership->membership_number ?? '—' }}</td>
                 <td class="text-slate-400 text-xs">{{ $membership->academicYear->label }}</td>
                 <td>
@@ -132,7 +154,7 @@
                 </td>
             </tr>
             @empty
-            <tr><td colspan="7">
+            <tr><td colspan="8">
                 <div class="empty-state">
                     <div class="empty-state-icon flex items-center justify-center">
                         <svg class="w-8 h-8 text-slate-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">

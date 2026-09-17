@@ -33,6 +33,7 @@
         </div>
         <h2 class="text-lg sm:text-xl font-bold text-white truncate">{{ $student->display_name }}</h2>
         <p class="text-slate-400 text-xs sm:text-sm font-mono mt-0.5">{{ $student->student_number }}</p>
+        <p class="text-xs text-brand-300 font-semibold mt-1">{{ ($student->program ?: 'BSIT') . ' • ' . ($student->year_level ?: '1st Year') }}</p>
         <div class="divider my-4"></div>
         <div class="grid grid-cols-2 gap-2.5 sm:gap-3 text-xs sm:text-sm text-left">
             <div class="p-2 rounded-lg bg-slate-950/60 border border-slate-800/80">

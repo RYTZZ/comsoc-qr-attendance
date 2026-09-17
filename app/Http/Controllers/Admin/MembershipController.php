@@ -28,6 +28,7 @@ class MembershipController extends Controller
             ->when($request->academic_year_id, fn($q) => $q->where('academic_year_id', $request->academic_year_id))
             ->when(!$request->academic_year_id && $activeYear, fn($q) => $q->where('academic_year_id', $activeYear->id))
             ->when($request->status, fn($q) => $q->where('status', $request->status))
+            ->when($request->filled('year_level'), fn($q) => $q->whereHas('student', fn($s) => $s->where('year_level', $request->year_level)))
             ->when($request->search, fn($q) => $q->whereHas('student', fn($s) => $s->where('student_number', 'like', "%{$request->search}%")
                 ->orWhere('last_name', 'ilike', "%{$request->search}%")
                 ->orWhere('first_name', 'ilike', "%{$request->search}%")
@@ -40,7 +41,9 @@ class MembershipController extends Controller
             ->whereDoesntHave('qrCodes', fn($q) => $q->where('status', 'active'))
             ->count();
 
-        return view('admin.memberships.index', compact('memberships', 'academicYears', 'activeYear', 'missingQrCount', 'filterYearId'));
+        $yearLevels = Student::YEAR_LEVELS;
+
+        return view('admin.memberships.index', compact('memberships', 'academicYears', 'activeYear', 'missingQrCount', 'filterYearId', 'yearLevels'));
     }
 
     public function activate(Membership $membership): RedirectResponse
@@ -168,12 +171,18 @@ class MembershipController extends Controller
                 $middleName = trim($rowClean['middle_name'] ?? $rowClean['middle name'] ?? $rowClean['middlename'] ?? '');
                 $rawName = trim($rowClean['name'] ?? $rowClean['full_name'] ?? $rowClean['full name'] ?? '');
 
+                $program = trim($rowClean['program'] ?? $rowClean['course'] ?? $rowClean['degree'] ?? '');
+                $rawYear = trim($rowClean['year_level'] ?? $rowClean['year level'] ?? $rowClean['year'] ?? $rowClean['yr'] ?? '');
+                $normalizedYear = Student::normalizeYearLevel($rawYear);
+
                 if (!empty($lastName) || !empty($firstName)) {
                     $student = Student::create([
                         'student_number' => $sn,
                         'last_name' => $lastName ?: $sn,
                         'first_name' => $firstName ?: $sn,
                         'middle_name' => $middleName ?: null,
+                        'program' => $program ?: null,
+                        'year_level' => $normalizedYear ?: '1st Year',
                     ]);
                 } elseif (!empty($rawName)) {
                     $parts = array_map('trim', explode(',', $rawName, 2));
@@ -183,7 +192,23 @@ class MembershipController extends Controller
                         'last_name' => $parts[0] ?: $sn,
                         'first_name' => $rest[0] ?? $sn,
                         'middle_name' => $rest[1] ?? null,
+                        'program' => $program ?: null,
+                        'year_level' => $normalizedYear ?: '1st Year',
                     ]);
+                }
+            } else {
+                $rawYear = trim($rowClean['year_level'] ?? $rowClean['year level'] ?? $rowClean['year'] ?? $rowClean['yr'] ?? '');
+                $normalizedYear = Student::normalizeYearLevel($rawYear);
+                $program = trim($rowClean['program'] ?? $rowClean['course'] ?? $rowClean['degree'] ?? '');
+                $updateData = [];
+                if ($normalizedYear && empty($student->year_level)) {
+                    $updateData['year_level'] = $normalizedYear;
+                }
+                if ($program && empty($student->program)) {
+                    $updateData['program'] = $program;
+                }
+                if (!empty($updateData)) {
+                    $student->update($updateData);
                 }
             }
 

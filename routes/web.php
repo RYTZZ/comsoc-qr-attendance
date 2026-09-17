@@ -132,7 +132,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
             Route::post('events/{event}/snack-sessions', [EventController::class, 'storeSnackSession'])->name('events.snack-sessions.store');
         });
 
-        Route::resource('students', StudentController::class)->only(['index', 'show']);
+        Route::resource('students', StudentController::class)->only(['index', 'show', 'update']);
         Route::post('students/{student}/create-account', [StudentController::class, 'createAccount'])->name('students.create-account');
         Route::post('students/{student}/activate-account', [StudentController::class, 'activateAccount'])->name('students.activate-account');
         Route::post('students/{student}/suspend-account', [StudentController::class, 'suspendAccount'])->name('students.suspend-account');

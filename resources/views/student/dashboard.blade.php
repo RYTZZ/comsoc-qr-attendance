@@ -90,7 +90,8 @@
             <div class="min-w-0 flex-1">
                 <p class="text-base sm:text-lg font-bold text-white truncate">{{ $student->display_name }}</p>
                 <p class="text-xs sm:text-sm text-slate-400 font-mono">{{ $student->student_number }}</p>
-                <div class="flex flex-wrap items-center gap-1.5 sm:gap-2 mt-1">
+                <p class="text-[11px] sm:text-xs text-brand-300 font-medium mt-0.5">{{ ($student->program ?: 'BSIT') . ' • ' . ($student->year_level ?: '1st Year') }}</p>
+                <div class="flex flex-wrap items-center gap-1.5 sm:gap-2 mt-1.5">
                     <span class="badge {{ $membership->status === 'active' ? 'badge-active' : 'badge-inactive' }}">
                         {{ ucfirst($membership->status) }} Member
                     </span>

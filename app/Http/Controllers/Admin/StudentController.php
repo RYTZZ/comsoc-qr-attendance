@@ -36,6 +36,8 @@ class StudentController extends Controller
                 ->orWhere('last_name', 'ilike', "%{$request->search}%")
                 ->orWhere('first_name', 'ilike', "%{$request->search}%")
             )
+            ->when($request->filled('year_level'), fn($q) => $q->where('year_level', $request->year_level))
+            ->when($request->filled('program'), fn($q) => $q->where('program', $request->program))
             ->when($request->filled('account_status'), function ($q) use ($request) {
                 if ($request->account_status === 'no_account') {
                     $q->doesntHave('user');
@@ -85,8 +87,10 @@ class StudentController extends Controller
             fn($q) => $q->whereHas('memberships', fn($m) => $m->where('academic_year_id', $yearId))
         )->doesntHave('user')->count();
 
+        $yearLevels = Student::YEAR_LEVELS;
+
         return view('admin.students.index', compact(
-            'students', 'activeYear', 'academicYears', 'yearId', 'noAccountCount'
+            'students', 'activeYear', 'academicYears', 'yearId', 'noAccountCount', 'yearLevels'
         ));
     }
 
@@ -94,7 +98,27 @@ class StudentController extends Controller
     {
         $activeYear = AcademicYear::active();
         $student->load(['memberships.academicYear', 'memberships.qrCodes', 'memberships.activeQrCode', 'user']);
-        return view('admin.students.show', compact('student', 'activeYear'));
+        $yearLevels = Student::YEAR_LEVELS;
+        $programs = \App\Models\Program::activeOptions();
+        return view('admin.students.show', compact('student', 'activeYear', 'yearLevels', 'programs'));
+    }
+
+    public function update(Request $request, Student $student): RedirectResponse
+    {
+        $validated = $request->validate([
+            'year_level' => ['required', \Illuminate\Validation\Rule::in(Student::YEAR_LEVELS)],
+            'program' => ['nullable', 'string', 'max:255'],
+            'first_name' => ['required', 'string', 'max:255'],
+            'last_name' => ['required', 'string', 'max:255'],
+            'middle_name' => ['nullable', 'string', 'max:255'],
+        ]);
+
+        $old = $student->toArray();
+        $student->update($validated);
+
+        AuditLogger::log('student.updated', $student, $old, $student->fresh()->toArray());
+
+        return back()->with('success', "Student record for {$student->display_name} updated successfully.");
     }
 
     public function createAccount(Request $request, Student $student): RedirectResponse

@@ -166,8 +166,8 @@ body {
         $studentNumber = $student->student_number ?? '2023-10023-BN-0';
         $this->drawBoldText($im, 26, 0, 96, 368, $colCoral, $fontBold, $studentNumber, 1);
 
-        $program = $student->program ?: 'BSIT';
-        $yearLevel = $student->year_level ?: '3rd Year';
+        $program = $student?->program ?: 'BSIT';
+        $yearLevel = $student?->year_level ?: '1st Year';
         $progYearText = "{$program} \u{2022} {$yearLevel}";
         imagettftext($im, 26, 0, 96, 428, $colMutedBlue, $fontRegular, $progYearText);
 

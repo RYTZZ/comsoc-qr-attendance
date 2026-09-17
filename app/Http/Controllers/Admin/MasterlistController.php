@@ -30,7 +30,8 @@ class MasterlistController extends Controller
         ]);
 
         $path = $request->file('file')->store('imports', 'local');
-        $rows = Excel::toArray(new MasterlistImport, storage_path('app/private/' . $path));
+        $fullPath = \Illuminate\Support\Facades\Storage::disk('local')->path($path);
+        $rows = Excel::toArray(new MasterlistImport, $fullPath);
         $data = $rows[0] ?? [];
 
         $academicYear = AcademicYear::findOrFail($request->academic_year_id);
@@ -39,6 +40,7 @@ class MasterlistController extends Controller
         session(['masterlist_import' => [
             'path' => $path,
             'academic_year_id' => $request->academic_year_id,
+            'corrected_records' => [],
         ]]);
 
         return view('admin.masterlist.preview', compact('preview', 'academicYear'));
@@ -52,9 +54,12 @@ class MasterlistController extends Controller
         }
 
         $academicYear = AcademicYear::findOrFail($importData['academic_year_id']);
-        $rows = Excel::toArray(new MasterlistImport, storage_path('app/private/' . $importData['path']));
+        $fullPath = \Illuminate\Support\Facades\Storage::disk('local')->path($importData['path']);
+        $rows = Excel::toArray(new MasterlistImport, $fullPath);
         $data = $rows[0] ?? [];
-        $preview = $this->classifyRows($data, $academicYear->id);
+
+        $corrections = $request->input('corrections', []);
+        $preview = $this->classifyRows($data, $academicYear->id, $corrections);
 
         $imported = 0;
         DB::transaction(function () use ($preview, $academicYear, &$imported) {
@@ -65,7 +70,7 @@ class MasterlistController extends Controller
                     'first_name' => $row['first_name'],
                     'middle_name' => $row['middle_name'] ?? null,
                     'program' => $row['program'] ?? null,
-                    'year_level' => $row['year_level'] ?? null,
+                    'year_level' => $row['year_level'],
                 ]);
 
                 Membership::create([
@@ -80,10 +85,16 @@ class MasterlistController extends Controller
             foreach ($preview['existing'] as $row) {
                 $student = Student::where('student_number', $row['student_number'])->first();
                 if ($student) {
-                    $student->update(array_filter([
-                        'program' => $row['program'] ?? null,
-                        'year_level' => $row['year_level'] ?? null,
-                    ]));
+                    $updateData = [];
+                    if (!empty($row['program'])) {
+                        $updateData['program'] = $row['program'];
+                    }
+                    if (!empty($row['year_level'])) {
+                        $updateData['year_level'] = $row['year_level'];
+                    }
+                    if (!empty($updateData)) {
+                        $student->update($updateData);
+                    }
                 }
                 Membership::firstOrCreate([
                     'student_id' => $student->id,
@@ -104,12 +115,12 @@ class MasterlistController extends Controller
             ->with('success', "Masterlist imported: {$imported} records processed for {$academicYear->label}.");
     }
 
-    private function classifyRows(array $data, string $academicYearId): array
+    private function classifyRows(array $data, string $academicYearId, array $corrections = []): array
     {
         $new = $existing = $duplicates = $invalid = [];
         $seenNumbers = [];
 
-        foreach ($data as $row) {
+        foreach ($data as $index => $row) {
             $rowClean = array_change_key_case((array) $row, CASE_LOWER);
 
             $studentNumber = trim(
@@ -131,7 +142,7 @@ class MasterlistController extends Controller
             }
 
             if (empty($studentNumber) || (empty($rawName) && empty($lastName) && empty($firstName))) {
-                $invalid[] = ['reason' => 'Missing student number or name', 'raw' => $row];
+                $invalid[] = ['reason' => 'Missing student number or name', 'raw' => $row, 'index' => $index];
                 continue;
             }
 
@@ -152,15 +163,38 @@ class MasterlistController extends Controller
             }
 
             $program = trim($rowClean['program'] ?? $rowClean['course'] ?? $rowClean['degree'] ?? '');
-            $yearLevel = trim($rowClean['year_level'] ?? $rowClean['year level'] ?? $rowClean['year'] ?? $rowClean['yr'] ?? '');
+            $rawYear = trim($rowClean['year_level'] ?? $rowClean['year level'] ?? $rowClean['year'] ?? $rowClean['yr'] ?? '');
 
-            $rowData = array_merge($nameParts, [
-                'student_number' => $studentNumber,
-                'program' => $program ?: null,
-                'year_level' => $yearLevel ?: null,
-            ]);
+            if (isset($corrections[$studentNumber]['year_level'])) {
+                $rawYear = $corrections[$studentNumber]['year_level'];
+            } elseif (isset($corrections[$index]['year_level'])) {
+                $rawYear = $corrections[$index]['year_level'];
+            }
+
+            $normalizedYear = Student::normalizeYearLevel($rawYear);
 
             $student = Student::where('student_number', $studentNumber)->first();
+
+            if (!$normalizedYear && $student && $student->year_level) {
+                $normalizedYear = $student->year_level;
+            }
+
+            $rowData = array_merge($nameParts, [
+                'index' => $index,
+                'student_number' => $studentNumber,
+                'program' => $program ?: ($student?->program ?? null),
+                'year_level' => $normalizedYear,
+                'raw_year_level' => $rawYear,
+            ]);
+
+            if (empty($normalizedYear)) {
+                $invalid[] = array_merge($rowData, [
+                    'reason' => 'Missing or invalid Year Level (must be 1st Year, 2nd Year, 3rd Year, or 4th Year)',
+                    'raw' => $row,
+                ]);
+                continue;
+            }
+
             if ($student) {
                 $hasMembership = Membership::where('student_id', $student->id)
                     ->where('academic_year_id', $academicYearId)

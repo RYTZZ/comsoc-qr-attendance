@@ -30,8 +30,22 @@
 <form method="GET" class="mb-4 flex flex-wrap gap-2 items-end">
     <input type="search" name="search" value="{{ request('search') }}"
            placeholder="Search name or student #…"
-           class="input w-full sm:w-56 text-sm">
-    <div class="w-full sm:w-44">
+           class="input w-full sm:w-52 text-sm">
+    <div class="w-full sm:w-36">
+        @php
+            $yearLevelOptions = ['' => 'All Year Levels'];
+            foreach($yearLevels as $yl) {
+                $yearLevelOptions[$yl] = $yl;
+            }
+        @endphp
+        <x-custom-dropdown
+            name="year_level"
+            :options="$yearLevelOptions"
+            :value="request('year_level', '')"
+            placeholder="All Year Levels"
+            buttonClass="py-2 text-xs sm:text-sm" />
+    </div>
+    <div class="w-full sm:w-40">
         <x-custom-dropdown
             name="account_status"
             :options="[
@@ -44,7 +58,7 @@
             placeholder="All Account Statuses"
             buttonClass="py-2 text-xs sm:text-sm" />
     </div>
-    <div class="w-full sm:w-40">
+    <div class="w-full sm:w-36">
         <x-custom-dropdown
             name="membership_status"
             :options="[
@@ -57,7 +71,7 @@
             placeholder="All Membership"
             buttonClass="py-2 text-xs sm:text-sm" />
     </div>
-    <div class="w-full sm:w-36">
+    <div class="w-full sm:w-32">
         <x-custom-dropdown
             name="qr_status"
             :options="[
@@ -70,7 +84,7 @@
             placeholder="All QR"
             buttonClass="py-2 text-xs sm:text-sm" />
     </div>
-    <div class="w-full sm:w-48">
+    <div class="w-full sm:w-44">
         @php
             $yearOpts = ['' => 'All Academic Years'];
             foreach($academicYears as $year) {
@@ -95,6 +109,7 @@
             <tr>
                 <th>Student Number</th>
                 <th>Name</th>
+                <th>Program & Year</th>
                 <th>Account</th>
                 <th>Membership</th>
                 <th>QR</th>
@@ -112,6 +127,12 @@
             <tr>
                 <td class="font-mono text-sm">{{ $student->student_number }}</td>
                 <td class="font-medium text-white">{{ $student->full_name }}</td>
+                <td>
+                    <div class="flex flex-col">
+                        <span class="text-white text-xs font-medium">{{ $student->year_level ?? '—' }}</span>
+                        <span class="text-slate-400 text-[11px]">{{ $student->program ?? 'BSIT' }}</span>
+                    </div>
+                </td>
                 <td>
                     @if(!$user)
                         <span class="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-semibold bg-slate-800 text-slate-400 border border-slate-700">No Account</span>
@@ -150,7 +171,7 @@
             </tr>
             @empty
             <tr>
-                <td colspan="7">
+                <td colspan="8">
                     <div class="empty-state">
                         <div class="empty-state-icon flex items-center justify-center">
                             <svg class="w-8 h-8 text-slate-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">

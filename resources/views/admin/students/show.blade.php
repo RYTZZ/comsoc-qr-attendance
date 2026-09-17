@@ -67,7 +67,17 @@
     <div class="lg:col-span-1 space-y-4">
 
         <div class="card">
-            <h2 class="section-title">Student Info</h2>
+            <div class="flex items-center justify-between mb-4">
+                <h2 class="section-title mb-0">Student Info</h2>
+                <button type="button"
+                        onclick="document.getElementById('edit-student-modal').classList.remove('hidden')"
+                        class="btn-secondary btn-sm flex items-center gap-1.5">
+                    <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/>
+                    </svg>
+                    Edit
+                </button>
+            </div>
             <dl class="space-y-3">
                 <div>
                     <dt class="label">Student Number</dt>
@@ -87,19 +97,97 @@
                     <dd class="text-white">{{ $student->middle_name }}</dd>
                 </div>
                 @endif
-                @if($student->program)
                 <div>
                     <dt class="label">Program</dt>
-                    <dd class="text-white text-sm">{{ $student->program }}</dd>
+                    <dd class="text-white text-sm">{{ $student->program ?: 'Not set' }}</dd>
                 </div>
-                @endif
-                @if($student->year_level)
                 <div>
                     <dt class="label">Year Level</dt>
-                    <dd class="text-white text-sm">Year {{ $student->year_level }}</dd>
+                    <dd class="text-white text-sm font-semibold">
+                        @if($student->year_level)
+                            <span class="badge badge-active text-xs">{{ $student->year_level }}</span>
+                        @else
+                            <span class="text-amber-400 text-xs">Not set</span>
+                        @endif
+                    </dd>
                 </div>
-                @endif
             </dl>
+        </div>
+
+        <div id="edit-student-modal" class="hidden fixed inset-0 bg-black/60 z-50 flex items-center justify-center p-4">
+            <div class="bg-slate-900 border border-slate-700 rounded-2xl p-6 max-w-md w-full space-y-4 shadow-2xl">
+                <div class="flex items-center justify-between border-b border-slate-800 pb-3">
+                    <h2 class="text-base font-bold text-white">Edit Student Details</h2>
+                    <button type="button"
+                            onclick="document.getElementById('edit-student-modal').classList.add('hidden')"
+                            class="text-slate-400 hover:text-white">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+                        </svg>
+                    </button>
+                </div>
+                <form method="POST" action="{{ route('admin.students.update', $student) }}" class="space-y-4">
+                    @csrf
+                    @method('PATCH')
+                    <div>
+                        <label class="label">Student Number</label>
+                        <input type="text" value="{{ $student->student_number }}" class="input w-full bg-slate-800/50 cursor-not-allowed font-mono text-xs" disabled>
+                    </div>
+                    <div class="grid grid-cols-2 gap-2">
+                        <div>
+                            <label class="label">First Name *</label>
+                            <input type="text" name="first_name" value="{{ old('first_name', $student->first_name) }}" class="input w-full text-sm" required>
+                        </div>
+                        <div>
+                            <label class="label">Last Name *</label>
+                            <input type="text" name="last_name" value="{{ old('last_name', $student->last_name) }}" class="input w-full text-sm" required>
+                        </div>
+                    </div>
+                    <div>
+                        <label class="label">Middle Name</label>
+                        <input type="text" name="middle_name" value="{{ old('middle_name', $student->middle_name) }}" class="input w-full text-sm">
+                    </div>
+                    <div>
+                        <label class="label">Program</label>
+                        @php
+                            $progOptions = ['' => 'Select Program'];
+                            foreach($programs as $p) {
+                                $progOptions[$p] = $p;
+                            }
+                            if ($student->program && !isset($progOptions[$student->program])) {
+                                $progOptions[$student->program] = $student->program;
+                            }
+                        @endphp
+                        <x-custom-dropdown
+                            name="program"
+                            :options="$progOptions"
+                            :value="old('program', $student->program)"
+                            placeholder="Select Program" />
+                    </div>
+                    <div>
+                        <label class="label">Year Level *</label>
+                        @php
+                            $ylOptions = [];
+                            foreach($yearLevels as $yl) {
+                                $ylOptions[$yl] = $yl;
+                            }
+                        @endphp
+                        <x-custom-dropdown
+                            name="year_level"
+                            :options="$ylOptions"
+                            :value="old('year_level', $student->year_level)"
+                            :required="true"
+                            placeholder="Select Year Level" />
+                    </div>
+                    <div class="flex gap-2 pt-2">
+                        <button type="submit" class="btn-primary flex-1">Save Changes</button>
+                        <button type="button" class="btn-secondary flex-1"
+                                onclick="document.getElementById('edit-student-modal').classList.add('hidden')">
+                            Cancel
+                        </button>
+                    </div>
+                </form>
+            </div>
         </div>
 
         <div class="card">

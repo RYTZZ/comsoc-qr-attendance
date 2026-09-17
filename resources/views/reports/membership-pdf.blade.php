@@ -37,6 +37,7 @@
                 <th>#</th>
                 <th>Student Number</th>
                 <th>Full Name</th>
+                <th>Program & Year</th>
                 <th>Academic Year</th>
                 <th>Status</th>
             </tr>
@@ -47,6 +48,7 @@
                     <td>{{ $i + 1 }}</td>
                     <td>{{ $row->student?->student_number ?? '—' }}</td>
                     <td>{{ $row->student?->display_name ?? '—' }}</td>
+                    <td>{{ ($row->student?->program ?: 'BSIT') . ' • ' . ($row->student?->year_level ?: '—') }}</td>
                     <td>{{ $row->academicYear?->label ?? '—' }}</td>
                     <td class="{{ $row->status === 'active' ? 'status-active' : 'status-inactive' }}">{{ strtoupper($row->status) }}</td>
                 </tr>

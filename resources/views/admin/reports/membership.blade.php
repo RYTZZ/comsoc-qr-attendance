@@ -53,6 +53,7 @@
                 <tr>
                     <th class="py-3 px-4">Student Name</th>
                     <th class="py-3 px-4">Student #</th>
+                    <th class="py-3 px-4">Program & Year</th>
                     <th class="py-3 px-4">Academic Year</th>
                     <th class="py-3 px-4">Status</th>
                     <th class="py-3 px-4">Enrolled At</th>
@@ -63,6 +64,15 @@
                     <tr class="hover:bg-slate-800/30 transition">
                         <td class="py-3 px-4 font-semibold text-white">{{ $mem->student?->display_name ?? '—' }}</td>
                         <td class="py-3 px-4 text-slate-300 font-mono">{{ $mem->student?->student_number ?? '—' }}</td>
+                        <td class="py-3 px-4 text-slate-300">
+                            @if($mem->student)
+                                <span class="text-white font-medium">{{ $mem->student->year_level ?? '—' }}</span>
+                                <span class="text-slate-500">•</span>
+                                <span class="text-slate-400 text-[11px]">{{ $mem->student->program ?: 'BSIT' }}</span>
+                            @else
+                                —
+                            @endif
+                        </td>
                         <td class="py-3 px-4 text-slate-300">{{ $mem->academicYear?->label ?? '—' }}</td>
                         <td class="py-3 px-4">
                             <span class="badge {{ $mem->status === 'active' ? 'badge-active' : 'badge-inactive' }}">
@@ -73,7 +83,7 @@
                     </tr>
                 @empty
                     <tr>
-                        <td colspan="5" class="py-8 text-center text-slate-500">No records found.</td>
+                        <td colspan="6" class="py-8 text-center text-slate-500">No records found.</td>
                     </tr>
                 @endforelse
             </tbody>
