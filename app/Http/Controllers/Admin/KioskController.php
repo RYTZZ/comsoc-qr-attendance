@@ -22,9 +22,19 @@ class KioskController extends Controller
     {
         $data = $request->validate([
             'name' => 'required|string|max:255',
-            'identifier' => 'required|string|max:100|unique:kiosks',
+            'identifier' => 'nullable|string|max:100|unique:kiosks,identifier',
             'assigned_staff_id' => 'nullable|exists:users,id',
+            'assigned_user_id' => 'nullable|exists:users,id',
         ]);
+
+        if (empty($data['assigned_staff_id']) && !empty($data['assigned_user_id'])) {
+            $data['assigned_staff_id'] = $data['assigned_user_id'];
+        }
+        unset($data['assigned_user_id']);
+
+        if (empty($data['identifier'])) {
+            $data['identifier'] = Kiosk::generateUniqueIdentifier();
+        }
 
         $kiosk = Kiosk::create($data);
         AuditLogger::log('kiosk.created', $kiosk, [], $kiosk->toArray());

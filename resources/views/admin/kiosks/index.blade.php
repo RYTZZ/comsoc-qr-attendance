@@ -24,9 +24,9 @@
                             <tr class="hover:bg-slate-800/30 transition">
                                 <td class="py-3 px-4">
                                     <div class="font-semibold text-white">{{ $k->name }}</div>
-                                    <div class="text-[11px] text-slate-500 font-mono">ID: {{ $k->kiosk_identifier ?? ('KIOSK-' . $k->id) }}</div>
+                                    <div class="text-[11px] text-slate-500 font-mono">ID: {{ $k->identifier ?? $k->kiosk_identifier ?? ('KIOSK-' . $k->id) }}</div>
                                 </td>
-                                <td class="py-3 px-4 text-slate-300">{{ $k->assignedUser?->name ?? 'Any Staff' }}</td>
+                                <td class="py-3 px-4 text-slate-300">{{ $k->assignedStaff?->name ?? $k->assignedUser?->name ?? 'Any Staff' }}</td>
                                 <td class="py-3 px-4">
                                     @if($k->is_active)
                                         <span class="badge badge-active">Online / Active</span>

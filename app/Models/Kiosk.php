@@ -28,6 +28,24 @@ class Kiosk extends Model
         'last_activity_at' => 'datetime',
     ];
 
+    protected static function booted(): void
+    {
+        static::creating(function (self $kiosk) {
+            if (empty($kiosk->identifier)) {
+                $kiosk->identifier = self::generateUniqueIdentifier();
+            }
+        });
+    }
+
+    public static function generateUniqueIdentifier(): string
+    {
+        do {
+            $identifier = 'KIOSK-' . strtoupper(bin2hex(random_bytes(3)));
+        } while (self::where('identifier', $identifier)->exists());
+
+        return $identifier;
+    }
+
     public function user(): BelongsTo
     {
         return $this->belongsTo(User::class, 'user_id');
