@@ -59,6 +59,7 @@ Route::get('/register-non-student', function () {
 })->name('public.register.latest');
 
 Route::get('/kiosk/health', [AttendanceKioskController::class, 'healthCheck'])->name('kiosk.health');
+Route::get('/kiosk', fn() => redirect()->route('login')->withErrors(['email' => 'No kiosk terminal is assigned to your account. Please contact the administrator.']))->name('kiosk.hub');
 
 require __DIR__ . '/auth.php';
 

@@ -14,6 +14,7 @@ use Barryvdh\DomPDF\Facade\Pdf;
 use Illuminate\Http\Request;
 use Illuminate\View\View;
 use Maatwebsite\Excel\Facades\Excel;
+use Symfony\Component\HttpFoundation\StreamedResponse;
 
 class ReportController extends Controller
 {
@@ -22,7 +23,7 @@ class ReportController extends Controller
         return view('admin.reports.index');
     }
 
-    public function membership(Request $request): View
+    public function membership(Request $request): View|\Symfony\Component\HttpFoundation\Response
     {
         $academicYears = AcademicYear::orderByDesc('year_start')->get();
         $data = Membership::with(['student', 'academicYear', 'activeQrCode'])
@@ -39,7 +40,7 @@ class ReportController extends Controller
         return view('admin.reports.membership', compact('data', 'academicYears'));
     }
 
-    public function attendance(Request $request): View
+    public function attendance(Request $request): View|StreamedResponse
     {
         $events = Event::orderByDesc('event_date')->get();
         $data = AttendanceRecord::with(['event', 'attendanceSession', 'kiosk', 'scannedByUser'])
