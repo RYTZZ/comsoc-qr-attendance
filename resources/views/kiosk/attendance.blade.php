@@ -9,6 +9,17 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Michroma&family=Sora:wght@600;700;800&family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet">
     @vite(['resources/css/app.css', 'resources/js/app.js'])
+    <style>
+        #qr-camera-reader video {
+            width: 100% !important;
+            height: 100% !important;
+            object-fit: cover !important;
+            border-radius: 0 !important;
+        }
+        #qr-camera-reader {
+            border: none !important;
+        }
+    </style>
 </head>
 <body class="h-full bg-[#0f1117] font-sans text-slate-100" x-data="kioskApp()" x-init="init()">
 
@@ -133,30 +144,21 @@
                                     <p class="text-[11px] text-slate-400">Position attendee QR code clearly within the view</p>
                                 </div>
                                 <div class="flex items-center gap-2">
-                                    <template x-for="cam in cameras" :key="cam.id">
-                                        <button type="button"
-                                                x-show="cameras.length > 1"
-                                                @click="switchCamera(cam.id)"
-                                                :class="activeCameraId === cam.id ? 'bg-indigo-600 text-white' : 'bg-slate-800 text-slate-400'"
-                                                class="px-2 py-1 rounded text-[10px] font-semibold transition hover:text-white"
-                                                x-text="cam.label.length > 14 ? cam.label.substring(0, 12) + '...' : cam.label">
-                                        </button>
-                                    </template>
+                                    <button type="button"
+                                            x-show="cameras.length > 1"
+                                            @click="toggleCamera()"
+                                            title="Switch Camera"
+                                            class="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-slate-800 text-slate-300 hover:bg-slate-700 hover:text-white transition text-[11px] font-semibold">
+                                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/>
+                                        </svg>
+                                        <span>Switch Camera</span>
+                                    </button>
                                 </div>
                             </div>
 
-                            <div class="relative w-full aspect-[4/3] bg-black rounded-xl overflow-hidden border border-slate-800 flex items-center justify-center">
+                            <div class="relative w-full aspect-[4/3] bg-black rounded-xl overflow-hidden border border-slate-800 flex items-center justify-center" style="--qr-video-fit:cover">
                                 <div id="qr-camera-reader" class="w-full h-full"></div>
-
-                                <div x-show="cameraStatus === 'ready'" class="pointer-events-none absolute inset-0 flex items-center justify-center">
-                                    <div class="w-56 h-56 sm:w-64 sm:h-64 border-2 border-indigo-500/80 rounded-2xl relative shadow-[0_0_20px_rgba(99,102,241,0.2)]">
-                                        <span class="absolute -top-1 -left-1 w-6 h-6 border-t-4 border-l-4 border-indigo-400 rounded-tl-lg"></span>
-                                        <span class="absolute -top-1 -right-1 w-6 h-6 border-t-4 border-r-4 border-indigo-400 rounded-tr-lg"></span>
-                                        <span class="absolute -bottom-1 -left-1 w-6 h-6 border-b-4 border-l-4 border-indigo-400 rounded-bl-lg"></span>
-                                        <span class="absolute -bottom-1 -right-1 w-6 h-6 border-b-4 border-r-4 border-indigo-400 rounded-br-lg"></span>
-                                        <div class="absolute inset-x-2 top-0 h-0.5 bg-gradient-to-r from-transparent via-indigo-400 to-transparent animate-pulse"></div>
-                                    </div>
-                                </div>
 
                                 <div x-show="cameraStatus === 'starting'" class="absolute inset-0 bg-[#171a23]/95 flex flex-col items-center justify-center p-6 text-center z-10" x-cloak>
                                     <div class="w-10 h-10 border-4 border-indigo-500 border-t-transparent rounded-full animate-spin mb-3"></div>
@@ -523,6 +525,13 @@ function kioskApp() {
                 );
                 this.cameraStatus = 'ready';
             }
+        },
+
+        toggleCamera() {
+            if (this.cameras.length < 2) return;
+            const currentIndex = this.cameras.findIndex(c => c.id === this.activeCameraId);
+            const nextIndex = (currentIndex + 1) % this.cameras.length;
+            this.switchCamera(this.cameras[nextIndex].id);
         },
 
         async stopScanner() {
