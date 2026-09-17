@@ -46,7 +46,7 @@ class Membership extends Model
 
     public function latestQrCode(): HasOne
     {
-        return $this->hasOne(QrCode::class)->latestOfMany();
+        return $this->hasOne(QrCode::class)->latestOfMany('created_at');
     }
 
     public function isActive(): bool
