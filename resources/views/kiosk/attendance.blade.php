@@ -10,19 +10,44 @@
     <link href="https://fonts.googleapis.com/css2?family=Michroma&family=Sora:wght@600;700;800&family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet">
     @vite(['resources/css/app.css', 'resources/js/app.js'])
     <style>
+        #qr-camera-reader {
+            width: 100% !important;
+            height: 100% !important;
+            border: none !important;
+            background: #000 !important;
+            position: relative;
+        }
         #qr-camera-reader video {
             width: 100% !important;
             height: 100% !important;
             object-fit: contain !important;
-            border-radius: 0 !important;
-        }
-        #qr-camera-reader {
-            border: none !important;
+            border-radius: 0.75rem !important;
         }
         #qr-camera-reader__scan_region {
-            display: flex;
-            align-items: center;
-            justify-content: center;
+            width: 100% !important;
+            height: 100% !important;
+            display: flex !important;
+            align-items: center !important;
+            justify-content: center !important;
+        }
+        #qr-camera-reader__dashboard {
+            display: none !important;
+        }
+        .scanner-laser-line {
+            position: absolute;
+            left: 10%;
+            right: 10%;
+            height: 2px;
+            background: linear-gradient(90deg, transparent, #818cf8, #c084fc, #818cf8, transparent);
+            box-shadow: 0 0 8px #818cf8, 0 0 16px #c084fc;
+            animation: laserScan 2.2s ease-in-out infinite;
+            pointer-events: none;
+            z-index: 5;
+        }
+        @keyframes laserScan {
+            0% { top: 15%; opacity: 0.2; }
+            50% { top: 85%; opacity: 1; }
+            100% { top: 15%; opacity: 0.2; }
         }
     </style>
 </head>
@@ -162,8 +187,21 @@
                                 </div>
                             </div>
 
-                            <div class="relative w-full aspect-[4/3] bg-black rounded-xl overflow-hidden border border-slate-800 flex items-center justify-center" style="--qr-video-fit:cover">
+                            <div class="relative w-full aspect-square max-h-[380px] bg-black rounded-xl overflow-hidden border border-slate-800 flex items-center justify-center">
                                 <div id="qr-camera-reader" class="w-full h-full"></div>
+
+                                <!-- Centered Scanning Target Frame & Active Laser Indicator -->
+                                <div x-show="cameraStatus === 'ready'" class="absolute inset-0 pointer-events-none flex items-center justify-center z-10" x-cloak>
+                                    <div class="relative w-3/4 h-3/4 max-w-[280px] max-h-[280px] border-2 border-indigo-500/40 rounded-2xl">
+                                        <!-- Corner Brackets -->
+                                        <div class="absolute -top-1 -left-1 w-6 h-6 border-t-4 border-l-4 border-indigo-400 rounded-tl-lg"></div>
+                                        <div class="absolute -top-1 -right-1 w-6 h-6 border-t-4 border-r-4 border-indigo-400 rounded-tr-lg"></div>
+                                        <div class="absolute -bottom-1 -left-1 w-6 h-6 border-b-4 border-l-4 border-indigo-400 rounded-bl-lg"></div>
+                                        <div class="absolute -bottom-1 -right-1 w-6 h-6 border-b-4 border-r-4 border-indigo-400 rounded-br-lg"></div>
+                                        <!-- Animated Laser Scan Line -->
+                                        <div class="scanner-laser-line"></div>
+                                    </div>
+                                </div>
 
                                 <div x-show="cameraStatus === 'starting'" class="absolute inset-0 bg-[#171a23]/95 flex flex-col items-center justify-center p-6 text-center z-10" x-cloak>
                                     <div class="w-10 h-10 border-4 border-indigo-500 border-t-transparent rounded-full animate-spin mb-3"></div>
@@ -474,16 +512,13 @@ function kioskApp() {
 
                 const scanConfig = {
                     fps: 20,
-                    qrbox: (viewfinderWidth, viewfinderHeight) => {
-                        const minEdge = Math.min(viewfinderWidth, viewfinderHeight);
-                        const qrboxEdge = Math.max(220, Math.floor(minEdge * 0.85));
-                        return { width: qrboxEdge, height: qrboxEdge };
-                    },
+                    aspectRatio: 1.0,
                     videoConstraints: {
                         deviceId: selectedCamera,
                         focusMode: 'continuous',
-                        width: { ideal: 1280 },
-                        height: { ideal: 720 }
+                        advanced: [{ focusMode: 'continuous' }],
+                        width: { min: 640, ideal: 1280 },
+                        height: { min: 480, ideal: 720 }
                     }
                 };
 
@@ -509,10 +544,10 @@ function kioskApp() {
                             { facingMode: 'environment' },
                             {
                                 fps: 20,
-                                qrbox: (viewfinderWidth, viewfinderHeight) => {
-                                    const minEdge = Math.min(viewfinderWidth, viewfinderHeight);
-                                    const qrboxEdge = Math.max(220, Math.floor(minEdge * 0.85));
-                                    return { width: qrboxEdge, height: qrboxEdge };
+                                aspectRatio: 1.0,
+                                videoConstraints: {
+                                    focusMode: 'continuous',
+                                    advanced: [{ focusMode: 'continuous' }]
                                 }
                             },
                             (decodedText) => this.handleDecodedQr(decodedText),
@@ -540,16 +575,13 @@ function kioskApp() {
                     cameraId,
                     {
                         fps: 20,
-                        qrbox: (viewfinderWidth, viewfinderHeight) => {
-                            const minEdge = Math.min(viewfinderWidth, viewfinderHeight);
-                            const qrboxEdge = Math.max(220, Math.floor(minEdge * 0.85));
-                            return { width: qrboxEdge, height: qrboxEdge };
-                        },
+                        aspectRatio: 1.0,
                         videoConstraints: {
                             deviceId: cameraId,
                             focusMode: 'continuous',
-                            width: { ideal: 1280 },
-                            height: { ideal: 720 }
+                            advanced: [{ focusMode: 'continuous' }],
+                            width: { min: 640, ideal: 1280 },
+                            height: { min: 480, ideal: 720 }
                         }
                     },
                     (decodedText) => this.handleDecodedQr(decodedText),
