@@ -121,21 +121,30 @@ class MasterlistController extends Controller
         $seenNumbers = [];
 
         foreach ($data as $index => $row) {
-            $rowClean = array_change_key_case((array) $row, CASE_LOWER);
+            $rowNormalized = [];
+            foreach ((array) $row as $key => $val) {
+                $cleanKey = strtolower(trim((string) $key));
+                $cleanKey = preg_replace('/\s+/', ' ', $cleanKey);
+                $cleanKey = str_replace(['_', '-'], ' ', $cleanKey);
+                $rowNormalized[$cleanKey] = $val;
+            }
 
             $studentNumber = trim(
-                $rowClean['student_number'] 
-                ?? $rowClean['student number'] 
-                ?? $rowClean['student_id'] 
-                ?? $rowClean['student id'] 
-                ?? $rowClean['id'] 
-                ?? ''
+                $this->extractFieldValue($rowNormalized, [
+                    'student number',
+                    'student no',
+                    'student id',
+                    'student',
+                    'id number',
+                    'id no',
+                    'id',
+                ])
             );
 
-            $lastName = trim($rowClean['last_name'] ?? $rowClean['last name'] ?? $rowClean['lastname'] ?? '');
-            $firstName = trim($rowClean['first_name'] ?? $rowClean['first name'] ?? $rowClean['firstname'] ?? '');
-            $middleName = trim($rowClean['middle_name'] ?? $rowClean['middle name'] ?? $rowClean['middlename'] ?? '');
-            $rawName = trim($rowClean['name'] ?? $rowClean['full_name'] ?? $rowClean['full name'] ?? '');
+            $lastName = trim($this->extractFieldValue($rowNormalized, ['last name', 'lastname', 'surname', 'family name']));
+            $firstName = trim($this->extractFieldValue($rowNormalized, ['first name', 'firstname', 'given name']));
+            $middleName = trim($this->extractFieldValue($rowNormalized, ['middle name', 'middlename', 'middle initial', 'mi']));
+            $rawName = trim($this->extractFieldValue($rowNormalized, ['name', 'full name', 'fullname', 'student name']));
 
             if (empty($studentNumber) && empty($rawName) && empty($lastName) && empty($firstName)) {
                 continue;
@@ -162,8 +171,27 @@ class MasterlistController extends Controller
                 $nameParts = $this->parseName($rawName);
             }
 
-            $program = trim($rowClean['program'] ?? $rowClean['course'] ?? $rowClean['degree'] ?? '');
-            $rawYear = trim($rowClean['year_level'] ?? $rowClean['year level'] ?? $rowClean['year'] ?? $rowClean['yr'] ?? '');
+            $rawProgram = trim($this->extractFieldValue($rowNormalized, [
+                'program',
+                'course',
+                'program / course',
+                'program/course',
+                'course / program',
+                'course/program',
+                'degree program',
+                'degree',
+            ]));
+
+            $normalizedProgram = Student::normalizeProgram($rawProgram);
+
+            $rawYear = trim($this->extractFieldValue($rowNormalized, [
+                'year level',
+                'yearlevel',
+                'year',
+                'yr level',
+                'yr',
+                'level',
+            ]));
 
             if (isset($corrections[$studentNumber]['year_level'])) {
                 $rawYear = $corrections[$studentNumber]['year_level'];
@@ -179,10 +207,12 @@ class MasterlistController extends Controller
                 $normalizedYear = $student->year_level;
             }
 
+            $finalProgram = $normalizedProgram ?: ($student?->program ?? null);
+
             $rowData = array_merge($nameParts, [
                 'index' => $index,
                 'student_number' => $studentNumber,
-                'program' => $program ?: ($student?->program ?? null),
+                'program' => $finalProgram,
                 'year_level' => $normalizedYear,
                 'raw_year_level' => $rawYear,
             ]);
@@ -210,6 +240,31 @@ class MasterlistController extends Controller
         }
 
         return compact('new', 'existing', 'duplicates', 'invalid');
+    }
+
+    private function extractFieldValue(array $rowNormalized, array $candidateKeys): string
+    {
+        foreach ($candidateKeys as $key) {
+            $normalizedKey = strtolower(trim($key));
+            $normalizedKey = preg_replace('/\s+/', ' ', $normalizedKey);
+            $normalizedKey = str_replace(['_', '-'], ' ', $normalizedKey);
+
+            if (array_key_exists($normalizedKey, $rowNormalized) && $rowNormalized[$normalizedKey] !== null) {
+                return (string) $rowNormalized[$normalizedKey];
+            }
+        }
+
+        foreach ($rowNormalized as $k => $v) {
+            $strippedKey = preg_replace('/[^a-z0-9]/', '', $k);
+            foreach ($candidateKeys as $key) {
+                $strippedCandidate = preg_replace('/[^a-z0-9]/', '', strtolower($key));
+                if ($strippedKey === $strippedCandidate && $v !== null) {
+                    return (string) $v;
+                }
+            }
+        }
+
+        return '';
     }
 
     private function parseName(string $raw): array

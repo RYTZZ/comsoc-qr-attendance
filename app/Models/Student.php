@@ -58,6 +58,43 @@ class Student extends Model
         return null;
     }
 
+    public static function normalizeProgram(?string $raw): ?string
+    {
+        if ($raw === null) {
+            return null;
+        }
+
+        $trimmed = trim($raw);
+        if ($trimmed === '') {
+            return null;
+        }
+
+        $clean = strtolower($trimmed);
+        $clean = preg_replace('/\s+/', ' ', $clean);
+
+        if ($clean === 'bsit' || str_contains($clean, 'information technology')) {
+            return 'BSIT';
+        }
+
+        if ($clean === 'bscs' || str_contains($clean, 'computer science')) {
+            return 'BSCS';
+        }
+
+        if ($clean === 'bsis' || str_contains($clean, 'information systems') || str_contains($clean, 'information system')) {
+            return 'BSIS';
+        }
+
+        if ($clean === 'btvted' || str_contains($clean, 'technical-vocational') || str_contains($clean, 'technical vocational')) {
+            return 'BTVTEd';
+        }
+
+        if ($clean === 'blis' || str_contains($clean, 'library and information science') || str_contains($clean, 'library & information science')) {
+            return 'BLIS';
+        }
+
+        return $trimmed;
+    }
+
     public function memberships(): HasMany
     {
         return $this->hasMany(Membership::class);

@@ -153,28 +153,75 @@ class MembershipController extends Controller
         $batchNumber = $lastBatch + 1;
 
         foreach ($data as $row) {
-            $rowClean = array_change_key_case((array) $row, CASE_LOWER);
-            $sn = trim(
-                $rowClean['student_number']
-                ?? $rowClean['student number']
-                ?? $rowClean['student_id']
-                ?? $rowClean['student id']
-                ?? $rowClean['id']
-                ?? ''
-            );
+            $rowNormalized = [];
+            foreach ((array) $row as $key => $val) {
+                $cleanKey = strtolower(trim((string) $key));
+                $cleanKey = preg_replace('/\s+/', ' ', $cleanKey);
+                $cleanKey = str_replace(['_', '-'], ' ', $cleanKey);
+                $rowNormalized[$cleanKey] = $val;
+            }
+
+            $extractField = function (array $candidateKeys) use ($rowNormalized): string {
+                foreach ($candidateKeys as $key) {
+                    $normalizedKey = strtolower(trim($key));
+                    $normalizedKey = preg_replace('/\s+/', ' ', $normalizedKey);
+                    $normalizedKey = str_replace(['_', '-'], ' ', $normalizedKey);
+                    if (array_key_exists($normalizedKey, $rowNormalized) && $rowNormalized[$normalizedKey] !== null) {
+                        return (string) $rowNormalized[$normalizedKey];
+                    }
+                }
+                foreach ($rowNormalized as $k => $v) {
+                    $strippedKey = preg_replace('/[^a-z0-9]/', '', $k);
+                    foreach ($candidateKeys as $key) {
+                        $strippedCandidate = preg_replace('/[^a-z0-9]/', '', strtolower($key));
+                        if ($strippedKey === $strippedCandidate && $v !== null) {
+                            return (string) $v;
+                        }
+                    }
+                }
+                return '';
+            };
+
+            $sn = trim($extractField([
+                'student number',
+                'student no',
+                'student id',
+                'student',
+                'id number',
+                'id no',
+                'id',
+            ]));
             if (!$sn) continue;
 
             $student = Student::where('student_number', $sn)->first();
+            $lastName = trim($extractField(['last name', 'lastname', 'surname', 'family name']));
+            $firstName = trim($extractField(['first name', 'firstname', 'given name']));
+            $middleName = trim($extractField(['middle name', 'middlename', 'middle initial', 'mi']));
+            $rawName = trim($extractField(['name', 'full name', 'fullname', 'student name']));
+
+            $rawProgram = trim($extractField([
+                'program',
+                'course',
+                'program / course',
+                'program/course',
+                'course / program',
+                'course/program',
+                'degree program',
+                'degree',
+            ]));
+            $program = Student::normalizeProgram($rawProgram);
+
+            $rawYear = trim($extractField([
+                'year level',
+                'yearlevel',
+                'year',
+                'yr level',
+                'yr',
+                'level',
+            ]));
+            $normalizedYear = Student::normalizeYearLevel($rawYear);
+
             if (!$student) {
-                $lastName = trim($rowClean['last_name'] ?? $rowClean['last name'] ?? $rowClean['lastname'] ?? '');
-                $firstName = trim($rowClean['first_name'] ?? $rowClean['first name'] ?? $rowClean['firstname'] ?? '');
-                $middleName = trim($rowClean['middle_name'] ?? $rowClean['middle name'] ?? $rowClean['middlename'] ?? '');
-                $rawName = trim($rowClean['name'] ?? $rowClean['full_name'] ?? $rowClean['full name'] ?? '');
-
-                $program = trim($rowClean['program'] ?? $rowClean['course'] ?? $rowClean['degree'] ?? '');
-                $rawYear = trim($rowClean['year_level'] ?? $rowClean['year level'] ?? $rowClean['year'] ?? $rowClean['yr'] ?? '');
-                $normalizedYear = Student::normalizeYearLevel($rawYear);
-
                 if (!empty($lastName) || !empty($firstName)) {
                     $student = Student::create([
                         'student_number' => $sn,
@@ -197,9 +244,6 @@ class MembershipController extends Controller
                     ]);
                 }
             } else {
-                $rawYear = trim($rowClean['year_level'] ?? $rowClean['year level'] ?? $rowClean['year'] ?? $rowClean['yr'] ?? '');
-                $normalizedYear = Student::normalizeYearLevel($rawYear);
-                $program = trim($rowClean['program'] ?? $rowClean['course'] ?? $rowClean['degree'] ?? '');
                 $updateData = [];
                 if ($normalizedYear && empty($student->year_level)) {
                     $updateData['year_level'] = $normalizedYear;
