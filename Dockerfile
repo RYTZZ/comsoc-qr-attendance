@@ -21,6 +21,7 @@ RUN apk add --no-cache \
     libjpeg-turbo-dev \
     libpng-dev \
     libxml2-dev \
+    libzip-dev \
     oniguruma-dev \
     zip \
     unzip \
@@ -36,6 +37,7 @@ RUN docker-php-ext-configure gd \
         pgsql \
         gd \
         bcmath \
+        zip \
     && docker-php-ext-enable opcache
 
 COPY --from=composer:2 /usr/bin/composer /usr/bin/composer
