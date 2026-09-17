@@ -99,6 +99,13 @@ class EventController extends Controller
             $data['location'] = $data['venue_name'];
         }
 
+        if (($data['status'] ?? null) === 'registration_open') {
+            $dl = $data['registration_deadline'] ?? null;
+            if ($dl && Carbon::parse($dl)->isPast()) {
+                $data['registration_deadline'] = null;
+            }
+        }
+
         $old = $event->toArray();
         $event->update($data);
 
@@ -135,7 +142,6 @@ class EventController extends Controller
         $old = ['status' => $event->status];
         $event->update([
             'status' => 'registration_closed',
-            'registration_deadline' => now(),
         ]);
 
         AuditLogger::log('event.registration_closed', $event, $old, $event->fresh()->toArray(), 'Registration closed by super admin.');
