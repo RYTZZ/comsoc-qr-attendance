@@ -72,7 +72,7 @@ class EventController extends Controller
         return view('admin.events.show', compact('event'));
     }
 
-    public function edit(Event $event): View
+    public function edit(Event $event): RedirectResponse
     {
         return redirect()->route('admin.events.configure', $event);
     }
