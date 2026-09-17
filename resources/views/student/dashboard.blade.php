@@ -84,8 +84,8 @@
     @if($membership)
     <div class="card border-slate-800">
         <div class="flex items-center gap-3 sm:gap-4">
-            <div class="w-12 h-12 sm:w-14 sm:h-14 gradient-brand rounded-xl flex items-center justify-center flex-shrink-0 shadow-lg text-xl sm:text-2xl font-bold text-white">
-                {{ strtoupper(substr($student->first_name, 0, 1)) }}
+            <div class="w-12 h-12 sm:w-14 sm:h-14 gradient-brand rounded-xl flex items-center justify-center flex-shrink-0 shadow-lg">
+                <svg class="w-6 h-6 sm:w-7 sm:h-7 text-white" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="5"/><path d="M20 21a8 8 0 1 0-16 0"/></svg>
             </div>
             <div class="min-w-0 flex-1">
                 <p class="text-base sm:text-lg font-bold text-white truncate">{{ $student->display_name }}</p>

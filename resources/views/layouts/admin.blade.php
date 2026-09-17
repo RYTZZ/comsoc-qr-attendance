@@ -199,8 +199,8 @@
 
         <div class="px-3 py-4 border-t border-slate-800">
             <div class="flex items-center gap-3 px-3 py-2 rounded-lg">
-                <div class="w-8 h-8 gradient-brand rounded-full flex items-center justify-center flex-shrink-0 text-xs font-bold text-white">
-                    {{ strtoupper(substr(auth()->user()->name, 0, 2)) }}
+                <div class="w-8 h-8 gradient-brand rounded-full flex items-center justify-center flex-shrink-0">
+                    <svg class="w-4 h-4 text-white" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="5"/><path d="M20 21a8 8 0 1 0-16 0"/></svg>
                 </div>
                 <div class="flex-1 min-w-0">
                     <p class="text-sm font-medium text-white truncate">{{ auth()->user()->name }}</p>
@@ -242,8 +242,8 @@
                 <span class="badge-active text-[10px] sm:text-xs px-2 py-0.5 sm:px-2.5 sm:py-1 truncate max-w-[120px] sm:max-w-none">{{ $activeYear->label }}</span>
                 @endif
                 <a href="{{ route('profile.edit') }}" class="flex items-center gap-2 p-1 text-slate-400 hover:text-white transition-colors" title="My Profile">
-                    <div class="w-7 h-7 sm:w-8 sm:h-8 gradient-brand rounded-full flex items-center justify-center text-xs font-bold text-white shadow">
-                        {{ strtoupper(substr(auth()->user()->name, 0, 2)) }}
+                    <div class="w-7 h-7 sm:w-8 sm:h-8 gradient-brand rounded-full flex items-center justify-center shadow">
+                        <svg class="w-3.5 h-3.5 sm:w-4 sm:h-4 text-white" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="5"/><path d="M20 21a8 8 0 1 0-16 0"/></svg>
                     </div>
                 </a>
             </div>
