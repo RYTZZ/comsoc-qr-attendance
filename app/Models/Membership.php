@@ -44,9 +44,12 @@ class Membership extends Model
         return $this->hasOne(QrCode::class)->where('status', 'active');
     }
 
-    public function latestQrCode(): HasOne
+    public function getLatestQrCodeAttribute(): ?QrCode
     {
-        return $this->hasOne(QrCode::class)->ofMany(['created_at' => 'MAX'], null);
+        if ($this->relationLoaded('qrCodes')) {
+            return $this->qrCodes->sortByDesc('created_at')->first();
+        }
+        return $this->qrCodes()->orderByDesc('created_at')->first();
     }
 
     public function isActive(): bool

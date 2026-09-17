@@ -24,7 +24,7 @@ class MembershipController extends Controller
 
         $filterYearId = $request->academic_year_id ?? $activeYear?->id;
 
-        $query = Membership::with(['student.user', 'academicYear', 'activeQrCode.card', 'latestQrCode'])
+        $query = Membership::with(['student.user', 'academicYear', 'activeQrCode.card', 'qrCodes'])
             ->when($request->academic_year_id, fn($q) => $q->where('academic_year_id', $request->academic_year_id))
             ->when(!$request->academic_year_id && $activeYear, fn($q) => $q->where('academic_year_id', $activeYear->id))
             ->when($request->status, fn($q) => $q->where('status', $request->status))
