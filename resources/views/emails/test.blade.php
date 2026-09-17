@@ -6,7 +6,7 @@
     action-text="Open Application"
     notice="This is an automated test email. No action is required."
 >
-    <p>Hi <strong>{{ $recipientName }}</strong>,</p>
-    <p>This test confirms that the ComSoc QR Attendance System email service is configured correctly and working as expected.</p>
-    <p>If you received this message, transactional emails such as password resets, OTPs, registration confirmations, and event notifications are ready to be sent.</p>
+    <p style="margin: 0 0 16px 0; color: #1e293b; font-size: 15px; line-height: 1.6;">Hi <strong>{{ $recipientName }}</strong>,</p>
+    <p style="margin: 0 0 16px 0; color: #334155; font-size: 15px; line-height: 1.65;">This test confirms that the ComSoc QR Attendance System email service is configured correctly and working as expected.</p>
+    <p style="margin: 0; color: #334155; font-size: 15px; line-height: 1.65;">If you received this message, transactional emails such as password resets, OTPs, registration confirmations, and event notifications are ready to be sent.</p>
 </x-layouts.email>
