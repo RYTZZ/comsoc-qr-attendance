@@ -36,7 +36,7 @@ RUN docker-php-ext-configure gd \
         pgsql \
         gd \
         bcmath \
-        opcache
+    && docker-php-ext-enable opcache
 
 COPY --from=composer:2 /usr/bin/composer /usr/bin/composer
 
