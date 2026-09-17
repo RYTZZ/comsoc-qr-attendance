@@ -13,6 +13,7 @@ chmod -R 775 /var/www/html/storage /var/www/html/bootstrap/cache
 php artisan storage:link --force 2>/dev/null || true
 
 php artisan migrate --force
+php artisan db:seed --force || true
 
 php artisan config:clear
 php artisan route:clear
