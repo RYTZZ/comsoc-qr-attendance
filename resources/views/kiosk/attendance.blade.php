@@ -13,11 +13,16 @@
         #qr-camera-reader video {
             width: 100% !important;
             height: 100% !important;
-            object-fit: cover !important;
+            object-fit: contain !important;
             border-radius: 0 !important;
         }
         #qr-camera-reader {
             border: none !important;
+        }
+        #qr-camera-reader__scan_region {
+            display: flex;
+            align-items: center;
+            justify-content: center;
         }
     </style>
 </head>
@@ -453,7 +458,12 @@ function kioskApp() {
                 }
 
                 this.cameras = devices;
-                this.qrScanner = new window.Html5Qrcode('qr-camera-reader');
+                this.qrScanner = new window.Html5Qrcode('qr-camera-reader', {
+                    experimentalFeatures: {
+                        useBarCodeDetectorIfSupported: true
+                    },
+                    verbose: false
+                });
 
                 let selectedCamera = devices[0].id;
                 const backCamera = devices.find(d => /back|rear|environment/i.test(d.label));
@@ -462,17 +472,23 @@ function kioskApp() {
                 }
                 this.activeCameraId = selectedCamera;
 
+                const scanConfig = {
+                    fps: 15,
+                    qrbox: (viewfinderWidth, viewfinderHeight) => {
+                        const minEdge = Math.min(viewfinderWidth, viewfinderHeight);
+                        const qrboxEdge = Math.max(220, Math.floor(minEdge * 0.80));
+                        return { width: qrboxEdge, height: qrboxEdge };
+                    },
+                    videoConstraints: {
+                        deviceId: selectedCamera,
+                        focusMode: 'continuous',
+                        facingMode: { ideal: 'environment' }
+                    }
+                };
+
                 await this.qrScanner.start(
                     selectedCamera,
-                    {
-                        fps: 10,
-                        qrbox: (viewfinderWidth, viewfinderHeight) => {
-                            const minEdge = Math.min(viewfinderWidth, viewfinderHeight);
-                            const qrboxEdge = Math.floor(minEdge * 0.75);
-                            return { width: qrboxEdge, height: qrboxEdge };
-                        },
-                        aspectRatio: 1.333333
-                    },
+                    scanConfig,
                     (decodedText) => {
                         this.handleDecodedQr(decodedText);
                     },
@@ -491,8 +507,12 @@ function kioskApp() {
                         await this.qrScanner.start(
                             { facingMode: 'environment' },
                             {
-                                fps: 10,
-                                qrbox: { width: 250, height: 250 }
+                                fps: 15,
+                                qrbox: (viewfinderWidth, viewfinderHeight) => {
+                                    const minEdge = Math.min(viewfinderWidth, viewfinderHeight);
+                                    const qrboxEdge = Math.max(220, Math.floor(minEdge * 0.80));
+                                    return { width: qrboxEdge, height: qrboxEdge };
+                                }
                             },
                             (decodedText) => this.handleDecodedQr(decodedText),
                             () => {}
@@ -509,15 +529,24 @@ function kioskApp() {
             this.activeCameraId = cameraId;
             if (this.qrScanner) {
                 await this.stopScanner();
-                this.qrScanner = new window.Html5Qrcode('qr-camera-reader');
+                this.qrScanner = new window.Html5Qrcode('qr-camera-reader', {
+                    experimentalFeatures: {
+                        useBarCodeDetectorIfSupported: true
+                    },
+                    verbose: false
+                });
                 await this.qrScanner.start(
                     cameraId,
                     {
-                        fps: 10,
+                        fps: 15,
                         qrbox: (viewfinderWidth, viewfinderHeight) => {
                             const minEdge = Math.min(viewfinderWidth, viewfinderHeight);
-                            const qrboxEdge = Math.floor(minEdge * 0.75);
+                            const qrboxEdge = Math.max(220, Math.floor(minEdge * 0.80));
                             return { width: qrboxEdge, height: qrboxEdge };
+                        },
+                        videoConstraints: {
+                            deviceId: cameraId,
+                            focusMode: 'continuous'
                         }
                     },
                     (decodedText) => this.handleDecodedQr(decodedText),
@@ -545,7 +574,20 @@ function kioskApp() {
         },
 
         handleDecodedQr(decodedText) {
-            const cleanToken = decodedText.trim();
+            if (!decodedText) return;
+            let cleanToken = decodedText.trim();
+
+            const tokenMatch = cleanToken.match(/[A-Za-z0-9]{48}/);
+            if (tokenMatch) {
+                cleanToken = tokenMatch[0];
+            } else if (cleanToken.includes('token=')) {
+                try {
+                    const parsedUrl = new URL(cleanToken, window.location.origin);
+                    const urlToken = parsedUrl.searchParams.get('token');
+                    if (urlToken) cleanToken = urlToken.trim();
+                } catch {}
+            }
+
             const now = Date.now();
             if (cleanToken === this.lastScannedToken && (now - this.lastScanTimestamp) < 3000) {
                 return;

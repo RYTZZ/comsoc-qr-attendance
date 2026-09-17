@@ -48,6 +48,13 @@ class AttendanceKioskController extends Controller
     {
         abort_unless($kiosk->is_active, 404);
 
+        $token = trim($request->input('token', ''));
+        if (preg_match('/[A-Za-z0-9]{48}/', $token, $matches)) {
+            $token = $matches[0];
+        }
+
+        $request->merge(['token' => $token]);
+
         $request->validate([
             'token' => 'required|string|size:48',
             'event_id' => 'required|exists:events,id',
