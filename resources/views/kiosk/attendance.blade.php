@@ -473,16 +473,17 @@ function kioskApp() {
                 this.activeCameraId = selectedCamera;
 
                 const scanConfig = {
-                    fps: 15,
+                    fps: 20,
                     qrbox: (viewfinderWidth, viewfinderHeight) => {
                         const minEdge = Math.min(viewfinderWidth, viewfinderHeight);
-                        const qrboxEdge = Math.max(220, Math.floor(minEdge * 0.80));
+                        const qrboxEdge = Math.max(220, Math.floor(minEdge * 0.85));
                         return { width: qrboxEdge, height: qrboxEdge };
                     },
                     videoConstraints: {
                         deviceId: selectedCamera,
                         focusMode: 'continuous',
-                        facingMode: { ideal: 'environment' }
+                        width: { ideal: 1280 },
+                        height: { ideal: 720 }
                     }
                 };
 
@@ -507,10 +508,10 @@ function kioskApp() {
                         await this.qrScanner.start(
                             { facingMode: 'environment' },
                             {
-                                fps: 15,
+                                fps: 20,
                                 qrbox: (viewfinderWidth, viewfinderHeight) => {
                                     const minEdge = Math.min(viewfinderWidth, viewfinderHeight);
-                                    const qrboxEdge = Math.max(220, Math.floor(minEdge * 0.80));
+                                    const qrboxEdge = Math.max(220, Math.floor(minEdge * 0.85));
                                     return { width: qrboxEdge, height: qrboxEdge };
                                 }
                             },
@@ -538,15 +539,17 @@ function kioskApp() {
                 await this.qrScanner.start(
                     cameraId,
                     {
-                        fps: 15,
+                        fps: 20,
                         qrbox: (viewfinderWidth, viewfinderHeight) => {
                             const minEdge = Math.min(viewfinderWidth, viewfinderHeight);
-                            const qrboxEdge = Math.max(220, Math.floor(minEdge * 0.80));
+                            const qrboxEdge = Math.max(220, Math.floor(minEdge * 0.85));
                             return { width: qrboxEdge, height: qrboxEdge };
                         },
                         videoConstraints: {
                             deviceId: cameraId,
-                            focusMode: 'continuous'
+                            focusMode: 'continuous',
+                            width: { ideal: 1280 },
+                            height: { ideal: 720 }
                         }
                     },
                     (decodedText) => this.handleDecodedQr(decodedText),
@@ -660,9 +663,46 @@ function kioskApp() {
 
         showFeedback(type, name, message, status = null) {
             this.feedback = { type, name, message, status };
+            this.playTone(type);
 
             if (this.feedbackTimer) clearTimeout(this.feedbackTimer);
             this.feedbackTimer = setTimeout(() => { this.feedback = null; }, 4000);
+        },
+
+        playTone(type) {
+            try {
+                if (navigator.vibrate) {
+                    if (type === 'success') navigator.vibrate(80);
+                    else if (type === 'duplicate') navigator.vibrate([60, 40, 60]);
+                    else navigator.vibrate([100, 50, 100]);
+                }
+                const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+                const osc = audioCtx.createOscillator();
+                const gain = audioCtx.createGain();
+                osc.connect(gain);
+                gain.connect(audioCtx.destination);
+
+                if (type === 'success') {
+                    osc.frequency.setValueAtTime(880, audioCtx.currentTime);
+                    osc.frequency.exponentialRampToValueAtTime(1200, audioCtx.currentTime + 0.12);
+                    gain.gain.setValueAtTime(0.15, audioCtx.currentTime);
+                    gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.12);
+                    osc.start();
+                    osc.stop(audioCtx.currentTime + 0.12);
+                } else if (type === 'duplicate') {
+                    osc.frequency.setValueAtTime(440, audioCtx.currentTime);
+                    gain.gain.setValueAtTime(0.12, audioCtx.currentTime);
+                    gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.2);
+                    osc.start();
+                    osc.stop(audioCtx.currentTime + 0.2);
+                } else {
+                    osc.frequency.setValueAtTime(260, audioCtx.currentTime);
+                    gain.gain.setValueAtTime(0.15, audioCtx.currentTime);
+                    gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.25);
+                    osc.start();
+                    osc.stop(audioCtx.currentTime + 0.25);
+                }
+            } catch {}
         }
     };
 }

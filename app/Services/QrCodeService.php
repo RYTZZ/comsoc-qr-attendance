@@ -94,7 +94,10 @@ class QrCodeService
 
         $reg = \App\Models\EventRegistration::where('qr_token', $token)
             ->where('status', 'approved')
-            ->where('qr_expires_at', '>', now())
+            ->where(function ($q) {
+                $q->whereNull('qr_expires_at')
+                  ->orWhere('qr_expires_at', '>', now()->subDay());
+            })
             ->first();
 
         if ($reg) {
