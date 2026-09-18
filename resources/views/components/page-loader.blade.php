@@ -1,14 +1,37 @@
 <div id="page-loading-scene"
-     x-data="{ ready: false }"
-     x-init="
-        if (document.readyState === 'complete') {
-            ready = true;
-        } else {
-            window.addEventListener('load', () => { ready = true; });
+     x-data="{
+        ready: false,
+        init() {
+            const minDuration = 3000;
+            const maxDuration = 5000;
+            const startTime = performance.now();
+            let pageLoaded = (document.readyState === 'complete');
+
+            const checkAndDismiss = () => {
+                const elapsed = performance.now() - startTime;
+                if (elapsed >= minDuration && pageLoaded) {
+                    this.ready = true;
+                } else if (elapsed < minDuration) {
+                    setTimeout(checkAndDismiss, minDuration - elapsed);
+                }
+            };
+
+            if (!pageLoaded) {
+                window.addEventListener('load', () => {
+                    pageLoaded = true;
+                    checkAndDismiss();
+                }, { once: true });
+            } else {
+                checkAndDismiss();
+            }
+
+            setTimeout(() => {
+                this.ready = true;
+            }, maxDuration);
         }
-     "
+     }"
      x-show="!ready"
-     x-transition:leave="transition ease-out duration-300"
+     x-transition:leave="transition ease-out duration-500"
      x-transition:leave-start="opacity-100"
      x-transition:leave-end="opacity-0 pointer-events-none"
      class="fixed inset-0 z-[9999] flex flex-col items-center justify-center bg-[#0f1117] text-slate-100 select-none">
