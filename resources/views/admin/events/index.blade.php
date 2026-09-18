@@ -155,11 +155,53 @@
                             @if(auth()->user()->isSuperAdmin())
                                 <a href="{{ route('admin.events.configure', $event) }}" class="btn-secondary btn-sm py-1 px-2 text-[11px] hover:border-[#7A1618]">Configure</a>
 
-                                <div x-data="{ open: false }" class="relative inline-block text-left" @click.away="open = false">
-                                    <button type="button" @click="open = !open" class="btn-secondary btn-sm py-1 px-1.5 text-xs text-slate-400 hover:text-white">
+                                <div x-data="{
+                                    open: false,
+                                    coords: { top: 0, left: 0 },
+                                    toggle() {
+                                        if (this.open) {
+                                            this.open = false;
+                                            return;
+                                        }
+                                        this.updatePosition();
+                                        this.open = true;
+                                    },
+                                    updatePosition() {
+                                        const btn = this.$refs.trigger;
+                                        if (!btn) return;
+                                        const rect = btn.getBoundingClientRect();
+                                        const menuWidth = 176;
+                                        const menuHeight = 210;
+                                        const padding = 8;
+                                        
+                                        let top = rect.bottom + 6;
+                                        if (top + menuHeight > window.innerHeight - padding && rect.top - menuHeight - 6 >= padding) {
+                                            top = rect.top - menuHeight - 6;
+                                        }
+
+                                        let left = rect.right - menuWidth;
+                                        if (left + menuWidth > window.innerWidth - padding) {
+                                            left = window.innerWidth - menuWidth - padding;
+                                        }
+                                        if (left < padding) {
+                                            left = padding;
+                                        }
+
+                                        this.coords = { top, left };
+                                    }
+                                }"
+                                @click.away="open = false"
+                                @keydown.escape.window="open = false"
+                                @scroll.window="if (open) updatePosition()"
+                                @resize.window="if (open) updatePosition()"
+                                class="relative inline-block text-left">
+                                    <button type="button" x-ref="trigger" @click="toggle()" class="btn-secondary btn-sm py-1 px-1.5 text-xs text-slate-400 hover:text-white">
                                         •••
                                     </button>
-                                    <div x-show="open" x-cloak class="absolute right-0 z-50 mt-1 w-44 rounded-xl bg-[#1e222d] border border-slate-700 shadow-2xl py-1 text-xs text-left">
+                                    <div x-show="open"
+                                         x-cloak
+                                         :style="`position: fixed; top: ${coords.top}px; left: ${coords.left}px; z-index: 9999;`"
+                                         class="w-44 rounded-xl bg-[#1e222d] border border-slate-700 shadow-2xl py-1 text-xs text-left">
                                         @if(!$event->is_published || $event->status === 'draft')
                                             <form method="POST" action="{{ route('admin.events.publish', $event) }}" onsubmit="return confirm('Publish this event and open registration?');">
                                                 @csrf
