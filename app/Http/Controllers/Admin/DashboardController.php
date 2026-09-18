@@ -22,16 +22,18 @@ class DashboardController extends Controller
             ? Membership::where('academic_year_id', $activeYear->id)->where('status', 'active')->count()
             : 0;
 
-        $programBreakdown = Student::selectRaw('COALESCE(program, "BSIT") as prog, COUNT(*) as count')
-            ->groupBy('prog')
-            ->orderByDesc('count')
-            ->get();
+        $programBreakdown = Student::all()
+            ->groupBy(fn($s) => $s->program ?: 'BSIT')
+            ->map(fn($group, $key) => (object)['prog' => $key, 'count' => $group->count()])
+            ->sortByDesc('count')
+            ->values();
 
         $yearLevelBreakdown = Student::whereNotNull('year_level')
-            ->selectRaw('year_level, COUNT(*) as count')
+            ->get()
             ->groupBy('year_level')
-            ->orderBy('year_level')
-            ->get();
+            ->map(fn($group, $key) => (object)['year_level' => $key, 'count' => $group->count()])
+            ->sortBy('year_level')
+            ->values();
 
         $recentScans = AttendanceRecord::with(['student', 'event', 'attendanceSession'])
             ->latest('scanned_at')
