@@ -112,10 +112,15 @@
                                     </form>
 
                                     @if($org->event_registrations_count === 0)
-                                        <form method="POST" action="{{ route('admin.organizations.destroy', $org) }}" class="inline" onsubmit="return confirm('Delete this institution?')">
+                                        <form method="POST" action="{{ route('admin.organizations.destroy', $org) }}" class="inline">
                                             @csrf
                                             @method('DELETE')
-                                            <button type="submit" class="btn-secondary btn-sm text-red-400 border-red-500/20">
+                                            <button type="button"
+                                                    data-confirm="Delete this institution? This action cannot be undone."
+                                                    data-confirm-title="Delete Institution"
+                                                    data-confirm-type="danger"
+                                                    data-confirm-btn="Delete Institution"
+                                                    class="btn-secondary btn-sm text-red-400 border-red-500/20">
                                                 Delete
                                             </button>
                                         </form>

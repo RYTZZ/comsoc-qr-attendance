@@ -157,10 +157,14 @@
         @if(auth()->user()->isSuperAdmin())
         <div class="card border-red-900/30">
             <h2 class="section-title text-red-400">Danger Zone</h2>
-            <form method="POST" action="{{ route('admin.events.destroy', $event) }}"
-                  onsubmit="return confirm('Delete this event? This cannot be undone.')">
+            <form method="POST" action="{{ route('admin.events.destroy', $event) }}">
                 @csrf @method('DELETE')
-                <button type="submit" class="btn-danger btn-sm">Delete Event</button>
+                <button type="button"
+                        data-confirm="Delete this event? All attendee registrations and scan associations will be removed permanently."
+                        data-confirm-title="Delete Event"
+                        data-confirm-type="danger"
+                        data-confirm-btn="Delete Event"
+                        class="btn-danger btn-sm">Delete Event</button>
             </form>
         </div>
         @endif

@@ -29,8 +29,11 @@
         <form method="POST" action="{{ route('admin.qr-codes.generate') }}" class="w-full sm:w-auto">
             @csrf
             <input type="hidden" name="academic_year_id" value="{{ $filterYearId }}">
-            <button type="submit" class="btn-primary text-xs w-full justify-center"
-                    onclick="return confirm('Generate missing QR codes for active memberships in the selected academic year?')">
+            <button type="button" class="btn-primary text-xs w-full justify-center"
+                    data-confirm="Generate missing QR codes for active memberships in the selected academic year?"
+                    data-confirm-title="Generate Missing QR Codes"
+                    data-confirm-type="primary"
+                    data-confirm-btn="Generate Codes">
                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
                 Generate Missing QR Codes
             </button>
@@ -130,11 +133,19 @@
                                     <input type="hidden" name="reason" id="reason-{{ $qr->id }}" value="">
                                     <button type="button" class="btn-secondary btn-sm text-red-400 border-red-500/20"
                                             onclick="
-                                                var r = prompt('Reason for revoking this QR code:');
-                                                if(r && r.trim()) {
-                                                    document.getElementById('reason-{{ $qr->id }}').value = r.trim();
-                                                    document.getElementById('revoke-form-{{ $qr->id }}').submit();
-                                                }
+                                                window.appPrompt({
+                                                    title: 'Revoke QR Code',
+                                                    message: 'Please provide a reason for revoking this QR code. The student will be unable to scan with this pass.',
+                                                    inputLabel: 'Revocation Reason',
+                                                    inputPlaceholder: 'Enter reason for revoking...',
+                                                    confirmText: 'Revoke QR Code',
+                                                    type: 'danger'
+                                                }).then(reason => {
+                                                    if(reason) {
+                                                        document.getElementById('reason-{{ $qr->id }}').value = reason;
+                                                        document.getElementById('revoke-form-{{ $qr->id }}').submit();
+                                                    }
+                                                });
                                             ">Revoke</button>
                                 </form>
                             @elseif($qr->status === 'revoked')

@@ -18,7 +18,12 @@
                 <form method="POST" action="{{ route('admin.event-registrations.reject', $registration) }}" class="inline">
                     @csrf
                     <input type="hidden" name="reason" value="Administrative decision">
-                    <button type="submit" class="btn-secondary btn-sm text-red-400 border-red-500/20" onclick="return confirm('Reject this registration?')">Reject</button>
+                    <button type="button"
+                            data-confirm="Reject this participant registration? Their status will be marked as rejected."
+                            data-confirm-title="Reject Registration"
+                            data-confirm-type="danger"
+                            data-confirm-btn="Reject Registration"
+                            class="btn-secondary btn-sm text-red-400 border-red-500/20">Reject</button>
                 </form>
             @elseif($registration->status === 'approved')
                 <a href="{{ route('admin.event-registrations.qr', $registration) }}" class="btn-primary btn-sm">

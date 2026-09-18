@@ -91,10 +91,15 @@
                                         </button>
                                     </form>
 
-                                    <form method="POST" action="{{ route('admin.programs.destroy', $prog) }}" class="inline" onsubmit="return confirm('Delete this program?')">
+                                    <form method="POST" action="{{ route('admin.programs.destroy', $prog) }}" class="inline">
                                         @csrf
                                         @method('DELETE')
-                                        <button type="submit" class="btn-secondary btn-sm text-red-400 border-red-500/20">
+                                        <button type="button"
+                                                data-confirm="Delete this academic program? This action cannot be undone."
+                                                data-confirm-title="Delete Program"
+                                                data-confirm-type="danger"
+                                                data-confirm-btn="Delete Program"
+                                                class="btn-secondary btn-sm text-red-400 border-red-500/20">
                                             Delete
                                         </button>
                                     </form>

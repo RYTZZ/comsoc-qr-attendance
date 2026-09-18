@@ -203,38 +203,63 @@
                                          :style="`position: fixed; top: ${coords.top}px; left: ${coords.left}px; z-index: 9999;`"
                                          class="w-44 rounded-xl bg-[#1e222d] border border-slate-700 shadow-2xl py-1 text-xs text-left">
                                         @if(!$event->is_published || $event->status === 'draft')
-                                            <form method="POST" action="{{ route('admin.events.publish', $event) }}" onsubmit="return confirm('Publish this event and open registration?');">
+                                            <form method="POST" action="{{ route('admin.events.publish', $event) }}">
                                                 @csrf
-                                                <button type="submit" class="w-full text-left px-3 py-2 text-emerald-400 hover:bg-emerald-500/10">Publish Event</button>
+                                                <button type="button"
+                                                        data-confirm="Publish this event and open registration for participants?"
+                                                        data-confirm-title="Publish Event"
+                                                        data-confirm-type="success"
+                                                        data-confirm-btn="Publish"
+                                                        class="w-full text-left px-3 py-2 text-emerald-400 hover:bg-emerald-500/10">Publish Event</button>
                                             </form>
                                         @endif
 
                                         @if($event->status === 'registration_open')
-                                            <form method="POST" action="{{ route('admin.events.close-registration', $event) }}" onsubmit="return confirm('Close registration for this event immediately?');">
+                                            <form method="POST" action="{{ route('admin.events.close-registration', $event) }}">
                                                 @csrf
-                                                <button type="submit" class="w-full text-left px-3 py-2 text-amber-400 hover:bg-amber-500/10">Close Registration</button>
+                                                <button type="button"
+                                                        data-confirm="Close registration for this event immediately? New participants will not be able to sign up."
+                                                        data-confirm-title="Close Registration"
+                                                        data-confirm-type="warning"
+                                                        data-confirm-btn="Close Registration"
+                                                        class="w-full text-left px-3 py-2 text-amber-400 hover:bg-amber-500/10">Close Registration</button>
                                             </form>
                                         @endif
 
                                         @if($event->status !== 'completed' && $event->status !== 'archived')
-                                            <form method="POST" action="{{ route('admin.events.complete', $event) }}" onsubmit="return confirm('Mark this event as completed?');">
+                                            <form method="POST" action="{{ route('admin.events.complete', $event) }}">
                                                 @csrf
-                                                <button type="submit" class="w-full text-left px-3 py-2 text-indigo-400 hover:bg-indigo-500/10">Complete Event</button>
+                                                <button type="button"
+                                                        data-confirm="Mark this event as completed? This concludes active check-ins and session scanning."
+                                                        data-confirm-title="Complete Event"
+                                                        data-confirm-type="primary"
+                                                        data-confirm-btn="Complete Event"
+                                                        class="w-full text-left px-3 py-2 text-indigo-400 hover:bg-indigo-500/10">Complete Event</button>
                                             </form>
                                         @endif
 
                                         @if($event->status !== 'archived')
-                                            <form method="POST" action="{{ route('admin.events.archive', $event) }}" onsubmit="return confirm('Archive this event? It will be removed from public view.');">
+                                            <form method="POST" action="{{ route('admin.events.archive', $event) }}">
                                                 @csrf
-                                                <button type="submit" class="w-full text-left px-3 py-2 text-slate-400 hover:bg-slate-700/30">Archive Event</button>
+                                                <button type="button"
+                                                        data-confirm="Archive this event? It will be removed from active public views."
+                                                        data-confirm-title="Archive Event"
+                                                        data-confirm-type="warning"
+                                                        data-confirm-btn="Archive Event"
+                                                        class="w-full text-left px-3 py-2 text-slate-400 hover:bg-slate-700/30">Archive Event</button>
                                             </form>
                                         @endif
 
                                         <div class="border-t border-slate-700/60 my-1"></div>
-                                        <form method="POST" action="{{ route('admin.events.destroy', $event) }}" onsubmit="return confirm('Permanently delete this event? This action cannot be undone.');">
+                                        <form method="POST" action="{{ route('admin.events.destroy', $event) }}">
                                             @csrf
                                             @method('DELETE')
-                                            <button type="submit" class="w-full text-left px-3 py-2 text-red-400 hover:bg-red-500/10">Delete Event</button>
+                                            <button type="button"
+                                                    data-confirm="Permanently delete this event? This action cannot be undone and deletes all associated registrations and logs."
+                                                    data-confirm-title="Delete Event"
+                                                    data-confirm-type="danger"
+                                                    data-confirm-btn="Delete Event"
+                                                    class="w-full text-left px-3 py-2 text-red-400 hover:bg-red-500/10">Delete Event</button>
                                         </form>
                                     </div>
                                 </div>

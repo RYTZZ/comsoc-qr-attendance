@@ -55,7 +55,12 @@
             @csrf
             <input type="hidden" name="academic_year_id" value="{{ request('academic_year_id') ?? $activeYear?->id ?? '' }}">
             <input type="file" name="file" accept=".xlsx,.xls,.csv" class="input w-full sm:w-48 py-1 text-xs" required>
-            <button type="submit" class="btn-success w-full sm:w-auto" onclick="return confirm('Bulk activate from this file?')">Bulk Activate</button>
+            <button type="button"
+                    data-confirm="Bulk activate memberships from this uploaded file?"
+                    data-confirm-title="Bulk Activate Memberships"
+                    data-confirm-type="success"
+                    data-confirm-btn="Activate File"
+                    class="btn-success w-full sm:w-auto">Bulk Activate</button>
         </form>
     </div>
 </div>
@@ -72,8 +77,12 @@
     <form method="POST" action="{{ route('admin.memberships.generate-missing-qrs') }}">
         @csrf
         <input type="hidden" name="academic_year_id" value="{{ $filterYearId }}">
-        <button type="submit" class="btn-primary btn-sm"
-                onclick="return confirm('Generate QR codes for all {{ $missingQrCount }} active members missing one?')">
+        <button type="button"
+                data-confirm="Generate QR codes for all {{ $missingQrCount }} active members missing one?"
+                data-confirm-title="Generate Missing QR Codes"
+                data-confirm-type="primary"
+                data-confirm-btn="Generate Codes"
+                class="btn-primary btn-sm">
             Generate Missing QR Codes
         </button>
     </form>
@@ -148,8 +157,12 @@
                     @else
                     <form method="POST" action="{{ route('admin.memberships.deactivate', $membership) }}" class="inline">
                         @csrf
-                        <button type="submit" class="btn-secondary btn-sm"
-                                onclick="return confirm('Deactivate this membership?')">Deactivate</button>
+                        <button type="button"
+                                data-confirm="Deactivate this membership? The student's active QR attendance access will be suspended."
+                                data-confirm-title="Deactivate Membership"
+                                data-confirm-type="warning"
+                                data-confirm-btn="Deactivate"
+                                class="btn-secondary btn-sm">Deactivate</button>
                     </form>
                     @endif
                 </td>
