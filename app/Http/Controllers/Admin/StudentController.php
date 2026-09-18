@@ -130,7 +130,7 @@ class StudentController extends Controller
         return back()->with('success', "Registered email updated for {$student->display_name}.");
     }
 
-    private function exportStudentsCsv($records, string $filename): \Symfony\Component\HttpFoundation\StreamedResponse
+    private function exportStudentsCsv($records, string $filename): StreamedResponse
     {
         $sorted = $records->sort(function ($a, $b) {
             $cmpProgram = strcasecmp($a->program ?? 'N/A', $b->program ?? 'N/A');

@@ -206,7 +206,7 @@ class EventRegistrationController extends Controller
             ->header('Content-Disposition', 'attachment; filename="' . $filename . '"');
     }
 
-    private function exportCsv($records, string $filename): \Symfony\Component\HttpFoundation\StreamedResponse
+    private function exportCsv($records, string $filename): StreamedResponse
     {
         $sorted = $records->sort(function ($a, $b) {
             $cmpProgram = strcasecmp($a->program ?? 'N/A', $b->program ?? 'N/A');

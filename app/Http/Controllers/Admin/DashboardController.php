@@ -16,7 +16,13 @@ class DashboardController extends Controller
     public function index(): View
     {
         $activeYear = AcademicYear::active();
+        $stats = $this->getDashboardStats($activeYear);
 
+        return view('admin.dashboard', compact('stats', 'activeYear'));
+    }
+
+    private function getDashboardStats(?AcademicYear $activeYear): array
+    {
         $totalStudents = Student::count();
         $activeMembers = $activeYear
             ? Membership::where('academic_year_id', $activeYear->id)->where('status', 'active')->count()
@@ -40,7 +46,7 @@ class DashboardController extends Controller
             ->take(6)
             ->get();
 
-        $stats = [
+        return [
             'total_students' => $totalStudents,
             'active_members' => $activeMembers,
             'membership_rate' => $totalStudents > 0 ? round(($activeMembers / $totalStudents) * 100, 1) : 0,
@@ -59,7 +65,5 @@ class DashboardController extends Controller
             'year_level_breakdown' => $yearLevelBreakdown,
             'recent_scans' => $recentScans,
         ];
-
-        return view('admin.dashboard', compact('stats', 'activeYear'));
     }
 }
