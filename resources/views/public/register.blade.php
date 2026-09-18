@@ -10,6 +10,7 @@
     @vite(['resources/css/app.css', 'resources/js/app.js'])
 </head>
 <body class="bg-[#0f1117] text-slate-100 min-h-screen flex flex-col font-sans antialiased selection:bg-[#7A1618] selection:text-white relative overflow-x-hidden">
+    <x-page-loader />
     <x-public-auth-bg />
 
     <div class="relative overflow-hidden flex-1 flex flex-col items-center justify-center p-4 py-10 z-10">

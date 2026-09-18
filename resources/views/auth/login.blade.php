@@ -13,6 +13,7 @@
 </head>
 <body class="h-full bg-[#0f1117] flex items-center justify-center min-h-screen p-4 font-sans text-slate-100 relative overflow-x-hidden selection:bg-[#7A1618] selection:text-white">
 
+<x-page-loader />
 <x-public-auth-bg />
 
 <div class="w-full max-w-md relative z-10">

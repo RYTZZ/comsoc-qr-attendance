@@ -382,7 +382,23 @@
         100% { opacity: 0.3; stroke: #7A1618; }
     }
 
+    .loading-bar-indeterminate {
+        background: linear-gradient(90deg, transparent 0%, #7A1618 50%, #cc7478 75%, transparent 100%);
+        background-size: 200% 100%;
+        animation: loadingBarSlide 1.2s cubic-bezier(0.4, 0, 0.2, 1) infinite;
+    }
+
+    @keyframes loadingBarSlide {
+        0% { transform: translateX(-100%); }
+        100% { transform: translateX(100%); }
+    }
+
     @media (prefers-reduced-motion: reduce) {
+        .loading-bar-indeterminate {
+            animation: none !important;
+            background: #7A1618 !important;
+        }
+
         .auth-ambient-glow,
         .particle-float-1,
         .particle-float-2,
