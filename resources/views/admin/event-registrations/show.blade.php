@@ -26,12 +26,27 @@
                             class="btn-secondary btn-sm text-red-400 border-red-500/20">Reject</button>
                 </form>
             @elseif($registration->status === 'approved')
-                <a href="{{ route('admin.event-registrations.qr', $registration) }}" class="btn-primary btn-sm">
-                    <svg class="w-4 h-4 mr-1.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
-                    </svg>
-                    Download Physical QR Pass
-                </a>
+                <div x-data="{ copied: false }" class="flex items-center gap-2">
+                    @if($registration->qr_token)
+                        <button type="button"
+                                @click="navigator.clipboard.writeText('{{ $registration->qr_token }}'); copied = true; setTimeout(() => copied = false, 2000)"
+                                class="btn-secondary btn-sm flex items-center gap-1.5 border-slate-700 text-xs">
+                            <svg x-show="!copied" class="w-3.5 h-3.5 text-indigo-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"/>
+                            </svg>
+                            <svg x-show="copied" class="w-3.5 h-3.5 text-emerald-400" fill="none" stroke="currentColor" viewBox="0 0 24 24" x-cloak>
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"/>
+                            </svg>
+                            <span x-text="copied ? 'Token Copied!' : 'Copy Token'"></span>
+                        </button>
+                    @endif
+                    <a href="{{ route('admin.event-registrations.qr', $registration) }}" class="btn-primary btn-sm">
+                        <svg class="w-4 h-4 mr-1.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
+                        </svg>
+                        Download Physical QR Pass
+                    </a>
+                </div>
             @endif
         </div>
     </div>

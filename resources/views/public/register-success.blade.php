@@ -103,9 +103,22 @@
                     <svg class="w-4 h-4 shrink-0 mt-0.5 text-brand-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
                     </svg>
-                    <span>
-                        Our event administrators will review your registration. Physical event QR cards and check-in badges will be provided by the ComSoc team.
-                    </span>
+                @php
+                    $calDate = $event->event_date ? $event->event_date->format('Ymd') : date('Ymd');
+                    $calTitle = urlencode($event->name . ' - ComSoc');
+                    $calDetails = urlencode('ComSoc Official Event Attendance. ' . ($event->description ?? ''));
+                    $calLocation = urlencode($event->location ?? 'SorSU Bulan Campus');
+                    $googleCalUrl = "https://calendar.google.com/calendar/render?action=TEMPLATE&text={$calTitle}&dates={$calDate}/{$calDate}&details={$calDetails}&location={$calLocation}";
+                @endphp
+
+                <div class="flex items-center gap-2 mb-4">
+                    <a href="{{ $googleCalUrl }}" target="_blank" rel="noopener noreferrer"
+                       class="flex-1 py-2 px-3 rounded-xl font-medium text-xs text-center text-slate-200 hover:text-white bg-slate-900 border border-slate-700 hover:bg-slate-800 transition flex items-center justify-center gap-1.5">
+                        <svg class="w-3.5 h-3.5 text-indigo-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/>
+                        </svg>
+                        Add to Google Calendar
+                    </a>
                 </div>
 
                 <a href="{{ route('public.register') }}" class="inline-block text-center w-full py-2.5 px-4 rounded-xl font-medium text-sm text-slate-300 hover:text-white bg-slate-800 hover:bg-slate-700 transition">

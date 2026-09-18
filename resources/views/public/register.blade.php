@@ -221,13 +221,53 @@
                             </p>
                         </div>
                     @else
+                        <!-- Multi-Step Progress Indicator -->
+                        <div class="flex items-center justify-between mb-6 px-2">
+                            <div class="flex items-center gap-2">
+                                <span class="w-6 h-6 rounded-full bg-[#7A1618] text-white text-xs font-bold flex items-center justify-center shadow">1</span>
+                                <span class="text-xs font-medium text-white hidden sm:inline">Personal</span>
+                            </div>
+                            <div class="h-0.5 flex-1 bg-slate-800 mx-2"></div>
+                            <div class="flex items-center gap-2">
+                                <span class="w-6 h-6 rounded-full bg-slate-800 text-slate-400 text-xs font-bold flex items-center justify-center border border-slate-700">2</span>
+                                <span class="text-xs font-medium text-slate-400 hidden sm:inline">Academic</span>
+                            </div>
+                            <div class="h-0.5 flex-1 bg-slate-800 mx-2"></div>
+                            <div class="flex items-center gap-2">
+                                <span class="w-6 h-6 rounded-full bg-slate-800 text-slate-400 text-xs font-bold flex items-center justify-center border border-slate-700">3</span>
+                                <span class="text-xs font-medium text-slate-400 hidden sm:inline">Food & Review</span>
+                            </div>
+                        </div>
+
                         <form method="POST"
                               action="{{ route('public.register.store', $event) }}"
                               x-data="{
                                   organization: '{{ old('organization', '') }}',
                                   foodRestriction: '{{ old('food_restrictions', 'None') }}',
                                   confirmed: {{ old('confirmed') ? 'true' : 'false' }},
-                                  isSubmitting: false
+                                  isSubmitting: false,
+                                  lookupQuery: '',
+                                  lookupLoading: false,
+                                  lookupMessage: '',
+                                  async checkStudent() {
+                                      if (!this.lookupQuery || this.lookupQuery.trim().length < 4) return;
+                                      this.lookupLoading = true;
+                                      this.lookupMessage = '';
+                                      try {
+                                          const res = await fetch('/kiosk/lookup-student?query=' + encodeURIComponent(this.lookupQuery.trim()), {
+                                              headers: { 'Accept': 'application/json' }
+                                          });
+                                          if (res.ok) {
+                                              const data = await res.json();
+                                              if (data && data.student) {
+                                                  document.getElementById('full_name').value = data.student.full_name;
+                                                  if (data.student.email) document.getElementById('email').value = data.student.email;
+                                                  this.lookupMessage = 'Record autofilled from membership database';
+                                              }
+                                          }
+                                      } catch {}
+                                      finally { this.lookupLoading = false; }
+                                  }
                               }"
                               @dropdown-selected.window="
                                   if ($event.detail.name === 'organization') { organization = $event.detail.value; }
@@ -239,9 +279,12 @@
                             <input type="hidden" name="event_id" value="{{ $event->id }}">
 
                             <div class="space-y-3">
-                                <div class="flex items-center gap-2 pb-1 border-b border-slate-800">
-                                    <span class="w-5 h-5 rounded-full bg-brand-500/10 text-brand-400 text-xs font-bold flex items-center justify-center">1</span>
-                                    <h3 class="text-xs font-semibold uppercase tracking-wider text-slate-300">Personal Information</h3>
+                                <div class="flex items-center justify-between pb-1 border-b border-slate-800">
+                                    <div class="flex items-center gap-2">
+                                        <span class="w-5 h-5 rounded-full bg-brand-500/10 text-brand-400 text-xs font-bold flex items-center justify-center">1</span>
+                                        <h3 class="text-xs font-semibold uppercase tracking-wider text-slate-300">Personal Information</h3>
+                                    </div>
+                                    <span class="text-[10px] text-slate-400 font-mono">Step 1 of 3</span>
                                 </div>
 
                                 <div>

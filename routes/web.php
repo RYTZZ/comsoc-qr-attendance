@@ -70,6 +70,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::middleware(['role:kiosk,staff,treasurer,admin,super_admin'])->group(function () {
         Route::get('/kiosk/{kiosk}', [AttendanceKioskController::class, 'show'])->name('kiosk.attendance');
         Route::post('/kiosk/{kiosk}/scan', [AttendanceKioskController::class, 'scan'])->name('kiosk.scan');
+        Route::post('/kiosk/{kiosk}/lookup', [AttendanceKioskController::class, 'manualLookup'])->name('kiosk.lookup');
         Route::get('/kiosk/{kiosk}/snack', [SnackKioskController::class, 'show'])->name('kiosk.snack');
         Route::post('/kiosk/{kiosk}/snack/scan', [SnackKioskController::class, 'scan'])->name('kiosk.snack.scan');
 
@@ -145,6 +146,8 @@ Route::middleware(['auth', 'verified'])->group(function () {
 
         Route::get('registrations', [EventRegistrationController::class, 'allRegistrations'])->name('event-registrations.all');
         Route::get('events/{event}/registrations', [EventRegistrationController::class, 'index'])->name('event-registrations.index');
+        Route::post('event-registrations/batch-approve', [EventRegistrationController::class, 'batchApprove'])->name('event-registrations.batch-approve');
+        Route::post('event-registrations/batch-reject', [EventRegistrationController::class, 'batchReject'])->name('event-registrations.batch-reject');
         Route::get('event-registrations/{registration}', [EventRegistrationController::class, 'show'])->name('event-registrations.show');
         Route::post('event-registrations/{registration}/approve', [EventRegistrationController::class, 'approve'])->name('event-registrations.approve');
         Route::post('event-registrations/{registration}/reject', [EventRegistrationController::class, 'reject'])->name('event-registrations.reject');

@@ -109,7 +109,13 @@
                                         : 'border-slate-800 bg-slate-950 text-slate-400 hover:border-slate-700'"
                                     class="border rounded-xl px-3.5 py-3 text-xs sm:text-sm font-semibold transition-all flex justify-between items-center active:scale-[0.98] min-h-[44px]">
                                 <span class="truncate font-medium text-white" x-text="item.item_name"></span>
-                                <span class="badge bg-amber-500/10 text-amber-400 border border-amber-500/20 text-[10px] shrink-0 ml-2" x-text="(item.total_quantity - item.distributed_quantity) + ' left'"></span>
+                                <div class="flex items-center gap-1.5 shrink-0 ml-2">
+                                    <span x-show="(item.total_quantity - item.distributed_quantity) <= Math.max(1, Math.floor(item.total_quantity * 0.15))"
+                                          class="px-2 py-0.5 rounded text-[9px] font-bold bg-red-500/20 text-red-400 border border-red-500/30 animate-pulse">
+                                        Low Stock
+                                    </span>
+                                    <span class="badge bg-amber-500/10 text-amber-400 border border-amber-500/20 text-[10px]" x-text="(item.total_quantity - item.distributed_quantity) + ' left'"></span>
+                                </div>
                             </button>
                         </template>
                     </div>

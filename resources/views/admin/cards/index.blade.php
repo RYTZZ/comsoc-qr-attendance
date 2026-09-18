@@ -4,6 +4,14 @@
         <h1 class="page-title">Physical ID Cards</h1>
         <p class="text-xs text-slate-400 mt-1">Track physical PVC/laminated membership cards, claims, and replacements.</p>
     </div>
+    <div class="flex items-center gap-2">
+        <button type="button" onclick="window.print()" class="btn-secondary btn-sm flex items-center gap-1.5 text-xs">
+            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z"/>
+            </svg>
+            Print Sheet (Grid Mode)
+        </button>
+    </div>
 </div>
 
 <div class="card p-5 mb-6 border-brand-500/20 bg-gradient-to-br from-slate-900 via-slate-900 to-brand-950/30">
@@ -56,7 +64,7 @@
 
 <div class="card overflow-hidden">
     <div class="overflow-x-auto">
-        <table class="w-full text-left text-xs">
+        <table class="w-full text-left text-xs table-sticky-header">
             <thead class="bg-slate-950/60 text-slate-400 border-b border-slate-800">
                 <tr>
                     <th class="py-3 px-4">Card / Batch UID</th>

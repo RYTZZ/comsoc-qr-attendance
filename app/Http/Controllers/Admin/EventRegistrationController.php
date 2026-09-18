@@ -147,6 +147,49 @@ class EventRegistrationController extends Controller
         return back()->with('success', 'Registration rejected.');
     }
 
+    public function batchApprove(Request $request): RedirectResponse
+    {
+        $ids = $request->input('registration_ids', []);
+        if (empty($ids) || !is_array($ids)) {
+            return back()->with('error', 'No registrations selected.');
+        }
+
+        $registrations = EventRegistration::whereIn('id', $ids)
+            ->where('status', 'pending')
+            ->get();
+
+        $count = 0;
+        foreach ($registrations as $registration) {
+            $registration->approve(auth()->user());
+            AuditLogger::log('registration.approved', $registration);
+            $count++;
+        }
+
+        return back()->with('success', "{$count} participant registration(s) approved and QR codes issued.");
+    }
+
+    public function batchReject(Request $request): RedirectResponse
+    {
+        $ids = $request->input('registration_ids', []);
+        $reason = $request->input('reason', 'Administrative decision');
+        if (empty($ids) || !is_array($ids)) {
+            return back()->with('error', 'No registrations selected.');
+        }
+
+        $registrations = EventRegistration::whereIn('id', $ids)
+            ->where('status', 'pending')
+            ->get();
+
+        $count = 0;
+        foreach ($registrations as $registration) {
+            $registration->reject(auth()->user(), $reason);
+            AuditLogger::log('registration.rejected', $registration, [], ['reason' => $reason]);
+            $count++;
+        }
+
+        return back()->with('success', "{$count} participant registration(s) rejected.");
+    }
+
     public function downloadQr(EventRegistration $registration)
     {
         if (!$registration->isQrValid()) {

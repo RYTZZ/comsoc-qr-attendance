@@ -111,6 +111,40 @@ class AttendanceKioskController extends Controller
         return response()->json($result, $result['success'] ? 200 : 422);
     }
 
+    public function manualLookup(Request $request, Kiosk $kiosk): JsonResponse
+    {
+        abort_unless($kiosk->is_active, 404);
+
+        $query = trim((string) $request->input('query', ''));
+        if (strlen($query) < 2) {
+            return response()->json(['results' => []]);
+        }
+
+        $students = \App\Models\Student::where(function ($q) use ($query) {
+                $q->where('student_number', 'like', "%{$query}%")
+                  ->orWhere('first_name', 'like', "%{$query}%")
+                  ->orWhere('last_name', 'like', "%{$query}%");
+            })
+            ->with(['memberships.activeQrCode'])
+            ->limit(8)
+            ->get()
+            ->map(function ($s) {
+                $activeMem = $s->memberships->firstWhere('status', 'active');
+                $token = $activeMem?->activeQrCode?->token;
+                return [
+                    'id' => $s->id,
+                    'name' => $s->full_name,
+                    'student_number' => $s->student_number,
+                    'program' => $s->program,
+                    'year_level' => $s->year_level,
+                    'has_active_qr' => !empty($token),
+                    'token' => $token,
+                ];
+            });
+
+        return response()->json(['results' => $students]);
+    }
+
     public function healthCheck(): JsonResponse
     {
         return response()->json(['status' => 'online', 'timestamp' => now()->toISOString()]);

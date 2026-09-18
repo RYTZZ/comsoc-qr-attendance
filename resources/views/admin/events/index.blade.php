@@ -14,11 +14,24 @@
     </div>
 </div>
 
-<div class="card mb-5 p-4">
-    <form method="GET" action="{{ route('admin.events.index') }}" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-3 items-end">
+<div class="card mb-5 p-4" x-data="{
+    searchVal: '{{ request('search') }}',
+    submitDebounced() {
+        $refs.eventFilterForm.submit();
+    }
+}">
+    <form x-ref="eventFilterForm" method="GET" action="{{ route('admin.events.index') }}" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-3 items-end">
         <div>
             <label class="label text-[11px] mb-1">Search Events</label>
-            <input type="text" name="search" value="{{ request('search') }}" placeholder="Search by event name…" class="input py-2 text-xs">
+            <div class="relative">
+                <input type="text" name="search" x-model="searchVal"
+                       @input.debounce.400ms="submitDebounced()"
+                       placeholder="Search by event name…"
+                       class="input py-2 text-xs pl-8">
+                <svg class="w-3.5 h-3.5 text-slate-500 absolute left-2.5 top-2.5 pointer-events-none" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
+                </svg>
+            </div>
         </div>
 
         @php
@@ -54,11 +67,36 @@
             @endif
         </div>
     </form>
+
+    @if(request()->hasAny(['search', 'academic_year_id', 'status']))
+    <div class="flex flex-wrap items-center gap-1.5 mt-3 pt-3 border-t border-slate-800/80">
+        <span class="text-[11px] text-slate-400 font-medium mr-1">Active Filters:</span>
+        @if(request('search'))
+            <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-medium bg-slate-800 text-slate-200 border border-slate-700">
+                <span>Event: "{{ request('search') }}"</span>
+                <a href="{{ request()->fullUrlWithQuery(['search' => null]) }}" class="hover:text-red-400">×</a>
+            </span>
+        @endif
+        @if(request('status'))
+            <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-medium bg-slate-800 text-slate-200 border border-slate-700">
+                <span>Status: {{ str_replace('_', ' ', ucfirst(request('status'))) }}</span>
+                <a href="{{ request()->fullUrlWithQuery(['status' => null]) }}" class="hover:text-red-400">×</a>
+            </span>
+        @endif
+        @if(request('academic_year_id'))
+            <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-medium bg-slate-800 text-slate-200 border border-slate-700">
+                <span>AY Filtered</span>
+                <a href="{{ request()->fullUrlWithQuery(['academic_year_id' => null]) }}" class="hover:text-red-400">×</a>
+            </span>
+        @endif
+        <a href="{{ route('admin.events.index') }}" class="text-[11px] text-brand-400 hover:underline ml-1">Clear all</a>
+    </div>
+    @endif
 </div>
 
 <div class="card overflow-hidden p-0 border border-slate-800">
     <div class="overflow-x-auto">
-        <table class="w-full text-left text-xs">
+        <table class="w-full text-left text-xs table-sticky-header">
             <thead class="bg-[#12141c] text-slate-400 border-b border-slate-800 uppercase tracking-wider font-semibold">
                 <tr>
                     <th class="py-3 px-4">Event Name</th>

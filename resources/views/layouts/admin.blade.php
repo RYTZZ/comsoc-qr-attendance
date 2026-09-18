@@ -245,6 +245,7 @@
 </div>
 
 <x-confirmation-dialog />
+<x-toast-stack />
 
 </body>
 </html>

@@ -49,9 +49,27 @@
             50% { top: 85%; opacity: 1; }
             100% { top: 15%; opacity: 0.2; }
         }
+
+        .screen-flash-success {
+            box-shadow: inset 0 0 0 4px rgba(16, 185, 129, 0.8), 0 0 35px rgba(16, 185, 129, 0.4);
+        }
+
+        .screen-flash-duplicate {
+            box-shadow: inset 0 0 0 4px rgba(245, 158, 11, 0.8), 0 0 35px rgba(245, 158, 11, 0.4);
+        }
+
+        .screen-flash-error {
+            box-shadow: inset 0 0 0 4px rgba(239, 68, 68, 0.8), 0 0 35px rgba(239, 68, 68, 0.4);
+        }
     </style>
 </head>
-<body class="h-full bg-[#0f1117] font-sans text-slate-100" x-data="kioskApp()" x-init="init()">
+<body class="h-full bg-[#0f1117] font-sans text-slate-100 transition-all duration-200"
+      :class="{
+          'screen-flash-success': flashEffect === 'success',
+          'screen-flash-duplicate': flashEffect === 'duplicate',
+          'screen-flash-error': flashEffect === 'error'
+      }"
+      x-data="kioskApp()" x-init="init()">
 
 <div class="min-h-screen flex flex-col justify-between p-3 sm:p-6 max-w-6xl mx-auto w-full">
     <header class="w-full flex items-center justify-between py-3 border-b border-slate-800/80 mb-4 shrink-0">
@@ -174,15 +192,22 @@
                                     <p class="text-[11px] text-slate-400">Position attendee QR code clearly within the view</p>
                                 </div>
                                 <div class="flex items-center gap-2">
+                                    <div x-show="cameras.length > 0" class="relative">
+                                        <select x-model="activeCameraId" @change="switchCamera(activeCameraId)"
+                                                class="text-[11px] bg-slate-900 border border-slate-700 text-slate-300 rounded-lg px-2.5 py-1.5 focus:ring-1 focus:ring-indigo-500 focus:outline-none">
+                                            <template x-for="cam in cameras" :key="cam.id">
+                                                <option :value="cam.id" x-text="cam.label || ('Camera ' + cam.id.slice(0, 6))"></option>
+                                            </template>
+                                        </select>
+                                    </div>
                                     <button type="button"
-                                            x-show="cameras.length > 1"
-                                            @click="toggleCamera()"
-                                            title="Switch Camera"
-                                            class="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-slate-800 text-slate-300 hover:bg-slate-700 hover:text-white transition text-[11px] font-semibold">
-                                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/>
+                                            @click="openManualModal = true"
+                                            title="Manual Student Number Fallback"
+                                            class="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-slate-800 text-slate-300 hover:bg-slate-700 hover:text-white transition text-[11px] font-semibold border border-slate-700/60">
+                                        <svg class="w-3.5 h-3.5 text-indigo-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
                                         </svg>
-                                        <span>Switch Camera</span>
+                                        <span>Manual Lookup</span>
                                     </button>
                                 </div>
                             </div>
@@ -330,40 +355,43 @@
 
                         <div class="card border-slate-800 p-4 sm:p-5 bg-[#171a23]">
                             <div class="flex items-center justify-between pb-3 border-b border-slate-800 mb-3">
-                                <h3 class="text-xs font-bold text-slate-400 uppercase tracking-wider">PREVIOUS SCAN</h3>
+                                <div class="flex items-center gap-2">
+                                    <span class="w-2 h-2 rounded-full bg-emerald-400"></span>
+                                    <h3 class="text-xs font-bold text-slate-400 uppercase tracking-wider">LIVE SCAN STREAM</h3>
+                                </div>
+                                <span class="text-[10px] text-slate-500 font-mono" x-text="scanHistory.length + ' in queue'"></span>
                             </div>
 
-                            <template x-if="previousScan">
-                                <div class="space-y-2 text-xs animate-fade-in">
-                                    <div class="flex items-center justify-between">
-                                        <p class="font-semibold text-white text-sm font-brand-display" x-text="previousScan.name || 'Attendee'"></p>
-                                        <span x-show="previousScan.participant_type"
-                                              :class="previousScan.participant_type === 'student' ? 'text-emerald-400' : 'text-blue-400'"
-                                              class="text-[10px] font-medium"
-                                              x-text="previousScan.participant_type === 'student' ? 'Membership' : 'Event Pass'">
-                                        </span>
-                                    </div>
-                                    <div class="flex items-center justify-between pt-1">
-                                        <div>
-                                            <p class="text-[11px] text-slate-500">Status</p>
+                            <div class="space-y-2.5 max-h-[260px] overflow-y-auto pr-1">
+                                <template x-for="(item, idx) in scanHistory" :key="idx">
+                                    <div class="p-2.5 rounded-xl bg-slate-900/80 border border-slate-800/80 flex items-center justify-between gap-2 animate-fade-in text-xs">
+                                        <div class="min-w-0 flex-1">
+                                            <div class="flex items-center gap-1.5">
+                                                <p class="font-semibold text-white truncate text-xs font-brand-display" x-text="item.name"></p>
+                                                <span x-show="item.dietary"
+                                                      class="px-1.5 py-0.2 rounded text-[9px] font-bold bg-amber-500/20 text-amber-300 border border-amber-500/30 shrink-0"
+                                                      :title="'Dietary note: ' + item.dietary">
+                                                    Special Meal
+                                                </span>
+                                            </div>
+                                            <p class="text-[10px] text-slate-500 font-mono" x-text="item.student_number || 'Guest'"></p>
+                                        </div>
+                                        <div class="text-right shrink-0">
                                             <span :class="{
-                                                'badge-present': previousScan.status === 'present' || previousScan.status === 'on_time',
-                                                'badge-late': previousScan.status === 'late'
-                                            }" class="badge text-[10px] px-2 py-0.5" x-text="(previousScan.status || 'PRESENT').toUpperCase()"></span>
-                                        </div>
-                                        <div class="text-right">
-                                            <p class="text-[11px] text-slate-500">Time</p>
-                                            <p class="font-mono text-slate-300" x-text="previousScan.time"></p>
+                                                'badge-present': item.status === 'present' || item.status === 'on_time',
+                                                'badge-late': item.status === 'late'
+                                            }" class="badge text-[9px] px-1.5 py-0.5" x-text="(item.status || 'PRESENT').toUpperCase()"></span>
+                                            <p class="text-[9px] text-slate-400 font-mono mt-0.5" x-text="item.time"></p>
                                         </div>
                                     </div>
-                                </div>
-                            </template>
+                                </template>
 
-                            <template x-if="!previousScan">
-                                <div class="py-6 text-center text-slate-500 text-xs">
-                                    <p>No previous scan</p>
-                                </div>
-                            </template>
+                                <template x-if="scanHistory.length === 0">
+                                    <div class="py-6 text-center text-slate-500 text-xs">
+                                        <p>No scans in live stream yet</p>
+                                    </div>
+                                </template>
+                            </div>
                         </div>
 
                         <div x-show="feedback" x-transition class="animate-slide-up" x-cloak>
@@ -388,8 +416,16 @@
                                         <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/></svg>
                                     </template>
                                 </div>
-                                <div x-show="feedback?.badge" class="mb-1">
+                                <div x-show="feedback?.badge" class="mb-1 flex items-center gap-1.5 flex-wrap justify-center">
                                     <span :class="feedback?.badge === 'Membership' ? 'bg-emerald-500/20 text-emerald-300' : 'bg-blue-500/20 text-blue-300'" class="text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-full" x-text="feedback?.badge"></span>
+                                    <template x-if="feedback?.dietary">
+                                        <span class="text-[10px] font-bold bg-amber-500/25 text-amber-300 border border-amber-500/40 px-2 py-0.5 rounded-full flex items-center gap-1">
+                                            <svg class="w-3 h-3 text-amber-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/>
+                                            </svg>
+                                            <span x-text="'DIETARY: ' + feedback?.dietary"></span>
+                                        </span>
+                                    </template>
                                 </div>
                                 <p class="font-bold text-sm text-white text-center" x-text="feedback?.name || feedback?.message"></p>
                                 <p x-show="feedback?.name" class="text-xs text-slate-300 mt-0.5 text-center" x-text="feedback?.message"></p>
@@ -400,6 +436,90 @@
             </div>
         </div>
     </main>
+
+    <div x-show="openManualModal"
+         x-transition:enter="transition ease-out duration-200"
+         x-transition:enter-start="opacity-0"
+         x-transition:enter-end="opacity-100"
+         x-transition:leave="transition ease-in duration-150"
+         x-transition:leave-start="opacity-100"
+         x-transition:leave-end="opacity-0"
+         class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm"
+         x-cloak>
+        <div class="card max-w-md w-full border-slate-700 bg-[#171a23] shadow-2xl space-y-4 p-5"
+             @click.away="openManualModal = false">
+            <div class="flex items-center justify-between pb-3 border-b border-slate-800">
+                <div class="flex items-center gap-2">
+                    <div class="w-8 h-8 rounded-lg bg-indigo-500/10 border border-indigo-500/20 text-indigo-400 flex items-center justify-center">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
+                        </svg>
+                    </div>
+                    <div>
+                        <h3 class="text-sm font-bold text-white font-brand-display">Manual Student Lookup</h3>
+                        <p class="text-[11px] text-slate-400">Search by student number or name</p>
+                    </div>
+                </div>
+                <button type="button" @click="openManualModal = false" class="text-slate-400 hover:text-white p-1 rounded-lg">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+                    </svg>
+                </button>
+            </div>
+
+            <div class="space-y-3">
+                <div class="relative">
+                    <input type="text"
+                           x-model="manualQuery"
+                           @input.debounce.300ms="performManualLookup()"
+                           placeholder="Type student number (e.g. 2024-...) or name..."
+                           class="input text-xs font-mono bg-slate-950 border-slate-700 text-white w-full pr-8">
+                    <div class="absolute right-2.5 top-2.5" x-show="manualLoading">
+                        <svg class="animate-spin w-4 h-4 text-indigo-400" fill="none" viewBox="0 0 24 24">
+                            <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                            <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                        </svg>
+                    </div>
+                </div>
+
+                <div class="max-h-60 overflow-y-auto space-y-1.5 divide-y divide-slate-800/40">
+                    <template x-for="item in manualResults" :key="item.id">
+                        <div class="pt-2 first:pt-0 flex items-center justify-between gap-2 p-2 rounded-lg hover:bg-slate-900/80 transition cursor-pointer"
+                             @click="selectManualStudent(item)">
+                            <div class="min-w-0">
+                                <p class="text-xs font-bold text-white truncate" x-text="item.name"></p>
+                                <div class="flex items-center gap-2 text-[10px] text-slate-400 font-mono">
+                                    <span x-text="item.student_number"></span>
+                                    <span>•</span>
+                                    <span x-text="item.program + ' ' + (item.year_level || '')"></span>
+                                </div>
+                            </div>
+                            <div class="shrink-0">
+                                <button type="button"
+                                        :disabled="!item.has_active_qr"
+                                        class="btn-primary btn-sm text-[11px] py-1 px-2.5"
+                                        :class="!item.has_active_qr ? 'opacity-40 cursor-not-allowed' : ''"
+                                        x-text="item.has_active_qr ? 'Check In' : 'No Active QR'">
+                                </button>
+                            </div>
+                        </div>
+                    </template>
+
+                    <template x-if="manualQuery.length >= 2 && manualResults.length === 0 && !manualLoading">
+                        <div class="py-6 text-center text-slate-500 text-xs">
+                            No matching students with active QR passes found.
+                        </div>
+                    </template>
+                </div>
+            </div>
+
+            <div class="flex justify-end pt-2 border-t border-slate-800">
+                <button type="button" @click="openManualModal = false" class="btn-secondary btn-sm text-xs">
+                    Cancel
+                </button>
+            </div>
+        </div>
+    </div>
 
     <footer class="w-full text-center py-3 text-[11px] text-slate-600 border-t border-slate-900 mt-auto shrink-0">
         ComSoc QR Terminal — Mobile, Tablet & Laptop Camera Ready
@@ -427,6 +547,13 @@ function kioskApp() {
         lastScannedToken: '',
         lastScanTimestamp: 0,
 
+        openManualModal: false,
+        manualQuery: '',
+        manualLoading: false,
+        manualResults: [],
+        scanHistory: [],
+        flashEffect: null,
+
         eventsData: {
             @foreach($events as $event)
             '{{ $event->id }}': {
@@ -441,6 +568,16 @@ function kioskApp() {
             setInterval(() => this.updateTime(), 1000);
             this.checkConnectivity();
             setInterval(() => this.checkConnectivity(), 5000);
+
+            window.addEventListener('keydown', (e) => {
+                if (e.altKey && e.key >= '1' && e.key <= '9') {
+                    const idx = parseInt(e.key, 10) - 1;
+                    if (this.sessions && this.sessions[idx]) {
+                        e.preventDefault();
+                        this.selectSession(this.sessions[idx].id);
+                    }
+                }
+            });
 
             this.$nextTick(() => {
                 const eventIds = Object.keys(this.eventsData);
@@ -730,10 +867,23 @@ function kioskApp() {
                         participant_type: data.participant_type,
                         status: data.status,
                         time: scanTime,
-                        message: data.message
+                        message: data.message,
+                        dietary: data.dietary_requirements || null
                     };
+
+                    this.scanHistory.unshift({
+                        name: data.name,
+                        student_number: data.student_number || 'N/A',
+                        status: data.status,
+                        time: scanTime,
+                        dietary: data.dietary_requirements || null
+                    });
+                    if (this.scanHistory.length > 5) {
+                        this.scanHistory.pop();
+                    }
+
                     const badge = data.participant_type === 'student' ? 'Membership' : 'Event Pass';
-                    this.showFeedback('success', data.name, data.message, data.status, badge);
+                    this.showFeedback('success', data.name, data.message, data.status, badge, data.dietary_requirements || null);
                 } else if (data.code === 'duplicate') {
                     this.showFeedback('duplicate', null, data.message);
                 } else {
@@ -748,12 +898,50 @@ function kioskApp() {
             }
         },
 
-        showFeedback(type, name, message, status = null, badge = null) {
-            this.feedback = { type, name, message, status, badge };
+        showFeedback(type, name, message, status = null, badge = null, dietary = null) {
+            this.feedback = { type, name, message, status, badge, dietary };
             this.playTone(type);
+            this.flashEffect = type;
+            setTimeout(() => {
+                if (this.flashEffect === type) this.flashEffect = null;
+            }, 800);
 
             if (this.feedbackTimer) clearTimeout(this.feedbackTimer);
             this.feedbackTimer = setTimeout(() => { this.feedback = null; }, 4000);
+        },
+
+        async performManualLookup() {
+            if (!this.manualQuery || this.manualQuery.trim().length < 2) {
+                this.manualResults = [];
+                return;
+            }
+            this.manualLoading = true;
+            try {
+                const res = await fetch('/kiosk/{{ $kiosk->id }}/lookup', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Accept': 'application/json',
+                        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
+                    },
+                    body: JSON.stringify({ query: this.manualQuery.trim() })
+                });
+                const data = await res.json();
+                this.manualResults = data.results || [];
+            } catch {
+                this.manualResults = [];
+            } finally {
+                this.manualLoading = false;
+            }
+        },
+
+        selectManualStudent(student) {
+            if (!student.token) return;
+            this.openManualModal = false;
+            this.token = student.token;
+            this.manualQuery = '';
+            this.manualResults = [];
+            this.submitScan();
         },
 
         playTone(type) {

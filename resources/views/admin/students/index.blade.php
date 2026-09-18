@@ -25,71 +25,121 @@
 <div class="alert-info mb-4">{{ session('info') }}</div>
 @endif
 
-<form method="GET" class="mb-4 flex flex-wrap gap-2 items-end">
-    <input type="search" name="search" value="{{ request('search') }}"
-           placeholder="Search name or student #…"
-           class="input w-full sm:w-52 text-sm">
-    <div class="w-full sm:w-36">
-        @php
-            $yearLevelOptions = ['' => 'All Year Levels'];
-            foreach($yearLevels as $yl) {
-                $yearLevelOptions[$yl] = $yl;
-            }
-        @endphp
-        <x-custom-dropdown
-            name="year_level"
-            :options="$yearLevelOptions"
-            :value="request('year_level', '')"
-            placeholder="All Year Levels"
-            buttonClass="py-2 text-xs sm:text-sm" />
+<div x-data="{
+    searchVal: '{{ request('search') }}',
+    submitDebounced() {
+        $refs.filterForm.submit();
+    }
+}">
+    <form x-ref="filterForm" method="GET" class="mb-3 flex flex-wrap gap-2 items-end">
+        <div class="relative w-full sm:w-56">
+            <input type="search" name="search" x-model="searchVal"
+                   @input.debounce.400ms="submitDebounced()"
+                   placeholder="Search name or student #…"
+                   class="input w-full text-sm pl-8">
+            <svg class="w-4 h-4 text-slate-500 absolute left-2.5 top-3 pointer-events-none" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
+            </svg>
+        </div>
+        <div class="w-full sm:w-36">
+            @php
+                $yearLevelOptions = ['' => 'All Year Levels'];
+                foreach($yearLevels as $yl) {
+                    $yearLevelOptions[$yl] = $yl;
+                }
+            @endphp
+            <x-custom-dropdown
+                name="year_level"
+                :options="$yearLevelOptions"
+                :value="request('year_level', '')"
+                placeholder="All Year Levels"
+                buttonClass="py-2 text-xs sm:text-sm" />
+        </div>
+        <div class="w-full sm:w-36">
+            <x-custom-dropdown
+                name="membership_status"
+                :options="[
+                    '' => 'All Membership',
+                    'active' => 'Active',
+                    'pending' => 'Pending',
+                    'none' => 'None',
+                ]"
+                :value="request('membership_status', '')"
+                placeholder="All Membership"
+                buttonClass="py-2 text-xs sm:text-sm" />
+        </div>
+        <div class="w-full sm:w-32">
+            <x-custom-dropdown
+                name="qr_status"
+                :options="[
+                    '' => 'All QR',
+                    'active' => 'QR Active',
+                    'missing' => 'QR Missing',
+                    'none' => 'No QR',
+                ]"
+                :value="request('qr_status', '')"
+                placeholder="All QR"
+                buttonClass="py-2 text-xs sm:text-sm" />
+        </div>
+        <div class="w-full sm:w-44">
+            @php
+                $yearOpts = ['' => 'All Academic Years'];
+                foreach($academicYears as $year) {
+                    $yearOpts[$year->id] = $year->label . ($year->is_active ? ' (Active)' : '');
+                }
+                $selectedYear = request('academic_year_id') ?: ($yearId ?? '');
+            @endphp
+            <x-custom-dropdown
+                name="academic_year_id"
+                :options="$yearOpts"
+                :value="$selectedYear"
+                placeholder="All Academic Years"
+                buttonClass="py-2 text-xs sm:text-sm" />
+        </div>
+        <button type="submit" class="btn-secondary text-sm">Filter</button>
+        <a href="{{ route('admin.students.index') }}" class="btn-secondary text-sm">Reset</a>
+    </form>
+
+    @if(request()->hasAny(['search', 'year_level', 'membership_status', 'qr_status', 'academic_year_id']))
+    <div class="flex flex-wrap items-center gap-1.5 mb-4">
+        <span class="text-[11px] text-slate-400 font-medium mr-1">Active Filters:</span>
+        @if(request('search'))
+            <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-medium bg-slate-800 text-slate-200 border border-slate-700">
+                <span>Query: "{{ request('search') }}"</span>
+                <a href="{{ request()->fullUrlWithQuery(['search' => null]) }}" class="hover:text-red-400">×</a>
+            </span>
+        @endif
+        @if(request('year_level'))
+            <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-medium bg-slate-800 text-slate-200 border border-slate-700">
+                <span>Year: {{ request('year_level') }}</span>
+                <a href="{{ request()->fullUrlWithQuery(['year_level' => null]) }}" class="hover:text-red-400">×</a>
+            </span>
+        @endif
+        @if(request('membership_status'))
+            <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-medium bg-slate-800 text-slate-200 border border-slate-700">
+                <span>Membership: {{ ucfirst(request('membership_status')) }}</span>
+                <a href="{{ request()->fullUrlWithQuery(['membership_status' => null]) }}" class="hover:text-red-400">×</a>
+            </span>
+        @endif
+        @if(request('qr_status'))
+            <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-medium bg-slate-800 text-slate-200 border border-slate-700">
+                <span>QR: {{ ucfirst(request('qr_status')) }}</span>
+                <a href="{{ request()->fullUrlWithQuery(['qr_status' => null]) }}" class="hover:text-red-400">×</a>
+            </span>
+        @endif
+        @if(request('academic_year_id'))
+            <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-medium bg-slate-800 text-slate-200 border border-slate-700">
+                <span>AY Filtered</span>
+                <a href="{{ request()->fullUrlWithQuery(['academic_year_id' => null]) }}" class="hover:text-red-400">×</a>
+            </span>
+        @endif
+        <a href="{{ route('admin.students.index') }}" class="text-[11px] text-brand-400 hover:underline ml-1">Clear all</a>
     </div>
-    <div class="w-full sm:w-36">
-        <x-custom-dropdown
-            name="membership_status"
-            :options="[
-                '' => 'All Membership',
-                'active' => 'Active',
-                'pending' => 'Pending',
-                'none' => 'None',
-            ]"
-            :value="request('membership_status', '')"
-            placeholder="All Membership"
-            buttonClass="py-2 text-xs sm:text-sm" />
-    </div>
-    <div class="w-full sm:w-32">
-        <x-custom-dropdown
-            name="qr_status"
-            :options="[
-                '' => 'All QR',
-                'active' => 'QR Active',
-                'missing' => 'QR Missing',
-                'none' => 'No QR',
-            ]"
-            :value="request('qr_status', '')"
-            placeholder="All QR"
-            buttonClass="py-2 text-xs sm:text-sm" />
-    </div>
-    <div class="w-full sm:w-44">
-        @php
-            $yearOpts = ['' => 'All Academic Years'];
-            foreach($academicYears as $year) {
-                $yearOpts[$year->id] = $year->label . ($year->is_active ? ' (Active)' : '');
-            }
-            $selectedYear = request('academic_year_id') ?: ($yearId ?? '');
-        @endphp
-        <x-custom-dropdown
-            name="academic_year_id"
-            :options="$yearOpts"
-            :value="$selectedYear"
-            placeholder="All Academic Years"
-            buttonClass="py-2 text-xs sm:text-sm" />
-    </div>
-    <button type="submit" class="btn-secondary text-sm">Filter</button>
-    <a href="{{ route('admin.students.index') }}" class="btn-secondary text-sm">Reset</a>
-</form>
+    @endif
+</div>
 
 <div class="table-wrap">
-    <table class="table">
+    <table class="table table-sticky-header">
         <thead>
             <tr>
                 <th>Student Number</th>
