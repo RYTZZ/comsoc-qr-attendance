@@ -41,128 +41,98 @@
 
             <a href="{{ route('admin.dashboard') }}"
                class="sidebar-link {{ request()->routeIs('admin.dashboard') ? 'active' : '' }}">
-                <svg class="sidebar-link-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"/>
-                </svg>
+                <i data-lucide="layout-dashboard" class="sidebar-link-icon"></i>
                 Dashboard
             </a>
 
             <div class="pt-4 pb-1">
-                <p class="px-3 text-xs font-semibold text-slate-600 uppercase tracking-wider">Management</p>
+                <p class="px-3 text-xs font-semibold text-slate-500 uppercase tracking-wider">Membership & Students</p>
             </div>
 
             @if(auth()->user()->isSuperAdmin())
             <a href="{{ route('admin.academic-years.index') }}"
                class="sidebar-link {{ request()->routeIs('admin.academic-years.*') ? 'active' : '' }}">
-                <svg class="sidebar-link-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/>
-                </svg>
+                <i data-lucide="calendar" class="sidebar-link-icon"></i>
                 Academic Years
             </a>
             <a href="{{ route('admin.masterlist.upload') }}"
                class="sidebar-link {{ request()->routeIs('admin.masterlist.*') ? 'active' : '' }}">
-                <svg class="sidebar-link-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"/>
-                </svg>
+                <i data-lucide="file-spreadsheet" class="sidebar-link-icon"></i>
                 Masterlist
             </a>
             @endif
 
             <a href="{{ route('admin.students.index') }}"
                class="sidebar-link {{ request()->routeIs('admin.students.*') ? 'active' : '' }}">
-                <svg class="sidebar-link-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z"/>
-                </svg>
+                <i data-lucide="users" class="sidebar-link-icon"></i>
                 Students
             </a>
 
             <a href="{{ route('admin.memberships.index') }}"
                class="sidebar-link {{ request()->routeIs('admin.memberships.*') ? 'active' : '' }}">
-                <svg class="sidebar-link-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4M7.835 4.697a3.42 3.42 0 001.946-.806 3.42 3.42 0 014.438 0 3.42 3.42 0 001.946.806 3.42 3.42 0 013.138 3.138 3.42 3.42 0 00.806 1.946 3.42 3.42 0 010 4.438 3.42 3.42 0 00-.806 1.946 3.42 3.42 0 01-3.138 3.138 3.42 3.42 0 00-1.946.806 3.42 3.42 0 01-4.438 0 3.42 3.42 0 00-1.946-.806 3.42 3.42 0 01-3.138-3.138 3.42 3.42 0 00-.806-1.946 3.42 3.42 0 010-4.438 3.42 3.42 0 00.806-1.946 3.42 3.42 0 013.138-3.138z"/>
-                </svg>
+                <i data-lucide="award" class="sidebar-link-icon"></i>
                 Memberships
             </a>
 
             <a href="{{ route('admin.qr-codes.index') }}"
                class="sidebar-link {{ request()->routeIs('admin.qr-codes.*') ? 'active' : '' }}">
-                <svg class="sidebar-link-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v1m6 11h2m-6 0h-2v4m0-11v3m0 0h.01M12 12h4.01M16 20h4M4 12h4m12 0h.01M5 8h2a1 1 0 001-1V5a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1zm12 0h2a1 1 0 001-1V5a1 1 0 00-1-1h-2a1 1 0 00-1 1v2a1 1 0 001 1zM5 20h2a1 1 0 001-1v-2a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1z"/>
-                </svg>
+                <i data-lucide="qr-code" class="sidebar-link-icon"></i>
                 QR Codes
             </a>
 
             <a href="{{ route('admin.cards.index') }}"
                class="sidebar-link {{ request()->routeIs('admin.cards.*') ? 'active' : '' }}">
-                <svg class="sidebar-link-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z"/>
-                </svg>
+                <i data-lucide="credit-card" class="sidebar-link-icon"></i>
                 Cards
             </a>
 
             <div class="pt-4 pb-1">
-                <p class="px-3 text-xs font-semibold text-slate-600 uppercase tracking-wider">Events</p>
+                <p class="px-3 text-xs font-semibold text-slate-500 uppercase tracking-wider">Events & Attendance</p>
             </div>
 
             <a href="{{ route('admin.events.index') }}"
                class="sidebar-link {{ request()->routeIs('admin.events.*') && !request()->routeIs('admin.event-registrations.*') ? 'active' : '' }}">
-                <svg class="sidebar-link-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 20H5a2 2 0 01-2-2V6a2 2 0 012-2h10a2 2 0 012 2v1m2 13a2 2 0 01-2-2V7m2 13a2 2 0 002-2V9a2 2 0 00-2-2h-2m-4-3H9M7 16h6M7 8h6v4H7V8z"/>
-                </svg>
+                <i data-lucide="calendar-check" class="sidebar-link-icon"></i>
                 Events
             </a>
 
             <a href="{{ route('admin.event-registrations.all') }}"
                class="sidebar-link {{ request()->routeIs('admin.event-registrations.*') ? 'active' : '' }}">
-                <svg class="sidebar-link-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18 9v3m0 0v3m0-3h3m-3 0h-3m-2-5a4 4 0 11-8 0 4 4 0 018 0zM3 20a6 6 0 0112 0v1H3v-1z"/>
-                </svg>
+                <i data-lucide="user-plus" class="sidebar-link-icon"></i>
                 Registrations
-            </a>
-
-            <a href="{{ route('admin.organizations.index') }}"
-               class="sidebar-link {{ request()->routeIs('admin.organizations.*') ? 'active' : '' }}">
-                <svg class="sidebar-link-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"/>
-                </svg>
-                Schools / Univs
-            </a>
-
-            <a href="{{ route('admin.programs.index') }}"
-               class="sidebar-link {{ request()->routeIs('admin.programs.*') ? 'active' : '' }}">
-                <svg class="sidebar-link-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 14l9-5-9-5-9 5 9 5z"/>
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 14l6.16-3.422a12.083 12.083 0 01.665 6.479A11.952 11.952 0 0012 20.055a11.952 11.952 0 00-6.824-2.998 12.078 12.078 0 01.665-6.479L12 14z"/>
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 14l9-5-9-5-9 5 9 5zm0 0l6.16-3.422a12.083 12.083 0 01.665 6.479A11.952 11.952 0 0012 20.055a11.952 11.952 0 00-6.824-2.998 12.078 12.078 0 01.665-6.479L12 14zm-4 6v-7.5l4-2.222"/>
-                </svg>
-                Programs / Courses
             </a>
 
             <a href="{{ route('admin.attendance.index') }}"
                class="sidebar-link {{ request()->routeIs('admin.attendance.*') ? 'active' : '' }}">
-                <svg class="sidebar-link-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4"/>
-                </svg>
+                <i data-lucide="check-circle-2" class="sidebar-link-icon"></i>
                 Attendance
             </a>
 
             <a href="{{ route('admin.kiosks.index') }}"
                class="sidebar-link {{ request()->routeIs('admin.kiosks.*') ? 'active' : '' }}">
-                <svg class="sidebar-link-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/>
-                </svg>
+                <i data-lucide="monitor" class="sidebar-link-icon"></i>
                 Kiosks
             </a>
 
             <div class="pt-4 pb-1">
-                <p class="px-3 text-xs font-semibold text-slate-600 uppercase tracking-wider">Operations</p>
+                <p class="px-3 text-xs font-semibold text-slate-500 uppercase tracking-wider">Operations & Admin</p>
             </div>
+
+            <a href="{{ route('admin.organizations.index') }}"
+               class="sidebar-link {{ request()->routeIs('admin.organizations.*') ? 'active' : '' }}">
+                <i data-lucide="building-2" class="sidebar-link-icon"></i>
+                Schools / Univs
+            </a>
+
+            <a href="{{ route('admin.programs.index') }}"
+               class="sidebar-link {{ request()->routeIs('admin.programs.*') ? 'active' : '' }}">
+                <i data-lucide="graduation-cap" class="sidebar-link-icon"></i>
+                Programs / Courses
+            </a>
 
             <a href="{{ route('admin.incidents.index') }}"
                class="sidebar-link {{ request()->routeIs('admin.incidents.*') ? 'active' : '' }}">
-                <svg class="sidebar-link-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/>
-                </svg>
+                <i data-lucide="alert-triangle" class="sidebar-link-icon"></i>
                 Incidents
                 @php $openIncidents = \App\Models\Incident::where('status','open')->count(); @endphp
                 @if($openIncidents > 0)
@@ -172,47 +142,39 @@
 
             <a href="{{ route('admin.reports.index') }}"
                class="sidebar-link {{ request()->routeIs('admin.reports.*') ? 'active' : '' }}">
-                <svg class="sidebar-link-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 17v-2m3 2v-4m3 4v-6m2 10H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
-                </svg>
+                <i data-lucide="bar-chart-3" class="sidebar-link-icon"></i>
                 Reports
             </a>
 
             @if(auth()->user()->isSuperAdmin())
             <a href="{{ route('admin.audit-logs.index') }}"
                class="sidebar-link {{ request()->routeIs('admin.audit-logs.*') ? 'active' : '' }}">
-                <svg class="sidebar-link-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
-                </svg>
+                <i data-lucide="history" class="sidebar-link-icon"></i>
                 Audit Logs
             </a>
 
             <a href="{{ route('admin.users.index') }}"
                class="sidebar-link {{ request()->routeIs('admin.users.*') ? 'active' : '' }}">
-                <svg class="sidebar-link-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z"/>
-                </svg>
+                <i data-lucide="shield" class="sidebar-link-icon"></i>
                 Accounts
             </a>
             @endif
         </nav>
 
         <div class="px-3 py-4 border-t border-slate-800">
-            <div class="flex items-center gap-3 px-3 py-2 rounded-lg">
-                <div class="w-8 h-8 gradient-brand rounded-full flex items-center justify-center flex-shrink-0">
-                    <svg class="w-4 h-4 text-white" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="5"/><path d="M20 21a8 8 0 1 0-16 0"/></svg>
+            <div class="flex items-center gap-3 px-3 py-2 rounded-lg bg-slate-950/60 border border-slate-800/80">
+                <div class="w-8 h-8 rounded-full bg-[#7A1618] flex items-center justify-center flex-shrink-0 text-white">
+                    <i data-lucide="user-round" class="w-4 h-4"></i>
                 </div>
                 <div class="flex-1 min-w-0">
                     <p class="text-sm font-medium text-white truncate">{{ auth()->user()->name }}</p>
-                    <p class="text-xs text-slate-500 truncate capitalize">{{ str_replace('_', ' ', auth()->user()->role) }}</p>
+                    <p class="text-xs text-slate-400 truncate capitalize">{{ str_replace('_', ' ', auth()->user()->role) }}</p>
                 </div>
             </div>
             <form method="POST" action="{{ route('logout') }}" class="mt-2">
                 @csrf
                 <button type="submit" class="sidebar-link w-full text-red-400 hover:text-red-300 hover:bg-red-950/30">
-                    <svg class="sidebar-link-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"/>
-                    </svg>
+                    <i data-lucide="log-out" class="sidebar-link-icon"></i>
                     Sign out
                 </button>
             </form>
@@ -220,18 +182,14 @@
     </aside>
 
     <div class="flex-1 flex flex-col min-h-screen lg:pl-64 w-full min-w-0">
-        <header class="sticky top-0 z-20 bg-slate-950/90 backdrop-blur border-b border-slate-800 flex items-center justify-between px-3 sm:px-6 h-14 shrink-0">
+        <header class="sticky top-0 z-20 bg-[#171a23]/95 backdrop-blur border-b border-slate-800 flex items-center justify-between px-3 sm:px-6 h-14 shrink-0 shadow-sm">
             <div class="flex items-center gap-2 sm:gap-3">
-                <button @click="sidebarOpen = true" class="lg:hidden p-2 -ml-1 rounded-lg text-slate-400 hover:text-white hover:bg-slate-800 transition-colors focus:outline-none focus:ring-2 focus:ring-indigo-500" aria-label="Open menu">
-                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"/>
-                    </svg>
+                <button @click="sidebarOpen = true" class="lg:hidden p-2 -ml-1 rounded-lg text-slate-400 hover:text-white hover:bg-slate-800 transition-colors focus:outline-none focus:ring-2 focus:ring-[#7A1618]" aria-label="Open menu">
+                    <i data-lucide="menu" class="w-5 h-5"></i>
                 </button>
                 <div class="lg:hidden flex items-center gap-2">
-                    <div class="w-7 h-7 gradient-brand rounded-lg flex items-center justify-center shadow">
-                        <svg class="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z"/>
-                        </svg>
+                    <div class="w-7 h-7 rounded-lg bg-[#7A1618] flex items-center justify-center shadow">
+                        <i data-lucide="user-round" class="w-4 h-4 text-white"></i>
                     </div>
                     <span class="font-bold text-white text-xs sm:text-sm truncate">ComSoc QR</span>
                 </div>
@@ -239,11 +197,11 @@
 
             <div class="flex items-center gap-2 sm:gap-3 ml-auto">
                 @if($activeYear = \App\Models\AcademicYear::active())
-                <span class="badge-active text-[10px] sm:text-xs px-2 py-0.5 sm:px-2.5 sm:py-1 truncate max-w-[120px] sm:max-w-none">{{ $activeYear->label }}</span>
+                <span class="badge-active text-[10px] sm:text-xs px-2.5 py-1 truncate max-w-[140px] sm:max-w-none">{{ $activeYear->label }}</span>
                 @endif
                 <a href="{{ route('profile.edit') }}" class="flex items-center gap-2 p-1 text-slate-400 hover:text-white transition-colors" title="My Profile">
-                    <div class="w-7 h-7 sm:w-8 sm:h-8 gradient-brand rounded-full flex items-center justify-center shadow">
-                        <svg class="w-3.5 h-3.5 sm:w-4 sm:h-4 text-white" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="5"/><path d="M20 21a8 8 0 1 0-16 0"/></svg>
+                    <div class="w-8 h-8 rounded-full bg-[#7A1618] flex items-center justify-center shadow text-white hover:ring-2 hover:ring-[#7A1618]/50 transition-all">
+                        <i data-lucide="user-round" class="w-4 h-4"></i>
                     </div>
                 </a>
             </div>

@@ -58,12 +58,12 @@
                         <td class="py-3 px-4">
                             @if($rec->is_late)
                                 <span class="badge badge-late inline-flex items-center gap-1">
-                                    <svg class="w-3 h-3 text-amber-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10" stroke-width="2"></circle><polyline points="12 6 12 12 16 14" stroke-width="2"></polyline></svg>
+                                    <i data-lucide="clock" class="w-3 h-3 text-amber-400"></i>
                                     LATE
                                 </span>
                             @else
                                 <span class="badge badge-present inline-flex items-center gap-1">
-                                    <svg class="w-3 h-3 text-emerald-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"/></svg>
+                                    <i data-lucide="check-circle-2" class="w-3 h-3 text-emerald-400"></i>
                                     ON TIME
                                 </span>
                             @endif

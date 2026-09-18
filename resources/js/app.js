@@ -2,9 +2,24 @@ import './bootstrap';
 
 import Alpine from 'alpinejs';
 import { Html5Qrcode } from 'html5-qrcode';
+import { createIcons, icons } from 'lucide';
 
 window.Alpine = Alpine;
 window.Html5Qrcode = Html5Qrcode;
+window.createIcons = createIcons;
+window.lucideIcons = icons;
+
+document.addEventListener('DOMContentLoaded', () => {
+    createIcons({ icons });
+});
+
+document.addEventListener('alpine:initialized', () => {
+    createIcons({ icons });
+});
+
+window.refreshIcons = () => {
+    createIcons({ icons });
+};
 
 Alpine.data('customDropdown', (config) => ({
     name: config.name,

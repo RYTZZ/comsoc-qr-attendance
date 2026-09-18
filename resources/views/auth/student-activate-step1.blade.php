@@ -43,7 +43,7 @@
             <div>
                 <label for="student_number" class="label">Student Number</label>
                 <input type="text" name="student_number" id="student_number" value="{{ old('student_number') }}"
-                       class="input font-mono" placeholder="e.g. 23-12345" required autofocus autocomplete="off">
+                       class="input font-mono" placeholder="Enter your Student Number" required autofocus autocomplete="off">
             </div>
 
             <button type="submit" class="btn-primary w-full justify-center py-2.5 mt-2">

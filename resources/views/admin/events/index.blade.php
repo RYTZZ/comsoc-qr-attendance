@@ -6,8 +6,8 @@
     </div>
     <div class="flex flex-wrap items-center gap-2">
         @if(auth()->user()->isSuperAdmin())
-        <a href="{{ route('admin.events.create') }}" class="btn-primary">
-            <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
+        <a href="{{ route('admin.events.create') }}" class="btn-primary flex items-center gap-2">
+            <i data-lucide="calendar-plus" class="w-4 h-4"></i>
             Create Event
         </a>
         @endif
@@ -205,12 +205,7 @@
                     <td colspan="9" class="py-12 text-center text-slate-500">
                         <div class="empty-state">
                             <div class="empty-state-icon flex items-center justify-center">
-                                <svg class="w-8 h-8 text-slate-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <rect x="3" y="4" width="18" height="18" rx="2" ry="2" stroke-width="1.5"></rect>
-                                    <line x1="16" y1="2" x2="16" y2="6" stroke-width="1.5" stroke-linecap="round"></line>
-                                    <line x1="8" y1="2" x2="8" y2="6" stroke-width="1.5" stroke-linecap="round"></line>
-                                    <line x1="3" y1="10" x2="21" y2="10" stroke-width="1.5"></line>
-                                </svg>
+                                <i data-lucide="calendar" class="w-8 h-8 text-slate-500"></i>
                             </div>
                             <p class="empty-state-title">No events found</p>
                             <p class="empty-state-body">Create a new event or adjust your filter criteria.</p>
