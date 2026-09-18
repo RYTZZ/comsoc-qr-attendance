@@ -77,6 +77,13 @@ class StudentController extends Controller
                 }
             });
 
+        if ($request->input('export') === 'csv') {
+            $records = $query->orderBy('last_name')->orderBy('first_name')->get();
+            $yearLabel = $academicYears->firstWhere('id', $yearId)?->label ?? 'All_Years';
+            $sanitizedYear = trim(preg_replace('/[^A-Za-z0-9_\-]+/', '_', $yearLabel), '_');
+            return $this->exportStudentsCsv($records, "Student_Records_{$sanitizedYear}");
+        }
+
         $students = $query
             ->orderBy('last_name')
             ->orderBy('first_name')
@@ -281,5 +288,68 @@ class StudentController extends Controller
         });
 
         return back()->with('success', "{$created} student account(s) created. Students must log in with their Student Number and change their temporary password.");
+    }
+
+    private function exportStudentsCsv($records, string $filename): \Symfony\Component\HttpFoundation\StreamedResponse
+    {
+        $sorted = $records->sort(function ($a, $b) {
+            $cmpProgram = strcasecmp($a->program ?? 'N/A', $b->program ?? 'N/A');
+            if ($cmpProgram !== 0) return $cmpProgram;
+
+            $cmpYear = strcasecmp($a->year_level ?? 'N/A', $b->year_level ?? 'N/A');
+            if ($cmpYear !== 0) return $cmpYear;
+
+            return strcasecmp($a->full_name ?? '', $b->full_name ?? '');
+        })->values();
+
+        $headers = [
+            'Content-Type' => 'text/csv; charset=UTF-8',
+            'Content-Disposition' => "attachment; filename=\"{$filename}.csv\"",
+            'Pragma' => 'no-cache',
+            'Cache-Control' => 'must-revalidate, post-check=0, pre-check=0',
+            'Expires' => '0',
+        ];
+
+        $callback = function () use ($sorted) {
+            $handle = fopen('php://output', 'w');
+            fprintf($handle, chr(0xEF).chr(0xBB).chr(0xBF));
+
+            fputcsv($handle, [
+                'Student Number',
+                'Last Name',
+                'First Name',
+                'Middle Name',
+                'Program',
+                'Year Level',
+                'Email',
+                'Account Status',
+                'Membership Status',
+                'QR Status',
+            ]);
+
+            foreach ($sorted as $student) {
+                $membership = $student->memberships->first();
+                $qrStatus = $membership?->activeQrCode ? 'Active' : ($membership ? 'Missing' : 'No Membership');
+                $membershipStatus = $membership ? ucfirst($membership->status) : 'None';
+                $accountStatus = $student->user ? ($student->user->is_active ? 'Active' : 'Inactive') : 'No Account';
+
+                fputcsv($handle, [
+                    $student->student_number ?? 'N/A',
+                    $student->last_name ?? '',
+                    $student->first_name ?? '',
+                    $student->middle_name ?? '',
+                    $student->program ?? 'N/A',
+                    $student->year_level ?? 'N/A',
+                    $student->user?->email ?? $student->email ?? '',
+                    $accountStatus,
+                    $membershipStatus,
+                    $qrStatus,
+                ]);
+            }
+
+            fclose($handle);
+        };
+
+        return response()->stream($callback, 200, $headers);
     }
 }

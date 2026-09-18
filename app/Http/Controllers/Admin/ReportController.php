@@ -37,6 +37,10 @@ class ReportController extends Controller
             return $pdf->download('membership_report.pdf');
         }
 
+        if ($request->export === 'csv') {
+            return $this->exportMembershipCsv($data, 'Membership_Report');
+        }
+
         return view('admin.reports.membership', compact('data', 'academicYears'));
     }
 
@@ -338,6 +342,76 @@ class ReportController extends Controller
                     $inc->reportedByUser?->name ?? 'N/A',
                     $inc->resolvedByUser?->name ?? 'Unresolved',
                     $inc->resolution_notes ?? '',
+                ]);
+            }
+
+            fclose($handle);
+        };
+
+        return response()->stream($callback, 200, $headers);
+    }
+
+    private function exportMembershipCsv($records, string $filename): StreamedResponse
+    {
+        $sorted = $records->sort(function ($a, $b) {
+            $programA = $a->student?->program ?? 'N/A';
+            $programB = $b->student?->program ?? 'N/A';
+            $cmpProgram = strcasecmp($programA, $programB);
+            if ($cmpProgram !== 0) return $cmpProgram;
+
+            $yearA = $a->student?->year_level ?? 'N/A';
+            $yearB = $b->student?->year_level ?? 'N/A';
+            $cmpYear = strcasecmp($yearA, $yearB);
+            if ($cmpYear !== 0) return $cmpYear;
+
+            $nameA = $a->student?->full_name ?? '';
+            $nameB = $b->student?->full_name ?? '';
+            return strcasecmp($nameA, $nameB);
+        })->values();
+
+        $headers = [
+            'Content-Type' => 'text/csv; charset=UTF-8',
+            'Content-Disposition' => "attachment; filename=\"{$filename}.csv\"",
+            'Pragma' => 'no-cache',
+            'Cache-Control' => 'must-revalidate, post-check=0, pre-check=0',
+            'Expires' => '0',
+        ];
+
+        $callback = function () use ($sorted) {
+            $handle = fopen('php://output', 'w');
+            fprintf($handle, chr(0xEF).chr(0xBB).chr(0xBF));
+
+            fputcsv($handle, [
+                'Student ID',
+                'Student Name',
+                'Program',
+                'Year Level',
+                'Academic Year',
+                'Membership Status',
+                'QR Status',
+                'Enrolled At',
+            ]);
+
+            foreach ($sorted as $membership) {
+                $student = $membership->student;
+                $studentId = $student?->student_number ?? 'N/A';
+                $fullName = $student?->full_name ?? 'N/A';
+                $program = $student?->program ?? 'N/A';
+                $yearLevel = $student?->year_level ?? 'N/A';
+                $ayLabel = $membership->academicYear?->label ?? 'N/A';
+                $status = ucfirst($membership->status ?? 'Inactive');
+                $qrStatus = $membership->activeQrCode ? 'Active' : 'Missing';
+                $enrolledAt = $membership->created_at ? $membership->created_at->format('Y-m-d H:i:s') : 'N/A';
+
+                fputcsv($handle, [
+                    $studentId,
+                    $fullName,
+                    $program,
+                    $yearLevel,
+                    $ayLabel,
+                    $status,
+                    $qrStatus,
+                    $enrolledAt,
                 ]);
             }
 

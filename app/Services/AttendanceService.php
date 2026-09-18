@@ -78,6 +78,25 @@ class AttendanceService
             }
         }
 
+        $existing = AttendanceRecord::where('attendance_session_id', $session->id)
+            ->where(function ($q) use ($participant, $token) {
+                $q->where('qr_token', $token)
+                    ->orWhere(function ($sub) use ($participant) {
+                        $sub->where('participant_type', $participant['type'])
+                            ->where('participant_id', $participant['id']);
+                    });
+            })
+            ->first();
+
+        if ($existing) {
+            $scannedAt = $existing->scanned_at ? $existing->scanned_at->format('g:i A') : 'earlier';
+            return [
+                'success' => false,
+                'message' => "Already scanned for {$session->name} at {$scannedAt}.",
+                'code' => 'duplicate'
+            ];
+        }
+
         $scanTime = now()->format('H:i:s');
         $status = $session->determineStatus($scanTime);
 

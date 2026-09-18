@@ -8,6 +8,7 @@
         </div>
     </div>
     <div class="flex gap-2">
+        <a href="{{ request()->fullUrlWithQuery(['export' => 'csv']) }}" class="btn-secondary text-xs">Export CSV</a>
         <a href="{{ request()->fullUrlWithQuery(['export' => 'pdf']) }}" class="btn-primary text-xs">Export PDF</a>
     </div>
 </div>

@@ -86,7 +86,8 @@ class CardController extends Controller
         $format = strtolower($request->query('format', 'png'));
         $service = app(\App\Services\MemberCardService::class);
         $student = $membership->student;
-        $baseName = sanitize_filename("{$student->student_number}_{$student->last_name}_card");
+        $studentIdentifier = $student ? "{$student->student_number}_{$student->last_name}" : "membership_{$membership->id}";
+        $baseName = sanitize_filename("{$studentIdentifier}_card");
 
         if ($format === 'jpg' || $format === 'jpeg') {
             $data = $service->generateJpeg($membership);

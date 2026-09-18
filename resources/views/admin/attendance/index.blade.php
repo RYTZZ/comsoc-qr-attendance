@@ -27,7 +27,10 @@
                 @forelse($records as $rec)
                     <tr class="hover:bg-slate-800/30 transition">
                         <td class="py-3 px-4">
-                            @if($rec->membership?->student)
+                            @if($rec->student)
+                                <div class="font-medium text-white">{{ $rec->student->display_name }}</div>
+                                <div class="text-[11px] text-slate-500">{{ $rec->student->student_number }}</div>
+                            @elseif($rec->membership?->student)
                                 <div class="font-medium text-white">{{ $rec->membership->student->display_name }}</div>
                                 <div class="text-[11px] text-slate-500">{{ $rec->membership->student->student_number }}</div>
                             @elseif($rec->eventRegistration)
@@ -38,7 +41,7 @@
                             @endif
                         </td>
                         <td class="py-3 px-4">
-                            @if($rec->attendee_type === 'student')
+                            @if($rec->participant_type === 'student' || $rec->attendee_type === 'student')
                                 <span class="badge bg-indigo-500/10 text-indigo-400 border-indigo-500/20">Student</span>
                             @else
                                 <span class="badge bg-purple-500/10 text-purple-400 border-purple-500/20">Guest</span>

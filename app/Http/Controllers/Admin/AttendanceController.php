@@ -16,11 +16,20 @@ class AttendanceController extends Controller
     {
         $events = Event::orderByDesc('event_date')->get();
 
-        $records = AttendanceRecord::with(['event', 'attendanceSession', 'kiosk', 'scannedByUser', 'correctedByUser'])
+        $records = AttendanceRecord::with(['event', 'attendanceSession', 'kiosk', 'scannedByUser', 'correctedByUser', 'student', 'eventRegistration'])
             ->when($request->event_id, fn($q) => $q->where('event_id', $request->event_id))
             ->when($request->session_type, fn($q) => $q->whereHas('attendanceSession', fn($s) => $s->where('type', $request->session_type)))
             ->when($request->status, fn($q) => $q->where('status', $request->status))
-            ->when($request->search, fn($q) => $q->where('qr_token', 'like', "%{$request->search}%"))
+            ->when($request->search, fn($q) => $q->where(function ($sq) use ($request) {
+                $sq->where('qr_token', 'like', "%{$request->search}%")
+                   ->orWhereHas('student', fn($st) => $st->where('student_number', 'like', "%{$request->search}%")
+                       ->orWhere('last_name', 'ilike', "%{$request->search}%")
+                       ->orWhere('first_name', 'ilike', "%{$request->search}%")
+                   )
+                   ->orWhereHas('eventRegistration', fn($er) => $er->where('full_name', 'ilike', "%{$request->search}%")
+                       ->orWhere('email', 'like', "%{$request->search}%")
+                   );
+            }))
             ->orderByDesc('scanned_at')
             ->paginate(25)
             ->withQueryString();

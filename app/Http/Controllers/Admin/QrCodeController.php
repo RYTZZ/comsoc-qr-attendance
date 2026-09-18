@@ -137,7 +137,8 @@ class QrCodeController extends Controller
                 $ext = 'png';
             }
 
-            $filename = sanitize_filename("{$student->student_number}_{$student->last_name}_card.{$ext}");
+            $studentIdentifier = $student ? "{$student->student_number}_{$student->last_name}" : "membership_{$membership->id}";
+            $filename = sanitize_filename("{$studentIdentifier}_card.{$ext}");
             $zip->addFromString($filename, $cardData);
         }
 
@@ -195,12 +196,14 @@ class QrCodeController extends Controller
     {
         $lines = ["Batch Number,Student Name,Student Number,Membership Number,QR Status,QR Token (first 8)"];
         foreach ($qrCodes as $qr) {
-            $student = $qr->membership->student;
+            $student = $qr->membership?->student;
+            $studentName = $student?->full_name ?? 'N/A';
+            $studentNumber = $student?->student_number ?? 'N/A';
             $lines[] = implode(',', [
                 $qr->batch_number,
-                '"' . $student->full_name . '"',
-                $student->student_number,
-                $qr->membership->membership_number ?? '',
+                '"' . str_replace('"', '""', $studentName) . '"',
+                $studentNumber,
+                $qr->membership?->membership_number ?? '',
                 $qr->status,
                 substr($qr->token, 0, 8) . '...',
             ]);

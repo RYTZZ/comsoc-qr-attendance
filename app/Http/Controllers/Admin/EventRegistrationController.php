@@ -64,6 +64,12 @@ class EventRegistrationController extends Controller
             $query->orderByDesc('created_at');
         }
 
+        if ($request->input('export') === 'csv') {
+            $records = $query->get();
+            $sanitizedEventName = trim(preg_replace('/[^A-Za-z0-9_\-]+/', '_', $event->name), '_');
+            return $this->exportCsv($records, ($sanitizedEventName ?: 'Event') . '_Registrations');
+        }
+
         $registrations = $query->paginate(20)->withQueryString();
 
         $tshirtSizes = EventRegistration::TSHIRT_SIZES;
@@ -154,5 +160,65 @@ class EventRegistrationController extends Controller
         return response($qrImage)
             ->header('Content-Type', 'image/png')
             ->header('Content-Disposition', 'attachment; filename="' . $filename . '"');
+    }
+
+    private function exportCsv($records, string $filename): \Symfony\Component\HttpFoundation\StreamedResponse
+    {
+        $sorted = $records->sort(function ($a, $b) {
+            $cmpProgram = strcasecmp($a->program ?? 'N/A', $b->program ?? 'N/A');
+            if ($cmpProgram !== 0) return $cmpProgram;
+
+            $cmpYear = strcasecmp($a->year_level ?? 'N/A', $b->year_level ?? 'N/A');
+            if ($cmpYear !== 0) return $cmpYear;
+
+            return strcasecmp($a->full_name ?? '', $b->full_name ?? '');
+        })->values();
+
+        $headers = [
+            'Content-Type' => 'text/csv; charset=UTF-8',
+            'Content-Disposition' => "attachment; filename=\"{$filename}.csv\"",
+            'Pragma' => 'no-cache',
+            'Cache-Control' => 'must-revalidate, post-check=0, pre-check=0',
+            'Expires' => '0',
+        ];
+
+        $callback = function () use ($sorted) {
+            $handle = fopen('php://output', 'w');
+            fprintf($handle, chr(0xEF).chr(0xBB).chr(0xBF));
+
+            fputcsv($handle, [
+                'Full Name',
+                'Email',
+                'Phone',
+                'School / Organization',
+                'Program',
+                'Year Level',
+                'T-Shirt Size',
+                'Food Restrictions',
+                'Food Restriction Details',
+                'Status',
+                'Registered At',
+            ]);
+
+            foreach ($sorted as $reg) {
+                fputcsv($handle, [
+                    $reg->full_name ?? 'N/A',
+                    $reg->email ?? 'N/A',
+                    $reg->phone ?? '',
+                    $reg->organization ?? 'N/A',
+                    $reg->program ?? 'N/A',
+                    $reg->year_level ?? 'N/A',
+                    $reg->tshirt_size ?? 'N/A',
+                    $reg->food_restrictions ?? 'None',
+                    $reg->food_restriction_details ?? '',
+                    ucfirst($reg->status ?? 'pending'),
+                    $reg->created_at ? $reg->created_at->format('Y-m-d H:i:s') : 'N/A',
+                ]);
+            }
+
+            fclose($handle);
+        };
+
+        return response()->stream($callback, 200, $headers);
     }
 }
