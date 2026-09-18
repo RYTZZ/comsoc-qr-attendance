@@ -251,7 +251,7 @@ class EventController extends Controller
             'status' => ['nullable', 'in:draft,registration_open,registration_closed,ongoing,completed,archived'],
             'attendance_enabled' => ['nullable', 'boolean'],
             'snack_distribution_enabled' => ['nullable', 'boolean'],
-            'logo' => ['nullable', 'image', 'max:3072'],
+            'logo' => ['nullable', 'image', 'mimes:jpeg,png,jpg,webp', 'max:3072'],
         ];
 
         $validated = $request->validate($rules);

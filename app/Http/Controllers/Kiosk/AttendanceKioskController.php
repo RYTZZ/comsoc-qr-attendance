@@ -48,6 +48,11 @@ class AttendanceKioskController extends Controller
     {
         abort_unless($kiosk->is_active, 404);
 
+        $user = auth()->user();
+        if ($user && $user->role === 'kiosk' && $user->kiosk && $user->kiosk->id !== $kiosk->id) {
+            abort(403, 'Unauthorized kiosk terminal.');
+        }
+
         $rawToken = trim((string) $request->input('token', ''));
         $token = $rawToken;
 
@@ -77,6 +82,10 @@ class AttendanceKioskController extends Controller
             'event_id' => 'required|exists:events,id',
             'session_id' => 'required|exists:attendance_sessions,id',
         ]);
+
+        if ($kiosk->assigned_event_id && $kiosk->assigned_event_id !== $request->event_id) {
+            return response()->json(['success' => false, 'message' => 'This kiosk is only authorized for its assigned event.'], 403);
+        }
 
         $event = Event::findOrFail($request->event_id);
         $session = AttendanceSession::findOrFail($request->session_id);

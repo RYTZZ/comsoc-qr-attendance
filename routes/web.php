@@ -47,11 +47,15 @@ Route::get('/dashboard', function () {
 })->middleware(['auth'])->name('dashboard');
 
 Route::get('/register', [PublicRegistrationController::class, 'index'])->name('public.register');
-Route::post('/register', [PublicRegistrationController::class, 'store'])->name('public.register.store');
+Route::post('/register', [PublicRegistrationController::class, 'store'])
+    ->middleware('throttle:15,1')
+    ->name('public.register.store');
 Route::get('/register/success', [PublicRegistrationController::class, 'success'])->name('public.register.success');
 
 Route::get('/events/{event}/register', [PublicRegistrationController::class, 'show'])->name('public.register.event');
-Route::post('/events/{event}/register', [PublicRegistrationController::class, 'store'])->name('public.register.event.store');
+Route::post('/events/{event}/register', [PublicRegistrationController::class, 'store'])
+    ->middleware('throttle:15,1')
+    ->name('public.register.event.store');
 Route::get('/events/{event}/register/success', [PublicRegistrationController::class, 'success'])->name('public.register.event.success');
 
 Route::get('/register-non-student', function () {

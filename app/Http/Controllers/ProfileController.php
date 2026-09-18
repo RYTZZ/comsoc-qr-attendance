@@ -48,6 +48,17 @@ class ProfileController extends Controller
 
         $user = $request->user();
 
+        if ($user->role === 'super_admin') {
+            $otherSuperAdmins = \App\Models\User::where('role', 'super_admin')
+                ->where('is_active', true)
+                ->where('id', '!=', $user->id)
+                ->count();
+
+            if ($otherSuperAdmins === 0) {
+                return back()->withErrors(['password' => 'Cannot delete the only active Super Admin account.']);
+            }
+        }
+
         Auth::logout();
 
         $user->delete();

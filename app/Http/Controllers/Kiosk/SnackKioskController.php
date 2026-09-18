@@ -44,6 +44,11 @@ class SnackKioskController extends Controller
     {
         abort_unless($kiosk->is_active, 404);
 
+        $user = auth()->user();
+        if ($user && $user->role === 'kiosk' && $user->kiosk && $user->kiosk->id !== $kiosk->id) {
+            abort(403, 'Unauthorized kiosk terminal.');
+        }
+
         $rawToken = trim((string) $request->input('token', ''));
         $token = $rawToken;
 
@@ -75,6 +80,11 @@ class SnackKioskController extends Controller
         ]);
 
         $session = SnackSession::findOrFail($request->snack_session_id);
+
+        if ($kiosk->assigned_event_id && $kiosk->assigned_event_id !== $session->event_id) {
+            return response()->json(['success' => false, 'message' => 'This kiosk is only authorized for its assigned event.'], 403);
+        }
+
         $inventory = SnackInventory::findOrFail($request->snack_inventory_id);
         $staff = auth()->user() ?? $kiosk->assignedStaff ?? $kiosk->user;
 

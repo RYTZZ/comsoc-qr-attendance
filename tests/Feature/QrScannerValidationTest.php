@@ -227,4 +227,64 @@ class QrScannerValidationTest extends TestCase
             'code' => 'invalid_qr',
         ]);
     }
+
+    public function test_rejects_scan_from_unauthorized_kiosk_terminal(): void
+    {
+        $kioskUserA = User::factory()->create(['role' => 'kiosk']);
+        $kioskUserB = User::factory()->create(['role' => 'kiosk']);
+        $event = $this->createEvent($kioskUserA);
+        $session = $this->createSession($event->id);
+
+        $kioskA = Kiosk::create([
+            'user_id' => $kioskUserA->id,
+            'name' => 'Kiosk A',
+            'identifier' => 'KIOSK-A',
+            'type' => 'attendance',
+            'is_active' => true,
+            'assigned_staff_id' => $kioskUserA->id,
+            'assigned_event_id' => $event->id,
+        ]);
+
+        $kioskB = Kiosk::create([
+            'user_id' => $kioskUserB->id,
+            'name' => 'Kiosk B',
+            'identifier' => 'KIOSK-B',
+            'type' => 'attendance',
+            'is_active' => true,
+            'assigned_staff_id' => $kioskUserB->id,
+            'assigned_event_id' => $event->id,
+        ]);
+
+        $response = $this->actingAs($kioskUserA)->postJson(route('kiosk.scan', $kioskB), [
+            'token' => str_repeat('X', 48),
+            'event_id' => $event->id,
+            'session_id' => $session->id,
+        ]);
+
+        $response->assertStatus(403);
+    }
+
+    public function test_students_cannot_access_kiosk_scan_endpoint(): void
+    {
+        $studentUser = User::factory()->create(['role' => 'student']);
+        $event = $this->createEvent($studentUser);
+        $session = $this->createSession($event->id);
+
+        $kiosk = Kiosk::create([
+            'name' => 'Kiosk Live',
+            'identifier' => 'KIOSK-LIVE',
+            'type' => 'attendance',
+            'is_active' => true,
+            'assigned_staff_id' => $studentUser->id,
+            'assigned_event_id' => $event->id,
+        ]);
+
+        $response = $this->actingAs($studentUser)->postJson(route('kiosk.scan', $kiosk), [
+            'token' => str_repeat('X', 48),
+            'event_id' => $event->id,
+            'session_id' => $session->id,
+        ]);
+
+        $response->assertStatus(403);
+    }
 }
