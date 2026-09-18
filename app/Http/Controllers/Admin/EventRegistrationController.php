@@ -9,11 +9,12 @@ use App\Services\AuditLogger;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\View\View;
+use Symfony\Component\HttpFoundation\StreamedResponse;
 use App\Services\QrPngRenderer;
 
 class EventRegistrationController extends Controller
 {
-    public function index(Request $request, Event $event): View
+    public function index(Request $request, Event $event): View|StreamedResponse
     {
         $query = $event->eventRegistrations();
 

@@ -35,7 +35,7 @@ class QrCodeController extends Controller
 
         $filterYearId = $request->academic_year_id ?? $activeYear?->id;
 
-        $missingQrCount = \App\Models\Membership::where('status', 'active')
+        $missingQrCount = Membership::where('status', 'active')
             ->when($filterYearId, fn($q) => $q->where('academic_year_id', $filterYearId))
             ->whereDoesntHave('qrCodes', fn($q) => $q->where('status', 'active'))
             ->count();
@@ -52,7 +52,7 @@ class QrCodeController extends Controller
             return back()->with('error', 'No active academic year configured.');
         }
 
-        $academicYear = \App\Models\AcademicYear::findOrFail($yearId);
+        $academicYear = AcademicYear::findOrFail($yearId);
 
         $lastBatch = QrCode::whereHas('membership', fn($q) => $q->where('academic_year_id', $yearId))
             ->max('batch_number') ?? 0;

@@ -13,10 +13,11 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Str;
 use Illuminate\View\View;
+use Symfony\Component\HttpFoundation\StreamedResponse;
 
 class StudentController extends Controller
 {
-    public function index(Request $request): View
+    public function index(Request $request): View|StreamedResponse
     {
         $activeYear = AcademicYear::active();
         $academicYears = AcademicYear::orderByDesc('year_start')->get();
