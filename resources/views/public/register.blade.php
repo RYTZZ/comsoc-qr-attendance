@@ -408,6 +408,8 @@
                     </p>
                 </div>
             @endif
+
+            <x-public-branding-footer />
         </div>
     </div>
 

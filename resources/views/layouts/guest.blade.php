@@ -28,6 +28,8 @@
             <div class="w-full sm:max-w-md card shadow-2xl border border-slate-800/80 bg-[#171a23]/95 backdrop-blur-md enter-card">
                 {{ $slot }}
             </div>
+
+            <x-public-branding-footer />
         </div>
     </body>
 </html>

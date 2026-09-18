@@ -74,9 +74,7 @@
 
     </div>
 
-    <p class="text-center text-xs text-slate-600 mt-6">
-        ComSoc QR Attendance v1.0 — Computing Society
-    </p>
+    <x-public-branding-footer />
 </div>
 
 </body>
