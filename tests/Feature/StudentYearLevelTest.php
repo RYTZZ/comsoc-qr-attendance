@@ -268,7 +268,6 @@ class StudentYearLevelTest extends TestCase
         $response->assertOk();
         $response->assertSee('2026-9999');
         $response->assertSee('Edge Case');
-        $response->assertSee('No Account');
         $response->assertSee('Not assigned');
         $response->assertSee('None');
         $response->assertSee('QR Missing');

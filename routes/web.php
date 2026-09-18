@@ -21,8 +21,6 @@ use App\Http\Controllers\Kiosk\AttendanceKioskController;
 use App\Http\Controllers\Kiosk\SnackKioskController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\PublicRegistrationController;
-use App\Http\Controllers\Student\DashboardController as StudentDashboard;
-use App\Http\Controllers\Student\PasswordController as StudentPasswordController;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', fn() => redirect()->route('login'));
@@ -33,9 +31,6 @@ Route::get('/dashboard', function () {
     if (!$user->is_active) {
         auth('web')->logout();
         return redirect()->route('login')->withErrors(['email' => 'Your account has been deactivated.']);
-    }
-    if ($user->role === 'student') {
-        return redirect()->route('student.dashboard');
     }
     if ($user->role === 'kiosk') {
         if ($user->kiosk) {
@@ -68,21 +63,9 @@ Route::get('/kiosk', fn() => redirect()->route('login')->withErrors(['email' => 
 require __DIR__ . '/auth.php';
 
 Route::middleware(['auth', 'verified'])->group(function () {
-
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
-
-    Route::middleware(['role:student', 'require_password_change'])->prefix('my')->name('student.')->group(function () {
-        Route::get('/password/change', [StudentPasswordController::class, 'showChangeForm'])->name('password.change')->withoutMiddleware('require_password_change');
-        Route::post('/password/change', [StudentPasswordController::class, 'update'])->name('password.update')->withoutMiddleware('require_password_change');
-        Route::get('/dashboard', [StudentDashboard::class, 'index'])->name('dashboard');
-        Route::get('/qr', [StudentDashboard::class, 'qr'])->name('qr');
-        Route::get('/qr/download', [StudentDashboard::class, 'downloadQr'])->name('qr.download');
-        Route::get('/card/download', [StudentDashboard::class, 'downloadCard'])->name('card.download');
-        Route::get('/attendance', [StudentDashboard::class, 'attendance'])->name('attendance');
-        Route::get('/incidents', [StudentDashboard::class, 'incidents'])->name('incidents');
-    });
 
     Route::middleware(['role:kiosk,staff,treasurer,admin,super_admin'])->group(function () {
         Route::get('/kiosk/{kiosk}', [AttendanceKioskController::class, 'show'])->name('kiosk.attendance');
@@ -139,13 +122,6 @@ Route::middleware(['auth', 'verified'])->group(function () {
 
         Route::resource('students', StudentController::class)->only(['index', 'show', 'update']);
         Route::patch('students/{student}/email', [StudentController::class, 'updateEmail'])->name('students.update-email');
-        Route::post('students/{student}/resend-activation', [StudentController::class, 'resendActivation'])->name('students.resend-activation');
-        Route::post('students/{student}/create-account', [StudentController::class, 'createAccount'])->name('students.create-account');
-        Route::post('students/{student}/activate-account', [StudentController::class, 'activateAccount'])->name('students.activate-account');
-        Route::post('students/{student}/suspend-account', [StudentController::class, 'suspendAccount'])->name('students.suspend-account');
-        Route::post('students/{student}/deactivate-account', [StudentController::class, 'deactivateAccount'])->name('students.deactivate-account');
-        Route::post('students/{student}/reset-password', [StudentController::class, 'resetPassword'])->name('students.reset-password');
-        Route::post('students/bulk-create-accounts', [StudentController::class, 'bulkCreateAccounts'])->name('students.bulk-create-accounts')->middleware('role:super_admin');
 
         Route::get('memberships', [MembershipController::class, 'index'])->name('memberships.index');
         Route::post('memberships/bulk-activate', [MembershipController::class, 'bulkActivate'])->name('memberships.bulk-activate');

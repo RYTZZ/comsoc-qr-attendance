@@ -30,34 +30,6 @@ Route::middleware('guest')->group(function () {
     Route::post('reset-password', [NewPasswordController::class, 'store'])
         ->middleware('throttle:6,1')
         ->name('password.store');
-
-    Route::get('activate', [\App\Http\Controllers\Auth\StudentActivationController::class, 'showVerifyStudentForm'])
-        ->name('student.activate');
-
-    Route::post('activate/verify-student', [\App\Http\Controllers\Auth\StudentActivationController::class, 'verifyStudent'])
-        ->middleware('throttle:10,1')
-        ->name('student.activate.student.submit');
-
-    Route::get('activate/email', [\App\Http\Controllers\Auth\StudentActivationController::class, 'showEmailForm'])
-        ->name('student.activate.email');
-
-    Route::post('activate/email', [\App\Http\Controllers\Auth\StudentActivationController::class, 'submitEmailAndSendOtp'])
-        ->middleware('throttle:5,1')
-        ->name('student.activate.email.submit');
-
-    Route::get('activate/verify', [\App\Http\Controllers\Auth\StudentActivationController::class, 'showVerifyForm'])
-        ->name('student.activate.verify');
-
-    Route::post('activate/verify', [\App\Http\Controllers\Auth\StudentActivationController::class, 'verifyOtp'])
-        ->middleware('throttle:5,1')
-        ->name('student.activate.verify.submit');
-
-    Route::get('activate/password', [\App\Http\Controllers\Auth\StudentActivationController::class, 'showPasswordForm'])
-        ->name('student.activate.password');
-
-    Route::post('activate/complete', [\App\Http\Controllers\Auth\StudentActivationController::class, 'completeActivation'])
-        ->middleware('throttle:5,1')
-        ->name('student.activate.complete');
 });
 
 Route::middleware('auth')->group(function () {

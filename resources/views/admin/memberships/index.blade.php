@@ -87,7 +87,6 @@
                 <th>Student</th>
                 <th>Student #</th>
                 <th>Program & Year</th>
-                <th>Account</th>
                 <th>Membership #</th>
                 <th>Academic Year</th>
                 <th>Status</th>
@@ -99,7 +98,6 @@
             @forelse($memberships as $membership)
             @php
                 $student = $membership->student;
-                $user = $student?->user;
             @endphp
             <tr>
                 <td class="font-medium text-white">{{ $student?->display_name ?? 'Unknown Student' }}</td>
@@ -109,15 +107,6 @@
                         <span class="text-white text-xs font-semibold">{{ $student?->year_level ?? 'Not assigned' }}</span>
                         <span class="text-slate-400 text-[11px]">{{ $student?->program ?? 'None' }}</span>
                     </div>
-                </td>
-                <td>
-                    @if(!$user)
-                        <span class="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-semibold bg-slate-800 text-slate-400 border border-slate-700">No Account</span>
-                    @elseif($user->is_active)
-                        <span class="badge-active text-xs">Active</span>
-                    @else
-                        <span class="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-semibold bg-red-500/10 text-red-400 border border-red-500/20">Suspended</span>
-                    @endif
                 </td>
                 <td class="font-mono text-xs text-slate-400">{{ $membership->membership_number ?? '—' }}</td>
                 <td class="text-slate-400 text-xs">{{ $membership->academicYear?->label ?? '—' }}</td>
@@ -166,7 +155,7 @@
                 </td>
             </tr>
             @empty
-            <tr><td colspan="9">
+            <tr><td colspan="8">
                 <div class="empty-state">
                     <div class="empty-state-icon flex items-center justify-center">
                         <i data-lucide="award" class="w-8 h-8 text-slate-500"></i>

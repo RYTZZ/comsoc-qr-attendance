@@ -19,8 +19,6 @@
 <div class="alert-error mb-4">{{ session('error') }}</div>
 @endif
 
-@endif
-
 <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
     <div class="lg:col-span-1 space-y-4">
 
@@ -186,113 +184,6 @@
             </div>
         </div>
 
-        <div class="card">
-            <h2 class="section-title">Account</h2>
-            @if($student->user)
-            @php $user = $student->user; @endphp
-            <dl class="space-y-3 mb-4">
-                <div>
-                    <dt class="label">Status</dt>
-                    <dd class="flex items-center gap-2">
-                        @if(!$user->is_active)
-                            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold bg-red-500/10 text-red-400 border border-red-500/20">Suspended</span>
-                        @elseif(!$user->is_activated)
-                            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold bg-amber-500/10 text-amber-400 border border-amber-500/20">Not Activated</span>
-                        @else
-                            <span class="badge-active">Active</span>
-                        @endif
-                    </dd>
-                </div>
-                <div>
-                    <dt class="label">Login Username</dt>
-                    <dd class="text-white font-mono text-sm">{{ $user->username }}</dd>
-                </div>
-                <div>
-                    <dt class="label">Account Email</dt>
-                    <dd class="text-white text-sm">{{ $user->email }}</dd>
-                </div>
-                <div>
-                    <dt class="label">Account Created</dt>
-                    <dd class="text-slate-300 text-sm">{{ $user->created_at->format('M d, Y') }}</dd>
-                </div>
-                <div>
-                    <dt class="label">Last Login</dt>
-                    <dd class="text-slate-300 text-sm">{{ $user->last_activity_at?->diffForHumans() ?? 'Never' }}</dd>
-                </div>
-            </dl>
-
-            <div class="space-y-2">
-                <form method="POST" action="{{ route('admin.students.resend-activation', $student) }}">
-                    @csrf
-                    <button type="submit" class="w-full px-4 py-2 rounded-xl text-sm font-semibold bg-indigo-500/10 text-indigo-300 border border-indigo-500/25 hover:bg-indigo-500/20 hover:text-white transition-colors">
-                        Send Activation OTP
-                    </button>
-                </form>
-
-                @if(!$user->is_active)
-                <form method="POST" action="{{ route('admin.students.activate-account', $student) }}">
-                    @csrf
-                    <button type="submit" class="btn-primary w-full text-sm">Activate Account</button>
-                </form>
-                @else
-                <form method="POST" action="{{ route('admin.students.suspend-account', $student) }}"
-                      onsubmit="return confirm('Suspend {{ $student->display_name }}\'s account? They will not be able to log in.')">
-                    @csrf
-                    <button type="submit" class="w-full px-4 py-2 rounded-xl text-sm font-semibold bg-amber-500/10 text-amber-400 border border-amber-500/20 hover:bg-amber-500/20 transition-colors">
-                        Suspend Account
-                    </button>
-                </form>
-                @endif
-
-                <form method="POST" action="{{ route('admin.students.reset-password', $student) }}"
-                      onsubmit="return confirm('Reset account access for {{ $student->display_name }}? They will need to verify and set a new password.')">
-                    @csrf
-                    <button type="submit" class="w-full px-4 py-2 rounded-xl text-sm font-semibold bg-slate-800 text-slate-300 border border-slate-700 hover:bg-slate-700 transition-colors">
-                        Require Password Reset
-                    </button>
-                </form>
-
-                @if($user->is_active)
-                <form method="POST" action="{{ route('admin.students.deactivate-account', $student) }}"
-                      onsubmit="return confirm('Deactivate {{ $student->display_name }}\'s account? They will not be able to log in.')">
-                    @csrf
-                    <button type="submit" class="w-full px-4 py-2 rounded-xl text-sm font-semibold bg-red-500/10 text-red-400 border border-red-500/20 hover:bg-red-500/20 transition-colors">
-                        Deactivate Account
-                    </button>
-                </form>
-                @endif
-            </div>
-
-            @else
-            <div class="text-center py-4 mb-4">
-                <div class="w-12 h-12 rounded-2xl bg-slate-800 flex items-center justify-center mx-auto mb-2 text-slate-400">
-                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.75" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
-                    </svg>
-                </div>
-                <p class="text-sm font-semibold text-slate-300">No Account</p>
-                <p class="text-xs text-slate-500 mt-1">This student does not have a system account yet.</p>
-            </div>
-            <div class="space-y-2">
-                @if($student->email)
-                <form method="POST" action="{{ route('admin.students.resend-activation', $student) }}">
-                    @csrf
-                    <button type="submit" class="btn-primary w-full text-sm">
-                        Initialize & Send Activation OTP
-                    </button>
-                </form>
-                @else
-                <form method="POST" action="{{ route('admin.students.create-account', $student) }}">
-                    @csrf
-                    <button type="submit" class="btn-primary w-full text-sm">
-                        Initialize Account
-                    </button>
-                </form>
-                @endif
-            </div>
-            <p class="text-xs text-slate-500 text-center mt-2">Login: <span class="font-mono text-slate-400">{{ $student->student_number }}</span> (Student activates with OTP)</p>
-            @endif
-        </div>
     </div>
 
     <div class="lg:col-span-2 space-y-4">

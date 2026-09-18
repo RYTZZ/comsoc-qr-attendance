@@ -29,12 +29,6 @@ class AuthenticatedSessionController extends Controller
             return back()->withErrors(['email' => 'Your account has been deactivated.']);
         }
 
-        if ($user->role === 'student' && !$user->is_activated) {
-            \App\Services\AuditLogger::log('auth.login_blocked_not_activated', $user, [], ['email' => $user->email]);
-            Auth::logout();
-            return back()->withErrors(['email' => 'Your student account is not yet activated. Please activate your account first.']);
-        }
-
         $user->update(['last_activity_at' => now()]);
 
         if ($user->role === 'kiosk' && $user->kiosk) {
@@ -55,12 +49,7 @@ class AuthenticatedSessionController extends Controller
             return redirect()->route('kiosk.hub');
         }
 
-        $redirect = match ($user->role) {
-            'student' => route('student.dashboard'),
-            default => route('admin.dashboard'),
-        };
-
-        return redirect()->intended($redirect);
+        return redirect()->intended(route('admin.dashboard'));
     }
 
     public function destroy(Request $request): RedirectResponse

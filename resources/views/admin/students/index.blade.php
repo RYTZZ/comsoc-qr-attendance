@@ -15,14 +15,6 @@
             <i data-lucide="file-spreadsheet" class="w-3.5 h-3.5"></i>
             Export CSV
         </a>
-        @if(auth()->user()->isSuperAdmin() && $noAccountCount > 0)
-        <button type="button"
-                onclick="document.getElementById('bulk-create-modal').classList.remove('hidden')"
-                class="btn-primary flex items-center gap-2 shrink-0">
-            <i data-lucide="user-plus" class="w-4 h-4"></i>
-            Bulk Create Accounts
-        </button>
-        @endif
     </div>
 </div>
 
@@ -49,20 +41,6 @@
             :options="$yearLevelOptions"
             :value="request('year_level', '')"
             placeholder="All Year Levels"
-            buttonClass="py-2 text-xs sm:text-sm" />
-    </div>
-    <div class="w-full sm:w-40">
-        <x-custom-dropdown
-            name="account_status"
-            :options="[
-                '' => 'All Account Statuses',
-                'no_account' => 'No Account',
-                'not_activated' => 'Not Activated',
-                'active' => 'Active',
-                'inactive' => 'Suspended / Deactivated',
-            ]"
-            :value="request('account_status', '')"
-            placeholder="All Account Statuses"
             buttonClass="py-2 text-xs sm:text-sm" />
     </div>
     <div class="w-full sm:w-36">
@@ -117,10 +95,8 @@
                 <th>Student Number</th>
                 <th>Name</th>
                 <th>Program & Year</th>
-                <th>Account</th>
                 <th>Membership</th>
                 <th>QR</th>
-                <th>Last Login</th>
                 <th></th>
             </tr>
         </thead>
@@ -129,7 +105,6 @@
             @php
                 $membership = $student->memberships->first();
                 $activeQr = $membership?->activeQrCode;
-                $user = $student->user;
             @endphp
             <tr>
                 <td class="font-mono text-sm">{{ $student->student_number }}</td>
@@ -139,17 +114,6 @@
                         <span class="text-white text-xs font-medium">{{ $student->year_level ?? '—' }}</span>
                         <span class="text-slate-400 text-[11px]">{{ $student->program ?? 'BSIT' }}</span>
                     </div>
-                </td>
-                <td>
-                    @if(!$user)
-                        <span class="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-semibold bg-slate-800 text-slate-400 border border-slate-700">No Account</span>
-                    @elseif(!$user->is_active)
-                        <span class="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-semibold bg-red-500/10 text-red-400 border border-red-500/20">Suspended</span>
-                    @elseif(!$user->is_activated)
-                        <span class="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-semibold bg-amber-500/10 text-amber-400 border border-amber-500/20">Not Activated</span>
-                    @else
-                        <span class="badge-active text-xs">Active</span>
-                    @endif
                 </td>
                 <td>
                     @if($membership)
@@ -171,16 +135,13 @@
                         <span class="text-slate-600 text-xs">None</span>
                     @endif
                 </td>
-                <td class="text-slate-400 text-xs">
-                    {{ $user?->last_activity_at?->diffForHumans() ?? '—' }}
-                </td>
                 <td>
                     <a href="{{ route('admin.students.show', $student) }}" class="btn-secondary btn-sm">Manage</a>
                 </td>
             </tr>
             @empty
             <tr>
-                <td colspan="8">
+                <td colspan="6">
                     <div class="empty-state">
                         <div class="empty-state-icon flex items-center justify-center">
                             <i data-lucide="users" class="w-8 h-8 text-slate-500"></i>
@@ -195,40 +156,4 @@
     </table>
 </div>
 <div class="mt-4">{{ $students->links() }}</div>
-
-@if(auth()->user()->isSuperAdmin())
-<div id="bulk-create-modal" class="hidden fixed inset-0 bg-black/60 z-50 flex items-center justify-center p-4">
-    <div class="bg-slate-900 border border-slate-700 rounded-2xl p-6 max-w-sm w-full space-y-4 shadow-2xl">
-        <h2 class="text-base font-bold text-white">Bulk Create Student Accounts</h2>
-        <p class="text-sm text-slate-400">
-            Create accounts for all students without one in the selected academic year.
-        </p>
-        <div class="bg-slate-800/60 rounded-xl p-4 text-center">
-            <p class="text-3xl font-bold text-white">{{ number_format($noAccountCount) }}</p>
-            <p class="text-xs text-slate-400 mt-1">Students Without Accounts</p>
-        </div>
-        @if($noAccountCount > 0)
-        <form method="POST" action="{{ route('admin.students.bulk-create-accounts') }}">
-            @csrf
-            <input type="hidden" name="academic_year_id" value="{{ $yearId }}">
-            <div class="flex gap-2">
-                <button type="submit" class="btn-primary flex-1"
-                        onclick="return confirm('Create {{ $noAccountCount }} student account(s)? This cannot be undone.')">
-                    Create Accounts
-                </button>
-                <button type="button" class="btn-secondary flex-1"
-                        onclick="document.getElementById('bulk-create-modal').classList.add('hidden')">
-                    Cancel
-                </button>
-            </div>
-        </form>
-        @else
-        <button type="button" class="btn-secondary w-full"
-                onclick="document.getElementById('bulk-create-modal').classList.add('hidden')">
-            Close
-        </button>
-        @endif
-    </div>
-</div>
-@endif
 </x-layouts.admin>
