@@ -28,24 +28,6 @@ class DashboardController extends Controller
             ? Membership::where('academic_year_id', $activeYear->id)->where('status', 'active')->count()
             : 0;
 
-        $programBreakdown = Student::all()
-            ->groupBy(fn($s) => $s->program ?: 'BSIT')
-            ->map(fn($group, $key) => (object)['prog' => $key, 'count' => $group->count()])
-            ->sortByDesc('count')
-            ->values();
-
-        $yearLevelBreakdown = Student::whereNotNull('year_level')
-            ->get()
-            ->groupBy('year_level')
-            ->map(fn($group, $key) => (object)['year_level' => $key, 'count' => $group->count()])
-            ->sortBy('year_level')
-            ->values();
-
-        $recentScans = AttendanceRecord::with(['student', 'event', 'attendanceSession'])
-            ->latest('scanned_at')
-            ->take(6)
-            ->get();
-
         return [
             'total_students' => $totalStudents,
             'active_members' => $activeMembers,
@@ -61,9 +43,36 @@ class DashboardController extends Controller
                 ->orderBy('event_date')
                 ->take(5)
                 ->get(),
-            'program_breakdown' => $programBreakdown,
-            'year_level_breakdown' => $yearLevelBreakdown,
-            'recent_scans' => $recentScans,
+            'program_breakdown' => $this->getProgramBreakdown(),
+            'year_level_breakdown' => $this->getYearLevelBreakdown(),
+            'recent_scans' => $this->getRecentScans(),
         ];
+    }
+
+    private function getProgramBreakdown()
+    {
+        return Student::all()
+            ->groupBy(fn($s) => $s->program ?: 'BSIT')
+            ->map(fn($group, $key) => (object)['prog' => $key, 'count' => $group->count()])
+            ->sortByDesc('count')
+            ->values();
+    }
+
+    private function getYearLevelBreakdown()
+    {
+        return Student::whereNotNull('year_level')
+            ->get()
+            ->groupBy('year_level')
+            ->map(fn($group, $key) => (object)['year_level' => $key, 'count' => $group->count()])
+            ->sortBy('year_level')
+            ->values();
+    }
+
+    private function getRecentScans()
+    {
+        return AttendanceRecord::with(['student', 'event', 'attendanceSession'])
+            ->latest('scanned_at')
+            ->take(6)
+            ->get();
     }
 }
