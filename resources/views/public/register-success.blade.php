@@ -8,21 +8,23 @@
     <link href="https://fonts.bunny.net/css?family=inter:300,400,500,600,700" rel="stylesheet" />
     @vite(['resources/css/app.css', 'resources/js/app.js'])
 </head>
-<body class="bg-slate-950 text-slate-100 min-h-screen flex flex-col font-sans antialiased selection:bg-brand-500 selection:text-white">
-    <div class="relative overflow-hidden bg-gradient-to-b from-brand-950/40 via-slate-950 to-slate-950 flex-1 flex flex-col items-center justify-center p-4 py-10">
+<body class="bg-[#0f1117] text-slate-100 min-h-screen flex flex-col font-sans antialiased selection:bg-[#7A1618] selection:text-white relative overflow-x-hidden">
+    <x-public-auth-bg />
+
+    <div class="relative overflow-hidden flex-1 flex flex-col items-center justify-center p-4 py-10 z-10">
         <div class="w-full max-w-lg relative z-10 text-center">
-            <div class="w-16 h-16 mx-auto mb-3 flex items-center justify-center p-1.5 rounded-2xl bg-slate-900/80 border border-slate-800 shadow-xl shadow-brand-500/10">
+            <div class="w-16 h-16 mx-auto mb-3 flex items-center justify-center p-1.5 rounded-2xl bg-[#171a23]/90 border border-slate-800 shadow-xl enter-logo backdrop-blur-sm">
                 <img src="{{ asset('images/COMSOC.png') }}" alt="Computing Society Logo" class="w-full h-full object-contain">
             </div>
 
-            <div class="bg-slate-900/90 border border-slate-800 backdrop-blur-xl rounded-2xl shadow-2xl p-6 sm:p-8 text-left">
+            <div class="bg-[#171a23]/95 border border-slate-800 backdrop-blur-md rounded-2xl shadow-2xl p-6 sm:p-8 text-left enter-card">
                 <div class="text-center mb-6">
                     <div class="inline-flex items-center justify-center w-12 h-12 rounded-full bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 mb-3">
                         <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
                         </svg>
                     </div>
-                    <h1 class="text-2xl font-bold text-white">Registration Submitted!</h1>
+                    <h1 class="font-brand-display text-2xl font-bold text-white">Registration Submitted!</h1>
                     <p class="text-slate-300 text-xs sm:text-sm mt-1">
                         Thank you for registering. Your details have been submitted for administrator review.
                     </p>

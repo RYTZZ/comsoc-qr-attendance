@@ -9,20 +9,24 @@
     <link href="https://fonts.googleapis.com/css2?family=Michroma&family=Sora:wght@600;700;800&family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet">
     @vite(['resources/css/app.css', 'resources/js/app.js'])
 </head>
-<body class="bg-[#0f1117] text-slate-100 min-h-screen flex flex-col font-sans antialiased selection:bg-[#7A1618] selection:text-white">
-    <div class="relative overflow-hidden flex-1 flex flex-col items-center justify-center p-4 py-10">
+<body class="bg-[#0f1117] text-slate-100 min-h-screen flex flex-col font-sans antialiased selection:bg-[#7A1618] selection:text-white relative overflow-x-hidden">
+    <x-public-auth-bg />
+
+    <div class="relative overflow-hidden flex-1 flex flex-col items-center justify-center p-4 py-10 z-10">
         <div class="w-full max-w-xl relative z-10">
             <div class="text-center mb-6">
-                <div class="w-20 h-20 mx-auto mb-3 flex items-center justify-center p-2 rounded-2xl bg-[#171a23] border border-slate-800 shadow-md">
+                <div class="w-20 h-20 mx-auto mb-3 flex items-center justify-center p-2 rounded-2xl bg-[#171a23]/90 border border-slate-800 shadow-xl enter-logo backdrop-blur-sm">
                     <img src="{{ asset('images/COMSOC.png') }}" alt="Computing Society Logo" class="w-full h-full object-contain">
                 </div>
-                <p class="font-brand-accent text-[11px] text-[#dfa6a9] tracking-widest uppercase mb-1">COMPUTING SOCIETY</p>
-                <h1 class="font-brand-display text-2xl sm:text-3xl font-bold tracking-tight text-white">Event Registration</h1>
-                <p class="text-slate-400 text-xs sm:text-sm mt-0.5">Official Non-Student Participant Gateway</p>
+                <div class="enter-header">
+                    <p class="font-brand-accent text-[11px] text-[#dfa6a9] tracking-widest uppercase mb-1">COMPUTING SOCIETY</p>
+                    <h1 class="font-brand-display text-2xl sm:text-3xl font-bold tracking-tight text-white">Event Registration</h1>
+                    <p class="text-slate-400 text-xs sm:text-sm mt-0.5">Official Non-Student Participant Gateway</p>
+                </div>
             </div>
 
             @if(!$event)
-                <div class="bg-[#171a23] border border-slate-800/80 rounded-2xl shadow-xl p-8 text-center">
+                <div class="bg-[#171a23]/95 border border-slate-800/80 rounded-2xl shadow-xl p-8 text-center enter-card backdrop-blur-md">
                     <div class="w-12 h-12 mx-auto rounded-full bg-slate-800/80 flex items-center justify-center text-slate-400 mb-3">
                         <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
@@ -34,7 +38,7 @@
                     </p>
                 </div>
             @else
-                <div class="bg-[#171a23] border border-slate-800/80 rounded-2xl shadow-xl p-5 sm:p-8">
+                <div class="bg-[#171a23]/95 border border-slate-800/80 rounded-2xl shadow-2xl p-5 sm:p-8 enter-card backdrop-blur-md">
                     @if(isset($events) && $events->count() > 1)
                         <div class="mb-6 pb-5 border-b border-slate-800">
                             <label class="block text-xs font-medium text-slate-300 mb-1.5 font-brand-display">

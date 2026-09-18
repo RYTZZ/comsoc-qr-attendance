@@ -11,19 +11,23 @@
     <link href="https://fonts.googleapis.com/css2?family=Michroma&family=Sora:wght@600;700;800&family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet">
     @vite(['resources/css/app.css', 'resources/js/app.js'])
 </head>
-<body class="h-full bg-[#0f1117] flex items-center justify-center min-h-screen p-4 font-sans text-slate-100">
+<body class="h-full bg-[#0f1117] flex items-center justify-center min-h-screen p-4 font-sans text-slate-100 relative overflow-x-hidden selection:bg-[#7A1618] selection:text-white">
 
-<div class="w-full max-w-md animate-slide-up">
+<x-public-auth-bg />
+
+<div class="w-full max-w-md relative z-10">
     <div class="text-center mb-8">
-        <div class="w-20 h-20 mx-auto mb-4 flex items-center justify-center p-2 rounded-2xl bg-[#171a23] border border-slate-800 shadow-md">
+        <div class="w-20 h-20 mx-auto mb-4 flex items-center justify-center p-2 rounded-2xl bg-[#171a23]/90 border border-slate-800 shadow-xl enter-logo backdrop-blur-sm">
             <img src="{{ asset('images/COMSOC.png') }}" alt="Computing Society Logo" class="w-full h-full object-contain">
         </div>
-        <p class="font-brand-accent text-[11px] text-[#dfa6a9] tracking-widest uppercase mb-1">COMPUTING SOCIETY</p>
-        <h1 class="font-brand-display text-2xl sm:text-3xl font-bold text-white tracking-tight">QR Attendance System</h1>
-        <p class="text-slate-400 mt-1 text-xs sm:text-sm">Manage memberships, events, and attendance records</p>
+        <div class="enter-header">
+            <p class="font-brand-accent text-[11px] text-[#dfa6a9] tracking-widest uppercase mb-1">COMPUTING SOCIETY</p>
+            <h1 class="font-brand-display text-2xl sm:text-3xl font-bold text-white tracking-tight">QR Attendance System</h1>
+            <p class="text-slate-400 mt-1 text-xs sm:text-sm">Manage memberships, events, and attendance records</p>
+        </div>
     </div>
 
-    <div class="card shadow-xl border border-slate-800/80 bg-[#171a23]">
+    <div class="card shadow-2xl border border-slate-800/80 bg-[#171a23]/95 backdrop-blur-md enter-card">
         <h2 class="font-brand-display text-base font-bold text-white mb-6">Sign in to your account</h2>
 
         @if($errors->any())
