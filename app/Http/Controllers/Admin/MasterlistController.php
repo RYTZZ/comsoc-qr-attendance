@@ -71,6 +71,7 @@ class MasterlistController extends Controller
                     'middle_name' => $row['middle_name'] ?? null,
                     'program' => $row['program'] ?? null,
                     'year_level' => $row['year_level'],
+                    'email' => $row['email'] ?? null,
                 ]);
 
                 Membership::create([
@@ -91,6 +92,9 @@ class MasterlistController extends Controller
                     }
                     if (!empty($row['year_level'])) {
                         $updateData['year_level'] = $row['year_level'];
+                    }
+                    if (!empty($row['email'])) {
+                        $updateData['email'] = $row['email'];
                     }
                     if (!empty($updateData)) {
                         $student->update($updateData);
@@ -184,6 +188,14 @@ class MasterlistController extends Controller
 
             $normalizedProgram = Student::normalizeProgram($rawProgram);
 
+            $rawEmail = strtolower(trim($this->extractFieldValue($rowNormalized, [
+                'email',
+                'email address',
+                'e mail',
+                'registered email',
+                'student email',
+            ])));
+
             $rawYear = trim($this->extractFieldValue($rowNormalized, [
                 'year level',
                 'yearlevel',
@@ -208,12 +220,14 @@ class MasterlistController extends Controller
             }
 
             $finalProgram = $normalizedProgram ?: ($student?->program ?? null);
+            $finalEmail = (!empty($rawEmail) && filter_var($rawEmail, FILTER_VALIDATE_EMAIL)) ? $rawEmail : ($student?->email ?? null);
 
             $rowData = array_merge($nameParts, [
                 'index' => $index,
                 'student_number' => $studentNumber,
                 'program' => $finalProgram,
                 'year_level' => $normalizedYear,
+                'email' => $finalEmail,
                 'raw_year_level' => $rawYear,
             ]);
 

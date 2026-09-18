@@ -41,8 +41,10 @@ class StudentController extends Controller
             ->when($request->filled('account_status'), function ($q) use ($request) {
                 if ($request->account_status === 'no_account') {
                     $q->doesntHave('user');
+                } elseif ($request->account_status === 'not_activated') {
+                    $q->whereHas('user', fn($u) => $u->where('is_activated', false));
                 } elseif ($request->account_status === 'active') {
-                    $q->whereHas('user', fn($u) => $u->where('is_active', true));
+                    $q->whereHas('user', fn($u) => $u->where('is_active', true)->where('is_activated', true));
                 } elseif ($request->account_status === 'inactive') {
                     $q->whereHas('user', fn($u) => $u->where('is_active', false));
                 }
@@ -118,14 +120,90 @@ class StudentController extends Controller
             'first_name' => ['required', 'string', 'max:255'],
             'last_name' => ['required', 'string', 'max:255'],
             'middle_name' => ['nullable', 'string', 'max:255'],
+            'email' => ['nullable', 'email', 'max:255'],
         ]);
 
         $old = $student->toArray();
         $student->update($validated);
 
+        if ($request->filled('email') && $student->user) {
+            $student->user->update(['email' => $request->email]);
+        }
+
         AuditLogger::log('student.updated', $student, $old, $student->fresh()->toArray());
 
         return back()->with('success', "Student record for {$student->display_name} updated successfully.");
+    }
+
+    public function updateEmail(Request $request, Student $student): RedirectResponse
+    {
+        $validated = $request->validate([
+            'email' => ['required', 'email', 'max:255'],
+        ]);
+
+        $student->update(['email' => $validated['email']]);
+
+        if ($student->user) {
+            $student->user->update(['email' => $validated['email']]);
+        }
+
+        AuditLogger::log('student.email_updated', $student, [], ['email' => $validated['email']]);
+
+        return back()->with('success', "Registered email updated for {$student->display_name}.");
+    }
+
+    public function resendActivation(Student $student): RedirectResponse
+    {
+        $email = $student->email ?? $student->user?->email;
+
+        if (!$email) {
+            return back()->with('error', 'Student does not have a registered email address. Please add one first.');
+        }
+
+        $user = $student->user;
+        if (!$user) {
+            $user = User::create([
+                'name' => $student->display_name,
+                'username' => $student->student_number,
+                'email' => $email,
+                'password' => Hash::make(Str::random(32)),
+                'role' => 'student',
+                'student_id' => $student->id,
+                'is_active' => true,
+                'is_activated' => false,
+                'must_change_password' => false,
+                'created_by' => auth()->id(),
+            ]);
+        }
+
+        $otp = (string) random_int(100000, 999999);
+        $user->activation_otp = Hash::make($otp);
+        $user->activation_otp_expires_at = now()->addMinutes(15);
+        $user->is_activated = false;
+        $user->save();
+
+        try {
+            \Illuminate\Support\Facades\Mail::send('emails.notification', [
+                'subject' => 'ComSoc Account Activation OTP',
+                'title' => 'Activate Your Student Account',
+                'subtitle' => 'Verification code for Computing Society QR Attendance',
+                'otp' => $otp,
+                'notice' => 'This code will expire in 15 minutes. Never share your verification code with anyone.',
+                'body' => '<p>Hello <strong>' . e($student->display_name) . '</strong>,</p><p>An administrator has sent an activation code for your student account. Please use this one-time password to complete your activation:</p>',
+            ], function ($message) use ($email, $student) {
+                $message->to($email, $student->display_name)
+                    ->subject('ComSoc Account Activation OTP');
+            });
+        } catch (\Throwable $e) {
+            report($e);
+        }
+
+        AuditLogger::log('account.activation_resent', $user, [], [
+            'student_id' => $student->id,
+            'sent_by' => auth()->id(),
+        ]);
+
+        return back()->with('success', "Activation code sent to {$email}.");
     }
 
     public function createAccount(Request $request, Student $student): RedirectResponse
@@ -135,24 +213,23 @@ class StudentController extends Controller
         }
 
         $studentNumber = $student->student_number;
-        $email = $studentNumber . '@student.local';
+        $email = $student->email ?? ($studentNumber . '@student.local');
 
         if (User::where('username', $studentNumber)->orWhere('email', $email)->exists()) {
-            return back()->with('error', 'A user account with this student number already exists.');
+            return back()->with('error', 'A user account with this student number or email already exists.');
         }
 
-        $tempPassword = Str::password(12, true, true, false);
-
-        $user = DB::transaction(function () use ($student, $studentNumber, $email, $tempPassword) {
+        $user = DB::transaction(function () use ($student, $studentNumber, $email) {
             return User::create([
                 'name' => $student->display_name,
                 'username' => $studentNumber,
                 'email' => $email,
-                'password' => Hash::make($tempPassword),
+                'password' => Hash::make(Str::random(32)),
                 'role' => 'student',
                 'student_id' => $student->id,
                 'is_active' => true,
-                'must_change_password' => true,
+                'is_activated' => false,
+                'must_change_password' => false,
                 'created_by' => auth()->id(),
             ]);
         });
@@ -163,11 +240,7 @@ class StudentController extends Controller
             'created_by' => auth()->id(),
         ]);
 
-        return back()->with('student_credentials', [
-            'username' => $studentNumber,
-            'password' => $tempPassword,
-            'student_name' => $student->display_name,
-        ]);
+        return back()->with('success', "Account record initialized for {$student->display_name}. The student can activate it via 'Activate Your Account' on the login screen.");
     }
 
     public function activateAccount(Student $student): RedirectResponse
@@ -176,7 +249,10 @@ class StudentController extends Controller
             return back()->with('error', 'This student does not have an account.');
         }
 
-        $student->user->update(['is_active' => true]);
+        $student->user->update([
+            'is_active' => true,
+            'is_activated' => true,
+        ]);
 
         AuditLogger::log('account.activated', $student->user, ['is_active' => false], ['is_active' => true]);
 
@@ -215,24 +291,18 @@ class StudentController extends Controller
             return back()->with('error', 'This student does not have an account.');
         }
 
-        $tempPassword = Str::password(12, true, true, false);
-
         $student->user->update([
-            'password' => Hash::make($tempPassword),
-            'must_change_password' => true,
+            'is_activated' => false,
+            'activation_token' => null,
+            'activation_otp' => null,
+            'activation_otp_expires_at' => null,
         ]);
 
-        AuditLogger::log('account.password_reset', $student->user, [], [
+        AuditLogger::log('account.password_reset_initiated', $student->user, [], [
             'reset_by' => auth()->id(),
-            'must_change_password' => true,
         ]);
 
-        return back()->with('student_credentials', [
-            'username' => $student->student_number,
-            'password' => $tempPassword,
-            'student_name' => $student->display_name,
-            'is_reset' => true,
-        ]);
+        return back()->with('success', "Account access reset for {$student->display_name}. The student must reactivate their account with an OTP.");
     }
 
     public function bulkCreateAccounts(Request $request): RedirectResponse
@@ -262,17 +332,16 @@ class StudentController extends Controller
                     continue;
                 }
 
-                $tempPassword = Str::password(12, true, true, false);
-
                 $user = User::create([
                     'name' => $student->display_name,
                     'username' => $studentNumber,
-                    'email' => $email,
-                    'password' => Hash::make($tempPassword),
+                    'email' => $student->email ?? $email,
+                    'password' => Hash::make(Str::random(32)),
                     'role' => 'student',
                     'student_id' => $student->id,
                     'is_active' => true,
-                    'must_change_password' => true,
+                    'is_activated' => false,
+                    'must_change_password' => false,
                     'created_by' => auth()->id(),
                 ]);
 
@@ -287,7 +356,7 @@ class StudentController extends Controller
             }
         });
 
-        return back()->with('success', "{$created} student account(s) created. Students must log in with their Student Number and change their temporary password.");
+        return back()->with('success', "{$created} student account(s) initialized. Students can activate their accounts using their Student Number and registered email.");
     }
 
     private function exportStudentsCsv($records, string $filename): \Symfony\Component\HttpFoundation\StreamedResponse
@@ -331,7 +400,16 @@ class StudentController extends Controller
                 $membership = $student->memberships->first();
                 $qrStatus = $membership?->activeQrCode ? 'Active' : ($membership ? 'Missing' : 'No Membership');
                 $membershipStatus = $membership ? ucfirst($membership->status) : 'None';
-                $accountStatus = $student->user ? ($student->user->is_active ? 'Active' : 'Inactive') : 'No Account';
+                $accountStatus = 'No Account';
+                if ($student->user) {
+                    if (!$student->user->is_active) {
+                        $accountStatus = 'Suspended';
+                    } elseif (!$student->user->is_activated) {
+                        $accountStatus = 'Not Activated';
+                    } else {
+                        $accountStatus = 'Active';
+                    }
+                }
 
                 fputcsv($handle, [
                     $student->student_number ?? 'N/A',

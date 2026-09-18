@@ -138,6 +138,8 @@ Route::middleware(['auth', 'verified'])->group(function () {
         });
 
         Route::resource('students', StudentController::class)->only(['index', 'show', 'update']);
+        Route::patch('students/{student}/email', [StudentController::class, 'updateEmail'])->name('students.update-email');
+        Route::post('students/{student}/resend-activation', [StudentController::class, 'resendActivation'])->name('students.resend-activation');
         Route::post('students/{student}/create-account', [StudentController::class, 'createAccount'])->name('students.create-account');
         Route::post('students/{student}/activate-account', [StudentController::class, 'activateAccount'])->name('students.activate-account');
         Route::post('students/{student}/suspend-account', [StudentController::class, 'suspendAccount'])->name('students.suspend-account');

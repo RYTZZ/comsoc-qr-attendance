@@ -81,7 +81,6 @@
     </div>
     @endif
 
-    @if($membership)
     <div class="card border-slate-800">
         <div class="flex items-center gap-3 sm:gap-4">
             <div class="w-12 h-12 sm:w-14 sm:h-14 gradient-brand rounded-xl flex items-center justify-center flex-shrink-0 shadow-lg">
@@ -92,17 +91,20 @@
                 <p class="text-xs sm:text-sm text-slate-400 font-mono">{{ $student->student_number }}</p>
                 <p class="text-[11px] sm:text-xs text-brand-300 font-medium mt-0.5">{{ ($student->program ?: 'BSIT') . ' • ' . ($student->year_level ?: '1st Year') }}</p>
                 <div class="flex flex-wrap items-center gap-1.5 sm:gap-2 mt-1.5">
+                    @if($membership)
                     <span class="badge {{ $membership->status === 'active' ? 'badge-active' : 'badge-inactive' }}">
                         {{ ucfirst($membership->status) }} Member
                     </span>
                     @if($activeYear)
                     <span class="text-[10px] sm:text-xs text-slate-500">{{ $activeYear->label }}</span>
                     @endif
+                    @else
+                    <span class="badge badge-inactive">No Active Membership</span>
+                    @endif
                 </div>
             </div>
         </div>
     </div>
-    @endif
 
     @if($recentAttendance->isNotEmpty())
     <div class="card">

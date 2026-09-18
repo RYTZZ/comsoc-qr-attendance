@@ -30,6 +30,27 @@ Route::middleware('guest')->group(function () {
     Route::post('reset-password', [NewPasswordController::class, 'store'])
         ->middleware('throttle:6,1')
         ->name('password.store');
+
+    Route::get('activate', [\App\Http\Controllers\Auth\StudentActivationController::class, 'showRequestForm'])
+        ->name('student.activate');
+
+    Route::post('activate/send-otp', [\App\Http\Controllers\Auth\StudentActivationController::class, 'sendOtp'])
+        ->middleware('throttle:5,1')
+        ->name('student.activate.send');
+
+    Route::get('activate/verify', [\App\Http\Controllers\Auth\StudentActivationController::class, 'showVerifyForm'])
+        ->name('student.activate.verify');
+
+    Route::post('activate/verify', [\App\Http\Controllers\Auth\StudentActivationController::class, 'verifyOtp'])
+        ->middleware('throttle:5,1')
+        ->name('student.activate.verify.submit');
+
+    Route::get('activate/password', [\App\Http\Controllers\Auth\StudentActivationController::class, 'showPasswordForm'])
+        ->name('student.activate.password');
+
+    Route::post('activate/complete', [\App\Http\Controllers\Auth\StudentActivationController::class, 'completeActivation'])
+        ->middleware('throttle:5,1')
+        ->name('student.activate.complete');
 });
 
 Route::middleware('auth')->group(function () {

@@ -19,48 +19,6 @@
 <div class="alert-error mb-4">{{ session('error') }}</div>
 @endif
 
-@if(session('student_credentials'))
-@php $creds = session('student_credentials'); @endphp
-<div class="mb-4 rounded-2xl border border-emerald-500/30 bg-emerald-950/20 p-5 space-y-3" x-data="{ copied: false }">
-    <div class="flex items-center gap-2">
-        <svg class="w-5 h-5 text-emerald-400 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
-        </svg>
-        <h2 class="font-bold text-white text-sm">
-            {{ isset($creds['is_reset']) ? 'Password Reset' : 'Account Created' }} — {{ $creds['student_name'] }}
-        </h2>
-    </div>
-    <div class="flex items-center gap-2 text-xs text-amber-400 font-semibold">
-        <svg class="w-4 h-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/>
-        </svg>
-        <span>These credentials are shown only once. Share them securely.</span>
-    </div>
-    <div class="bg-slate-950 rounded-xl p-4 space-y-2 font-mono text-sm">
-        <div class="flex items-center justify-between gap-4">
-            <div>
-                <p class="text-xs text-slate-500 mb-0.5">Student Number (Login)</p>
-                <p class="text-white font-bold">{{ $creds['username'] }}</p>
-            </div>
-        </div>
-        <div class="flex items-center justify-between gap-4">
-            <div>
-                <p class="text-xs text-slate-500 mb-0.5">Temporary Password</p>
-                <p class="text-emerald-300 font-bold text-base tracking-wider">{{ $creds['password'] }}</p>
-            </div>
-            <button type="button"
-                    x-on:click="navigator.clipboard.writeText('{{ $creds['username'] }}\n{{ $creds['password'] }}'); copied = true; setTimeout(() => copied = false, 2000)"
-                    class="btn-secondary btn-sm shrink-0">
-                <span x-show="!copied">Copy</span>
-                <span x-show="copied" class="flex items-center gap-1">
-                    <svg class="w-3.5 h-3.5 text-emerald-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"/></svg>
-                    Copied
-                </span>
-            </button>
-        </div>
-    </div>
-    <p class="text-xs text-slate-500">The student will be required to change this password on first login.</p>
-</div>
 @endif
 
 <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
@@ -82,6 +40,17 @@
                 <div>
                     <dt class="label">Student Number</dt>
                     <dd class="text-white font-mono">{{ $student->student_number }}</dd>
+                </div>
+                <div>
+                    <dt class="label">Registered Email</dt>
+                    <dd class="text-white flex items-center justify-between gap-2">
+                        <span class="text-sm {{ $student->email ? 'text-white' : 'text-amber-400 italic' }}">
+                            {{ $student->email ?: 'No email registered' }}
+                        </span>
+                        <button type="button" onclick="document.getElementById('edit-email-modal').classList.remove('hidden')" class="text-xs text-indigo-400 hover:text-indigo-300">
+                            Change
+                        </button>
+                    </dd>
                 </div>
                 <div>
                     <dt class="label">Last Name</dt>
@@ -132,6 +101,10 @@
                     <div>
                         <label class="label">Student Number</label>
                         <input type="text" value="{{ $student->student_number }}" class="input w-full bg-slate-800/50 cursor-not-allowed font-mono text-xs" disabled>
+                    </div>
+                    <div>
+                        <label class="label">Registered Email</label>
+                        <input type="email" name="email" value="{{ old('email', $student->email) }}" class="input w-full text-sm" placeholder="student@example.com">
                     </div>
                     <div class="grid grid-cols-2 gap-2">
                         <div>
@@ -190,6 +163,29 @@
             </div>
         </div>
 
+        <div id="edit-email-modal" class="hidden fixed inset-0 bg-black/60 z-50 flex items-center justify-center p-4">
+            <div class="bg-slate-900 border border-slate-700 rounded-2xl p-6 max-w-sm w-full space-y-4 shadow-2xl">
+                <div class="flex items-center justify-between border-b border-slate-800 pb-3">
+                    <h2 class="text-base font-bold text-white">Registered Email Address</h2>
+                    <button type="button" onclick="document.getElementById('edit-email-modal').classList.add('hidden')" class="text-slate-400 hover:text-white">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+                    </button>
+                </div>
+                <form method="POST" action="{{ route('admin.students.update-email', $student) }}" class="space-y-4">
+                    @csrf
+                    @method('PATCH')
+                    <div>
+                        <label class="label">Student Email *</label>
+                        <input type="email" name="email" value="{{ old('email', $student->email) }}" class="input w-full text-sm" placeholder="student@example.com" required>
+                    </div>
+                    <div class="flex gap-2">
+                        <button type="submit" class="btn-primary flex-1">Save Email</button>
+                        <button type="button" class="btn-secondary flex-1" onclick="document.getElementById('edit-email-modal').classList.add('hidden')">Cancel</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+
         <div class="card">
             <h2 class="section-title">Account</h2>
             @if($student->user)
@@ -197,20 +193,23 @@
             <dl class="space-y-3 mb-4">
                 <div>
                     <dt class="label">Status</dt>
-                    <dd>
-                        @if($user->is_active)
-                            <span class="badge-active">Active</span>
-                        @else
+                    <dd class="flex items-center gap-2">
+                        @if(!$user->is_active)
                             <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold bg-red-500/10 text-red-400 border border-red-500/20">Suspended</span>
-                        @endif
-                        @if($user->must_change_password)
-                            <span class="ml-1 inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-semibold bg-amber-500/10 text-amber-400 border border-amber-500/20">Must Change Password</span>
+                        @elseif(!$user->is_activated)
+                            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold bg-amber-500/10 text-amber-400 border border-amber-500/20">Not Activated</span>
+                        @else
+                            <span class="badge-active">Active</span>
                         @endif
                     </dd>
                 </div>
                 <div>
                     <dt class="label">Login Username</dt>
                     <dd class="text-white font-mono text-sm">{{ $user->username }}</dd>
+                </div>
+                <div>
+                    <dt class="label">Account Email</dt>
+                    <dd class="text-white text-sm">{{ $user->email }}</dd>
                 </div>
                 <div>
                     <dt class="label">Account Created</dt>
@@ -223,6 +222,13 @@
             </dl>
 
             <div class="space-y-2">
+                <form method="POST" action="{{ route('admin.students.resend-activation', $student) }}">
+                    @csrf
+                    <button type="submit" class="w-full px-4 py-2 rounded-xl text-sm font-semibold bg-indigo-500/10 text-indigo-300 border border-indigo-500/25 hover:bg-indigo-500/20 hover:text-white transition-colors">
+                        Send Activation OTP
+                    </button>
+                </form>
+
                 @if(!$user->is_active)
                 <form method="POST" action="{{ route('admin.students.activate-account', $student) }}">
                     @csrf
@@ -239,10 +245,10 @@
                 @endif
 
                 <form method="POST" action="{{ route('admin.students.reset-password', $student) }}"
-                      onsubmit="return confirm('Reset the password for {{ $student->display_name }}? A new temporary password will be generated.')">
+                      onsubmit="return confirm('Reset account access for {{ $student->display_name }}? They will need to verify and set a new password.')">
                     @csrf
                     <button type="submit" class="w-full px-4 py-2 rounded-xl text-sm font-semibold bg-slate-800 text-slate-300 border border-slate-700 hover:bg-slate-700 transition-colors">
-                        Reset Password
+                        Require Password Reset
                     </button>
                 </form>
 
@@ -265,16 +271,26 @@
                     </svg>
                 </div>
                 <p class="text-sm font-semibold text-slate-300">No Account</p>
-                <p class="text-xs text-slate-500 mt-1">This student does not have a system account.</p>
+                <p class="text-xs text-slate-500 mt-1">This student does not have a system account yet.</p>
             </div>
-            <form method="POST" action="{{ route('admin.students.create-account', $student) }}"
-                  onsubmit="return confirm('Create a student account for {{ $student->display_name }}? The login username will be their Student Number.')">
-                @csrf
-                <button type="submit" class="btn-primary w-full">
-                    Create Account
-                </button>
-            </form>
-            <p class="text-xs text-slate-500 text-center mt-2">Login: <span class="font-mono text-slate-400">{{ $student->student_number }}</span> + auto-generated password</p>
+            <div class="space-y-2">
+                @if($student->email)
+                <form method="POST" action="{{ route('admin.students.resend-activation', $student) }}">
+                    @csrf
+                    <button type="submit" class="btn-primary w-full text-sm">
+                        Initialize & Send Activation OTP
+                    </button>
+                </form>
+                @else
+                <form method="POST" action="{{ route('admin.students.create-account', $student) }}">
+                    @csrf
+                    <button type="submit" class="btn-primary w-full text-sm">
+                        Initialize Account
+                    </button>
+                </form>
+                @endif
+            </div>
+            <p class="text-xs text-slate-500 text-center mt-2">Login: <span class="font-mono text-slate-400">{{ $student->student_number }}</span> (Student activates with OTP)</p>
             @endif
         </div>
     </div>

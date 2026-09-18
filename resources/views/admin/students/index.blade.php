@@ -57,6 +57,7 @@
             :options="[
                 '' => 'All Account Statuses',
                 'no_account' => 'No Account',
+                'not_activated' => 'Not Activated',
                 'active' => 'Active',
                 'inactive' => 'Suspended / Deactivated',
             ]"
@@ -142,10 +143,12 @@
                 <td>
                     @if(!$user)
                         <span class="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-semibold bg-slate-800 text-slate-400 border border-slate-700">No Account</span>
-                    @elseif($user->is_active)
-                        <span class="badge-active text-xs">Active</span>
-                    @else
+                    @elseif(!$user->is_active)
                         <span class="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-semibold bg-red-500/10 text-red-400 border border-red-500/20">Suspended</span>
+                    @elseif(!$user->is_activated)
+                        <span class="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-semibold bg-amber-500/10 text-amber-400 border border-amber-500/20">Not Activated</span>
+                    @else
+                        <span class="badge-active text-xs">Active</span>
                     @endif
                 </td>
                 <td>

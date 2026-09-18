@@ -19,7 +19,7 @@ class Student extends Model
         '4th Year',
     ];
 
-    protected $fillable = ['student_number', 'last_name', 'first_name', 'middle_name', 'program', 'year_level'];
+    protected $fillable = ['student_number', 'last_name', 'first_name', 'middle_name', 'program', 'year_level', 'email'];
 
     public static function normalizeYearLevel(?string $raw): ?string
     {

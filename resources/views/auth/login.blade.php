@@ -66,6 +66,16 @@
                 Sign In
             </button>
         </form>
+
+        <div class="mt-6 pt-5 border-t border-slate-800/80 text-center">
+            <p class="text-xs text-slate-400 mb-2">First time signing in or newly enrolled?</p>
+            <a href="{{ route('student.activate') }}" class="inline-flex items-center justify-center gap-1.5 w-full py-2 px-4 rounded-xl text-xs font-semibold bg-indigo-500/10 text-indigo-300 border border-indigo-500/25 hover:bg-indigo-500/20 hover:text-white transition-all">
+                <svg class="w-3.5 h-3.5 text-indigo-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 7a2 2 0 012 2m4 0a6 6 0 01-7.743 5.743L11 17H9v2H7v2H4a1 1 0 01-1-1v-2.586a1 1 0 01.293-.707l5.964-5.964A6 6 0 1121 9z"/>
+                </svg>
+                Activate Your Account
+            </a>
+        </div>
     </div>
 
     <p class="text-center text-xs text-slate-600 mt-6">

@@ -22,6 +22,10 @@ class User extends Authenticatable
         'student_id',
         'created_by',
         'is_active',
+        'is_activated',
+        'activation_otp',
+        'activation_otp_expires_at',
+        'activation_token',
         'must_change_password',
         'last_activity_at',
     ];
@@ -29,14 +33,18 @@ class User extends Authenticatable
     protected $hidden = [
         'password',
         'remember_token',
+        'activation_otp',
+        'activation_token',
     ];
 
     protected function casts(): array
     {
         return [
             'email_verified_at' => 'datetime',
+            'activation_otp_expires_at' => 'datetime',
             'password' => 'hashed',
             'is_active' => 'boolean',
+            'is_activated' => 'boolean',
             'must_change_password' => 'boolean',
             'last_activity_at' => 'datetime',
         ];
