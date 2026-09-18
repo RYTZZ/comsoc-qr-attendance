@@ -31,12 +31,19 @@ Route::middleware('guest')->group(function () {
         ->middleware('throttle:6,1')
         ->name('password.store');
 
-    Route::get('activate', [\App\Http\Controllers\Auth\StudentActivationController::class, 'showRequestForm'])
+    Route::get('activate', [\App\Http\Controllers\Auth\StudentActivationController::class, 'showVerifyStudentForm'])
         ->name('student.activate');
 
-    Route::post('activate/send-otp', [\App\Http\Controllers\Auth\StudentActivationController::class, 'sendOtp'])
+    Route::post('activate/verify-student', [\App\Http\Controllers\Auth\StudentActivationController::class, 'verifyStudent'])
+        ->middleware('throttle:10,1')
+        ->name('student.activate.student.submit');
+
+    Route::get('activate/email', [\App\Http\Controllers\Auth\StudentActivationController::class, 'showEmailForm'])
+        ->name('student.activate.email');
+
+    Route::post('activate/email', [\App\Http\Controllers\Auth\StudentActivationController::class, 'submitEmailAndSendOtp'])
         ->middleware('throttle:5,1')
-        ->name('student.activate.send');
+        ->name('student.activate.email.submit');
 
     Route::get('activate/verify', [\App\Http\Controllers\Auth\StudentActivationController::class, 'showVerifyForm'])
         ->name('student.activate.verify');

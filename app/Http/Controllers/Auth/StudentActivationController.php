@@ -16,50 +16,93 @@ use Illuminate\View\View;
 
 class StudentActivationController extends Controller
 {
-    public function showRequestForm(): View
+    public function showVerifyStudentForm(): View
     {
-        return view('auth.student-activate');
+        return view('auth.student-activate-step1');
     }
 
-    public function sendOtp(Request $request): RedirectResponse
+    public function verifyStudent(Request $request): RedirectResponse
     {
         $request->validate([
             'student_number' => ['required', 'string'],
-            'email' => ['required', 'string', 'email'],
         ]);
 
         $studentNumber = trim($request->input('student_number'));
-        $inputEmail = strtolower(trim($request->input('email')));
 
         $student = Student::whereRaw('LOWER(TRIM(student_number)) = ?', [strtolower($studentNumber)])->first();
 
         if (!$student) {
             return back()->withInput()->withErrors([
-                'student_number' => 'No student record found with this student number.',
+                'student_number' => 'No student record found with this student number in the current masterlist.',
             ]);
         }
 
-        $studentEmail = strtolower(trim((string) ($student->email ?? '')));
         $user = $student->user;
-        $userEmail = strtolower(trim((string) ($user?->email ?? '')));
-
-        $emailMatches = false;
-        if ($studentEmail !== '' && $studentEmail === $inputEmail) {
-            $emailMatches = true;
-        } elseif ($userEmail !== '' && $userEmail === $inputEmail) {
-            $emailMatches = true;
+        if ($user && $user->is_activated && $user->is_active) {
+            return redirect()->route('login')->with('info', 'Your account is already active. Please sign in with your credentials.');
         }
 
-        if (!$emailMatches) {
-            return back()->withInput()->withErrors([
-                'email' => 'The provided email does not match our records for this student number.',
+        session([
+            'activation_student_id' => $student->id,
+            'activation_student_number' => $student->student_number,
+            'activation_step' => 'email',
+        ]);
+
+        return redirect()->route('student.activate.email');
+    }
+
+    public function showEmailForm(Request $request): View|RedirectResponse
+    {
+        $studentId = session('activation_student_id');
+        if (!$studentId) {
+            return redirect()->route('student.activate')->withErrors([
+                'student_number' => 'Please verify your student number first.',
             ]);
         }
 
-        if ($user && $user->is_activated && $user->is_active) {
-            return redirect()->route('login')->with('info', 'Your account is already activated. Please sign in with your password.');
+        $student = Student::find($studentId);
+        if (!$student) {
+            return redirect()->route('student.activate');
         }
 
+        $currentEmail = $student->email ?? $student->user?->email;
+
+        return view('auth.student-activate-step2', compact('student', 'currentEmail'));
+    }
+
+    public function submitEmailAndSendOtp(Request $request): RedirectResponse
+    {
+        $studentId = session('activation_student_id');
+        if (!$studentId) {
+            return redirect()->route('student.activate')->withErrors([
+                'student_number' => 'Please verify your student number first.',
+            ]);
+        }
+
+        $student = Student::find($studentId);
+        if (!$student) {
+            return redirect()->route('student.activate');
+        }
+
+        $request->validate([
+            'email' => ['required', 'string', 'email', 'max:255'],
+        ]);
+
+        $inputEmail = strtolower(trim($request->input('email')));
+
+        $existingUserWithEmail = User::where('email', $inputEmail)
+            ->where('student_id', '!=', $student->id)
+            ->first();
+
+        if ($existingUserWithEmail) {
+            return back()->withInput()->withErrors([
+                'email' => 'This email address is already associated with another account.',
+            ]);
+        }
+
+        $student->update(['email' => $inputEmail]);
+
+        $user = $student->user;
         if (!$user) {
             $user = User::create([
                 'name' => $student->display_name,
@@ -73,13 +116,7 @@ class StudentActivationController extends Controller
                 'must_change_password' => false,
             ]);
         } else {
-            if ($user->email !== $inputEmail) {
-                $user->email = $inputEmail;
-            }
-        }
-
-        if (empty($student->email)) {
-            $student->update(['email' => $inputEmail]);
+            $user->email = $inputEmail;
         }
 
         $otp = (string) random_int(100000, 999999);
@@ -92,6 +129,7 @@ class StudentActivationController extends Controller
             'activation_student_id' => $student->id,
             'activation_user_id' => $user->id,
             'activation_email' => $inputEmail,
+            'activation_step' => 'otp',
         ]);
 
         try {
@@ -113,16 +151,21 @@ class StudentActivationController extends Controller
         AuditLogger::log('account.activation_otp_sent', $user, [], [
             'student_id' => $student->id,
             'student_number' => $student->student_number,
+            'email' => $inputEmail,
         ]);
 
-        return redirect()->route('student.activate.verify')->with('success', 'A 6-digit activation code has been sent to your registered email.');
+        return redirect()->route('student.activate.verify')->with('success', 'A 6-digit activation code has been sent to ' . $inputEmail . '.');
     }
 
     public function showVerifyForm(Request $request): View|RedirectResponse
     {
         $userId = session('activation_user_id');
-        if (!$userId) {
-            return redirect()->route('student.activate')->withErrors(['email' => 'Please enter your student details first.']);
+        $studentId = session('activation_student_id');
+
+        if (!$userId || !$studentId) {
+            return redirect()->route('student.activate')->withErrors([
+                'student_number' => 'Please verify your student number first.',
+            ]);
         }
 
         $user = User::find($userId);
@@ -138,8 +181,12 @@ class StudentActivationController extends Controller
     public function verifyOtp(Request $request): RedirectResponse
     {
         $userId = session('activation_user_id');
-        if (!$userId) {
-            return redirect()->route('student.activate')->withErrors(['email' => 'Session expired. Please restart activation.']);
+        $studentId = session('activation_student_id');
+
+        if (!$userId || !$studentId) {
+            return redirect()->route('student.activate')->withErrors([
+                'student_number' => 'Session expired. Please restart activation.',
+            ]);
         }
 
         $user = User::find($userId);
@@ -173,6 +220,7 @@ class StudentActivationController extends Controller
 
         session([
             'activation_token' => $activationToken,
+            'activation_step' => 'password',
         ]);
 
         return redirect()->route('student.activate.password')->with('success', 'Verification code confirmed. Please set your new password.');
@@ -184,12 +232,16 @@ class StudentActivationController extends Controller
         $sessionToken = session('activation_token');
 
         if (!$userId || !$sessionToken) {
-            return redirect()->route('student.activate')->withErrors(['email' => 'Session expired. Please restart activation.']);
+            return redirect()->route('student.activate')->withErrors([
+                'student_number' => 'Session expired. Please restart activation.',
+            ]);
         }
 
         $user = User::find($userId);
         if (!$user || $user->activation_token !== $sessionToken) {
-            return redirect()->route('student.activate')->withErrors(['email' => 'Invalid or expired activation session.']);
+            return redirect()->route('student.activate')->withErrors([
+                'student_number' => 'Invalid or expired activation session.',
+            ]);
         }
 
         return view('auth.student-set-password', compact('user'));
@@ -201,12 +253,16 @@ class StudentActivationController extends Controller
         $sessionToken = session('activation_token');
 
         if (!$userId || !$sessionToken) {
-            return redirect()->route('student.activate')->withErrors(['email' => 'Session expired. Please restart activation.']);
+            return redirect()->route('student.activate')->withErrors([
+                'student_number' => 'Session expired. Please restart activation.',
+            ]);
         }
 
         $user = User::find($userId);
         if (!$user || $user->activation_token !== $sessionToken) {
-            return redirect()->route('student.activate')->withErrors(['email' => 'Invalid or expired activation session.']);
+            return redirect()->route('student.activate')->withErrors([
+                'student_number' => 'Invalid or expired activation session.',
+            ]);
         }
 
         $request->validate([
@@ -224,9 +280,11 @@ class StudentActivationController extends Controller
 
         session()->forget([
             'activation_student_id',
+            'activation_student_number',
             'activation_user_id',
             'activation_email',
             'activation_token',
+            'activation_step',
         ]);
 
         AuditLogger::log('account.activated_by_student', $user, [], [

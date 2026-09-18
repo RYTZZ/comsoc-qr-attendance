@@ -18,36 +18,83 @@ class StudentActivationTest extends TestCase
 {
     use RefreshDatabase;
 
-    public function test_activation_page_can_be_rendered(): void
+    public function test_activation_step1_page_can_be_rendered(): void
     {
         $response = $this->get(route('student.activate'));
         $response->assertStatus(200);
-        $response->assertSee('Activate Your Account');
+        $response->assertSee('Enter Your Student Number');
     }
 
-    public function test_student_can_request_otp_with_matching_record(): void
+    public function test_step1_invalid_student_number_is_rejected(): void
     {
-        Mail::fake();
+        $response = $this->post(route('student.activate.student.submit'), [
+            'student_number' => '99-9999',
+        ]);
 
+        $response->assertSessionHasErrors(['student_number']);
+        $this->assertNull(session('activation_student_id'));
+    }
+
+    public function test_step1_valid_student_proceeds_to_step2_email_form(): void
+    {
         $student = Student::create([
             'student_number' => '23-0001',
             'first_name' => 'Juan',
             'last_name' => 'Dela Cruz',
-            'email' => 'juan.delacruz@example.com',
             'program' => 'BSIT',
             'year_level' => '1st Year',
         ]);
 
-        $response = $this->post(route('student.activate.send'), [
+        $response = $this->post(route('student.activate.student.submit'), [
             'student_number' => '23-0001',
-            'email' => 'juan.delacruz@example.com',
+        ]);
+
+        $response->assertRedirect(route('student.activate.email'));
+        $this->assertEquals($student->id, session('activation_student_id'));
+
+        $emailPage = $this->get(route('student.activate.email'));
+        $emailPage->assertStatus(200);
+        $emailPage->assertSee('Provide Your Email');
+        $emailPage->assertSee('Juan Dela Cruz');
+    }
+
+    public function test_step2_cannot_be_accessed_without_verifying_student_number(): void
+    {
+        $response = $this->get(route('student.activate.email'));
+        $response->assertRedirect(route('student.activate'));
+        $response->assertSessionHasErrors(['student_number']);
+    }
+
+    public function test_step2_submits_email_and_sends_otp(): void
+    {
+        Mail::fake();
+
+        $student = Student::create([
+            'student_number' => '23-0002',
+            'first_name' => 'Maria',
+            'last_name' => 'Santos',
+            'program' => 'BSCS',
+            'year_level' => '2nd Year',
+        ]);
+
+        $this->withSession([
+            'activation_student_id' => $student->id,
+            'activation_student_number' => $student->student_number,
+        ]);
+
+        $response = $this->post(route('student.activate.email.submit'), [
+            'email' => 'maria.santos@student.com',
         ]);
 
         $response->assertRedirect(route('student.activate.verify'));
         $response->assertSessionHas('success');
 
-        $user = User::where('username', '23-0001')->first();
+        $student->refresh();
+        $this->assertEquals('maria.santos@student.com', $student->email);
+
+        $user = User::where('student_id', $student->id)->first();
         $this->assertNotNull($user);
+        $this->assertEquals('maria.santos@student.com', $user->email);
         $this->assertFalse((bool) $user->is_activated);
         $this->assertNotNull($user->activation_otp);
         $this->assertNotNull($user->activation_otp_expires_at);
@@ -55,33 +102,7 @@ class StudentActivationTest extends TestCase
         Mail::assertSent(\Illuminate\Mail\Mailable::class, 0);
     }
 
-    public function test_mismatched_email_or_student_number_is_rejected(): void
-    {
-        $student = Student::create([
-            'student_number' => '23-0002',
-            'first_name' => 'Maria',
-            'last_name' => 'Santos',
-            'email' => 'maria@example.com',
-            'program' => 'BSCS',
-            'year_level' => '2nd Year',
-        ]);
-
-        $response = $this->post(route('student.activate.send'), [
-            'student_number' => '23-0002',
-            'email' => 'wrong@example.com',
-        ]);
-
-        $response->assertSessionHasErrors(['email']);
-
-        $responseNotFound = $this->post(route('student.activate.send'), [
-            'student_number' => '99-9999',
-            'email' => 'maria@example.com',
-        ]);
-
-        $responseNotFound->assertSessionHasErrors(['student_number']);
-    }
-
-    public function test_student_can_verify_otp_and_set_password(): void
+    public function test_step3_and_step4_verify_otp_and_set_password_activates_account(): void
     {
         $student = Student::create([
             'student_number' => '23-0003',

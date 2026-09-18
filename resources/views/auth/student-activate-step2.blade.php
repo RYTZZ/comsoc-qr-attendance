@@ -4,8 +4,7 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="csrf-token" content="{{ csrf_token() }}">
-    <meta name="description" content="Activate your student account for ComSoc QR Attendance.">
-    <title>Activate Account — Computing Society QR Attendance</title>
+    <title>Activate Account (Step 2) — Computing Society QR Attendance</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Michroma&family=Sora:wght@600;700;800&family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet">
@@ -20,12 +19,20 @@
         </div>
         <p class="font-brand-accent text-[11px] text-[#dfa6a9] tracking-widest uppercase mb-1">COMPUTING SOCIETY</p>
         <h1 class="font-brand-display text-2xl sm:text-3xl font-bold text-white tracking-tight">Account Activation</h1>
-        <p class="text-slate-400 mt-1 text-xs sm:text-sm">Verify your student identity to set your password</p>
+        <p class="text-slate-400 mt-1 text-xs sm:text-sm">Step 2 of 4 — Associate Email Address</p>
     </div>
 
     <div class="card shadow-xl border border-slate-800/80 bg-[#171a23]">
-        <h2 class="font-brand-display text-base font-bold text-white mb-2">Activate Your Account</h2>
-        <p class="text-slate-400 text-xs mb-6">Enter your Student Number and registered email to receive an activation code.</p>
+        <div class="p-3 mb-4 rounded-xl bg-slate-900/80 border border-slate-800 flex items-center justify-between">
+            <div>
+                <p class="text-[10px] text-slate-400 uppercase tracking-wider font-semibold">Verified Student</p>
+                <p class="text-sm font-bold text-white">{{ $student->display_name }}</p>
+            </div>
+            <span class="font-mono text-xs text-indigo-400 bg-indigo-500/10 px-2 py-1 rounded border border-indigo-500/20">{{ $student->student_number }}</span>
+        </div>
+
+        <h2 class="font-brand-display text-base font-bold text-white mb-2">Provide Your Email</h2>
+        <p class="text-slate-400 text-xs mb-6">Enter the email address you want to associate with your account. A one-time verification code will be sent to it.</p>
 
         @if($errors->any())
         <div class="alert-error mb-4">
@@ -34,34 +41,27 @@
         </div>
         @endif
 
-        @if(session('status'))
-        <div class="alert-success mb-4">{{ session('status') }}</div>
-        @endif
-
-        <form method="POST" action="{{ route('student.activate.send') }}" class="space-y-4">
+        <form method="POST" action="{{ route('student.activate.email.submit') }}" class="space-y-4">
             @csrf
 
             <div>
-                <label for="student_number" class="label">Student Number</label>
-                <input type="text" name="student_number" id="student_number" value="{{ old('student_number') }}"
-                       class="input font-mono" placeholder="e.g. 23-12345" required autofocus autocomplete="off">
-            </div>
-
-            <div>
-                <label for="email" class="label">Registered Email Address</label>
-                <input type="email" name="email" id="email" value="{{ old('email') }}"
-                       class="input" placeholder="student@example.com" required autocomplete="email">
-                <p class="text-[11px] text-slate-500 mt-1">Must match the email address registered on your student profile.</p>
+                <label for="email" class="label">Email Address</label>
+                <input type="email" name="email" id="email" value="{{ old('email', $currentEmail) }}"
+                       class="input" placeholder="youremail@example.com" required autofocus autocomplete="email">
+                <p class="text-[11px] text-slate-500 mt-1">This email will be used for account verification and attendance notifications.</p>
             </div>
 
             <button type="submit" class="btn-primary w-full justify-center py-2.5 mt-2">
-                Send Verification Code
+                Send Verification OTP →
             </button>
         </form>
 
-        <div class="mt-6 pt-4 border-t border-slate-800/80 text-center">
-            <a href="{{ route('login') }}" class="text-xs text-slate-400 hover:text-white transition-colors">
-                ← Return to Sign In
+        <div class="mt-6 pt-4 border-t border-slate-800/80 flex items-center justify-between text-xs">
+            <a href="{{ route('student.activate') }}" class="text-slate-400 hover:text-white transition-colors">
+                ← Change Student Number
+            </a>
+            <a href="{{ route('login') }}" class="text-slate-400 hover:text-white transition-colors">
+                Sign In
             </a>
         </div>
     </div>
