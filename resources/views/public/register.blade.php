@@ -10,6 +10,7 @@
     @vite(['resources/css/app.css', 'resources/js/app.js'])
 </head>
 <body class="bg-[#0f1117] text-slate-100 min-h-screen flex flex-col font-sans antialiased selection:bg-[#7A1618] selection:text-white relative overflow-x-hidden">
+    <x-toast-stack />
     <x-page-loader />
     <x-public-auth-bg />
 
@@ -221,229 +222,540 @@
                             </p>
                         </div>
                     @else
-                        <!-- Multi-Step Progress Indicator -->
-                        <div class="flex items-center justify-between mb-6 px-2">
-                            <div class="flex items-center gap-2">
-                                <span class="w-6 h-6 rounded-full bg-[#7A1618] text-white text-xs font-bold flex items-center justify-center shadow">1</span>
-                                <span class="text-xs font-medium text-white hidden sm:inline">Personal</span>
-                            </div>
-                            <div class="h-0.5 flex-1 bg-slate-800 mx-2"></div>
-                            <div class="flex items-center gap-2">
-                                <span class="w-6 h-6 rounded-full bg-slate-800 text-slate-400 text-xs font-bold flex items-center justify-center border border-slate-700">2</span>
-                                <span class="text-xs font-medium text-slate-400 hidden sm:inline">Academic</span>
-                            </div>
-                            <div class="h-0.5 flex-1 bg-slate-800 mx-2"></div>
-                            <div class="flex items-center gap-2">
-                                <span class="w-6 h-6 rounded-full bg-slate-800 text-slate-400 text-xs font-bold flex items-center justify-center border border-slate-700">3</span>
-                                <span class="text-xs font-medium text-slate-400 hidden sm:inline">Food & Review</span>
-                            </div>
-                        </div>
+                        @php
+                            $step1Errors = $errors->has('full_name') || $errors->has('email') || $errors->has('organization') || $errors->has('custom_organization');
+                            $step2Errors = $errors->has('program') || $errors->has('year_level') || $errors->has('tshirt_size');
+                            $step3Errors = $errors->has('food_restrictions') || $errors->has('food_restriction_details') || $errors->has('confirmed');
 
-                        <form method="POST"
-                              action="{{ route('public.register.store', $event) }}"
-                              x-data="{
-                                  organization: '{{ old('organization', '') }}',
-                                  foodRestriction: '{{ old('food_restrictions', 'None') }}',
-                                  confirmed: {{ old('confirmed') ? 'true' : 'false' }},
-                                  isSubmitting: false,
-                                  lookupQuery: '',
-                                  lookupLoading: false,
-                                  lookupMessage: '',
-                                  async checkStudent() {
-                                      if (!this.lookupQuery || this.lookupQuery.trim().length < 4) return;
-                                      this.lookupLoading = true;
-                                      this.lookupMessage = '';
-                                      try {
-                                          const res = await fetch('/kiosk/lookup-student?query=' + encodeURIComponent(this.lookupQuery.trim()), {
-                                              headers: { 'Accept': 'application/json' }
-                                          });
-                                          if (res.ok) {
-                                              const data = await res.json();
-                                              if (data && data.student) {
-                                                  document.getElementById('full_name').value = data.student.full_name;
-                                                  if (data.student.email) document.getElementById('email').value = data.student.email;
-                                                  this.lookupMessage = 'Record autofilled from membership database';
-                                              }
-                                          }
-                                      } catch {}
-                                      finally { this.lookupLoading = false; }
-                                  }
-                              }"
-                              @dropdown-selected.window="
-                                  if ($event.detail.name === 'organization') { organization = $event.detail.value; }
-                                  if ($event.detail.name === 'food_restrictions') { foodRestriction = $event.detail.value; }
-                              "
-                              @submit="if(!confirmed) { $event.preventDefault(); return; } isSubmitting = true;"
-                              class="space-y-6">
-                            @csrf
-                            <input type="hidden" name="event_id" value="{{ $event->id }}">
+                            $initialStep = 1;
+                            if ($step1Errors) {
+                                $initialStep = 1;
+                            } elseif ($step2Errors) {
+                                $initialStep = 2;
+                            } elseif ($step3Errors) {
+                                $initialStep = 3;
+                            }
+                        @endphp
 
-                            <div class="space-y-3">
-                                <div class="flex items-center justify-between pb-1 border-b border-slate-800">
-                                    <div class="flex items-center gap-2">
-                                        <span class="w-5 h-5 rounded-full bg-brand-500/10 text-brand-400 text-xs font-bold flex items-center justify-center">1</span>
-                                        <h3 class="text-xs font-semibold uppercase tracking-wider text-slate-300">Personal Information</h3>
-                                    </div>
-                                    <span class="text-[10px] text-slate-400 font-mono">Step 1 of 3</span>
-                                </div>
+                        <div x-data="{
+                            currentStep: {{ $initialStep }},
+                            fullName: '{{ addslashes(old('full_name', '')) }}',
+                            email: '{{ addslashes(old('email', '')) }}',
+                            organization: '{{ addslashes(old('organization', '')) }}',
+                            customOrganization: '{{ addslashes(old('custom_organization', '')) }}',
+                            program: '{{ addslashes(old('program', '')) }}',
+                            yearLevel: '{{ addslashes(old('year_level', '')) }}',
+                            tshirtSize: '{{ addslashes(old('tshirt_size', '')) }}',
+                            foodRestriction: '{{ addslashes(old('food_restrictions', 'None')) }}',
+                            foodRestrictionDetails: '{{ addslashes(old('food_restriction_details', '')) }}',
+                            confirmed: {{ old('confirmed') ? 'true' : 'false' }},
+                            isSubmitting: false,
+                            step1Completed: false,
+                            step2Completed: false,
+                            step3Completed: false,
+                            errors: {
+                                full_name: '',
+                                email: '',
+                                organization: '',
+                                custom_organization: '',
+                                program: '',
+                                year_level: '',
+                                tshirt_size: '',
+                                food_restrictions: '',
+                                food_restriction_details: '',
+                                confirmed: ''
+                            },
+                            notify(message, type = 'error') {
+                                if (window.toast) {
+                                    window.toast(message, type);
+                                }
+                            },
+                            validateEmail(str) {
+                                return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(str);
+                            },
+                            validateStep1() {
+                                let valid = true;
+                                this.errors.full_name = '';
+                                this.errors.email = '';
+                                this.errors.organization = '';
+                                this.errors.custom_organization = '';
 
-                                <div>
-                                    <label for="full_name" class="block text-xs font-medium text-slate-300 mb-1">Full Name <span class="text-red-400">*</span></label>
-                                    <input id="full_name" name="full_name" type="text" value="{{ old('full_name') }}" required autofocus
-                                           class="w-full rounded-xl bg-slate-950 border border-slate-700 px-3.5 py-2.5 text-sm text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-brand-500 focus:border-transparent transition"
-                                           placeholder="e.g., Juan Dela Cruz" />
-                                    @error('full_name')
-                                        <p class="text-red-400 text-xs mt-1">{{ $message }}</p>
-                                    @enderror
-                                </div>
+                                if (!this.fullName || !this.fullName.trim()) {
+                                    this.errors.full_name = 'Full name is required.';
+                                    valid = false;
+                                }
 
-                                <div>
-                                    <label for="email" class="block text-xs font-medium text-slate-300 mb-1">Email Address <span class="text-red-400">*</span></label>
-                                    <input id="email" name="email" type="email" value="{{ old('email') }}" required
-                                           class="w-full rounded-xl bg-slate-950 border border-slate-700 px-3.5 py-2.5 text-sm text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-brand-500 focus:border-transparent transition"
-                                           placeholder="e.g., juan@example.com" />
-                                    @error('email')
-                                        <p class="text-red-400 text-xs mt-1">{{ $message }}</p>
-                                    @enderror
-                                </div>
+                                if (!this.email || !this.email.trim()) {
+                                    this.errors.email = 'Email address is required.';
+                                    valid = false;
+                                } else if (!this.validateEmail(this.email.trim())) {
+                                    this.errors.email = 'Please provide a valid email address.';
+                                    valid = false;
+                                }
 
-                                <div>
-                                    <label for="organization" class="block text-xs font-medium text-slate-300 mb-1">School / University <span class="text-red-400">*</span></label>
-                                    @php
-                                        $orgOptions = $organizations->pluck('name')->toArray();
-                                        $orgOptions[] = 'Other';
-                                    @endphp
-                                    <x-custom-dropdown name="organization"
-                                                       :options="$orgOptions"
-                                                       :value="old('organization')"
-                                                       placeholder="Select your school or university"
-                                                       :required="true" />
-                                    @error('organization')
-                                        <p class="text-red-400 text-xs mt-1">{{ $message }}</p>
-                                    @enderror
-                                </div>
+                                if (!this.organization || !this.organization.trim()) {
+                                    this.errors.organization = 'Please select your school or university.';
+                                    valid = false;
+                                } else if (this.organization === 'Other' && (!this.customOrganization || !this.customOrganization.trim())) {
+                                    this.errors.custom_organization = 'Please enter your school or university name.';
+                                    valid = false;
+                                }
 
-                                <div x-show="organization === 'Other'" x-cloak class="transition-all">
-                                    <label for="custom_organization" class="block text-xs font-medium text-slate-300 mb-1">
-                                        School / University Name <span class="text-red-400">*</span>
-                                    </label>
-                                    <input id="custom_organization" name="custom_organization" type="text"
-                                           value="{{ old('custom_organization') }}"
-                                           :required="organization === 'Other'"
-                                           class="w-full rounded-xl bg-slate-950 border border-slate-700 px-3.5 py-2.5 text-sm text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-brand-500 focus:border-transparent transition"
-                                           placeholder="Enter your official school / university name" />
-                                    @error('custom_organization')
-                                        <p class="text-red-400 text-xs mt-1">{{ $message }}</p>
-                                    @enderror
-                                </div>
-                            </div>
+                                if (!valid) {
+                                    this.notify('Please complete all required personal information fields.');
+                                    this.step1Completed = false;
+                                } else {
+                                    this.step1Completed = true;
+                                }
 
-                            <div class="space-y-3">
-                                <div class="flex items-center gap-2 pb-1 border-b border-slate-800">
-                                    <span class="w-5 h-5 rounded-full bg-brand-500/10 text-brand-400 text-xs font-bold flex items-center justify-center">2</span>
-                                    <h3 class="text-xs font-semibold uppercase tracking-wider text-slate-300">Participant Information</h3>
-                                </div>
+                                return valid;
+                            },
+                            validateStep2() {
+                                let valid = true;
+                                this.errors.program = '';
+                                this.errors.year_level = '';
+                                this.errors.tshirt_size = '';
 
-                                <div>
-                                    <label for="program" class="block text-xs font-medium text-slate-300 mb-1">Program / Course <span class="text-red-400">*</span></label>
-                                    <x-custom-dropdown name="program"
-                                                       :options="$programs"
-                                                       :value="old('program')"
-                                                       placeholder="Select Program"
-                                                       :required="true" />
-                                    @error('program')
-                                        <p class="text-red-400 text-xs mt-1">{{ $message }}</p>
-                                    @enderror
-                                </div>
+                                if (!this.program || !this.program.trim()) {
+                                    this.errors.program = 'Please select your program or course.';
+                                    valid = false;
+                                }
 
-                                <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                                    <div>
-                                        <label for="year_level" class="block text-xs font-medium text-slate-300 mb-1">Year Level <span class="text-red-400">*</span></label>
-                                        <x-custom-dropdown name="year_level"
-                                                           :options="$yearLevels"
-                                                           :value="old('year_level')"
-                                                           placeholder="Select Year Level"
-                                                           :required="true" />
-                                        @error('year_level')
-                                            <p class="text-red-400 text-xs mt-1">{{ $message }}</p>
-                                        @enderror
-                                    </div>
+                                if (!this.yearLevel || !this.yearLevel.trim()) {
+                                    this.errors.year_level = 'Please select your year level.';
+                                    valid = false;
+                                }
 
-                                    <div>
-                                        <label for="tshirt_size" class="block text-xs font-medium text-slate-300 mb-1">T-Shirt Size <span class="text-red-400">*</span></label>
-                                        <x-custom-dropdown name="tshirt_size"
-                                                           :options="$tshirtSizes"
-                                                           :value="old('tshirt_size')"
-                                                           placeholder="Select Size"
-                                                           :required="true" />
-                                        @error('tshirt_size')
-                                            <p class="text-red-400 text-xs mt-1">{{ $message }}</p>
-                                        @enderror
-                                    </div>
-                                </div>
-                            </div>
+                                if (!this.tshirtSize || !this.tshirtSize.trim()) {
+                                    this.errors.tshirt_size = 'Please select your T-Shirt size.';
+                                    valid = false;
+                                }
 
-                            <div class="space-y-3">
-                                <div class="flex items-center gap-2 pb-1 border-b border-slate-800">
-                                    <span class="w-5 h-5 rounded-full bg-brand-500/10 text-brand-400 text-xs font-bold flex items-center justify-center">3</span>
-                                    <h3 class="text-xs font-semibold uppercase tracking-wider text-slate-300">Food Information</h3>
-                                </div>
+                                if (!valid) {
+                                    this.notify('Please complete all required participant information fields.');
+                                    this.step2Completed = false;
+                                } else {
+                                    this.step2Completed = true;
+                                }
 
-                                <div>
-                                    <label for="food_restrictions" class="block text-xs font-medium text-slate-300 mb-1">Food Restrictions <span class="text-red-400">*</span></label>
-                                    <x-custom-dropdown name="food_restrictions"
-                                                       :options="$foodRestrictions"
-                                                       :value="old('food_restrictions', 'None')"
-                                                       placeholder="Select Food Restrictions"
-                                                       :required="true" />
-                                    @error('food_restrictions')
-                                        <p class="text-red-400 text-xs mt-1">{{ $message }}</p>
-                                    @enderror
-                                </div>
+                                return valid;
+                            },
+                            validateStep3() {
+                                let valid = true;
+                                this.errors.food_restrictions = '';
+                                this.errors.food_restriction_details = '';
+                                this.errors.confirmed = '';
 
-                                <div x-show="foodRestriction === 'Allergies' || foodRestriction === 'Other'" x-cloak class="transition-all">
-                                    <label for="food_restriction_details" class="block text-xs font-medium text-slate-300 mb-1">
-                                        Food Restriction Details <span class="text-red-400">*</span>
-                                    </label>
-                                    <textarea id="food_restriction_details" name="food_restriction_details" rows="2"
-                                              :required="foodRestriction === 'Allergies' || foodRestriction === 'Other'"
-                                              class="w-full rounded-xl bg-slate-950 border border-slate-700 px-3.5 py-2 text-sm text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-brand-500 focus:border-transparent transition"
-                                              placeholder="Please specify your dietary restrictions or known food allergies...">{{ old('food_restriction_details') }}</textarea>
-                                    @error('food_restriction_details')
-                                        <p class="text-red-400 text-xs mt-1">{{ $message }}</p>
-                                    @enderror
-                                </div>
-                            </div>
+                                if (!this.foodRestriction || !this.foodRestriction.trim()) {
+                                    this.errors.food_restrictions = 'Please select food restrictions.';
+                                    valid = false;
+                                } else if ((this.foodRestriction === 'Allergies' || this.foodRestriction === 'Other') && (!this.foodRestrictionDetails || !this.foodRestrictionDetails.trim())) {
+                                    this.errors.food_restriction_details = 'Please provide details for your food restrictions or allergies.';
+                                    valid = false;
+                                }
 
-                            <div class="space-y-3 pt-2">
-                                <div class="flex items-center gap-2 pb-1 border-b border-slate-800">
-                                    <span class="w-5 h-5 rounded-full bg-brand-500/10 text-brand-400 text-xs font-bold flex items-center justify-center">4</span>
-                                    <h3 class="text-xs font-semibold uppercase tracking-wider text-slate-300">Confirmation</h3>
-                                </div>
+                                if (!this.confirmed) {
+                                    this.errors.confirmed = 'You must confirm that your information is accurate and agree to participate.';
+                                    valid = false;
+                                }
 
-                                <label class="flex items-start gap-3 p-3 rounded-xl bg-slate-950 border border-slate-800 hover:border-slate-700 cursor-pointer transition">
-                                    <input type="checkbox" name="confirmed" value="1"
-                                           x-model="confirmed"
-                                           required
-                                           class="mt-1 h-4 w-4 rounded border-slate-700 text-brand-500 focus:ring-brand-400 focus:ring-offset-slate-950 bg-slate-900" />
-                                    <span class="text-xs text-slate-300 leading-relaxed">
-                                        I confirm that the information I provided is accurate and that I agree to participate in this event. <span class="text-red-400">*</span>
+                                if (!valid) {
+                                    this.notify('Please review the required fields and confirmation agreement.');
+                                    this.step3Completed = false;
+                                } else {
+                                    this.step3Completed = true;
+                                }
+
+                                return valid;
+                            },
+                            nextStep() {
+                                if (this.currentStep === 1) {
+                                    if (this.validateStep1()) {
+                                        this.currentStep = 2;
+                                        window.scrollTo({ top: 0, behavior: 'smooth' });
+                                    }
+                                } else if (this.currentStep === 2) {
+                                    if (this.validateStep2()) {
+                                        this.currentStep = 3;
+                                        window.scrollTo({ top: 0, behavior: 'smooth' });
+                                    }
+                                }
+                            },
+                            prevStep() {
+                                if (this.currentStep > 1) {
+                                    this.currentStep--;
+                                    window.scrollTo({ top: 0, behavior: 'smooth' });
+                                }
+                            },
+                            submitForm(event) {
+                                if (!this.validateStep1()) {
+                                    this.currentStep = 1;
+                                    event.preventDefault();
+                                    return;
+                                }
+                                if (!this.validateStep2()) {
+                                    this.currentStep = 2;
+                                    event.preventDefault();
+                                    return;
+                                }
+                                if (!this.validateStep3()) {
+                                    this.currentStep = 3;
+                                    event.preventDefault();
+                                    return;
+                                }
+                                this.isSubmitting = true;
+                            }
+                        }"
+                        @dropdown-selected.window="
+                            if ($event.detail.name === 'organization') {
+                                organization = $event.detail.value;
+                                errors.organization = '';
+                            }
+                            if ($event.detail.name === 'program') {
+                                program = $event.detail.value;
+                                errors.program = '';
+                            }
+                            if ($event.detail.name === 'year_level') {
+                                yearLevel = $event.detail.value;
+                                errors.year_level = '';
+                            }
+                            if ($event.detail.name === 'tshirt_size') {
+                                tshirtSize = $event.detail.value;
+                                errors.tshirt_size = '';
+                            }
+                            if ($event.detail.name === 'food_restrictions') {
+                                foodRestriction = $event.detail.value;
+                                errors.food_restrictions = '';
+                            }
+                        "
+                        class="space-y-6">
+
+                            <div class="flex items-center justify-between mb-6 px-2">
+                                <div class="flex items-center gap-2">
+                                    <template x-if="step1Completed && currentStep > 1">
+                                        <span class="w-6 h-6 rounded-full bg-emerald-600 text-white text-xs font-bold flex items-center justify-center shadow">
+                                            ✓
+                                        </span>
+                                    </template>
+                                    <template x-if="currentStep === 1">
+                                        <span class="w-6 h-6 rounded-full bg-[#7A1618] text-white text-xs font-bold flex items-center justify-center shadow">
+                                            ●
+                                        </span>
+                                    </template>
+                                    <template x-if="currentStep > 1 && !step1Completed">
+                                        <span class="w-6 h-6 rounded-full bg-slate-800 text-slate-400 text-xs font-bold flex items-center justify-center border border-slate-700">
+                                            ○
+                                        </span>
+                                    </template>
+                                    <span class="text-xs font-medium"
+                                          :class="currentStep === 1 ? 'text-white font-semibold' : (step1Completed ? 'text-emerald-400' : 'text-slate-400')">
+                                        1 Personal
                                     </span>
-                                </label>
-                                @error('confirmed')
-                                    <p class="text-red-400 text-xs mt-1">{{ $message }}</p>
-                                @enderror
+                                </div>
+
+                                <div class="h-0.5 flex-1 mx-2"
+                                     :class="step1Completed ? 'bg-emerald-600/50' : 'bg-slate-800'"></div>
+
+                                <div class="flex items-center gap-2">
+                                    <template x-if="step2Completed && currentStep > 2">
+                                        <span class="w-6 h-6 rounded-full bg-emerald-600 text-white text-xs font-bold flex items-center justify-center shadow">
+                                            ✓
+                                        </span>
+                                    </template>
+                                    <template x-if="currentStep === 2">
+                                        <span class="w-6 h-6 rounded-full bg-[#7A1618] text-white text-xs font-bold flex items-center justify-center shadow">
+                                            ●
+                                        </span>
+                                    </template>
+                                    <template x-if="currentStep !== 2 && !(step2Completed && currentStep > 2)">
+                                        <span class="w-6 h-6 rounded-full bg-slate-800 text-slate-400 text-xs font-bold flex items-center justify-center border border-slate-700">
+                                            ○
+                                        </span>
+                                    </template>
+                                    <span class="text-xs font-medium"
+                                          :class="currentStep === 2 ? 'text-white font-semibold' : (step2Completed && currentStep > 2 ? 'text-emerald-400' : 'text-slate-400')">
+                                        2 Academic
+                                    </span>
+                                </div>
+
+                                <div class="h-0.5 flex-1 mx-2"
+                                     :class="step2Completed ? 'bg-emerald-600/50' : 'bg-slate-800'"></div>
+
+                                <div class="flex items-center gap-2">
+                                    <template x-if="step3Completed">
+                                        <span class="w-6 h-6 rounded-full bg-emerald-600 text-white text-xs font-bold flex items-center justify-center shadow">
+                                            ✓
+                                        </span>
+                                    </template>
+                                    <template x-if="currentStep === 3 && !step3Completed">
+                                        <span class="w-6 h-6 rounded-full bg-[#7A1618] text-white text-xs font-bold flex items-center justify-center shadow">
+                                            ●
+                                        </span>
+                                    </template>
+                                    <template x-if="currentStep < 3 && !step3Completed">
+                                        <span class="w-6 h-6 rounded-full bg-slate-800 text-slate-400 text-xs font-bold flex items-center justify-center border border-slate-700">
+                                            ○
+                                        </span>
+                                    </template>
+                                    <span class="text-xs font-medium"
+                                          :class="currentStep === 3 ? 'text-white font-semibold' : (step3Completed ? 'text-emerald-400' : 'text-slate-400')">
+                                        3 Food & Review
+                                    </span>
+                                </div>
                             </div>
 
-                            <div class="pt-2">
-                                <button type="submit"
-                                        :disabled="!confirmed || isSubmitting"
-                                        class="w-full py-3.5 px-4 rounded-xl font-semibold text-sm text-white bg-[#7A1618] hover:bg-[#8e1b1d] disabled:opacity-50 disabled:cursor-not-allowed active:scale-[0.99] transition shadow-md focus:outline-none focus:ring-2 focus:ring-[#7A1618] focus:ring-offset-2 focus:ring-offset-[#171a23]">
-                                    <span x-show="!isSubmitting">Submit Registration</span>
-                                    <span x-show="isSubmitting" x-cloak>Submitting Registration...</span>
-                                </button>
-                            </div>
-                        </form>
+                            <form method="POST"
+                                  action="{{ route('public.register.store', $event) }}"
+                                  @submit="submitForm($event)"
+                                  class="space-y-6">
+                                @csrf
+                                <input type="hidden" name="event_id" value="{{ $event->id }}">
+
+                                <div x-show="currentStep === 1" x-cloak class="space-y-4">
+                                    <div class="flex items-center justify-between pb-1 border-b border-slate-800">
+                                        <div class="flex items-center gap-2">
+                                            <span class="w-5 h-5 rounded-full bg-[#7A1618]/20 text-[#dfa6a9] text-xs font-bold flex items-center justify-center">1</span>
+                                            <h3 class="text-xs font-semibold uppercase tracking-wider text-slate-300">Personal Information</h3>
+                                        </div>
+                                        <span class="text-[10px] text-slate-400 font-mono">Step 1 of 3</span>
+                                    </div>
+
+                                    <div>
+                                        <label for="full_name" class="block text-xs font-medium text-slate-300 mb-1">Full Name <span class="text-red-400">*</span></label>
+                                        <input id="full_name"
+                                               name="full_name"
+                                               type="text"
+                                               x-model="fullName"
+                                               @input="errors.full_name = ''"
+                                               class="w-full rounded-xl bg-slate-950 border border-slate-700 px-3.5 py-2.5 text-sm text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-[#7A1618] focus:border-transparent transition"
+                                               placeholder="e.g., Juan Dela Cruz" />
+                                        <template x-if="errors.full_name">
+                                            <p class="text-red-400 text-xs mt-1" x-text="errors.full_name"></p>
+                                        </template>
+                                        @error('full_name')
+                                            <p class="text-red-400 text-xs mt-1">{{ $message }}</p>
+                                        @enderror
+                                    </div>
+
+                                    <div>
+                                        <label for="email" class="block text-xs font-medium text-slate-300 mb-1">Email Address <span class="text-red-400">*</span></label>
+                                        <input id="email"
+                                               name="email"
+                                               type="email"
+                                               x-model="email"
+                                               @input="errors.email = ''"
+                                               class="w-full rounded-xl bg-slate-950 border border-slate-700 px-3.5 py-2.5 text-sm text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-[#7A1618] focus:border-transparent transition"
+                                               placeholder="e.g., juan@example.com" />
+                                        <template x-if="errors.email">
+                                            <p class="text-red-400 text-xs mt-1" x-text="errors.email"></p>
+                                        </template>
+                                        @error('email')
+                                            <p class="text-red-400 text-xs mt-1">{{ $message }}</p>
+                                        @enderror
+                                    </div>
+
+                                    <div>
+                                        <label for="organization" class="block text-xs font-medium text-slate-300 mb-1">School / University <span class="text-red-400">*</span></label>
+                                        @php
+                                            $orgOptions = $organizations->pluck('name')->toArray();
+                                            $orgOptions[] = 'Other';
+                                        @endphp
+                                        <x-custom-dropdown name="organization"
+                                                           :options="$orgOptions"
+                                                           :value="old('organization')"
+                                                           placeholder="Select your school or university"
+                                                           :required="true" />
+                                        <template x-if="errors.organization">
+                                            <p class="text-red-400 text-xs mt-1" x-text="errors.organization"></p>
+                                        </template>
+                                        @error('organization')
+                                            <p class="text-red-400 text-xs mt-1">{{ $message }}</p>
+                                        @enderror
+                                    </div>
+
+                                    <div x-show="organization === 'Other'" x-cloak class="transition-all">
+                                        <label for="custom_organization" class="block text-xs font-medium text-slate-300 mb-1">
+                                            School / University Name <span class="text-red-400">*</span>
+                                        </label>
+                                        <input id="custom_organization"
+                                               name="custom_organization"
+                                               type="text"
+                                               x-model="customOrganization"
+                                               @input="errors.custom_organization = ''"
+                                               class="w-full rounded-xl bg-slate-950 border border-slate-700 px-3.5 py-2.5 text-sm text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-[#7A1618] focus:border-transparent transition"
+                                               placeholder="Enter your official school / university name" />
+                                        <template x-if="errors.custom_organization">
+                                            <p class="text-red-400 text-xs mt-1" x-text="errors.custom_organization"></p>
+                                        </template>
+                                        @error('custom_organization')
+                                            <p class="text-red-400 text-xs mt-1">{{ $message }}</p>
+                                        @enderror
+                                    </div>
+
+                                    <div class="pt-4 flex justify-end">
+                                        <button type="button"
+                                                @click="nextStep()"
+                                                class="w-full sm:w-auto min-w-[130px] py-3 px-6 rounded-xl font-semibold text-sm text-white bg-[#7A1618] hover:bg-[#8e1b1d] active:scale-[0.99] transition shadow-md focus:outline-none focus:ring-2 focus:ring-[#7A1618] focus:ring-offset-2 focus:ring-offset-[#171a23]">
+                                            Next
+                                        </button>
+                                    </div>
+                                </div>
+
+                                <div x-show="currentStep === 2" x-cloak class="space-y-4">
+                                    <div class="flex items-center justify-between pb-1 border-b border-slate-800">
+                                        <div class="flex items-center gap-2">
+                                            <span class="w-5 h-5 rounded-full bg-[#7A1618]/20 text-[#dfa6a9] text-xs font-bold flex items-center justify-center">2</span>
+                                            <h3 class="text-xs font-semibold uppercase tracking-wider text-slate-300">Participant Information</h3>
+                                        </div>
+                                        <span class="text-[10px] text-slate-400 font-mono">Step 2 of 3</span>
+                                    </div>
+
+                                    <div>
+                                        <label for="program" class="block text-xs font-medium text-slate-300 mb-1">Program / Course <span class="text-red-400">*</span></label>
+                                        <x-custom-dropdown name="program"
+                                                           :options="$programs"
+                                                           :value="old('program')"
+                                                           placeholder="Select Program"
+                                                           :required="true" />
+                                        <template x-if="errors.program">
+                                            <p class="text-red-400 text-xs mt-1" x-text="errors.program"></p>
+                                        </template>
+                                        @error('program')
+                                            <p class="text-red-400 text-xs mt-1">{{ $message }}</p>
+                                        @enderror
+                                    </div>
+
+                                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                                        <div>
+                                            <label for="year_level" class="block text-xs font-medium text-slate-300 mb-1">Year Level <span class="text-red-400">*</span></label>
+                                            <x-custom-dropdown name="year_level"
+                                                               :options="$yearLevels"
+                                                               :value="old('year_level')"
+                                                               placeholder="Select Year Level"
+                                                               :required="true" />
+                                            <template x-if="errors.year_level">
+                                                <p class="text-red-400 text-xs mt-1" x-text="errors.year_level"></p>
+                                            </template>
+                                            @error('year_level')
+                                                <p class="text-red-400 text-xs mt-1">{{ $message }}</p>
+                                            @enderror
+                                        </div>
+
+                                        <div>
+                                            <label for="tshirt_size" class="block text-xs font-medium text-slate-300 mb-1">T-Shirt Size <span class="text-red-400">*</span></label>
+                                            <x-custom-dropdown name="tshirt_size"
+                                                               :options="$tshirtSizes"
+                                                               :value="old('tshirt_size')"
+                                                               placeholder="Select Size"
+                                                               :required="true" />
+                                            <template x-if="errors.tshirt_size">
+                                                <p class="text-red-400 text-xs mt-1" x-text="errors.tshirt_size"></p>
+                                            </template>
+                                            @error('tshirt_size')
+                                                <p class="text-red-400 text-xs mt-1">{{ $message }}</p>
+                                            @enderror
+                                        </div>
+                                    </div>
+
+                                    <div class="pt-4 flex items-center justify-between gap-3">
+                                        <button type="button"
+                                                @click="prevStep()"
+                                                class="w-1/2 sm:w-auto min-w-[110px] py-3 px-5 rounded-xl font-medium text-sm text-slate-300 bg-slate-800/80 hover:bg-slate-700 hover:text-white active:scale-[0.99] transition border border-slate-700 focus:outline-none focus:ring-2 focus:ring-slate-600 focus:ring-offset-2 focus:ring-offset-[#171a23]">
+                                            Back
+                                        </button>
+                                        <button type="button"
+                                                @click="nextStep()"
+                                                class="w-1/2 sm:w-auto min-w-[130px] py-3 px-6 rounded-xl font-semibold text-sm text-white bg-[#7A1618] hover:bg-[#8e1b1d] active:scale-[0.99] transition shadow-md focus:outline-none focus:ring-2 focus:ring-[#7A1618] focus:ring-offset-2 focus:ring-offset-[#171a23]">
+                                            Next
+                                        </button>
+                                    </div>
+                                </div>
+
+                                <div x-show="currentStep === 3" x-cloak class="space-y-4">
+                                    <div class="flex items-center justify-between pb-1 border-b border-slate-800">
+                                        <div class="flex items-center gap-2">
+                                            <span class="w-5 h-5 rounded-full bg-[#7A1618]/20 text-[#dfa6a9] text-xs font-bold flex items-center justify-center">3</span>
+                                            <h3 class="text-xs font-semibold uppercase tracking-wider text-slate-300">Food & Review</h3>
+                                        </div>
+                                        <span class="text-[10px] text-slate-400 font-mono">Step 3 of 3</span>
+                                    </div>
+
+                                    <div class="space-y-3">
+                                        <div>
+                                            <label for="food_restrictions" class="block text-xs font-medium text-slate-300 mb-1">Food Restrictions <span class="text-red-400">*</span></label>
+                                            <x-custom-dropdown name="food_restrictions"
+                                                               :options="$foodRestrictions"
+                                                               :value="old('food_restrictions', 'None')"
+                                                               placeholder="Select Food Restrictions"
+                                                               :required="true" />
+                                            <template x-if="errors.food_restrictions">
+                                                <p class="text-red-400 text-xs mt-1" x-text="errors.food_restrictions"></p>
+                                            </template>
+                                            @error('food_restrictions')
+                                                <p class="text-red-400 text-xs mt-1">{{ $message }}</p>
+                                            @enderror
+                                        </div>
+
+                                        <div x-show="foodRestriction === 'Allergies' || foodRestriction === 'Other'" x-cloak class="transition-all">
+                                            <label for="food_restriction_details" class="block text-xs font-medium text-slate-300 mb-1">
+                                                Food Restriction Details <span class="text-red-400">*</span>
+                                            </label>
+                                            <textarea id="food_restriction_details"
+                                                      name="food_restriction_details"
+                                                      rows="2"
+                                                      x-model="foodRestrictionDetails"
+                                                      @input="errors.food_restriction_details = ''"
+                                                      class="w-full rounded-xl bg-slate-950 border border-slate-700 px-3.5 py-2 text-sm text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-[#7A1618] focus:border-transparent transition"
+                                                      placeholder="Please specify your dietary restrictions or known food allergies..."></textarea>
+                                            <template x-if="errors.food_restriction_details">
+                                                <p class="text-red-400 text-xs mt-1" x-text="errors.food_restriction_details"></p>
+                                            </template>
+                                            @error('food_restriction_details')
+                                                <p class="text-red-400 text-xs mt-1">{{ $message }}</p>
+                                            @enderror
+                                        </div>
+                                    </div>
+
+                                    <div class="space-y-3 pt-2">
+                                        <div class="flex items-center gap-2 pb-1 border-b border-slate-800">
+                                            <h3 class="text-xs font-semibold uppercase tracking-wider text-slate-300">Confirmation</h3>
+                                        </div>
+
+                                        <label class="flex items-start gap-3 p-3 rounded-xl bg-slate-950 border border-slate-800 hover:border-slate-700 cursor-pointer transition">
+                                            <input type="checkbox"
+                                                   name="confirmed"
+                                                   value="1"
+                                                   x-model="confirmed"
+                                                   @change="errors.confirmed = ''"
+                                                   class="mt-1 h-4 w-4 rounded border-slate-700 text-[#7A1618] focus:ring-[#7A1618] focus:ring-offset-slate-950 bg-slate-900" />
+                                            <span class="text-xs text-slate-300 leading-relaxed">
+                                                I confirm that the information I provided is accurate and that I agree to participate in this event. <span class="text-red-400">*</span>
+                                            </span>
+                                        </label>
+                                        <template x-if="errors.confirmed">
+                                            <p class="text-red-400 text-xs mt-1" x-text="errors.confirmed"></p>
+                                        </template>
+                                        @error('confirmed')
+                                            <p class="text-red-400 text-xs mt-1">{{ $message }}</p>
+                                        @enderror
+                                    </div>
+
+                                    <div class="pt-4 flex items-center justify-between gap-3">
+                                        <button type="button"
+                                                @click="prevStep()"
+                                                class="w-1/3 sm:w-auto min-w-[110px] py-3.5 px-5 rounded-xl font-medium text-sm text-slate-300 bg-slate-800/80 hover:bg-slate-700 hover:text-white active:scale-[0.99] transition border border-slate-700 focus:outline-none focus:ring-2 focus:ring-slate-600 focus:ring-offset-2 focus:ring-offset-[#171a23]">
+                                            Back
+                                        </button>
+                                        <button type="submit"
+                                                :disabled="!confirmed || isSubmitting"
+                                                class="flex-1 py-3.5 px-4 rounded-xl font-semibold text-sm text-white bg-[#7A1618] hover:bg-[#8e1b1d] disabled:opacity-50 disabled:cursor-not-allowed active:scale-[0.99] transition shadow-md focus:outline-none focus:ring-2 focus:ring-[#7A1618] focus:ring-offset-2 focus:ring-offset-[#171a23]">
+                                            <span x-show="!isSubmitting">Submit Registration</span>
+                                            <span x-show="isSubmitting" x-cloak>Submitting Registration...</span>
+                                        </button>
+                                    </div>
+                                </div>
+                            </form>
+                        </div>
                     @endif
 
                     <p class="text-[11px] text-slate-500 text-center mt-5">

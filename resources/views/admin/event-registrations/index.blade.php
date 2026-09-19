@@ -231,7 +231,7 @@
             <span x-text="selected.length" class="text-brand-400 font-mono"></span> pending selected
         </span>
         <div class="h-4 w-px bg-slate-700"></div>
-        <form method="POST" action="{{ route('event-registrations.batch-approve') }}" class="inline">
+        <form method="POST" action="{{ route('admin.event-registrations.batch-approve') }}" class="inline">
             @csrf
             <template x-for="id in selected" :key="id">
                 <input type="hidden" name="registration_ids[]" :value="id">
@@ -240,7 +240,7 @@
                 Approve Selected
             </button>
         </form>
-        <form method="POST" action="{{ route('event-registrations.batch-reject') }}" class="inline">
+        <form method="POST" action="{{ route('admin.event-registrations.batch-reject') }}" class="inline">
             @csrf
             <template x-for="id in selected" :key="id">
                 <input type="hidden" name="registration_ids[]" :value="id">
