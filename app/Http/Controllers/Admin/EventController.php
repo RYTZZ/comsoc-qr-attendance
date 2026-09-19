@@ -252,6 +252,11 @@ class EventController extends Controller
             'attendance_enabled' => ['nullable', 'boolean'],
             'snack_distribution_enabled' => ['nullable', 'boolean'],
             'logo' => ['nullable', 'image', 'mimes:jpeg,png,jpg,webp', 'max:3072'],
+            'sessions' => ['nullable', 'array'],
+            'sessions.*.enabled' => ['nullable', 'boolean'],
+            'sessions.*.opens_at' => ['nullable', 'date_format:H:i'],
+            'sessions.*.closes_at' => ['nullable', 'date_format:H:i'],
+            'sessions.*.late_threshold' => ['nullable', 'date_format:H:i'],
         ];
 
         $validated = $request->validate($rules);
@@ -260,7 +265,7 @@ class EventController extends Controller
             $opens = Carbon::parse($validated['registration_opens_at']);
             $deadline = Carbon::parse($validated['registration_deadline']);
             if ($opens->gt($deadline)) {
-                back()->withErrors(['registration_opens_at' => 'Registration opening date & time must be before registration closing date & time.'])->throwResponse();
+                back()->withInput()->withErrors(['registration_opens_at' => 'Registration opening date & time must be before registration closing date & time.'])->throwResponse();
             }
         }
 
@@ -268,13 +273,77 @@ class EventController extends Controller
             $deadline = Carbon::parse($validated['registration_deadline']);
             $starts = Carbon::parse($validated['starts_at']);
             if ($deadline->gt($starts)) {
-                back()->withErrors(['registration_deadline' => 'Registration closing date & time must be before or equal to event start time.'])->throwResponse();
+                back()->withInput()->withErrors(['registration_deadline' => 'Registration closing date & time must be before or equal to event start time.'])->throwResponse();
             }
         }
 
         if (!empty($validated['attendance_starts_at']) && !empty($validated['attendance_ends_at'])) {
             if ($validated['attendance_starts_at'] >= $validated['attendance_ends_at']) {
-                back()->withErrors(['attendance_ends_at' => 'Attendance end time must be after attendance start time.'])->throwResponse();
+                back()->withInput()->withErrors(['attendance_ends_at' => 'Attendance end time must be after attendance start time.'])->throwResponse();
+            }
+        }
+
+        if (!empty($validated['starts_at']) && !empty($validated['ends_at'])) {
+            if (Carbon::parse($validated['ends_at'])->lt(Carbon::parse($validated['starts_at']))) {
+                back()->withInput()->withErrors(['ends_at' => 'Event End Time cannot be earlier than Event Start Time.'])->throwResponse();
+            }
+        }
+
+        if ($request->boolean('attendance_enabled') && !empty($validated['sessions']) && is_array($validated['sessions'])) {
+            $sess = $validated['sessions'];
+
+            foreach (['morning_in', 'morning_out', 'afternoon_in', 'afternoon_out'] as $type) {
+                if (!empty($sess[$type]['enabled'])) {
+                    if (empty($sess[$type]['opens_at'])) {
+                        back()->withInput()->withErrors(["sessions.{$type}.opens_at" => ucwords(str_replace('_', ' ', $type)) . ' opening time is required.'])->throwResponse();
+                    }
+                    if (empty($sess[$type]['closes_at'])) {
+                        back()->withInput()->withErrors(["sessions.{$type}.closes_at" => ucwords(str_replace('_', ' ', $type)) . ' closing time is required.'])->throwResponse();
+                    }
+                    if ($sess[$type]['opens_at'] >= $sess[$type]['closes_at']) {
+                        back()->withInput()->withErrors(["sessions.{$type}.closes_at" => ucwords(str_replace('_', ' ', $type)) . ' closing time must be after opening time.'])->throwResponse();
+                    }
+                }
+            }
+
+            if (!empty($sess['morning_in']['enabled']) && !empty($sess['morning_in']['late_threshold'])) {
+                $late = $sess['morning_in']['late_threshold'];
+                $opens = $sess['morning_in']['opens_at'];
+                $closes = $sess['morning_in']['closes_at'];
+                if ($late < $opens || $late > $closes) {
+                    back()->withInput()->withErrors(['sessions.morning_in.late_threshold' => 'Morning Late Threshold must be between Morning IN opening and closing times.'])->throwResponse();
+                }
+            }
+
+            if (!empty($sess['afternoon_in']['enabled']) && !empty($sess['afternoon_in']['late_threshold'])) {
+                $late = $sess['afternoon_in']['late_threshold'];
+                $opens = $sess['afternoon_in']['opens_at'];
+                $closes = $sess['afternoon_in']['closes_at'];
+                if ($late < $opens || $late > $closes) {
+                    back()->withInput()->withErrors(['sessions.afternoon_in.late_threshold' => 'Afternoon Late Threshold must be between Afternoon IN opening and closing times.'])->throwResponse();
+                }
+            }
+
+            if (!empty($sess['morning_in']['enabled']) && !empty($sess['morning_out']['enabled'])) {
+                if ($sess['morning_in']['opens_at'] >= $sess['morning_out']['opens_at']) {
+                    back()->withInput()->withErrors(['sessions.morning_out.opens_at' => 'Morning IN must occur earlier than Morning OUT.'])->throwResponse();
+                }
+            }
+
+            if (!empty($sess['afternoon_in']['enabled']) && !empty($sess['afternoon_out']['enabled'])) {
+                if ($sess['afternoon_in']['opens_at'] >= $sess['afternoon_out']['opens_at']) {
+                    back()->withInput()->withErrors(['sessions.afternoon_out.opens_at' => 'Afternoon IN must occur earlier than Afternoon OUT.'])->throwResponse();
+                }
+            }
+
+            if (!empty($sess['morning_out']['enabled']) && !empty($sess['afternoon_in']['enabled'])) {
+                if ($sess['morning_out']['opens_at'] > $sess['afternoon_in']['opens_at']) {
+                    back()->withInput()->withErrors(['sessions.afternoon_in.opens_at' => 'Morning OUT cannot be later than Afternoon IN.'])->throwResponse();
+                }
+            } elseif (!empty($sess['morning_in']['enabled']) && !empty($sess['afternoon_in']['enabled'])) {
+                if ($sess['morning_in']['opens_at'] >= $sess['afternoon_in']['opens_at']) {
+                    back()->withInput()->withErrors(['sessions.afternoon_in.opens_at' => 'Morning IN must occur before Afternoon IN.'])->throwResponse();
+                }
             }
         }
 
