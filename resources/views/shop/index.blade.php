@@ -189,10 +189,10 @@
                                     <div class="pt-3 border-t border-[#334155] flex items-center justify-between gap-3">
                                         <div>
                                             <span class="text-[10px] uppercase font-bold text-[#94A3B8] tracking-wider block">Cost</span>
-                                            <div class="flex items-center gap-1 font-extrabold text-sm text-amber-400 font-mono">
+                                            <div class="flex items-center gap-1.5 font-extrabold text-sm text-amber-400 font-mono">
                                                 <i data-lucide="coins" class="w-3.5 h-3.5"></i>
                                                 <span>{{ number_format($reward->points_cost) }} EXP</span>
-                                                <span class="sr-only">{{ number_format($reward->points_cost) }} pts</span>
+                                                <span class="text-[11px] font-normal text-slate-400">({{ number_format($reward->points_cost) }} pts)</span>
                                             </div>
                                         </div>
 

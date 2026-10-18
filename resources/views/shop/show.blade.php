@@ -96,6 +96,7 @@
                                 <div class="text-xl font-black text-amber-400 flex items-center gap-1.5 justify-end font-mono">
                                     <i data-lucide="coins" class="w-5 h-5"></i>
                                     <span>{{ number_format($reward->points_cost) }} EXP</span>
+                                    <span class="text-xs font-normal text-slate-400">({{ number_format($reward->points_cost) }} pts)</span>
                                 </div>
                             </div>
                         </div>

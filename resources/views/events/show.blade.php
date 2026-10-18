@@ -194,17 +194,53 @@
 
                         <div class="pt-4 border-t border-slate-800">
                             @if($registration)
-                                <div class="bg-emerald-500/10 border border-emerald-500/30 rounded-xl p-4 text-center space-y-2">
-                                    <div class="flex items-center justify-center gap-1.5 text-emerald-400 font-bold text-xs">
-                                        <i data-lucide="check-circle-2" class="w-4 h-4"></i>
-                                        <span>You are Registered!</span>
+                                @if($registration->status === 'approved')
+                                    <div class="bg-emerald-500/10 border border-emerald-500/30 rounded-xl p-4 text-center space-y-2">
+                                        <div class="flex items-center justify-center gap-1.5 text-emerald-400 font-bold text-xs">
+                                            <i data-lucide="check-circle-2" class="w-4 h-4"></i>
+                                            <span>You are Registered!</span>
+                                        </div>
+                                        <p class="text-[11px] text-slate-400">Your Dynamic Attendance QR Pass is active and authorized for this event.</p>
+                                        <a href="{{ route('tickets.show', $registration) }}" class="btn-primary w-full text-xs text-center py-2 block">
+                                            Open Event Dynamic QR Pass
+                                        </a>
                                     </div>
-                                    <p class="text-[11px] text-slate-400">Your participation pass has been issued.</p>
-                                    <a href="{{ route('tickets.show', $registration) }}" class="btn-primary w-full text-xs text-center py-2 block">
-                                        Open Ticket & QR Pass
-                                    </a>
-                                </div>
+                                @elseif($registration->status === 'pending')
+                                    <div class="bg-amber-500/10 border border-amber-500/30 rounded-xl p-4 text-center space-y-2">
+                                        <div class="flex items-center justify-center gap-1.5 text-amber-400 font-bold text-xs">
+                                            <i data-lucide="clock" class="w-4 h-4"></i>
+                                            <span>Registration Pending Review</span>
+                                        </div>
+                                        <p class="text-[11px] text-slate-400">Your registration is awaiting approval. Your Dynamic Attendance QR code will activate upon approval.</p>
+                                        <a href="{{ route('tickets.show', $registration) }}" class="btn-secondary w-full text-xs text-center py-2 block">
+                                            View Registration Details
+                                        </a>
+                                    </div>
+                                @else
+                                    <div class="bg-rose-500/10 border border-rose-500/30 rounded-xl p-4 text-center space-y-2">
+                                        <div class="flex items-center justify-center gap-1.5 text-rose-400 font-bold text-xs">
+                                            <i data-lucide="alert-circle" class="w-4 h-4"></i>
+                                            <span>Registration Cancelled or Ineligible</span>
+                                        </div>
+                                        <p class="text-[11px] text-slate-400">Attendance QR Pass is not active. Your registration was cancelled or revoked.</p>
+                                        <a href="{{ route('tickets.show', $registration) }}" class="btn-secondary w-full text-xs text-center py-2 block">
+                                            View Status
+                                        </a>
+                                    </div>
+                                @endif
                             @elseif($event->isRegistrationOpen())
+                                <div class="mb-4 p-3 rounded-xl bg-[#560E0F]/15 border border-[#8F3033]/40 text-left">
+                                    <div class="flex items-start gap-2.5">
+                                        <i data-lucide="qr-code" class="w-4 h-4 text-[#df747a] shrink-0 mt-0.5"></i>
+                                        <div>
+                                            <p class="text-xs font-bold text-white">Dynamic Attendance QR Pass Required</p>
+                                            <p class="text-[11px] text-[#94A3B8] mt-0.5">
+                                                Join this event to access your Dynamic Attendance QR Code for check-in and rewards.
+                                            </p>
+                                        </div>
+                                    </div>
+                                </div>
+
                                 <form method="POST" action="{{ route('events.join', $event) }}" class="space-y-4">
                                     @csrf
 

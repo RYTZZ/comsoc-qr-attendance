@@ -434,4 +434,73 @@ class EventSpecificDynamicQrSecurityTest extends TestCase
         $this->assertFalse($result['success']);
         $this->assertEquals('signature_mismatch', $result['code']);
     }
+
+    public function test_member_dynamic_qr_view_and_refresh_respect_event_registration_states(): void
+    {
+        // Case A: Unregistered student viewing event-scoped QR
+        $resNotJoined = $this->actingAs($this->unregisteredStudentUser)->get(route('member.dynamic_qr', ['event_id' => $this->eventA->id]));
+        $resNotJoined->assertOk();
+        $resNotJoined->assertSee('Join this event to access your Dynamic Attendance QR Code.');
+        $resNotJoined->assertSee('Join Event Now');
+        $resNotJoined->assertDontSee('id="qrcode-canvas"', false);
+
+        // Case A refresh call is rejected
+        $refreshNotJoined = $this->actingAs($this->unregisteredStudentUser)->postJson(route('member.dynamic_qr.refresh'), [
+            'event_id' => $this->eventA->id,
+        ]);
+        $refreshNotJoined->assertStatus(403);
+        $refreshNotJoined->assertJsonFragment([
+            'message' => 'Join this event to access your Dynamic Attendance QR Code.',
+        ]);
+
+        // Case B: Registered and approved student
+        EventRegistration::create([
+            'event_id' => $this->eventA->id,
+            'user_id' => $this->studentUser->id,
+            'full_name' => $this->studentUser->name,
+            'email' => $this->studentUser->email,
+            'status' => 'approved',
+            'ticket_code' => 'TCK-APPR123',
+        ]);
+
+        $resApproved = $this->actingAs($this->studentUser)->get(route('member.dynamic_qr', ['event_id' => $this->eventA->id]));
+        $resApproved->assertOk();
+        $resApproved->assertSee('Event Dynamic Attendance Pass');
+        $resApproved->assertSee($this->eventA->name);
+        $resApproved->assertSee('QR refreshes in');
+
+        $refreshApproved = $this->actingAs($this->studentUser)->postJson(route('member.dynamic_qr.refresh'), [
+            'event_id' => $this->eventA->id,
+        ]);
+        $refreshApproved->assertOk();
+        $this->assertTrue($refreshApproved->json('success'));
+        $this->assertNotEmpty($refreshApproved->json('payload'));
+        $this->assertNotEmpty($refreshApproved->json('manual_token'));
+
+        // Case C: Cancelled registration
+        $cancelledUser = User::factory()->create([
+            'role' => 'student',
+            'is_active' => true,
+            'is_eligible' => true,
+        ]);
+        EventRegistration::create([
+            'event_id' => $this->eventA->id,
+            'user_id' => $cancelledUser->id,
+            'full_name' => $cancelledUser->name,
+            'email' => $cancelledUser->email,
+            'status' => 'cancelled',
+            'ticket_code' => 'TCK-CANC456',
+        ]);
+
+        $resCancelled = $this->actingAs($cancelledUser)->get(route('member.dynamic_qr', ['event_id' => $this->eventA->id]));
+        $resCancelled->assertOk();
+        $resCancelled->assertSee('Event Pass Inactive');
+        $resCancelled->assertSee('Your registration for this event has been cancelled, rejected, or your member account is ineligible.');
+        $resCancelled->assertDontSee('id="qrcode-canvas"', false);
+
+        $refreshCancelled = $this->actingAs($cancelledUser)->postJson(route('member.dynamic_qr.refresh'), [
+            'event_id' => $this->eventA->id,
+        ]);
+        $refreshCancelled->assertStatus(403);
+    }
 }

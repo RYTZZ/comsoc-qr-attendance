@@ -326,7 +326,7 @@
                                 <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
                                     <div>
                                         <label class="block text-xs font-semibold text-slate-300 mb-1">
-                                            Points Cost <span class="text-rose-400">*</span>
+                                            Points Cost (Spendable EXP) <span class="text-rose-400">*</span>
                                         </label>
                                         <input type="number" name="points_cost" min="0" value="50" required
                                                class="input-dark text-xs w-full font-mono">
@@ -510,7 +510,7 @@
                                                     <div class="text-[11px] text-slate-400 flex flex-wrap items-center gap-3 mt-1.5">
                                                         <span>{{ $reward->category }}</span>
                                                         <span>•</span>
-                                                        <span class="text-amber-400 font-bold">{{ number_format($reward->points_cost) }} pts</span>
+                                                        <span class="text-amber-400 font-bold">{{ number_format($reward->points_cost) }} pts / EXP</span>
                                                         <span>•</span>
                                                         <span class="text-emerald-400 font-medium">Stock: {{ $reward->stock === null ? 'Unlimited' : $reward->stock }}</span>
                                                         <span>•</span>
@@ -632,7 +632,7 @@
                                                         </div>
 
                                                         <div>
-                                                            <label class="block text-xs font-semibold text-slate-300 mb-1">Points Cost</label>
+                                                            <label class="block text-xs font-semibold text-slate-300 mb-1">Points Cost (Spendable EXP)</label>
                                                             <input type="number" name="points_cost" :value="activeReward?.points_cost" required class="input-dark text-xs w-full font-mono">
                                                         </div>
                                                     </div>

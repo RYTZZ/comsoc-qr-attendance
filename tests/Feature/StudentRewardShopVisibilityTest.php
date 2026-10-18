@@ -384,4 +384,81 @@ class StudentRewardShopVisibilityTest extends TestCase
         $this->assertEquals(75, $redemption->points_spent);
         $this->assertNotNull($redemption->claim_code);
     }
+
+    public function test_bsit_program_shirt_is_visible_to_eligible_student_with_1000_exp_and_redeems_properly(): void
+    {
+        $shirt = Reward::create([
+            'title' => 'BSIT PROGRAM SHIRT',
+            'category' => 'Apparel',
+            'reward_type' => 'physical',
+            'points_cost' => 450,
+            'stock' => 5,
+            'redemption_limit_per_member' => 1,
+            'status' => 'published',
+            'is_active' => true,
+            'is_archived' => false,
+            'min_level' => 1,
+            'published_at' => now(),
+        ]);
+
+        // Student with 1,000 EXP
+        app(\App\Services\ExpLedgerService::class)->creditExp(
+            user: $this->student,
+            amount: 1000,
+            sourceType: 'event_attendance',
+            description: 'Attendance EXP'
+        );
+
+        $this->assertEquals(1000, $this->student->getSpendableExp());
+
+        // 1. Check shop index visibility
+        $shopRes = $this->actingAs($this->student)->get(route('shop.index'));
+        $shopRes->assertOk();
+        $shopRes->assertSee('BSIT PROGRAM SHIRT');
+        $shopRes->assertSee('450 EXP');
+        $shopRes->assertSee('Apparel');
+        $shopRes->assertSee('5 left');
+
+        // 2. Check shop show page
+        $showRes = $this->actingAs($this->student)->get(route('shop.show', $shirt));
+        $showRes->assertOk();
+        $showRes->assertSee('BSIT PROGRAM SHIRT');
+        $showRes->assertSee('450 EXP');
+        $showRes->assertSee('Redeem for 450 EXP');
+
+        // 3. Ineligible member cannot redeem
+        $ineligibleStudent = User::factory()->create([
+            'role' => 'student',
+            'is_active' => true,
+            'is_eligible' => false,
+        ]);
+        app(\App\Services\ExpLedgerService::class)->creditExp(
+            user: $ineligibleStudent,
+            amount: 1000,
+            sourceType: 'adjustment',
+            description: 'Credit'
+        );
+        $ineligibleRes = $this->actingAs($ineligibleStudent)->post(route('shop.redeem', $shirt));
+        $ineligibleRes->assertSessionHas('error');
+        $this->assertEquals(5, $shirt->fresh()->stock);
+
+        // 4. Eligible student redeems shirt
+        $redeemRes = $this->actingAs($this->student)->post(route('shop.redeem', $shirt), [
+            'notes' => 'Size Large',
+        ]);
+        $redeemRes->assertRedirect(route('shop.show', $shirt));
+        $redeemRes->assertSessionHas('success');
+
+        // Stock decremented from 5 to 4
+        $this->assertEquals(4, $shirt->fresh()->stock);
+
+        // Spendable balance deducted from 1000 to 550
+        $this->assertEquals(550, $this->student->getSpendableExp());
+
+        // 5. Per-user redemption limit enforced (limit 1/user)
+        $duplicateRes = $this->actingAs($this->student)->post(route('shop.redeem', $shirt));
+        $duplicateRes->assertSessionHas('error');
+        $this->assertEquals(4, $shirt->fresh()->stock);
+        $this->assertEquals(550, $this->student->getSpendableExp());
+    }
 }

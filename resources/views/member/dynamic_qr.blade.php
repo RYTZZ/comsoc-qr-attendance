@@ -6,7 +6,9 @@
              initialFormattedManualToken: '{{ $initialFormattedManualToken ?? '' }}',
              initialExpiresAt: '{{ $initialExpiresAt }}',
              ttl: {{ $ttl }},
-             refreshUrl: '{{ route('member.dynamic_qr.refresh') }}'
+             refreshUrl: '{{ route('member.dynamic_qr.refresh') }}',
+             eventId: '{{ $event?->id ?? '' }}',
+             passState: '{{ $passState ?? 'active' }}'
          })"
          x-init="initPass()">
 
@@ -42,129 +44,201 @@
                 <div class="absolute -top-24 -left-24 w-48 h-48 bg-[#560E0F]/30 rounded-full blur-3xl pointer-events-none"></div>
                 <div class="absolute -bottom-24 -right-24 w-48 h-48 bg-[#8F3033]/25 rounded-full blur-3xl pointer-events-none"></div>
 
+                @if(isset($event))
+                    <div class="mb-3 px-3 py-1.5 rounded-xl bg-slate-900/80 border border-slate-800 text-center w-full">
+                        <span class="text-[10px] uppercase font-bold text-slate-400 tracking-wider block font-mono">Event Attendance Pass</span>
+                        <h2 class="text-sm font-bold text-white font-brand-display truncate">{{ $event->name }}</h2>
+                    </div>
+                @endif
+
                 <div class="mb-4">
                     <span class="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full text-xs font-bold text-white shadow-sm border border-[#8F3033]/50 bg-burgundy-deep">
                         <span class="w-2 h-2 rounded-full bg-[#df747a] animate-ping"></span>
-                        Official Dynamic Attendance Pass
+                        {{ isset($event) ? 'Event Dynamic Attendance Pass' : 'Official Dynamic Attendance Pass' }}
                     </span>
                 </div>
 
-                <!-- Outer QR frame with perimeter animated countdown timer border -->
-                <div class="relative p-2 sm:p-2.5 rounded-3xl flex items-center justify-center transition-all duration-300">
-                    <!-- SVG Countdown Border Overlay -->
-                    <svg class="absolute inset-0 w-full h-full pointer-events-none -rotate-90"
-                         viewBox="0 0 280 280"
-                         preserveAspectRatio="none">
-                        <!-- Track Background -->
-                        <rect x="5" y="5" width="270" height="270" rx="22" ry="22"
-                              fill="none"
-                              stroke="#1E293B"
-                              stroke-width="5" />
-                        <!-- Animated Perimeter Countdown Indicator -->
-                        <rect x="5" y="5" width="270" height="270" rx="22" ry="22"
-                              fill="none"
-                              :stroke="timeLeft <= 5 ? '#ef4444' : (timeLeft <= 10 ? '#f59e0b' : '#8F3033')"
-                              stroke-width="5"
-                              stroke-linecap="round"
-                              pathLength="1000"
-                              stroke-dasharray="1000"
-                              :stroke-dashoffset="1000 - (progressPercent * 10)"
-                              class="transition-all duration-300 ease-linear drop-shadow-[0_0_8px_rgba(143,48,51,0.5)]" />
-                    </svg>
-
-                    <!-- QR Inner White Box with Quiet Zone -->
-                    <div class="relative p-4 sm:p-5 bg-white rounded-2xl shadow-2xl flex items-center justify-center border border-slate-200">
-                        <div id="qrcode-canvas" class="w-[210px] h-[210px] sm:w-[230px] sm:h-[230px] flex items-center justify-center overflow-hidden"></div>
-
-                        <!-- Refreshing Loading State -->
-                        <div x-show="refreshing" class="absolute inset-0 bg-white/95 backdrop-blur-xs rounded-2xl flex flex-col items-center justify-center transition-opacity z-10" style="display: none;">
-                            <i data-lucide="refresh-cw" class="w-8 h-8 text-[#560E0F] animate-spin mb-2"></i>
-                            <span class="text-xs font-bold text-slate-900 font-brand-display">Refreshing Pass...</span>
+                @if(($passState ?? 'active') === 'not_joined')
+                    <!-- Case A: Student has not joined the event -->
+                    <div class="w-full p-6 bg-slate-900/90 rounded-2xl border border-slate-800 space-y-4 my-2">
+                        <div class="w-14 h-14 mx-auto rounded-2xl bg-amber-500/10 border border-amber-500/30 flex items-center justify-center text-amber-400">
+                            <i data-lucide="ticket" class="w-7 h-7"></i>
                         </div>
+                        <div class="space-y-1">
+                            <h3 class="text-base font-bold text-white font-brand-display">Registration Required</h3>
+                            <p class="text-xs text-amber-300 font-semibold leading-relaxed">
+                                Join this event to access your Dynamic Attendance QR Code.
+                            </p>
+                            <p class="text-[11px] text-[#94A3B8] leading-relaxed">
+                                Each event requires its own authorized pass. Once you join, your 30-second rotating QR pass will become available here.
+                            </p>
+                        </div>
+                        @if(isset($event))
+                            <a href="{{ route('events.show', $event) }}" class="btn-primary w-full text-xs py-2.5 flex items-center justify-center gap-2 shadow-lg shadow-[#560E0F]/20">
+                                <i data-lucide="calendar-plus" class="w-4 h-4"></i>
+                                <span>Join Event Now</span>
+                            </a>
+                        @else
+                            <a href="{{ route('events.index') }}" class="btn-primary w-full text-xs py-2.5 flex items-center justify-center gap-2">
+                                <span>Browse Events</span>
+                            </a>
+                        @endif
+                    </div>
+                @elseif(($passState ?? 'active') === 'pending')
+                    <!-- Case A pending approval: Registration pending -->
+                    <div class="w-full p-6 bg-slate-900/90 rounded-2xl border border-slate-800 space-y-4 my-2">
+                        <div class="w-14 h-14 mx-auto rounded-2xl bg-amber-500/10 border border-amber-500/30 flex items-center justify-center text-amber-400">
+                            <i data-lucide="clock" class="w-7 h-7"></i>
+                        </div>
+                        <div class="space-y-1">
+                            <h3 class="text-base font-bold text-white font-brand-display">Registration Pending Review</h3>
+                            <p class="text-xs text-slate-300 leading-relaxed">
+                                Your event pass will activate once your registration is approved by the event coordinator.
+                            </p>
+                        </div>
+                        @if(isset($eventRegistration))
+                            <a href="{{ route('tickets.show', $eventRegistration) }}" class="btn-secondary w-full text-xs py-2 flex items-center justify-center gap-1.5">
+                                <span>View Ticket Details</span>
+                            </a>
+                        @endif
+                    </div>
+                @elseif(($passState ?? 'active') === 'revoked')
+                    <!-- Case C: Cancelled / Revoked / Ineligible -->
+                    <div class="w-full p-6 bg-slate-900/90 rounded-2xl border border-slate-800 space-y-4 my-2">
+                        <div class="w-14 h-14 mx-auto rounded-2xl bg-rose-500/10 border border-rose-500/30 flex items-center justify-center text-rose-400">
+                            <i data-lucide="shield-alert" class="w-7 h-7"></i>
+                        </div>
+                        <div class="space-y-1">
+                            <h3 class="text-base font-bold text-rose-400 font-brand-display">Event Pass Inactive</h3>
+                            <p class="text-xs text-slate-300 leading-relaxed">
+                                Your registration for this event has been cancelled, rejected, or your member account is ineligible. A valid QR pass cannot be issued.
+                            </p>
+                        </div>
+                        @if(isset($event))
+                            <a href="{{ route('events.show', $event) }}" class="btn-secondary w-full text-xs py-2 flex items-center justify-center gap-1.5">
+                                <span>Return to Event</span>
+                            </a>
+                        @endif
+                    </div>
+                @else
+                    <!-- Case B: Joined & Eligible - Active 30s Dynamic Rolling QR -->
+                    <!-- Outer QR frame with perimeter animated countdown timer border -->
+                    <div class="relative p-2 sm:p-2.5 rounded-3xl flex items-center justify-center transition-all duration-300">
+                        <!-- SVG Countdown Border Overlay -->
+                        <svg class="absolute inset-0 w-full h-full pointer-events-none -rotate-90"
+                             viewBox="0 0 280 280"
+                             preserveAspectRatio="none">
+                            <!-- Track Background -->
+                            <rect x="5" y="5" width="270" height="270" rx="22" ry="22"
+                                  fill="none"
+                                  stroke="#1E293B"
+                                  stroke-width="5" />
+                            <!-- Animated Perimeter Countdown Indicator -->
+                            <rect x="5" y="5" width="270" height="270" rx="22" ry="22"
+                                  fill="none"
+                                  :stroke="timeLeft <= 5 ? '#ef4444' : (timeLeft <= 10 ? '#f59e0b' : '#8F3033')"
+                                  stroke-width="5"
+                                  stroke-linecap="round"
+                                  pathLength="1000"
+                                  stroke-dasharray="1000"
+                                  :stroke-dashoffset="1000 - (progressPercent * 10)"
+                                  class="transition-all duration-300 ease-linear drop-shadow-[0_0_8px_rgba(143,48,51,0.5)]" />
+                        </svg>
 
-                        <!-- Render / Connection Error State -->
-                        <div x-show="errorMessage && !refreshing" class="absolute inset-0 bg-white rounded-2xl flex flex-col items-center justify-center p-4 text-center z-10" style="display: none;">
-                            <div class="w-10 h-10 rounded-xl bg-rose-50 text-rose-600 flex items-center justify-center mb-2 border border-rose-200">
-                                <i data-lucide="alert-circle" class="w-5 h-5"></i>
+                        <!-- QR Inner White Box with Quiet Zone -->
+                        <div class="relative p-4 sm:p-5 bg-white rounded-2xl shadow-2xl flex items-center justify-center border border-slate-200">
+                            <div id="qrcode-canvas" class="w-[210px] h-[210px] sm:w-[230px] sm:h-[230px] flex items-center justify-center overflow-hidden"></div>
+
+                            <!-- Refreshing Loading State -->
+                            <div x-show="refreshing" class="absolute inset-0 bg-white/95 backdrop-blur-xs rounded-2xl flex flex-col items-center justify-center transition-opacity z-10" style="display: none;">
+                                <i data-lucide="refresh-cw" class="w-8 h-8 text-[#560E0F] animate-spin mb-2"></i>
+                                <span class="text-xs font-bold text-slate-900 font-brand-display">Refreshing Pass...</span>
                             </div>
-                            <span class="text-xs font-bold text-slate-900 font-brand-display">Failed to load QR</span>
-                            <p class="text-[10px] text-slate-500 mt-1 max-w-[170px]" x-text="errorMessage"></p>
-                            <button type="button" @click="fetchNewToken()" class="mt-3 px-3 py-1 rounded-lg bg-[#560E0F] text-white text-[11px] font-bold hover:bg-[#8F3033] transition shadow">
-                                Retry
-                            </button>
+
+                            <!-- Render / Connection Error State -->
+                            <div x-show="errorMessage && !refreshing" class="absolute inset-0 bg-white rounded-2xl flex flex-col items-center justify-center p-4 text-center z-10" style="display: none;">
+                                <div class="w-10 h-10 rounded-xl bg-rose-50 text-rose-600 flex items-center justify-center mb-2 border border-rose-200">
+                                    <i data-lucide="alert-circle" class="w-5 h-5"></i>
+                                </div>
+                                <span class="text-xs font-bold text-slate-900 font-brand-display">Failed to load QR</span>
+                                <p class="text-[10px] text-slate-500 mt-1 max-w-[170px]" x-text="errorMessage"></p>
+                                <button type="button" @click="fetchNewToken()" class="mt-3 px-3 py-1 rounded-lg bg-[#560E0F] text-white text-[11px] font-bold hover:bg-[#8F3033] transition shadow">
+                                    Retry
+                                </button>
+                            </div>
                         </div>
                     </div>
-                </div>
 
-                <div class="w-full mt-6 space-y-3">
-                    <div class="flex items-center justify-between text-xs px-1">
-                        <span class="text-[#94A3B8] flex items-center gap-1.5 font-medium">
-                            <i data-lucide="timer" class="w-4 h-4 text-[#df747a]"></i>
-                            <span>QR refreshes in</span>
-                        </span>
-                        <span class="font-mono font-black text-sm tabular-nums"
-                              :class="timeLeft <= 5 ? 'text-rose-400 animate-pulse' : (timeLeft <= 10 ? 'text-amber-400' : 'text-[#df747a]')"
-                              x-text="formattedTimeLeft">00:30</span>
-                    </div>
-
-                    <!-- Secondary Horizontal Bar -->
-                    <div class="w-full h-2 bg-[#0B1120] rounded-full overflow-hidden p-0.5 border border-[#334155]">
-                        <div class="h-full rounded-full transition-all duration-300 ease-linear"
-                             :class="timeLeft <= 5 ? 'bg-rose-500' : (timeLeft <= 10 ? 'bg-amber-500' : 'bg-burgundy-gradient')"
-                             :style="`width: ${progressPercent}%`"></div>
-                    </div>
-
-                    <div class="pt-2 flex items-center justify-between text-[11px] text-[#94A3B8]">
-                        <span class="flex items-center gap-1">
-                            <i data-lucide="shield-check" class="w-3.5 h-3.5 text-emerald-400"></i>
-                            <span>Anti-Screenshot Verified</span>
-                        </span>
-                        <button type="button" @click="fetchNewToken()" :disabled="refreshing" class="text-[#df747a] hover:text-white underline underline-offset-2 transition disabled:opacity-50 flex items-center gap-1 font-semibold">
-                            <i data-lucide="refresh-cw" class="w-3 h-3" :class="refreshing ? 'animate-spin' : ''"></i>
-                            <span>Force Refresh</span>
-                        </button>
-                    </div>
-
-                    <!-- Manual Attendance Token Section -->
-                    <div class="mt-4 pt-4 border-t border-[#334155]/80 w-full text-left">
-                        <div class="flex items-center justify-between mb-1.5">
-                            <span class="text-[11px] font-bold uppercase tracking-wider text-[#94A3B8] font-brand-display flex items-center gap-1.5">
-                                <i data-lucide="key" class="w-3.5 h-3.5 text-[#df747a]"></i>
-                                <span>Manual Attendance Token</span>
+                    <div class="w-full mt-6 space-y-3">
+                        <div class="flex items-center justify-between text-xs px-1">
+                            <span class="text-[#94A3B8] flex items-center gap-1.5 font-medium">
+                                <i data-lucide="timer" class="w-4 h-4 text-[#df747a]"></i>
+                                <span>QR refreshes in</span>
                             </span>
-                            <span class="text-[10px] text-slate-500 font-mono" x-text="formattedTimeLeft + ' left'"></span>
+                            <span class="font-mono font-black text-sm tabular-nums"
+                                  :class="timeLeft <= 5 ? 'text-rose-400 animate-pulse' : (timeLeft <= 10 ? 'text-amber-400' : 'text-[#df747a]')"
+                                  x-text="formattedTimeLeft">00:30</span>
                         </div>
 
-                        <div class="flex items-center gap-2 bg-[#0B1120] border-2 border-[#334155] hover:border-[#8F3033]/70 rounded-2xl p-2 sm:p-2.5 transition">
-                            <div class="flex-1 font-mono font-black text-center text-lg sm:text-xl tracking-widest text-[#F8FAFC] select-all tabular-nums"
-                                 x-text="displayManualToken">
-                                {{ $initialFormattedManualToken ?? '------' }}
-                            </div>
+                        <!-- Secondary Horizontal Bar -->
+                        <div class="w-full h-2 bg-[#0B1120] rounded-full overflow-hidden p-0.5 border border-[#334155]">
+                            <div class="h-full rounded-full transition-all duration-300 ease-linear"
+                                 :class="timeLeft <= 5 ? 'bg-rose-500' : (timeLeft <= 10 ? 'bg-amber-500' : 'bg-burgundy-gradient')"
+                                 :style="`width: ${progressPercent}%`"></div>
+                        </div>
 
-                            <button type="button"
-                                    @click="copyToken()"
-                                    class="shrink-0 px-3 py-1.5 rounded-xl text-xs font-semibold bg-[#172033] hover:bg-[#1E293B] text-slate-200 hover:text-white border border-[#334155] transition flex items-center gap-1 shadow-sm active:scale-95"
-                                    :title="copied ? 'Copied to clipboard' : 'Copy token'">
-                                <template x-if="!copied">
-                                    <span class="flex items-center gap-1">
-                                        <i data-lucide="copy" class="w-3.5 h-3.5 text-[#df747a]"></i>
-                                        <span class="hidden sm:inline">Copy</span>
-                                    </span>
-                                </template>
-                                <template x-if="copied">
-                                    <span class="flex items-center gap-1 text-emerald-400 font-bold">
-                                        <i data-lucide="check" class="w-3.5 h-3.5"></i>
-                                        <span>Copied!</span>
-                                    </span>
-                                </template>
+                        <div class="pt-2 flex items-center justify-between text-[11px] text-[#94A3B8]">
+                            <span class="flex items-center gap-1">
+                                <i data-lucide="shield-check" class="w-3.5 h-3.5 text-emerald-400"></i>
+                                <span>Anti-Screenshot Verified</span>
+                            </span>
+                            <button type="button" @click="fetchNewToken()" :disabled="refreshing" class="text-[#df747a] hover:text-white underline underline-offset-2 transition disabled:opacity-50 flex items-center gap-1 font-semibold">
+                                <i data-lucide="refresh-cw" class="w-3 h-3" :class="refreshing ? 'animate-spin' : ''"></i>
+                                <span>Force Refresh</span>
                             </button>
                         </div>
 
-                        <p class="text-[11px] text-[#94A3B8] mt-2 text-center leading-relaxed">
-                            Can't scan the QR code? Enter this token in the manual attendance lookup.
-                        </p>
+                        <!-- Manual Attendance Token Section -->
+                        <div class="mt-4 pt-4 border-t border-[#334155]/80 w-full text-left">
+                            <div class="flex items-center justify-between mb-1.5">
+                                <span class="text-[11px] font-bold uppercase tracking-wider text-[#94A3B8] font-brand-display flex items-center gap-1.5">
+                                    <i data-lucide="key" class="w-3.5 h-3.5 text-[#df747a]"></i>
+                                    <span>Manual Attendance Token</span>
+                                </span>
+                                <span class="text-[10px] text-slate-500 font-mono" x-text="formattedTimeLeft + ' left'"></span>
+                            </div>
+
+                            <div class="flex items-center gap-2 bg-[#0B1120] border-2 border-[#334155] hover:border-[#8F3033]/70 rounded-2xl p-2 sm:p-2.5 transition">
+                                <div class="flex-1 font-mono font-black text-center text-lg sm:text-xl tracking-widest text-[#F8FAFC] select-all tabular-nums"
+                                     x-text="displayManualToken">
+                                    {{ $initialFormattedManualToken ?? '------' }}
+                                </div>
+
+                                <button type="button"
+                                        @click="copyToken()"
+                                        class="shrink-0 px-3 py-1.5 rounded-xl text-xs font-semibold bg-[#172033] hover:bg-[#1E293B] text-slate-200 hover:text-white border border-[#334155] transition flex items-center gap-1 shadow-sm active:scale-95"
+                                        :title="copied ? 'Copied to clipboard' : 'Copy token'">
+                                    <template x-if="!copied">
+                                        <span class="flex items-center gap-1">
+                                            <i data-lucide="copy" class="w-3.5 h-3.5 text-[#df747a]"></i>
+                                            <span class="hidden sm:inline">Copy</span>
+                                        </span>
+                                    </template>
+                                    <template x-if="copied">
+                                        <span class="flex items-center gap-1 text-emerald-400 font-bold">
+                                            <i data-lucide="check" class="w-3.5 h-3.5"></i>
+                                            <span>Copied!</span>
+                                        </span>
+                                    </template>
+                                </button>
+                            </div>
+
+                            <p class="text-[11px] text-[#94A3B8] mt-2 text-center leading-relaxed">
+                                Can't scan the QR code? Enter this token in the manual attendance lookup.
+                            </p>
+                        </div>
                     </div>
-                </div>
+                @endif
             </div>
         </div>
 
@@ -234,7 +308,13 @@
                     }
                 },
 
+                eventId: config.eventId || '',
+                passState: config.passState || 'active',
+
                 initPass() {
+                    if (this.passState !== 'active') {
+                        return;
+                    }
                     this.waitForQrLibAndRender();
                     this.syncTiming();
                     this.startCountdown();
@@ -315,7 +395,10 @@
                                 'Content-Type': 'application/json',
                                 'Accept': 'application/json',
                                 'X-CSRF-TOKEN': tokenMeta ? tokenMeta.getAttribute('content') : ''
-                            }
+                            },
+                            body: JSON.stringify({
+                                event_id: this.eventId || null
+                            })
                         });
 
                         if (!response.ok) {
