@@ -15,7 +15,7 @@
     </style>
 </head>
 <body>
-    <div style="margin-bottom: 16px; border-bottom: 2px solid #7A1618; padding-bottom: 12px;">
+    <div style="margin-bottom: 16px; border-bottom: 2px solid #560E0F; padding-bottom: 12px;">
         <table style="width: 100%; border: none; margin-top: 0;">
             <tr style="border: none;">
                 <td style="width: 60px; border: none; padding: 0; vertical-align: middle;">

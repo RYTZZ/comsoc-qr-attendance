@@ -39,7 +39,13 @@ class LoginRequest extends FormRequest
         $this->ensureIsNotRateLimited();
 
         $loginInput = $this->input('login', $this->input('email'));
-        $fieldType = filter_var($loginInput, FILTER_VALIDATE_EMAIL) ? 'email' : 'username';
+        
+        $fieldType = 'username';
+        if (filter_var($loginInput, FILTER_VALIDATE_EMAIL)) {
+            $fieldType = 'email';
+        } elseif (\App\Models\User::where('student_number', $loginInput)->exists()) {
+            $fieldType = 'student_number';
+        }
 
         $credentials = [
             $fieldType => $loginInput,

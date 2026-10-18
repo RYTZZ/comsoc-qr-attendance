@@ -47,7 +47,7 @@
                     buttonClass="py-2 text-xs" />
             </div>
             <div class="flex gap-2">
-                <input type="search" name="search" value="{{ request('search') }}" placeholder="Search…" class="input flex-1 sm:w-40">
+                <input type="search" name="search" value="{{ request('search') }}" class="input flex-1 sm:w-40">
                 <button type="submit" class="btn-secondary shrink-0">Filter</button>
             </div>
         </form>

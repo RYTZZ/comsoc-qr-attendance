@@ -125,7 +125,7 @@ style="display: none;">
          x-transition:leave="ease-in duration-150"
          x-transition:leave-start="opacity-100 translate-y-0 sm:scale-100"
          x-transition:leave-end="opacity-0 translate-y-3 sm:scale-95"
-         class="relative w-full max-w-md bg-[#171a23] border border-slate-800 rounded-2xl shadow-2xl p-6 text-left overflow-hidden z-10">
+         class="relative w-full max-w-md bg-[#172033] border border-slate-800 rounded-2xl shadow-2xl p-6 text-left overflow-hidden z-10">
 
         <div class="flex items-start gap-3.5 mb-4">
             <div class="w-10 h-10 rounded-xl flex items-center justify-center shrink-0"
@@ -186,7 +186,7 @@ style="display: none;">
                     x-ref="confirmBtn"
                     @click="confirm()"
                     :class="{
-                        'btn-primary bg-[#7A1618] hover:bg-[#8e1b1d] focus:ring-[#7A1618]': type === 'danger' || type === 'primary',
+                        'btn-primary bg-[#560E0F] hover:bg-[#8e1b1d] focus:ring-[#560E0F]': type === 'danger' || type === 'primary',
                         'btn-warning bg-amber-600 hover:bg-amber-500 focus:ring-amber-500': type === 'warning',
                         'btn-success bg-emerald-600 hover:bg-emerald-500 focus:ring-emerald-500': type === 'success'
                     }"

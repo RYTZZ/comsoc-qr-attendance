@@ -6,10 +6,10 @@
     <title>{{ $event ? 'Register for ' . $event->name : 'Non-Student Registration' }} — Computing Society</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Michroma&family=Sora:wght@600;700;800&family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Manrope:wght@600;700;800&family=Space+Grotesk:wght@500;600;700&display=swap" rel="stylesheet">
     @vite(['resources/css/app.css', 'resources/js/app.js'])
 </head>
-<body class="bg-[#0f1117] text-slate-100 min-h-screen flex flex-col font-sans antialiased selection:bg-[#7A1618] selection:text-white relative overflow-x-hidden">
+<body class="bg-[#0B1120] text-slate-100 min-h-screen flex flex-col font-sans antialiased selection:bg-[#560E0F] selection:text-white relative overflow-x-hidden">
     <x-toast-stack />
     <x-page-loader />
     <x-public-auth-bg />
@@ -17,7 +17,7 @@
     <div class="relative overflow-hidden flex-1 flex flex-col items-center justify-center p-4 py-10 z-10">
         <div class="w-full max-w-xl relative z-10">
             <div class="text-center mb-6">
-                <div class="w-20 h-20 mx-auto mb-3 flex items-center justify-center p-2 rounded-2xl bg-[#171a23]/90 border border-slate-800 shadow-xl enter-logo backdrop-blur-sm">
+                <div class="w-20 h-20 mx-auto mb-3 flex items-center justify-center p-2 rounded-2xl bg-[#172033]/90 border border-slate-800 shadow-xl enter-logo backdrop-blur-sm">
                     <img src="{{ asset('images/COMSOC.png') }}" alt="Computing Society Logo" class="w-full h-full object-contain">
                 </div>
                 <div class="enter-header">
@@ -28,7 +28,7 @@
             </div>
 
             @if(!$event)
-                <div class="bg-[#171a23]/95 border border-slate-800/80 rounded-2xl shadow-xl p-8 text-center enter-card backdrop-blur-md">
+                <div class="bg-[#172033]/95 border border-slate-800/80 rounded-2xl shadow-xl p-8 text-center enter-card backdrop-blur-md">
                     <div class="w-12 h-12 mx-auto rounded-full bg-slate-800/80 flex items-center justify-center text-slate-400 mb-3">
                         <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
@@ -40,7 +40,7 @@
                     </p>
                 </div>
             @else
-                <div class="bg-[#171a23]/95 border border-slate-800/80 rounded-2xl shadow-2xl p-5 sm:p-8 enter-card backdrop-blur-md">
+                <div class="bg-[#172033]/95 border border-slate-800/80 rounded-2xl shadow-2xl p-5 sm:p-8 enter-card backdrop-blur-md">
                     @if(isset($events) && $events->count() > 1)
                         <div class="mb-6 pb-5 border-b border-slate-800">
                             <label class="block text-xs font-medium text-slate-300 mb-1.5 font-brand-display">
@@ -66,7 +66,7 @@
 
                     <div class="border-b border-slate-800 pb-5 mb-6">
                         <div class="flex flex-wrap items-center justify-between gap-2 mb-2">
-                            <div class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold bg-[#7A1618]/15 text-[#dfa6a9] border border-[#7A1618]/30">
+                            <div class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold bg-[#560E0F]/15 text-[#dfa6a9] border border-[#560E0F]/30">
                                 Participant Registration
                             </div>
 
@@ -438,7 +438,7 @@
                                         </span>
                                     </template>
                                     <template x-if="currentStep === 1">
-                                        <span class="w-6 h-6 rounded-full bg-[#7A1618] text-white text-xs font-bold flex items-center justify-center shadow">
+                                        <span class="w-6 h-6 rounded-full bg-[#560E0F] text-white text-xs font-bold flex items-center justify-center shadow">
                                             ●
                                         </span>
                                     </template>
@@ -463,7 +463,7 @@
                                         </span>
                                     </template>
                                     <template x-if="currentStep === 2">
-                                        <span class="w-6 h-6 rounded-full bg-[#7A1618] text-white text-xs font-bold flex items-center justify-center shadow">
+                                        <span class="w-6 h-6 rounded-full bg-[#560E0F] text-white text-xs font-bold flex items-center justify-center shadow">
                                             ●
                                         </span>
                                     </template>
@@ -488,7 +488,7 @@
                                         </span>
                                     </template>
                                     <template x-if="currentStep === 3 && !step3Completed">
-                                        <span class="w-6 h-6 rounded-full bg-[#7A1618] text-white text-xs font-bold flex items-center justify-center shadow">
+                                        <span class="w-6 h-6 rounded-full bg-[#560E0F] text-white text-xs font-bold flex items-center justify-center shadow">
                                             ●
                                         </span>
                                     </template>
@@ -514,7 +514,7 @@
                                 <div x-show="currentStep === 1" x-cloak class="space-y-4">
                                     <div class="flex items-center justify-between pb-1 border-b border-slate-800">
                                         <div class="flex items-center gap-2">
-                                            <span class="w-5 h-5 rounded-full bg-[#7A1618]/20 text-[#dfa6a9] text-xs font-bold flex items-center justify-center">1</span>
+                                            <span class="w-5 h-5 rounded-full bg-[#560E0F]/20 text-[#dfa6a9] text-xs font-bold flex items-center justify-center">1</span>
                                             <h3 class="text-xs font-semibold uppercase tracking-wider text-slate-300">Personal Information</h3>
                                         </div>
                                         <span class="text-[10px] text-slate-400 font-mono">Step 1 of 3</span>
@@ -527,8 +527,7 @@
                                                type="text"
                                                x-model="fullName"
                                                @input="errors.full_name = ''"
-                                               class="w-full rounded-xl bg-slate-950 border border-slate-700 px-3.5 py-2.5 text-sm text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-[#7A1618] focus:border-transparent transition"
-                                               placeholder="e.g., Juan Dela Cruz" />
+                                               class="w-full rounded-xl bg-slate-950 border border-slate-700 px-3.5 py-2.5 text-sm text-white focus:outline-none focus:ring-2 focus:ring-[#560E0F] focus:border-transparent transition" />
                                         <template x-if="errors.full_name">
                                             <p class="text-red-400 text-xs mt-1" x-text="errors.full_name"></p>
                                         </template>
@@ -544,8 +543,7 @@
                                                type="email"
                                                x-model="email"
                                                @input="errors.email = ''"
-                                               class="w-full rounded-xl bg-slate-950 border border-slate-700 px-3.5 py-2.5 text-sm text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-[#7A1618] focus:border-transparent transition"
-                                               placeholder="e.g., juan@example.com" />
+                                               class="w-full rounded-xl bg-slate-950 border border-slate-700 px-3.5 py-2.5 text-sm text-white focus:outline-none focus:ring-2 focus:ring-[#560E0F] focus:border-transparent transition" />
                                         <template x-if="errors.email">
                                             <p class="text-red-400 text-xs mt-1" x-text="errors.email"></p>
                                         </template>
@@ -582,8 +580,7 @@
                                                type="text"
                                                x-model="customOrganization"
                                                @input="errors.custom_organization = ''"
-                                               class="w-full rounded-xl bg-slate-950 border border-slate-700 px-3.5 py-2.5 text-sm text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-[#7A1618] focus:border-transparent transition"
-                                               placeholder="Enter your official school / university name" />
+                                               class="w-full rounded-xl bg-slate-950 border border-slate-700 px-3.5 py-2.5 text-sm text-white focus:outline-none focus:ring-2 focus:ring-[#560E0F] focus:border-transparent transition" />
                                         <template x-if="errors.custom_organization">
                                             <p class="text-red-400 text-xs mt-1" x-text="errors.custom_organization"></p>
                                         </template>
@@ -595,7 +592,7 @@
                                     <div class="pt-4 flex justify-end">
                                         <button type="button"
                                                 @click="nextStep()"
-                                                class="w-full sm:w-auto min-w-[130px] py-3 px-6 rounded-xl font-semibold text-sm text-white bg-[#7A1618] hover:bg-[#8e1b1d] active:scale-[0.99] transition shadow-md focus:outline-none focus:ring-2 focus:ring-[#7A1618] focus:ring-offset-2 focus:ring-offset-[#171a23]">
+                                                class="w-full sm:w-auto min-w-[130px] py-3 px-6 rounded-xl font-semibold text-sm text-white bg-[#560E0F] hover:bg-[#8e1b1d] active:scale-[0.99] transition shadow-md focus:outline-none focus:ring-2 focus:ring-[#560E0F] focus:ring-offset-2 focus:ring-offset-[#172033]">
                                             Next
                                         </button>
                                     </div>
@@ -604,7 +601,7 @@
                                 <div x-show="currentStep === 2" x-cloak class="space-y-4">
                                     <div class="flex items-center justify-between pb-1 border-b border-slate-800">
                                         <div class="flex items-center gap-2">
-                                            <span class="w-5 h-5 rounded-full bg-[#7A1618]/20 text-[#dfa6a9] text-xs font-bold flex items-center justify-center">2</span>
+                                            <span class="w-5 h-5 rounded-full bg-[#560E0F]/20 text-[#dfa6a9] text-xs font-bold flex items-center justify-center">2</span>
                                             <h3 class="text-xs font-semibold uppercase tracking-wider text-slate-300">Participant Information</h3>
                                         </div>
                                         <span class="text-[10px] text-slate-400 font-mono">Step 2 of 3</span>
@@ -660,12 +657,12 @@
                                     <div class="pt-4 flex items-center justify-between gap-3">
                                         <button type="button"
                                                 @click="prevStep()"
-                                                class="w-1/2 sm:w-auto min-w-[110px] py-3 px-5 rounded-xl font-medium text-sm text-slate-300 bg-slate-800/80 hover:bg-slate-700 hover:text-white active:scale-[0.99] transition border border-slate-700 focus:outline-none focus:ring-2 focus:ring-slate-600 focus:ring-offset-2 focus:ring-offset-[#171a23]">
+                                                class="w-1/2 sm:w-auto min-w-[110px] py-3 px-5 rounded-xl font-medium text-sm text-slate-300 bg-slate-800/80 hover:bg-slate-700 hover:text-white active:scale-[0.99] transition border border-slate-700 focus:outline-none focus:ring-2 focus:ring-slate-600 focus:ring-offset-2 focus:ring-offset-[#172033]">
                                             Back
                                         </button>
                                         <button type="button"
                                                 @click="nextStep()"
-                                                class="w-1/2 sm:w-auto min-w-[130px] py-3 px-6 rounded-xl font-semibold text-sm text-white bg-[#7A1618] hover:bg-[#8e1b1d] active:scale-[0.99] transition shadow-md focus:outline-none focus:ring-2 focus:ring-[#7A1618] focus:ring-offset-2 focus:ring-offset-[#171a23]">
+                                                class="w-1/2 sm:w-auto min-w-[130px] py-3 px-6 rounded-xl font-semibold text-sm text-white bg-[#560E0F] hover:bg-[#8e1b1d] active:scale-[0.99] transition shadow-md focus:outline-none focus:ring-2 focus:ring-[#560E0F] focus:ring-offset-2 focus:ring-offset-[#172033]">
                                             Next
                                         </button>
                                     </div>
@@ -674,7 +671,7 @@
                                 <div x-show="currentStep === 3" x-cloak class="space-y-4">
                                     <div class="flex items-center justify-between pb-1 border-b border-slate-800">
                                         <div class="flex items-center gap-2">
-                                            <span class="w-5 h-5 rounded-full bg-[#7A1618]/20 text-[#dfa6a9] text-xs font-bold flex items-center justify-center">3</span>
+                                            <span class="w-5 h-5 rounded-full bg-[#560E0F]/20 text-[#dfa6a9] text-xs font-bold flex items-center justify-center">3</span>
                                             <h3 class="text-xs font-semibold uppercase tracking-wider text-slate-300">Food & Review</h3>
                                         </div>
                                         <span class="text-[10px] text-slate-400 font-mono">Step 3 of 3</span>
@@ -705,8 +702,7 @@
                                                       rows="2"
                                                       x-model="foodRestrictionDetails"
                                                       @input="errors.food_restriction_details = ''"
-                                                      class="w-full rounded-xl bg-slate-950 border border-slate-700 px-3.5 py-2 text-sm text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-[#7A1618] focus:border-transparent transition"
-                                                      placeholder="Please specify your dietary restrictions or known food allergies..."></textarea>
+                                                      class="w-full rounded-xl bg-slate-950 border border-slate-700 px-3.5 py-2 text-sm text-white focus:outline-none focus:ring-2 focus:ring-[#560E0F] focus:border-transparent transition"></textarea>
                                             <template x-if="errors.food_restriction_details">
                                                 <p class="text-red-400 text-xs mt-1" x-text="errors.food_restriction_details"></p>
                                             </template>
@@ -727,7 +723,7 @@
                                                    value="1"
                                                    x-model="confirmed"
                                                    @change="errors.confirmed = ''"
-                                                   class="mt-1 h-4 w-4 rounded border-slate-700 text-[#7A1618] focus:ring-[#7A1618] focus:ring-offset-slate-950 bg-slate-900" />
+                                                   class="mt-1 h-4 w-4 rounded border-slate-700 text-[#560E0F] focus:ring-[#560E0F] focus:ring-offset-slate-950 bg-slate-900" />
                                             <span class="text-xs text-slate-300 leading-relaxed">
                                                 I confirm that the information I provided is accurate and that I agree to participate in this event. <span class="text-red-400">*</span>
                                             </span>
@@ -743,12 +739,12 @@
                                     <div class="pt-4 flex items-center justify-between gap-3">
                                         <button type="button"
                                                 @click="prevStep()"
-                                                class="w-1/3 sm:w-auto min-w-[110px] py-3.5 px-5 rounded-xl font-medium text-sm text-slate-300 bg-slate-800/80 hover:bg-slate-700 hover:text-white active:scale-[0.99] transition border border-slate-700 focus:outline-none focus:ring-2 focus:ring-slate-600 focus:ring-offset-2 focus:ring-offset-[#171a23]">
+                                                class="w-1/3 sm:w-auto min-w-[110px] py-3.5 px-5 rounded-xl font-medium text-sm text-slate-300 bg-slate-800/80 hover:bg-slate-700 hover:text-white active:scale-[0.99] transition border border-slate-700 focus:outline-none focus:ring-2 focus:ring-slate-600 focus:ring-offset-2 focus:ring-offset-[#172033]">
                                             Back
                                         </button>
                                         <button type="submit"
                                                 :disabled="!confirmed || isSubmitting"
-                                                class="flex-1 py-3.5 px-4 rounded-xl font-semibold text-sm text-white bg-[#7A1618] hover:bg-[#8e1b1d] disabled:opacity-50 disabled:cursor-not-allowed active:scale-[0.99] transition shadow-md focus:outline-none focus:ring-2 focus:ring-[#7A1618] focus:ring-offset-2 focus:ring-offset-[#171a23]">
+                                                class="flex-1 py-3.5 px-4 rounded-xl font-semibold text-sm text-white bg-[#560E0F] hover:bg-[#8e1b1d] disabled:opacity-50 disabled:cursor-not-allowed active:scale-[0.99] transition shadow-md focus:outline-none focus:ring-2 focus:ring-[#560E0F] focus:ring-offset-2 focus:ring-offset-[#172033]">
                                             <span x-show="!isSubmitting">Submit Registration</span>
                                             <span x-show="isSubmitting" x-cloak>Submitting Registration...</span>
                                         </button>

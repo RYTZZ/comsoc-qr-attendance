@@ -287,4 +287,170 @@ class QrScannerValidationTest extends TestCase
 
         $response->assertStatus(403);
     }
+
+    public function test_scans_all_session_types_successfully(): void
+    {
+        $staff = User::factory()->create(['role' => 'staff']);
+        $event = $this->createEvent($staff);
+
+        $kiosk = Kiosk::create([
+            'name' => 'Gate Terminal',
+            'identifier' => 'KIOSK-GATE-ALL',
+            'type' => 'attendance',
+            'is_active' => true,
+            'assigned_staff_id' => $staff->id,
+            'assigned_event_id' => $event->id,
+        ]);
+
+        $student = Student::create([
+            'student_number' => '2023-0002',
+            'first_name' => 'Juan',
+            'last_name' => 'Dela Cruz',
+            'program' => 'BSIT',
+            'year_level' => '3rd Year',
+        ]);
+        $ay = AcademicYear::first();
+        $membership = Membership::create([
+            'student_id' => $student->id,
+            'academic_year_id' => $ay->id,
+            'status' => 'active',
+            'fee_paid' => true,
+        ]);
+        $qr = QrCode::create([
+            'membership_id' => $membership->id,
+            'token' => str_repeat('B', 48),
+            'status' => 'active',
+            'batch_number' => 1,
+            'activated_at' => now(),
+        ]);
+
+        $types = ['morning_in', 'morning_out', 'afternoon_in', 'afternoon_out'];
+        foreach ($types as $type) {
+            $session = AttendanceSession::create([
+                'event_id' => $event->id,
+                'type' => $type,
+                'opens_at' => '00:00:00',
+                'closes_at' => '23:59:59',
+                'is_active' => true,
+            ]);
+
+            $response = $this->actingAs($staff)->postJson(route('kiosk.scan', $kiosk), [
+                'token' => $qr->token,
+                'event_id' => $event->id,
+                'session_id' => $session->id,
+            ]);
+
+            $response->assertStatus(200);
+            $response->assertJson(['success' => true]);
+        }
+    }
+
+    public function test_rejects_session_belonging_to_another_event(): void
+    {
+        $staff = User::factory()->create(['role' => 'staff']);
+        $eventA = $this->createEvent($staff);
+        $eventB = $this->createEvent($staff);
+        $sessionB = $this->createSession($eventB->id);
+
+        $kiosk = Kiosk::create([
+            'name' => 'Kiosk Event A',
+            'identifier' => 'KIOSK-EVENT-A',
+            'type' => 'attendance',
+            'is_active' => true,
+            'assigned_staff_id' => $staff->id,
+            'assigned_event_id' => $eventA->id,
+        ]);
+
+        $student = Student::create([
+            'student_number' => '2023-0003',
+            'first_name' => 'Pedro',
+            'last_name' => 'Penduko',
+            'program' => 'BSCS',
+            'year_level' => '1st Year',
+        ]);
+        $ay = AcademicYear::first();
+        $membership = Membership::create([
+            'student_id' => $student->id,
+            'academic_year_id' => $ay->id,
+            'status' => 'active',
+            'fee_paid' => true,
+        ]);
+        $qr = QrCode::create([
+            'membership_id' => $membership->id,
+            'token' => str_repeat('C', 48),
+            'status' => 'active',
+            'batch_number' => 1,
+            'activated_at' => now(),
+        ]);
+
+        $response = $this->actingAs($staff)->postJson(route('kiosk.scan', $kiosk), [
+            'token' => $qr->token,
+            'event_id' => $eventA->id,
+            'session_id' => $sessionB->id,
+        ]);
+
+        $response->assertStatus(422);
+        $response->assertJson([
+            'success' => false,
+            'message' => 'Invalid attendance session for this event.',
+            'code' => 'session_mismatch',
+        ]);
+    }
+
+    public function test_rejects_inactive_session(): void
+    {
+        $staff = User::factory()->create(['role' => 'staff']);
+        $event = $this->createEvent($staff);
+        $session = AttendanceSession::create([
+            'event_id' => $event->id,
+            'type' => 'morning_in',
+            'opens_at' => '08:00:00',
+            'closes_at' => '12:00:00',
+            'is_active' => false,
+        ]);
+
+        $kiosk = Kiosk::create([
+            'name' => 'Kiosk Inactive Session',
+            'identifier' => 'KIOSK-INACTIVE',
+            'type' => 'attendance',
+            'is_active' => true,
+            'assigned_staff_id' => $staff->id,
+            'assigned_event_id' => $event->id,
+        ]);
+
+        $student = Student::create([
+            'student_number' => '2023-0004',
+            'first_name' => 'Jose',
+            'last_name' => 'Rizal',
+            'program' => 'BSCS',
+            'year_level' => '4th Year',
+        ]);
+        $ay = AcademicYear::first();
+        $membership = Membership::create([
+            'student_id' => $student->id,
+            'academic_year_id' => $ay->id,
+            'status' => 'active',
+            'fee_paid' => true,
+        ]);
+        $qr = QrCode::create([
+            'membership_id' => $membership->id,
+            'token' => str_repeat('D', 48),
+            'status' => 'active',
+            'batch_number' => 1,
+            'activated_at' => now(),
+        ]);
+
+        $response = $this->actingAs($staff)->postJson(route('kiosk.scan', $kiosk), [
+            'token' => $qr->token,
+            'event_id' => $event->id,
+            'session_id' => $session->id,
+        ]);
+
+        $response->assertStatus(422);
+        $response->assertJson([
+            'success' => false,
+            'message' => 'This attendance session is inactive.',
+            'code' => 'session_inactive',
+        ]);
+    }
 }

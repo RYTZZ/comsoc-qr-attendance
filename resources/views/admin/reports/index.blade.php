@@ -86,7 +86,7 @@
      x-transition:leave-end="opacity-0"
      class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm"
      x-cloak>
-    <div class="card max-w-md w-full border-slate-700 bg-[#171a23] shadow-2xl space-y-4 p-5"
+    <div class="card max-w-md w-full border-slate-700 bg-[#172033] shadow-2xl space-y-4 p-5"
          @click.away="openRangeModal = false">
         <div class="flex items-center justify-between pb-3 border-b border-slate-800">
             <div class="flex items-center gap-2">
@@ -107,10 +107,18 @@
             <input type="hidden" name="format" value="csv">
             <div>
                 <label class="label text-xs">Report Target</label>
-                <select x-model="reportType" class="input text-xs w-full">
-                    <option value="attendance">Event Attendance Logs</option>
-                    <option value="membership">Membership Master Report</option>
-                </select>
+                <div class="grid grid-cols-2 gap-2 mt-1">
+                    <button type="button" @click="reportType = 'attendance'"
+                            :class="reportType === 'attendance' ? 'bg-[#560E0F] border-[#cc7478] text-white shadow' : 'bg-slate-900 border-slate-700 text-slate-300 hover:border-slate-500'"
+                            class="py-2 px-3 rounded-xl border text-xs font-semibold text-center transition">
+                        Event Attendance
+                    </button>
+                    <button type="button" @click="reportType = 'membership'"
+                            :class="reportType === 'membership' ? 'bg-[#560E0F] border-[#cc7478] text-white shadow' : 'bg-slate-900 border-slate-700 text-slate-300 hover:border-slate-500'"
+                            class="py-2 px-3 rounded-xl border text-xs font-semibold text-center transition">
+                        Membership Master
+                    </button>
+                </div>
             </div>
 
             <div class="grid grid-cols-2 gap-2">

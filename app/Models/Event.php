@@ -20,6 +20,9 @@ class Event extends Model
     protected $fillable = [
         'academic_year_id',
         'created_by',
+        'approved_by',
+        'approved_at',
+        'approval_notes',
         'name',
         'event_type',
         'organizer',
@@ -44,12 +47,22 @@ class Event extends Model
         'status',
         'attendance_enabled',
         'snack_distribution_enabled',
+        'cover_image',
+        'participation_requirements',
+        'reward_xp',
+        'reward_points',
+        'exp_formula_type',
+        'exp_base_amount',
+        'exp_duration_rate',
+        'late_penalty_percent',
+        'exp_expiration_days',
     ];
 
     protected $casts = [
         'event_date' => 'date',
         'starts_at' => 'datetime',
         'ends_at' => 'datetime',
+        'approved_at' => 'datetime',
         'registration_opens_at' => 'datetime',
         'registration_deadline' => 'datetime',
         'requires_registration' => 'boolean',
@@ -58,6 +71,8 @@ class Event extends Model
         'attendance_enabled' => 'boolean',
         'snack_distribution_enabled' => 'boolean',
         'max_participants' => 'integer',
+        'reward_xp' => 'integer',
+        'reward_points' => 'integer',
     ];
 
     public function academicYear(): BelongsTo
@@ -68,6 +83,16 @@ class Event extends Model
     public function createdBy(): BelongsTo
     {
         return $this->belongsTo(User::class, 'created_by');
+    }
+
+    public function approver(): BelongsTo
+    {
+        return $this->belongsTo(User::class, 'approved_by');
+    }
+
+    public function raffles(): HasMany
+    {
+        return $this->hasMany(Raffle::class);
     }
 
     public function attendanceSessions(): HasMany
@@ -88,6 +113,14 @@ class Event extends Model
     public function eventRegistrations(): HasMany
     {
         return $this->hasMany(EventRegistration::class);
+    }
+
+    public function organizers(): \Illuminate\Database\Eloquent\Relations\BelongsToMany
+    {
+        return $this->belongsToMany(User::class, 'event_organizer_assignments', 'event_id', 'user_id')
+            ->using(EventOrganizerAssignment::class)
+            ->withPivot('id')
+            ->withTimestamps();
     }
 
     public function incidents(): HasMany
@@ -123,7 +156,15 @@ class Event extends Model
             return 'completed';
         }
 
-        if (!$this->is_published || $this->status === 'draft') {
+        if ($this->status === 'draft') {
+            return 'draft';
+        }
+
+        if ($this->status === 'approved' && !$this->is_published) {
+            return 'approved';
+        }
+
+        if (!$this->is_published) {
             return 'draft';
         }
 
@@ -131,12 +172,16 @@ class Event extends Model
             return 'registration_closed';
         }
 
-        if ($this->status === 'registration_open') {
+        if ($this->status === 'published' || $this->status === 'registration_open') {
             if ($this->registration_deadline && now()->gte($this->registration_deadline)) {
                 return 'registration_closed';
             }
 
-            return 'registration_open';
+            if ($this->status === 'registration_open') {
+                return 'registration_open';
+            }
+
+            return 'published';
         }
 
         if ($this->status === 'ongoing') {
@@ -144,7 +189,7 @@ class Event extends Model
         }
 
         if ($this->isRegistrationOpen()) {
-            return 'registration_open';
+            return 'published';
         }
 
         if ($this->starts_at && now()->gte($this->starts_at) && (!$this->ends_at || now()->lte($this->ends_at))) {
@@ -166,6 +211,8 @@ class Event extends Model
     {
         return match ($this->effective_status) {
             'draft' => 'Draft',
+            'approved' => 'Approved',
+            'published' => 'Published',
             'registration_open' => 'Registration Open',
             'registration_closed' => 'Registration Closed',
             'ongoing' => 'Ongoing',
@@ -178,7 +225,8 @@ class Event extends Model
     public function getStatusBadgeClassAttribute(): string
     {
         return match ($this->effective_status) {
-            'registration_open', 'ongoing' => 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20',
+            'approved' => 'bg-cyan-500/10 text-cyan-400 border-cyan-500/20',
+            'published', 'registration_open', 'ongoing' => 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20',
             'registration_closed' => 'bg-amber-500/10 text-amber-400 border-amber-500/20',
             'completed' => 'bg-indigo-500/10 text-indigo-400 border-indigo-500/20',
             'archived' => 'bg-slate-500/10 text-slate-400 border-slate-500/20',

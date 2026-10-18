@@ -50,7 +50,7 @@
 
         <div>
             <label for="description" class="label">Incident Narrative / Evidence <span class="text-red-400">*</span></label>
-            <textarea id="description" name="description" rows="5" required class="input" placeholder="Provide factual details (what happened, where, student numbers involved, witnesses)...">{{ old('description') }}</textarea>
+            <textarea id="description" name="description" rows="5" required class="input">{{ old('description') }}</textarea>
             <p class="text-[11px] text-slate-500 mt-1">Minimum 20 characters required.</p>
             @error('description')<p class="text-red-400 text-xs mt-1">{{ $message }}</p>@enderror
         </div>

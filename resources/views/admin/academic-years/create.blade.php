@@ -12,7 +12,7 @@
 
         <div>
             <label for="label" class="label">Label / Academic Year Name <span class="text-red-400">*</span></label>
-            <input id="label" name="label" type="text" value="{{ old('label') }}" required class="input" placeholder="e.g. A.Y. 2024-2025" />
+            <input id="label" name="label" type="text" value="{{ old('label') }}" required class="input" />
             @error('label')<p class="text-red-400 text-xs mt-1">{{ $message }}</p>@enderror
         </div>
 

@@ -33,7 +33,6 @@
                 <label class="block text-[11px] font-medium text-slate-400 uppercase tracking-wider mb-1">Search Participant</label>
                 <div class="relative">
                     <input type="text" name="search" value="{{ request('search') }}"
-                           placeholder="Name, email, school, program..."
                            class="w-full rounded-xl bg-slate-950 border border-slate-700 px-3 py-2 pl-9 text-xs text-white placeholder-slate-500 focus:ring-2 focus:ring-brand-500 focus:outline-none">
                     <svg class="w-4 h-4 text-slate-500 absolute left-3 top-2.5 pointer-events-none" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
@@ -111,7 +110,7 @@
                                    @click="toggleAll()"
                                    :checked="allPendingIds.length > 0 && selected.length === allPendingIds.length"
                                    :disabled="allPendingIds.length === 0"
-                                   class="rounded bg-slate-900 border-slate-700 text-[#7A1618] focus:ring-[#7A1618]">
+                                   class="rounded bg-slate-900 border-slate-700 text-[#560E0F] focus:ring-[#560E0F]">
                         </th>
                         <th class="py-3 px-4">Participant Name</th>
                         <th class="py-3 px-4">Email</th>
@@ -134,7 +133,7 @@
                                     <input type="checkbox"
                                            value="{{ $reg->id }}"
                                            x-model="selected"
-                                           class="rounded bg-slate-900 border-slate-700 text-[#7A1618] focus:ring-[#7A1618]">
+                                           class="rounded bg-slate-900 border-slate-700 text-[#560E0F] focus:ring-[#560E0F]">
                                 @endif
                             </td>
                             <td class="py-3 px-4 font-semibold text-white">
@@ -225,7 +224,7 @@
          x-transition:leave="transition ease-in duration-150"
          x-transition:leave-start="opacity-100 translate-y-0"
          x-transition:leave-end="opacity-0 translate-y-4"
-         class="fixed bottom-6 left-1/2 -translate-x-1/2 z-40 bg-[#171a23]/95 border border-slate-700 shadow-2xl rounded-2xl px-5 py-3 flex items-center gap-4 backdrop-blur-md"
+         class="fixed bottom-6 left-1/2 -translate-x-1/2 z-40 bg-[#172033]/95 border border-slate-700 shadow-2xl rounded-2xl px-5 py-3 flex items-center gap-4 backdrop-blur-md"
          x-cloak>
         <span class="text-xs font-semibold text-white">
             <span x-text="selected.length" class="text-brand-400 font-mono"></span> pending selected

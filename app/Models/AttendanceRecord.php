@@ -17,8 +17,10 @@ class AttendanceRecord extends Model
         'qr_token',
         'participant_type',
         'participant_id',
+        'user_id',
         'action',
         'status',
+        'calculated_exp',
         'kiosk_id',
         'scanned_by',
         'scanned_at',
@@ -32,7 +34,13 @@ class AttendanceRecord extends Model
         'scanned_at' => 'datetime',
         'corrected_at' => 'datetime',
         'is_corrected' => 'boolean',
+        'calculated_exp' => 'integer',
     ];
+
+    public function user(): BelongsTo
+    {
+        return $this->belongsTo(User::class);
+    }
 
     public function event(): BelongsTo
     {

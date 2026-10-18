@@ -37,7 +37,7 @@
         <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div class="sm:col-span-2">
                 <label for="name" class="label">Event Name <span class="text-red-400">*</span></label>
-                <input id="name" name="name" type="text" value="{{ old('name') }}" required class="input" placeholder="e.g. Annual Computing Convention 2026" />
+                <input id="name" name="name" type="text" value="{{ old('name') }}" required class="input" />
                 @error('name')<p class="text-red-400 text-xs mt-1">{{ $message }}</p>@enderror
             </div>
 
@@ -71,25 +71,25 @@
 
             <div>
                 <label for="organizer" class="label">Organizer / Committee</label>
-                <input id="organizer" name="organizer" type="text" value="{{ old('organizer', 'Computing Society') }}" class="input" placeholder="e.g. ComSoc Executive Board" />
+                <input id="organizer" name="organizer" type="text" value="{{ old('organizer', 'Computing Society') }}" class="input" />
                 @error('organizer')<p class="text-red-400 text-xs mt-1">{{ $message }}</p>@enderror
             </div>
 
             <div>
                 <label for="contact_info" class="label">Contact Information</label>
-                <input id="contact_info" name="contact_info" type="text" value="{{ old('contact_info') }}" class="input" placeholder="e.g. comsoc@university.edu" />
+                <input id="contact_info" name="contact_info" type="text" value="{{ old('contact_info') }}" class="input" />
                 @error('contact_info')<p class="text-red-400 text-xs mt-1">{{ $message }}</p>@enderror
             </div>
 
             <div class="sm:col-span-2">
                 <label for="description" class="label">Description</label>
-                <textarea id="description" name="description" rows="3" class="input resize-none" placeholder="Provide complete event agenda and highlights…">{{ old('description') }}</textarea>
+                <textarea id="description" name="description" rows="3" class="input resize-none">{{ old('description') }}</textarea>
                 @error('description')<p class="text-red-400 text-xs mt-1">{{ $message }}</p>@enderror
             </div>
 
             <div class="sm:col-span-2">
                 <label class="label">Event Logo / Banner</label>
-                <input type="file" name="logo" accept="image/*" class="input py-2 text-xs file:mr-3 file:py-1 file:px-2.5 file:rounded-lg file:border-0 file:text-xs file:font-semibold file:bg-[#7A1618] file:text-white hover:file:bg-[#921c1f]" />
+                <input type="file" name="logo" accept="image/*" class="input py-2 text-xs file:mr-3 file:py-1 file:px-2.5 file:rounded-lg file:border-0 file:text-xs file:font-semibold file:bg-[#560E0F] file:text-white hover:file:bg-[#921c1f]" />
                 <p class="text-[11px] text-slate-500 mt-1">PNG, JPG, or WebP up to 3MB. If empty, the official ComSoc logo will be used.</p>
                 @error('logo')<p class="text-red-400 text-xs mt-1">{{ $message }}</p>@enderror
             </div>
@@ -177,7 +177,7 @@
                     <div>
                         <label for="venue_name" class="label">Venue / Facility Name <span class="text-red-400">*</span></label>
                         <div class="relative">
-                            <input id="venue_name" name="venue_name" type="text" value="{{ old('venue_name') }}" required class="input pl-9" placeholder="e.g. SorSU Bulan Campus Social Hall" />
+                            <input id="venue_name" name="venue_name" type="text" value="{{ old('venue_name') }}" required class="input pl-9" />
                             <i data-lucide="building" class="w-4 h-4 text-slate-500 absolute left-3 top-3 pointer-events-none"></i>
                         </div>
                         <p class="text-[10px] text-slate-500 mt-1">Primary building or hall where attendance and activities take place.</p>
@@ -187,7 +187,7 @@
                     <div>
                         <label for="venue_address" class="label">Campus / Specific Address</label>
                         <div class="relative">
-                            <input id="venue_address" name="venue_address" type="text" value="{{ old('venue_address') }}" class="input pl-9" placeholder="e.g. Zone 8, Bulan, Sorsogon" />
+                            <input id="venue_address" name="venue_address" type="text" value="{{ old('venue_address') }}" class="input pl-9" />
                             <i data-lucide="map" class="w-4 h-4 text-slate-500 absolute left-3 top-3 pointer-events-none"></i>
                         </div>
                         <p class="text-[10px] text-slate-500 mt-1">Geographic campus location or barangay address.</p>
@@ -196,7 +196,7 @@
 
                     <div class="sm:col-span-2">
                         <label for="venue_details" class="label">Additional Room & Gate Directions</label>
-                        <textarea id="venue_details" name="venue_details" rows="2" class="input resize-none" placeholder="e.g. 2nd Floor, Left Wing. Please wear society shirts and present student ID at the entrance.">{{ old('venue_details') }}</textarea>
+                        <textarea id="venue_details" name="venue_details" rows="2" class="input resize-none">{{ old('venue_details') }}</textarea>
                         @error('venue_details')<p class="text-red-400 text-xs mt-1">{{ $message }}</p>@enderror
                     </div>
                 </div>
@@ -225,14 +225,14 @@
 
             <div>
                 <label for="max_participants" class="label">Participant Limit</label>
-                <input id="max_participants" name="max_participants" type="number" min="1" value="{{ old('max_participants') }}" class="input" placeholder="Leave empty for unlimited" />
+                <input id="max_participants" name="max_participants" type="number" min="1" value="{{ old('max_participants') }}" class="input" />
                 @error('max_participants')<p class="text-red-400 text-xs mt-1">{{ $message }}</p>@enderror
             </div>
         </div>
 
         <div class="space-y-3 pt-2">
             <label class="flex items-start gap-3 p-3 rounded-xl bg-slate-950/60 border border-slate-800 cursor-pointer hover:border-slate-700 transition">
-                <input type="checkbox" name="requires_registration" value="1" {{ old('requires_registration', '1') ? 'checked' : '' }} class="mt-0.5 w-4 h-4 rounded bg-[#12141c] border-slate-700 text-[#7A1618] focus:ring-[#7A1618]" />
+                <input type="checkbox" name="requires_registration" value="1" {{ old('requires_registration', '1') ? 'checked' : '' }} class="mt-0.5 w-4 h-4 rounded bg-[#12141c] border-slate-700 text-[#560E0F] focus:ring-[#560E0F]" />
                 <div>
                     <span class="text-sm font-semibold text-white">Registration Required</span>
                     <p class="text-xs text-slate-400 mt-0.5">Require attendees to register before participating.</p>
@@ -240,7 +240,7 @@
             </label>
 
             <label class="flex items-start gap-3 p-3 rounded-xl bg-slate-950/60 border border-slate-800 cursor-pointer hover:border-slate-700 transition">
-                <input type="checkbox" name="allow_non_students" value="1" {{ old('allow_non_students', '1') ? 'checked' : '' }} class="mt-0.5 w-4 h-4 rounded bg-[#12141c] border-slate-700 text-[#7A1618] focus:ring-[#7A1618]" />
+                <input type="checkbox" name="allow_non_students" value="1" {{ old('allow_non_students', '1') ? 'checked' : '' }} class="mt-0.5 w-4 h-4 rounded bg-[#12141c] border-slate-700 text-[#560E0F] focus:ring-[#560E0F]" />
                 <div>
                     <span class="text-sm font-semibold text-white">Non-Student Registration Enabled</span>
                     <p class="text-xs text-slate-400 mt-0.5">Enable external guests and non-students to register.</p>
@@ -248,7 +248,7 @@
             </label>
 
             <label class="flex items-start gap-3 p-3 rounded-xl bg-slate-950/60 border border-slate-800 cursor-pointer hover:border-slate-700 transition">
-                <input type="checkbox" name="is_published" value="1" {{ old('is_published') ? 'checked' : '' }} class="mt-0.5 w-4 h-4 rounded bg-[#12141c] border-slate-700 text-[#7A1618] focus:ring-[#7A1618]" />
+                <input type="checkbox" name="is_published" value="1" {{ old('is_published') ? 'checked' : '' }} class="mt-0.5 w-4 h-4 rounded bg-[#12141c] border-slate-700 text-[#560E0F] focus:ring-[#560E0F]" />
                 <div>
                     <span class="text-sm font-semibold text-white">Publish Event Immediately</span>
                     <p class="text-xs text-slate-400 mt-0.5">If unchecked, event will be saved as Draft.</p>

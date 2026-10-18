@@ -8,10 +8,10 @@
     <title>{{ isset($title) ? $title . ' — ' : '' }}ComSoc QR Attendance</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Michroma&family=Sora:wght@600;700;800&family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Manrope:wght@600;700;800&family=Space+Grotesk:wght@600;700&display=swap" rel="stylesheet">
     @vite(['resources/css/app.css', 'resources/js/app.js'])
 </head>
-<body class="h-full bg-[#0f1117] text-slate-100 antialiased font-sans" x-data="{ sidebarOpen: false }">
+<body class="h-full bg-[#0B1120] text-[#F8FAFC] antialiased font-sans" x-data="{ sidebarOpen: false }">
 
 <div class="flex h-full">
     <div x-show="sidebarOpen"
@@ -138,12 +138,90 @@
                 @if($openIncidents > 0)
                 <span class="ml-auto badge-open text-xs px-1.5 py-0.5">{{ $openIncidents }}</span>
                 @endif
+            <a href="{{ route('admin.support.index') }}"
+               class="sidebar-link {{ request()->routeIs('admin.support.*') ? 'active' : '' }}">
+                <i data-lucide="life-buoy" class="sidebar-link-icon"></i>
+                Help Desk & Disputes
+                @php $openTickets = \App\Models\SupportTicket::whereIn('status', ['open', 'in_review', 'awaiting_member'])->count(); @endphp
+                @if($openTickets > 0)
+                <span class="ml-auto bg-rose-500/20 text-rose-300 border border-rose-500/30 text-[10px] font-bold px-1.5 py-0.5 rounded">{{ $openTickets }}</span>
+                @endif
+            </a>
+
+            <a href="{{ route('admin.economy.index') }}"
+               class="sidebar-link {{ request()->routeIs('admin.economy.*') ? 'active' : '' }}">
+                <i data-lucide="coins" class="sidebar-link-icon"></i>
+                Reward Economy
+            </a>
+
+            @if(auth()->user()->isSuperAdmin())
+            <a href="{{ route('admin.students.exp-points.index') }}"
+               class="sidebar-link {{ request()->routeIs('admin.students.exp-points.*') ? 'active' : '' }}">
+                <i data-lucide="award" class="sidebar-link-icon text-amber-400"></i>
+                Manage EXP & Points
+            </a>
+            @endif
+
+            <a href="{{ route('admin.raffles.index') }}"
+               class="sidebar-link {{ request()->routeIs('admin.raffles.*') ? 'active' : '' }}">
+                <i data-lucide="ticket" class="sidebar-link-icon text-indigo-400"></i>
+                Event Raffles
+            </a>
+
+            <a href="{{ route('admin.missions.index') }}"
+               class="sidebar-link {{ request()->routeIs('admin.missions.*') ? 'active' : '' }}">
+                <i data-lucide="target" class="sidebar-link-icon"></i>
+                Missions & Quests
+                @php $pendingMissions = \App\Models\MissionSubmission::where('status','pending')->count(); @endphp
+                @if($pendingMissions > 0)
+                <span class="ml-auto bg-amber-500/20 text-amber-300 border border-amber-500/30 text-[10px] font-bold px-1.5 py-0.5 rounded">{{ $pendingMissions }}</span>
+                @endif
+            </a>
+
+            <a href="{{ route('admin.shop.index') }}"
+               class="sidebar-link {{ request()->routeIs('admin.shop.*') ? 'active' : '' }}">
+                <i data-lucide="gift" class="sidebar-link-icon"></i>
+                Reward Shop & Claims
+                @php $pendingClaims = \App\Models\RewardRedemption::where('status','pending')->count(); @endphp
+                @if($pendingClaims > 0)
+                <span class="ml-auto bg-amber-500/20 text-amber-300 border border-amber-500/30 text-[10px] font-bold px-1.5 py-0.5 rounded">{{ $pendingClaims }}</span>
+                @endif
+            </a>
+
+            <a href="{{ route('admin.opportunities.index') }}"
+               class="sidebar-link {{ request()->routeIs('admin.opportunities.*') ? 'active' : '' }}">
+                <i data-lucide="briefcase" class="sidebar-link-icon"></i>
+                Opportunities
+            </a>
+
+            <a href="{{ route('admin.announcements.index') }}"
+               class="sidebar-link {{ request()->routeIs('admin.announcements.*') ? 'active' : '' }}">
+                <i data-lucide="megaphone" class="sidebar-link-icon"></i>
+                Announcements
+            </a>
+
+            <a href="{{ route('admin.achievements.index') }}"
+               class="sidebar-link {{ request()->routeIs('admin.achievements.*') ? 'active' : '' }}">
+                <i data-lucide="award" class="sidebar-link-icon"></i>
+                Achievements
+            </a>
+
+            <a href="{{ route('admin.seasons.index') }}"
+               class="sidebar-link {{ request()->routeIs('admin.seasons.*') ? 'active' : '' }}">
+                <i data-lucide="calendar-range" class="sidebar-link-icon"></i>
+                Seasons & Cycles
             </a>
 
             <a href="{{ route('admin.reports.index') }}"
                class="sidebar-link {{ request()->routeIs('admin.reports.*') ? 'active' : '' }}">
                 <i data-lucide="bar-chart-3" class="sidebar-link-icon"></i>
                 Reports
+            </a>
+
+            <a href="{{ route('admin.analytics.index') }}"
+               class="sidebar-link {{ request()->routeIs('admin.analytics.*') ? 'active' : '' }}">
+                <i data-lucide="line-chart" class="sidebar-link-icon"></i>
+                Event Analytics & Impact
             </a>
 
             @if(auth()->user()->isSuperAdmin())
@@ -163,7 +241,7 @@
 
         <div class="px-3 py-4 border-t border-slate-800">
             <div class="flex items-center gap-3 px-3 py-2 rounded-lg bg-slate-950/60 border border-slate-800/80">
-                <div class="w-8 h-8 rounded-full bg-[#7A1618] flex items-center justify-center flex-shrink-0 text-white">
+                <div class="w-8 h-8 rounded-full bg-[#560E0F] flex items-center justify-center flex-shrink-0 text-white">
                     <i data-lucide="user-round" class="w-4 h-4"></i>
                 </div>
                 <div class="flex-1 min-w-0">
@@ -182,25 +260,29 @@
     </aside>
 
     <div class="flex-1 flex flex-col min-h-screen lg:pl-64 w-full min-w-0">
-        <header class="sticky top-0 z-20 bg-[#171a23]/95 backdrop-blur border-b border-slate-800 flex items-center justify-between px-3 sm:px-6 h-14 shrink-0 shadow-sm">
+        <header class="sticky top-0 z-20 bg-[#172033]/95 backdrop-blur border-b border-[#334155] flex items-center justify-between px-3 sm:px-6 h-14 shrink-0 shadow-sm">
             <div class="flex items-center gap-2 sm:gap-3">
-                <button @click="sidebarOpen = true" class="lg:hidden p-2 -ml-1 rounded-lg text-slate-400 hover:text-white hover:bg-slate-800 transition-colors focus:outline-none focus:ring-2 focus:ring-[#7A1618]" aria-label="Open menu">
+                <button @click="sidebarOpen = true" class="lg:hidden p-2 -ml-1 rounded-lg text-slate-400 hover:text-white hover:bg-slate-800 transition-colors focus:outline-none focus:ring-2 focus:ring-[#8F3033]" aria-label="Open menu">
                     <i data-lucide="menu" class="w-5 h-5"></i>
                 </button>
                 <div class="lg:hidden flex items-center gap-2">
-                    <div class="w-7 h-7 rounded-lg bg-[#7A1618] flex items-center justify-center shadow">
+                    <div class="w-7 h-7 rounded-lg bg-[#560E0F] flex items-center justify-center shadow">
                         <i data-lucide="user-round" class="w-4 h-4 text-white"></i>
                     </div>
-                    <span class="font-bold text-white text-xs sm:text-sm truncate">ComSoc QR</span>
+                    <span class="font-bold text-white text-xs sm:text-sm truncate font-brand-display">ComSoc QR</span>
                 </div>
             </div>
 
             <div class="flex items-center gap-2 sm:gap-3 ml-auto">
+                <a href="{{ route('dashboard') }}" class="btn-secondary text-[11px] sm:text-xs py-1.5 px-2.5 sm:px-3 flex items-center gap-1.5" title="Return to Member Dashboard">
+                    <i data-lucide="layout-grid" class="w-3.5 h-3.5"></i>
+                    <span class="hidden sm:inline">Member View</span>
+                </a>
                 @if($activeYear = \App\Models\AcademicYear::active())
-                <span class="badge-active text-[10px] sm:text-xs px-2.5 py-1 truncate max-w-[140px] sm:max-w-none">{{ $activeYear->label }}</span>
+                <span class="badge-active text-[10px] sm:text-xs px-2.5 py-1 truncate max-w-[120px] sm:max-w-none">{{ $activeYear->label }}</span>
                 @endif
                 <a href="{{ route('profile.edit') }}" class="flex items-center gap-2 p-1 text-slate-400 hover:text-white transition-colors" title="My Profile">
-                    <div class="w-8 h-8 rounded-full bg-[#7A1618] flex items-center justify-center shadow text-white hover:ring-2 hover:ring-[#7A1618]/50 transition-all">
+                    <div class="w-8 h-8 rounded-full bg-[#560E0F] flex items-center justify-center shadow text-white hover:ring-2 hover:ring-[#8F3033]/50 transition-all">
                         <i data-lucide="user-round" class="w-4 h-4"></i>
                     </div>
                 </a>

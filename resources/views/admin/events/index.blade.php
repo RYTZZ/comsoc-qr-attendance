@@ -26,7 +26,6 @@
             <div class="relative">
                 <input type="text" name="search" x-model="searchVal"
                        @input.debounce.400ms="submitDebounced()"
-                       placeholder="Search by event name…"
                        class="input py-2 text-xs pl-8">
                 <svg class="w-3.5 h-3.5 text-slate-500 absolute left-2.5 top-2.5 pointer-events-none" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
@@ -110,7 +109,7 @@
                     <th class="py-3 px-4 text-right">Actions</th>
                 </tr>
             </thead>
-            <tbody class="divide-y divide-slate-800/60 bg-[#171a23]">
+            <tbody class="divide-y divide-slate-800/60 bg-[#172033]">
                 @forelse($events as $event)
                 <tr class="hover:bg-slate-800/40 transition">
                     <td class="py-3.5 px-4 font-semibold text-white">
@@ -191,7 +190,7 @@
                         <div class="inline-flex items-center gap-1">
                             <a href="{{ route('admin.events.show', $event) }}" class="btn-secondary btn-sm py-1 px-2 text-[11px]">View</a>
                             @if(auth()->user()->isSuperAdmin())
-                                <a href="{{ route('admin.events.configure', $event) }}" class="btn-secondary btn-sm py-1 px-2 text-[11px] hover:border-[#7A1618]">Configure</a>
+                                <a href="{{ route('admin.events.configure', $event) }}" class="btn-secondary btn-sm py-1 px-2 text-[11px] hover:border-[#560E0F]">Configure</a>
 
                                 <div x-data="{
                                     open: false,
@@ -240,7 +239,19 @@
                                          x-cloak
                                          :style="`position: fixed; top: ${coords.top}px; left: ${coords.left}px; z-index: 9999;`"
                                          class="w-44 rounded-xl bg-[#1e222d] border border-slate-700 shadow-2xl py-1 text-xs text-left">
-                                        @if(!$event->is_published || $event->status === 'draft')
+                                        @if($event->status === 'draft')
+                                            <form method="POST" action="{{ route('admin.events.approve', $event) }}">
+                                                @csrf
+                                                <button type="button"
+                                                        data-confirm="Approve this draft event for publication? This verifies event schedule and operational readiness."
+                                                        data-confirm-title="Approve Event"
+                                                        data-confirm-type="success"
+                                                        data-confirm-btn="Approve"
+                                                        class="w-full text-left px-3 py-2 text-cyan-400 hover:bg-cyan-500/10">Approve Event</button>
+                                            </form>
+                                        @endif
+
+                                        @if(($event->status === 'approved' || $event->status === 'draft') && !$event->is_published)
                                             <form method="POST" action="{{ route('admin.events.publish', $event) }}">
                                                 @csrf
                                                 <button type="button"

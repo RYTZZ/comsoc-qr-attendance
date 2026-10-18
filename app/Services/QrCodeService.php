@@ -92,7 +92,8 @@ class QrCodeService
             ];
         }
 
-        $reg = \App\Models\EventRegistration::where('qr_token', $token)
+        $reg = \App\Models\EventRegistration::with(['user.student', 'event'])
+            ->where('qr_token', $token)
             ->where('status', 'approved')
             ->where(function ($q) {
                 $q->whereNull('qr_expires_at')
@@ -101,6 +102,16 @@ class QrCodeService
             ->first();
 
         if ($reg) {
+            if ($reg->user && $reg->user->student) {
+                return [
+                    'type' => 'student',
+                    'id' => $reg->user->student->id,
+                    'qr_token' => $token,
+                    'name' => $reg->user->student->display_name,
+                    'registration' => $reg,
+                ];
+            }
+
             return [
                 'type' => 'non_student',
                 'id' => $reg->id,

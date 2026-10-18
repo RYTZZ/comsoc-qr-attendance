@@ -48,7 +48,7 @@ class="fixed top-5 right-5 z-[9999] flex flex-col gap-2.5 max-w-sm w-full pointe
              x-transition:leave="transition ease-in duration-200"
              x-transition:leave-start="opacity-100 scale-100"
              x-transition:leave-end="opacity-0 scale-90 translate-x-4"
-             class="pointer-events-auto relative overflow-hidden rounded-xl border bg-[#171a23]/95 backdrop-blur-md shadow-2xl p-3.5 flex items-start gap-3"
+             class="pointer-events-auto relative overflow-hidden rounded-xl border bg-[#172033]/95 backdrop-blur-md shadow-2xl p-3.5 flex items-start gap-3"
              :class="{
                 'border-emerald-500/30 text-white': toast.type === 'success',
                 'border-red-500/30 text-white': toast.type === 'error',

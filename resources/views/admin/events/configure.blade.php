@@ -47,7 +47,7 @@
         <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div class="sm:col-span-2">
                 <label for="name" class="label">Event Name <span class="text-red-400">*</span></label>
-                <input id="name" name="name" type="text" value="{{ old('name', $event->name) }}" required class="input" placeholder="e.g. Annual Computing Convention 2026" />
+                <input id="name" name="name" type="text" value="{{ old('name', $event->name) }}" required class="input" />
                 @error('name')<p class="text-red-400 text-xs mt-1">{{ $message }}</p>@enderror
             </div>
 
@@ -81,19 +81,19 @@
 
             <div>
                 <label for="organizer" class="label">Organizer / Host Committee</label>
-                <input id="organizer" name="organizer" type="text" value="{{ old('organizer', $event->organizer) }}" class="input" placeholder="e.g. ComSoc Executive Board" />
+                <input id="organizer" name="organizer" type="text" value="{{ old('organizer', $event->organizer) }}" class="input" />
                 @error('organizer')<p class="text-red-400 text-xs mt-1">{{ $message }}</p>@enderror
             </div>
 
             <div>
                 <label for="contact_info" class="label">Contact Information / Inquiries</label>
-                <input id="contact_info" name="contact_info" type="text" value="{{ old('contact_info', $event->contact_info) }}" class="input" placeholder="e.g. comsoc@university.edu / 09123456789" />
+                <input id="contact_info" name="contact_info" type="text" value="{{ old('contact_info', $event->contact_info) }}" class="input" />
                 @error('contact_info')<p class="text-red-400 text-xs mt-1">{{ $message }}</p>@enderror
             </div>
 
             <div class="sm:col-span-2">
                 <label for="description" class="label">Event Description</label>
-                <textarea id="description" name="description" rows="3" class="input resize-none" placeholder="Provide complete event agenda, requirements, and highlights…">{{ old('description', $event->description) }}</textarea>
+                <textarea id="description" name="description" rows="3" class="input resize-none">{{ old('description', $event->description) }}</textarea>
                 @error('description')<p class="text-red-400 text-xs mt-1">{{ $message }}</p>@enderror
             </div>
 
@@ -108,7 +108,7 @@
                         </div>
                     @endif
                     <div class="flex-1">
-                        <input type="file" name="logo" accept="image/*" class="input py-2 text-xs file:mr-3 file:py-1 file:px-2.5 file:rounded-lg file:border-0 file:text-xs file:font-semibold file:bg-[#7A1618] file:text-white hover:file:bg-[#921c1f]" />
+                        <input type="file" name="logo" accept="image/*" class="input py-2 text-xs file:mr-3 file:py-1 file:px-2.5 file:rounded-lg file:border-0 file:text-xs file:font-semibold file:bg-[#560E0F] file:text-white hover:file:bg-[#921c1f]" />
                         <p class="text-[11px] text-slate-500 mt-1">PNG, JPG, or WebP up to 3MB.</p>
                     </div>
                 </div>
@@ -120,7 +120,7 @@
     <div class="card space-y-6" id="schedule-venue-section">
         <div class="border-b border-slate-800 pb-3 flex items-center justify-between">
             <div class="flex items-center gap-2.5">
-                <div class="w-8 h-8 rounded-lg bg-[#7A1618]/20 border border-[#7A1618]/40 flex items-center justify-center text-[#e07e83]">
+                <div class="w-8 h-8 rounded-lg bg-[#560E0F]/20 border border-[#560E0F]/40 flex items-center justify-center text-[#e07e83]">
                     <i data-lucide="calendar-clock" class="w-4 h-4"></i>
                 </div>
                 <div>
@@ -173,13 +173,13 @@
                 <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
                     <div>
                         <label for="event_start_time" class="label">Event Start Time <span class="text-red-400">*</span></label>
-                        <x-time-picker name="event_start_time" id="event_start_time" :value="old('event_start_time', $event->starts_at?->format('H:i'))" placeholder="e.g. 08:00 AM" />
+                        <x-time-picker name="event_start_time" id="event_start_time" :value="old('event_start_time', $event->starts_at?->format('H:i'))" placeholder="Select time" />
                         @error('starts_at')<p class="text-red-400 text-xs mt-1">{{ $message }}</p>@enderror
                     </div>
 
                     <div>
                         <label for="event_end_time" class="label">Event End Time</label>
-                        <x-time-picker name="event_end_time" id="event_end_time" :value="old('event_end_time', $event->ends_at?->format('H:i'))" placeholder="e.g. 05:00 PM" />
+                        <x-time-picker name="event_end_time" id="event_end_time" :value="old('event_end_time', $event->ends_at?->format('H:i'))" placeholder="Select time" />
                         @error('ends_at')<p class="text-red-400 text-xs mt-1">{{ $message }}</p>@enderror
                     </div>
                 </div>
@@ -206,7 +206,7 @@
                     <div>
                         <label for="venue_name" class="label">Venue / Facility Name <span class="text-red-400">*</span></label>
                         <div class="relative">
-                            <input id="venue_name" name="venue_name" type="text" x-model="venueName" required class="input pl-9" placeholder="e.g. SorSU Bulan Campus Social Hall" />
+                            <input id="venue_name" name="venue_name" type="text" x-model="venueName" required class="input pl-9" />
                             <i data-lucide="building" class="w-4 h-4 text-slate-500 absolute left-3 top-3 pointer-events-none"></i>
                         </div>
                         <p class="text-[10px] text-slate-500 mt-1">Primary building or hall where attendance and activities take place.</p>
@@ -216,7 +216,7 @@
                     <div>
                         <label for="venue_address" class="label">Campus / Specific Address</label>
                         <div class="relative">
-                            <input id="venue_address" name="venue_address" type="text" x-model="venueAddress" class="input pl-9" placeholder="e.g. Zone 8, Bulan, Sorsogon" />
+                            <input id="venue_address" name="venue_address" type="text" x-model="venueAddress" class="input pl-9" />
                             <i data-lucide="map" class="w-4 h-4 text-slate-500 absolute left-3 top-3 pointer-events-none"></i>
                         </div>
                         <p class="text-[10px] text-slate-500 mt-1">Geographic campus location or barangay address.</p>
@@ -225,7 +225,7 @@
 
                     <div class="sm:col-span-2">
                         <label for="venue_details" class="label">Additional Room & Gate Directions</label>
-                        <textarea id="venue_details" name="venue_details" rows="2" class="input resize-none" placeholder="e.g. 2nd Floor, West Wing. All students must present their student ID at Gate 1 checkpoint.">{{ old('venue_details', $event->venue_details) }}</textarea>
+                        <textarea id="venue_details" name="venue_details" rows="2" class="input resize-none">{{ old('venue_details', $event->venue_details) }}</textarea>
                         @error('venue_details')<p class="text-red-400 text-xs mt-1">{{ $message }}</p>@enderror
                     </div>
                 </div>
@@ -255,7 +255,7 @@
 
         <div class="space-y-3 pt-2">
             <label class="flex items-start gap-3 p-3 rounded-xl bg-slate-950/60 border border-slate-800 cursor-pointer hover:border-slate-700 transition">
-                <input type="checkbox" name="requires_registration" value="1" x-model="requiresReg" class="mt-0.5 w-4 h-4 rounded bg-[#12141c] border-slate-700 text-[#7A1618] focus:ring-[#7A1618]" />
+                <input type="checkbox" name="requires_registration" value="1" x-model="requiresReg" class="mt-0.5 w-4 h-4 rounded bg-[#12141c] border-slate-700 text-[#560E0F] focus:ring-[#560E0F]" />
                 <div>
                     <span class="text-sm font-semibold text-white">Registration Required</span>
                     <p class="text-xs text-slate-400 mt-0.5">Participants must register before attending or scanning their QR credentials.</p>
@@ -263,7 +263,7 @@
             </label>
 
             <label class="flex items-start gap-3 p-3 rounded-xl bg-slate-950/60 border border-slate-800 cursor-pointer hover:border-slate-700 transition">
-                <input type="checkbox" name="allow_non_students" value="1" {{ old('allow_non_students', $event->allow_non_students) ? 'checked' : '' }} class="mt-0.5 w-4 h-4 rounded bg-[#12141c] border-slate-700 text-[#7A1618] focus:ring-[#7A1618]" />
+                <input type="checkbox" name="allow_non_students" value="1" {{ old('allow_non_students', $event->allow_non_students) ? 'checked' : '' }} class="mt-0.5 w-4 h-4 rounded bg-[#12141c] border-slate-700 text-[#560E0F] focus:ring-[#560E0F]" />
                 <div>
                     <span class="text-sm font-semibold text-white">Non-Student Registration Enabled</span>
                     <p class="text-xs text-slate-400 mt-0.5">Allow external guest attendees, senior high students, and faculty from other institutions to register.</p>
@@ -282,7 +282,7 @@
     <div class="card space-y-6" id="attendance-config-section">
         <div class="border-b border-slate-800 pb-3 flex flex-wrap items-center justify-between gap-2">
             <div class="flex items-center gap-2.5">
-                <div class="w-8 h-8 rounded-lg bg-[#7A1618]/20 border border-[#7A1618]/40 flex items-center justify-center text-[#e07e83]">
+                <div class="w-8 h-8 rounded-lg bg-[#560E0F]/20 border border-[#560E0F]/40 flex items-center justify-center text-[#e07e83]">
                     <i data-lucide="qr-code" class="w-4 h-4"></i>
                 </div>
                 <div>
@@ -303,7 +303,7 @@
             </div>
             <label class="relative inline-flex items-center cursor-pointer shrink-0">
                 <input type="checkbox" name="attendance_enabled" value="1" x-model="attendanceEnabled" class="sr-only peer">
-                <div class="w-12 h-6.5 bg-slate-800 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-[#7A1618]"></div>
+                <div class="w-12 h-6.5 bg-slate-800 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-[#560E0F]"></div>
                 <span class="ml-2.5 text-xs font-mono font-bold" :class="attendanceEnabled ? 'text-[#e07e83]' : 'text-slate-500'" x-text="attendanceEnabled ? 'ACTIVE' : 'MUTED'"></span>
             </label>
         </div>
@@ -328,7 +328,7 @@
                             </div>
                             <label class="relative inline-flex items-center cursor-pointer shrink-0">
                                 <input type="checkbox" name="sessions[morning_in][enabled]" value="1" x-model="morningInEnabled" class="sr-only peer">
-                                <div class="w-9 h-5 bg-slate-800 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-[#7A1618]"></div>
+                                <div class="w-9 h-5 bg-slate-800 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-[#560E0F]"></div>
                                 <span class="ml-2 text-[11px] font-mono font-bold" :class="morningInEnabled ? 'text-emerald-400' : 'text-slate-500'" x-text="morningInEnabled ? 'ON' : 'OFF'"></span>
                             </label>
                         </div>
@@ -349,7 +349,7 @@
 
                             <div class="pt-2 border-t border-slate-800/80">
                                 <label class="label text-xs">Late Threshold</label>
-                                <x-time-picker name="sessions[morning_in][late_threshold]" id="morning_in_late" :value="old('sessions.morning_in.late_threshold', $existingMorningIn?->late_threshold)" placeholder="e.g. 08:15 AM" />
+                                <x-time-picker name="sessions[morning_in][late_threshold]" id="morning_in_late" :value="old('sessions.morning_in.late_threshold', $existingMorningIn?->late_threshold)" placeholder="Select time" />
                                 <p class="text-[11px] text-amber-300/90 mt-1.5 flex items-start gap-1.5">
                                     <i data-lucide="info" class="w-3.5 h-3.5 text-amber-400 shrink-0 mt-0.5"></i>
                                     <span>Students checking in after this time will be marked as <strong class="text-amber-200">Late</strong> for Morning IN. Scans prior to this are recorded as Present.</span>
@@ -371,7 +371,7 @@
                             </div>
                             <label class="relative inline-flex items-center cursor-pointer shrink-0">
                                 <input type="checkbox" name="sessions[morning_out][enabled]" value="1" x-model="morningOutEnabled" class="sr-only peer">
-                                <div class="w-9 h-5 bg-slate-800 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-[#7A1618]"></div>
+                                <div class="w-9 h-5 bg-slate-800 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-[#560E0F]"></div>
                                 <span class="ml-2 text-[11px] font-mono font-bold" :class="morningOutEnabled ? 'text-emerald-400' : 'text-slate-500'" x-text="morningOutEnabled ? 'ON' : 'OFF'"></span>
                             </label>
                         </div>
@@ -424,7 +424,7 @@
                             </div>
                             <label class="relative inline-flex items-center cursor-pointer shrink-0">
                                 <input type="checkbox" name="sessions[afternoon_in][enabled]" value="1" x-model="afternoonInEnabled" class="sr-only peer">
-                                <div class="w-9 h-5 bg-slate-800 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-[#7A1618]"></div>
+                                <div class="w-9 h-5 bg-slate-800 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-[#560E0F]"></div>
                                 <span class="ml-2 text-[11px] font-mono font-bold" :class="afternoonInEnabled ? 'text-emerald-400' : 'text-slate-500'" x-text="afternoonInEnabled ? 'ON' : 'OFF'"></span>
                             </label>
                         </div>
@@ -467,7 +467,7 @@
                             </div>
                             <label class="relative inline-flex items-center cursor-pointer shrink-0">
                                 <input type="checkbox" name="sessions[afternoon_out][enabled]" value="1" x-model="afternoonOutEnabled" class="sr-only peer">
-                                <div class="w-9 h-5 bg-slate-800 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-[#7A1618]"></div>
+                                <div class="w-9 h-5 bg-slate-800 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-[#560E0F]"></div>
                                 <span class="ml-2 text-[11px] font-mono font-bold" :class="afternoonOutEnabled ? 'text-emerald-400' : 'text-slate-500'" x-text="afternoonOutEnabled ? 'ON' : 'OFF'"></span>
                             </label>
                         </div>
@@ -524,7 +524,7 @@
 
                         <div class="relative z-10 flex flex-col items-center text-center">
                             <span class="text-[11px] font-mono font-bold" :class="morningInEnabled ? 'text-white' : 'text-slate-600'" x-text="morningInOpens ? formatTimeDisplay(morningInOpens) : 'TBD'"></span>
-                            <div class="w-3.5 h-3.5 rounded-full my-1.5 border-2" :class="morningInEnabled ? 'bg-[#7A1618] border-red-400 shadow-sm' : 'bg-slate-800 border-slate-700'"></div>
+                            <div class="w-3.5 h-3.5 rounded-full my-1.5 border-2" :class="morningInEnabled ? 'bg-[#560E0F] border-red-400 shadow-sm' : 'bg-slate-800 border-slate-700'"></div>
                             <span class="text-[10px] font-semibold" :class="morningInEnabled ? 'text-[#dfa6a9]' : 'text-slate-600'">Morning IN</span>
                         </div>
 
@@ -538,13 +538,13 @@
 
                         <div class="relative z-10 flex flex-col items-center text-center">
                             <span class="text-[11px] font-mono font-bold" :class="morningOutEnabled ? 'text-white' : 'text-slate-600'" x-text="morningOutOpens ? formatTimeDisplay(morningOutOpens) : 'TBD'"></span>
-                            <div class="w-3.5 h-3.5 rounded-full my-1.5 border-2" :class="morningOutEnabled ? 'bg-[#7A1618] border-red-400 shadow-sm' : 'bg-slate-800 border-slate-700'"></div>
+                            <div class="w-3.5 h-3.5 rounded-full my-1.5 border-2" :class="morningOutEnabled ? 'bg-[#560E0F] border-red-400 shadow-sm' : 'bg-slate-800 border-slate-700'"></div>
                             <span class="text-[10px] font-semibold" :class="morningOutEnabled ? 'text-[#dfa6a9]' : 'text-slate-600'">Morning OUT</span>
                         </div>
 
                         <div class="relative z-10 flex flex-col items-center text-center">
                             <span class="text-[11px] font-mono font-bold" :class="afternoonInEnabled ? 'text-white' : 'text-slate-600'" x-text="afternoonInOpens ? formatTimeDisplay(afternoonInOpens) : 'TBD'"></span>
-                            <div class="w-3.5 h-3.5 rounded-full my-1.5 border-2" :class="afternoonInEnabled ? 'bg-[#7A1618] border-red-400 shadow-sm' : 'bg-slate-800 border-slate-700'"></div>
+                            <div class="w-3.5 h-3.5 rounded-full my-1.5 border-2" :class="afternoonInEnabled ? 'bg-[#560E0F] border-red-400 shadow-sm' : 'bg-slate-800 border-slate-700'"></div>
                             <span class="text-[10px] font-semibold" :class="afternoonInEnabled ? 'text-[#dfa6a9]' : 'text-slate-600'">Afternoon IN</span>
                         </div>
 
@@ -558,7 +558,7 @@
 
                         <div class="relative z-10 flex flex-col items-center text-center">
                             <span class="text-[11px] font-mono font-bold" :class="afternoonOutEnabled ? 'text-white' : 'text-slate-600'" x-text="afternoonOutOpens ? formatTimeDisplay(afternoonOutOpens) : 'TBD'"></span>
-                            <div class="w-3.5 h-3.5 rounded-full my-1.5 border-2" :class="afternoonOutEnabled ? 'bg-[#7A1618] border-red-400 shadow-sm' : 'bg-slate-800 border-slate-700'"></div>
+                            <div class="w-3.5 h-3.5 rounded-full my-1.5 border-2" :class="afternoonOutEnabled ? 'bg-[#560E0F] border-red-400 shadow-sm' : 'bg-slate-800 border-slate-700'"></div>
                             <span class="text-[10px] font-semibold" :class="afternoonOutEnabled ? 'text-[#dfa6a9]' : 'text-slate-600'">Afternoon OUT</span>
                         </div>
                     </div>
@@ -653,7 +653,7 @@
         <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 items-center">
             <div>
                 <label for="max_participants" class="label">Maximum Participant Limit</label>
-                <input id="max_participants" name="max_participants" type="number" min="1" value="{{ old('max_participants', $event->max_participants) }}" class="input" placeholder="Leave blank for unlimited capacity" />
+                <input id="max_participants" name="max_participants" type="number" min="1" value="{{ old('max_participants', $event->max_participants) }}" class="input" />
                 <p class="text-[11px] text-slate-500 mt-1">If blank or 0, registrations will be unlimited.</p>
                 @error('max_participants')<p class="text-red-400 text-xs mt-1">{{ $message }}</p>@enderror
             </div>
@@ -702,7 +702,7 @@
 
             <div class="space-y-3">
                 <label class="flex items-start gap-3 p-3 rounded-xl bg-slate-950/60 border border-slate-800 cursor-pointer hover:border-slate-700 transition">
-                    <input type="checkbox" name="is_published" value="1" {{ old('is_published', $event->is_published) ? 'checked' : '' }} class="mt-0.5 w-4 h-4 rounded bg-[#12141c] border-slate-700 text-[#7A1618] focus:ring-[#7A1618]" />
+                    <input type="checkbox" name="is_published" value="1" {{ old('is_published', $event->is_published) ? 'checked' : '' }} class="mt-0.5 w-4 h-4 rounded bg-[#12141c] border-slate-700 text-[#560E0F] focus:ring-[#560E0F]" />
                     <div>
                         <span class="text-sm font-semibold text-white">Publish Event</span>
                         <p class="text-xs text-slate-400 mt-0.5">Show this event on kiosks, student dashboard, and public portal.</p>
@@ -710,7 +710,7 @@
                 </label>
 
                 <label class="flex items-start gap-3 p-3 rounded-xl bg-slate-950/60 border border-slate-800 cursor-pointer hover:border-slate-700 transition">
-                    <input type="checkbox" name="snack_distribution_enabled" value="1" {{ old('snack_distribution_enabled', $event->snack_distribution_enabled) ? 'checked' : '' }} class="mt-0.5 w-4 h-4 rounded bg-[#12141c] border-slate-700 text-[#7A1618] focus:ring-[#7A1618]" />
+                    <input type="checkbox" name="snack_distribution_enabled" value="1" {{ old('snack_distribution_enabled', $event->snack_distribution_enabled) ? 'checked' : '' }} class="mt-0.5 w-4 h-4 rounded bg-[#12141c] border-slate-700 text-[#560E0F] focus:ring-[#560E0F]" />
                     <div>
                         <span class="text-sm font-semibold text-white">Snack Distribution Enabled</span>
                         <p class="text-xs text-slate-400 mt-0.5">Allow snack claim kiosk sessions for this event.</p>
@@ -720,7 +720,7 @@
         </div>
     </div>
 
-    <div class="sticky bottom-4 z-20 p-4 rounded-xl bg-[#171a23]/95 backdrop-blur-md border border-slate-700 shadow-2xl flex flex-wrap items-center justify-between gap-3">
+    <div class="sticky bottom-4 z-20 p-4 rounded-xl bg-[#172033]/95 backdrop-blur-md border border-slate-700 shadow-2xl flex flex-wrap items-center justify-between gap-3">
         <div class="flex items-center gap-2">
             <span class="w-2.5 h-2.5 rounded-full" :class="isDirty ? 'bg-amber-400 animate-pulse' : 'bg-emerald-400'"></span>
             <span class="text-xs text-slate-300 font-medium" x-text="isDirty ? 'Unsaved configuration changes' : 'All saved and up to date'"></span>

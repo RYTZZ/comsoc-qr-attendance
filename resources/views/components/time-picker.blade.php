@@ -37,10 +37,10 @@
             @click="if(!disabled) open = !open"
             :disabled="disabled"
             :aria-expanded="open.toString()"
-            class="w-full flex items-center justify-between gap-2 rounded-lg bg-[#12141c] border px-3 py-2 text-sm text-left transition focus:outline-none focus:ring-2 focus:ring-[#7A1618] focus:border-transparent min-h-[38px] sm:min-h-[42px]"
+            class="w-full flex items-center justify-between gap-2 rounded-lg bg-[#12141c] border px-3 py-2 text-sm text-left transition focus:outline-none focus:ring-2 focus:ring-[#560E0F] focus:border-transparent min-h-[38px] sm:min-h-[42px]"
             :class="[
                 disabled ? 'opacity-50 cursor-not-allowed border-slate-800' : 'cursor-pointer hover:border-slate-600',
-                open ? 'ring-2 ring-[#7A1618] border-transparent shadow-md' : 'border-slate-700'
+                open ? 'ring-2 ring-[#560E0F] border-transparent shadow-md' : 'border-slate-700'
             ]">
         <div class="flex items-center gap-2 truncate">
             <svg class="w-4 h-4 shrink-0 transition-colors" :class="value ? 'text-[#e07e83]' : 'text-slate-500'" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -76,7 +76,7 @@
          x-transition:leave="transition ease-in duration-75"
          x-transition:leave-start="transform opacity-100 scale-100 translate-y-0"
          x-transition:leave-end="transform opacity-0 scale-95 -translate-y-1"
-         class="absolute z-50 mt-1.5 w-64 rounded-xl bg-[#171a23] border border-slate-700 shadow-2xl p-3 space-y-3"
+         class="absolute z-50 mt-1.5 w-64 rounded-xl bg-[#172033] border border-slate-700 shadow-2xl p-3 space-y-3"
          style="display: none;">
         
         <div class="flex items-center justify-between border-b border-slate-800 pb-2">
@@ -84,13 +84,13 @@
             <div class="flex items-center bg-slate-950/80 rounded-lg p-0.5 border border-slate-800">
                 <button type="button"
                         @click="setAmPm('AM')"
-                        :class="ampm === 'AM' ? 'bg-[#7A1618] text-white font-bold shadow' : 'text-slate-400 hover:text-white'"
+                        :class="ampm === 'AM' ? 'bg-[#560E0F] text-white font-bold shadow' : 'text-slate-400 hover:text-white'"
                         class="px-2 py-0.5 text-xs rounded transition">
                     AM
                 </button>
                 <button type="button"
                         @click="setAmPm('PM')"
-                        :class="ampm === 'PM' ? 'bg-[#7A1618] text-white font-bold shadow' : 'text-slate-400 hover:text-white'"
+                        :class="ampm === 'PM' ? 'bg-[#560E0F] text-white font-bold shadow' : 'text-slate-400 hover:text-white'"
                         class="px-2 py-0.5 text-xs rounded transition">
                     PM
                 </button>
@@ -104,7 +104,7 @@
                     <template x-for="h in hours" :key="h">
                         <button type="button"
                                 @click="setHour(h)"
-                                :class="selectedHour === h ? 'bg-[#7A1618] text-white font-bold' : 'text-slate-300 hover:bg-slate-800/80'"
+                                :class="selectedHour === h ? 'bg-[#560E0F] text-white font-bold' : 'text-slate-300 hover:bg-slate-800/80'"
                                 class="w-full py-1 text-xs rounded-md transition text-center"
                                 x-text="h">
                         </button>
@@ -117,7 +117,7 @@
                     <template x-for="m in minutes" :key="m">
                         <button type="button"
                                 @click="setMinute(m)"
-                                :class="selectedMinute === m ? 'bg-[#7A1618] text-white font-bold' : 'text-slate-300 hover:bg-slate-800/80'"
+                                :class="selectedMinute === m ? 'bg-[#560E0F] text-white font-bold' : 'text-slate-300 hover:bg-slate-800/80'"
                                 class="w-full py-1 text-xs rounded-md transition text-center"
                                 x-text="m">
                         </button>

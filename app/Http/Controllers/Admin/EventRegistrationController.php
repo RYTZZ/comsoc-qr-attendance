@@ -20,10 +20,10 @@ class EventRegistrationController extends Controller
 
         if ($search = $request->input('search')) {
             $query->where(function ($q) use ($search) {
-                $q->where('full_name', 'like', "%{$search}%")
-                  ->orWhere('email', 'like', "%{$search}%")
-                  ->orWhere('organization', 'like', "%{$search}%")
-                  ->orWhere('program', 'like', "%{$search}%");
+                $q->whereLike('full_name', "%{$search}%")
+                  ->orWhereLike('email', "%{$search}%")
+                  ->orWhereLike('organization', "%{$search}%")
+                  ->orWhereLike('program', "%{$search}%");
             });
         }
 

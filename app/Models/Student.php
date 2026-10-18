@@ -19,7 +19,39 @@ class Student extends Model
         '4th Year',
     ];
 
-    protected $fillable = ['student_number', 'last_name', 'first_name', 'middle_name', 'program', 'year_level', 'email'];
+    public const BLOCKS = [
+        '1',
+        '2',
+        '3',
+        '4',
+        '5',
+    ];
+
+    public const ALLOWED_PROGRAMS = [
+        'Bachelor of Science in Information Technology',
+        'Bachelor of Science in Computer Science',
+        'Bachelor of Science in Information Systems',
+        'Bachelor of Technical-Vocational Teacher Education',
+    ];
+
+    public const ALLOWED_YEARS = [
+        '1st',
+        '2nd',
+        '3rd',
+        '4th',
+    ];
+
+    protected $fillable = [
+        'student_number',
+        'last_name',
+        'first_name',
+        'middle_name',
+        'program',
+        'year_level',
+        'block',
+        'email',
+        'is_registrar_imported',
+    ];
 
     public static function normalizeYearLevel(?string $raw): ?string
     {
@@ -103,6 +135,11 @@ class Student extends Model
     public function user(): HasOne
     {
         return $this->hasOne(User::class);
+    }
+
+    public function attendanceRecords(): HasMany
+    {
+        return $this->hasMany(AttendanceRecord::class, 'participant_id');
     }
 
     public function getFullNameAttribute(): string

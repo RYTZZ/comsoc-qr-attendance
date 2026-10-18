@@ -34,12 +34,12 @@
      x-transition:leave="transition ease-out duration-500"
      x-transition:leave-start="opacity-100"
      x-transition:leave-end="opacity-0 pointer-events-none"
-     class="fixed inset-0 z-[9999] flex flex-col items-center justify-center bg-[#0f1117] text-slate-100 select-none">
+     class="fixed inset-0 z-[9999] flex flex-col items-center justify-center bg-[#0B1120] text-slate-100 select-none">
 
     <div class="relative flex flex-col items-center">
-        <div class="absolute -inset-6 rounded-full bg-[#7A1618]/25 blur-2xl pointer-events-none"></div>
+        <div class="absolute -inset-6 rounded-full bg-[#560E0F]/25 blur-2xl pointer-events-none"></div>
 
-        <div class="relative w-20 h-20 mb-5 flex items-center justify-center p-2 rounded-2xl bg-[#171a23] border border-slate-800 shadow-2xl">
+        <div class="relative w-20 h-20 mb-5 flex items-center justify-center p-2 rounded-2xl bg-[#172033] border border-slate-800 shadow-2xl">
             <img src="{{ asset('images/COMSOC.png') }}" alt="Computing Society Logo" class="w-full h-full object-contain">
         </div>
 

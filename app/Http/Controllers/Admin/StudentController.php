@@ -32,12 +32,13 @@ class StudentController extends Controller
                     ->with('activeQrCode'),
                 'user',
             ])
-            ->when($request->search, fn($q) => $q
-                ->where('student_number', 'like', "%{$request->search}%")
-                ->orWhere('last_name', 'ilike', "%{$request->search}%")
-                ->orWhere('first_name', 'ilike', "%{$request->search}%")
-            )
+            ->when($request->search, fn($q) => $q->where(fn($s) => $s
+                ->whereLike('student_number', "%{$request->search}%")
+                ->orWhereLike('last_name', "%{$request->search}%")
+                ->orWhereLike('first_name', "%{$request->search}%")
+            ))
             ->when($request->filled('year_level'), fn($q) => $q->where('year_level', $request->year_level))
+            ->when($request->filled('block'), fn($q) => $q->where('block', $request->block))
             ->when($request->filled('program'), fn($q) => $q->where('program', $request->program))
             ->when($request->filled('membership_status'), function ($q) use ($request, $yearId) {
                 if ($request->membership_status === 'none') {
@@ -102,6 +103,7 @@ class StudentController extends Controller
     {
         $validated = $request->validate([
             'year_level' => ['required', \Illuminate\Validation\Rule::in(Student::YEAR_LEVELS)],
+            'block' => ['nullable', \Illuminate\Validation\Rule::in(Student::BLOCKS)],
             'program' => ['nullable', 'string', 'max:255'],
             'first_name' => ['required', 'string', 'max:255'],
             'last_name' => ['required', 'string', 'max:255'],

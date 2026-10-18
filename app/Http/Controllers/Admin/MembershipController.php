@@ -30,9 +30,9 @@ class MembershipController extends Controller
             ->when($request->status, fn($q) => $q->where('status', $request->status))
             ->when($request->filled('year_level'), fn($q) => $q->whereHas('student', fn($s) => $s->where('year_level', $request->year_level)))
             ->when($request->search, fn($q) => $q->whereHas('student', fn($s) => $s->where(function ($sub) use ($request) {
-                $sub->where('student_number', 'ilike', "%{$request->search}%")
-                    ->orWhere('last_name', 'ilike', "%{$request->search}%")
-                    ->orWhere('first_name', 'ilike', "%{$request->search}%");
+                $sub->whereLike('student_number', "%{$request->search}%")
+                    ->orWhereLike('last_name', "%{$request->search}%")
+                    ->orWhereLike('first_name', "%{$request->search}%");
             })));
 
         $memberships = $query->orderBy('memberships.created_at', 'desc')->paginate(20)->withQueryString();

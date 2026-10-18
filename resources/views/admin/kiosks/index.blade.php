@@ -57,7 +57,7 @@
                 @csrf
                 <div>
                     <label for="name" class="label">Kiosk Name <span class="text-red-400">*</span></label>
-                    <input id="name" name="name" type="text" required class="input" placeholder="e.g., Gate 1 Scanner" />
+                    <input id="name" name="name" type="text" required class="input" />
                 </div>
                 <div>
                     <label for="assigned_user_id" class="label">Assigned Staff Operator</label>

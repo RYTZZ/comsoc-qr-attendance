@@ -78,6 +78,16 @@
                         @endif
                     </dd>
                 </div>
+                <div>
+                    <dt class="label">Block / Section</dt>
+                    <dd class="text-white text-sm font-semibold">
+                        @if($student->block)
+                            <span class="badge badge-active text-xs">Block {{ $student->block }}</span>
+                        @else
+                            <span class="text-slate-400 text-xs">Not set</span>
+                        @endif
+                    </dd>
+                </div>
             </dl>
         </div>
 
@@ -102,7 +112,7 @@
                     </div>
                     <div>
                         <label class="label">Registered Email</label>
-                        <input type="email" name="email" value="{{ old('email', $student->email) }}" class="input w-full text-sm" placeholder="student@example.com">
+                        <input type="email" name="email" value="{{ old('email', $student->email) }}" class="input w-full text-sm">
                     </div>
                     <div class="grid grid-cols-2 gap-2">
                         <div>
@@ -150,6 +160,21 @@
                             :required="true"
                             placeholder="Select Year Level" />
                     </div>
+                    <div>
+                        <label class="label">Block / Section</label>
+                        <x-custom-dropdown
+                            name="block"
+                            :options="[
+                                '' => 'Select Block',
+                                '1' => 'Block 1',
+                                '2' => 'Block 2',
+                                '3' => 'Block 3',
+                                '4' => 'Block 4',
+                                '5' => 'Block 5',
+                            ]"
+                            :value="old('block', $student->block)"
+                            placeholder="Select Block" />
+                    </div>
                     <div class="flex gap-2 pt-2">
                         <button type="submit" class="btn-primary flex-1">Save Changes</button>
                         <button type="button" class="btn-secondary flex-1"
@@ -174,7 +199,7 @@
                     @method('PATCH')
                     <div>
                         <label class="label">Student Email *</label>
-                        <input type="email" name="email" value="{{ old('email', $student->email) }}" class="input w-full text-sm" placeholder="student@example.com" required>
+                        <input type="email" name="email" value="{{ old('email', $student->email) }}" class="input w-full text-sm" required>
                     </div>
                     <div class="flex gap-2">
                         <button type="submit" class="btn-primary flex-1">Save Email</button>

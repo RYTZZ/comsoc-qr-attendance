@@ -28,6 +28,31 @@ class DashboardController extends Controller
             ? Membership::where('academic_year_id', $activeYear->id)->where('status', 'active')->count()
             : 0;
 
+        $totalEventRegistrations = \App\Models\EventRegistration::count();
+        $totalAttendanceScans = AttendanceRecord::count();
+
+        $totalMissions = \App\Models\Mission::count();
+        $approvedSubmissions = \App\Models\MissionSubmission::where('status', 'approved')->count();
+        $pendingSubmissions = \App\Models\MissionSubmission::where('status', 'pending')->count();
+        $totalSubmissions = \App\Models\MissionSubmission::count();
+        $missionCompletionRate = $totalSubmissions > 0 ? round(($approvedSubmissions / $totalSubmissions) * 100, 1) : 0;
+
+        $totalXpDistributed = (int) \App\Models\XpTransaction::sum('amount');
+        $totalPointsDistributed = (int) \App\Models\PointTransaction::where('amount', '>', 0)->sum('amount');
+        $totalPointsSpent = abs((int) \App\Models\PointTransaction::where('amount', '<', 0)->sum('amount'));
+
+        $pendingRedemptions = \App\Models\RewardRedemption::where('status', 'pending')->count();
+        $fulfilledRedemptions = \App\Models\RewardRedemption::where('status', 'fulfilled')->count();
+        $availableInventory = (int) \App\Models\Reward::where('is_active', true)->sum('stock');
+
+        $activeJobOpportunities = \App\Models\JobListing::where('is_active', true)->count();
+        $activeAnnouncements = \App\Models\Announcement::active()->count();
+        $openSupportTickets = \App\Models\SupportTicket::whereIn('status', ['open', 'in_review', 'awaiting_member'])->count();
+        $activeProjects = \App\Models\CollaborationProject::whereIn('status', ['recruiting', 'in_progress'])->count();
+        $pendingVolunteers = \App\Models\VolunteerApplication::where('status', 'applied')->count();
+
+        $recentAuditLogs = \App\Models\AuditLog::with('user')->latest()->take(5)->get();
+
         return [
             'total_students' => $totalStudents,
             'active_members' => $activeMembers,
@@ -36,7 +61,25 @@ class DashboardController extends Controller
                 ? Event::where('academic_year_id', $activeYear->id)->count()
                 : 0,
             'open_incidents' => Incident::where('status', 'open')->count(),
+            'open_support_tickets' => $openSupportTickets,
+            'active_projects' => $activeProjects,
+            'pending_volunteers' => $pendingVolunteers,
             'todays_scans' => AttendanceRecord::whereDate('scanned_at', today())->count(),
+            'total_event_registrations' => $totalEventRegistrations,
+            'total_attendance_scans' => $totalAttendanceScans,
+            'total_missions' => $totalMissions,
+            'pending_submissions' => $pendingSubmissions,
+            'approved_submissions' => $approvedSubmissions,
+            'mission_completion_rate' => $missionCompletionRate,
+            'total_xp_distributed' => $totalXpDistributed,
+            'total_points_distributed' => $totalPointsDistributed,
+            'total_points_spent' => $totalPointsSpent,
+            'pending_redemptions' => $pendingRedemptions,
+            'fulfilled_redemptions' => $fulfilledRedemptions,
+            'available_inventory' => $availableInventory,
+            'active_job_opportunities' => $activeJobOpportunities,
+            'active_announcements' => $activeAnnouncements,
+            'recent_audit_logs' => $recentAuditLogs,
             'upcoming_events' => Event::where('event_date', '>=', today())
                 ->where('is_published', true)
                 ->withCount('attendanceRecords')

@@ -21,7 +21,6 @@
     <form method="GET" action="{{ route('admin.organizations.index') }}" class="flex flex-wrap items-center justify-between gap-3">
         <div class="flex-1 min-w-[200px] max-w-md relative">
             <input type="text" name="search" value="{{ request('search') }}"
-                   placeholder="Search institution name..."
                    class="w-full rounded-xl bg-slate-950 border border-slate-700 px-3 py-2 pl-9 text-xs text-white placeholder-slate-500 focus:ring-2 focus:ring-brand-500 focus:outline-none">
             <svg class="w-4 h-4 text-slate-500 absolute left-3 top-2.5 pointer-events-none" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
@@ -168,8 +167,7 @@
             <div>
                 <label for="org_name" class="block font-medium text-slate-300 mb-1">Institution Name <span class="text-red-400">*</span></label>
                 <input id="org_name" name="name" type="text" required autofocus
-                       placeholder="e.g., SorSU - Bulan Campus"
-                       class="w-full rounded-xl bg-slate-950 border border-slate-700 px-3.5 py-2 text-sm text-white placeholder-slate-500 focus:ring-2 focus:ring-brand-500 focus:outline-none">
+                       class="w-full rounded-xl bg-slate-950 border border-slate-700 px-3.5 py-2 text-sm text-white focus:ring-2 focus:ring-brand-500 focus:outline-none">
                 @error('name')
                     <p class="text-red-400 text-xs mt-1">{{ $message }}</p>
                 @enderror

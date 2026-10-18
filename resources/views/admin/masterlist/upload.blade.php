@@ -31,6 +31,19 @@
 </div>
 
 <div class="max-w-2xl">
+    <div class="mb-6 p-4 rounded-xl border border-amber-500/30 bg-amber-500/10 text-amber-200">
+        <div class="flex items-start gap-3">
+            <svg class="w-5 h-5 text-amber-400 mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/>
+            </svg>
+            <div>
+                <p class="font-semibold text-sm text-amber-300">Notice: Transition to Student Self-Registration</p>
+                <p class="text-xs text-amber-200/80 mt-1 leading-relaxed">
+                    Under COMSOC's revised Data Privacy and Governance Policy, registrar bulk masterlist imports are deprecated. Students now self-register directly through the verified portal using institutional email credentials. This interface is retained solely for historical legacy reconciliation under authorized Data Protection Officer (DPO) supervision.
+                </p>
+            </div>
+        </div>
+    </div>
     <div class="card mb-6">
         <div class="alert-info mb-5">
             <svg class="w-4 h-4 flex-shrink-0 mt-0.5" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clip-rule="evenodd"/></svg>

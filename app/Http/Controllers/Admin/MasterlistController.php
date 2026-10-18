@@ -72,6 +72,7 @@ class MasterlistController extends Controller
                     'program' => $row['program'] ?? null,
                     'year_level' => $row['year_level'],
                     'email' => $row['email'] ?? null,
+                    'is_registrar_imported' => true,
                 ]);
 
                 Membership::create([

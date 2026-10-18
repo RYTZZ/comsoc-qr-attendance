@@ -35,7 +35,6 @@
         <div class="relative w-full sm:w-56">
             <input type="search" name="search" x-model="searchVal"
                    @input.debounce.400ms="submitDebounced()"
-                   placeholder="Search name or student #…"
                    class="input w-full text-sm pl-8">
             <svg class="w-4 h-4 text-slate-500 absolute left-2.5 top-3 pointer-events-none" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
@@ -53,6 +52,21 @@
                 :options="$yearLevelOptions"
                 :value="request('year_level', '')"
                 placeholder="All Year Levels"
+                buttonClass="py-2 text-xs sm:text-sm" />
+        </div>
+        <div class="w-full sm:w-28">
+            <x-custom-dropdown
+                name="block"
+                :options="[
+                    '' => 'All Blocks',
+                    '1' => 'Block 1',
+                    '2' => 'Block 2',
+                    '3' => 'Block 3',
+                    '4' => 'Block 4',
+                    '5' => 'Block 5',
+                ]"
+                :value="request('block', '')"
+                placeholder="All Blocks"
                 buttonClass="py-2 text-xs sm:text-sm" />
         </div>
         <div class="w-full sm:w-36">

@@ -40,8 +40,8 @@
             @keydown.enter.prevent="selectHighlighted()"
             :aria-expanded="open.toString()"
             aria-haspopup="listbox"
-            :class="open ? 'ring-2 ring-[#7A1618] border-transparent shadow-md' : 'border-slate-700 hover:border-slate-600'"
-            class="w-full flex items-center justify-between gap-2 rounded-xl bg-[#12141c] border px-3.5 py-2.5 text-sm text-left transition focus:outline-none focus:ring-2 focus:ring-[#7A1618] focus:border-transparent {{ $buttonClass }}">
+            :class="open ? 'ring-2 ring-[#560E0F] border-transparent shadow-md' : 'border-slate-700 hover:border-slate-600'"
+            class="w-full flex items-center justify-between gap-2 rounded-xl bg-[#12141c] border px-3.5 py-2.5 text-sm text-left transition focus:outline-none focus:ring-2 focus:ring-[#560E0F] focus:border-transparent {{ $buttonClass }}">
         <span class="truncate block"
               :class="value ? 'text-white font-medium' : 'text-slate-500'"
               x-text="displayLabel">
@@ -69,7 +69,7 @@
             <div @click="select(opt.value)"
                  @mouseenter="highlightedIndex = idx"
                  :class="{
-                     'bg-[#7A1618] text-white font-semibold': value === opt.value,
+                     'bg-[#560E0F] text-white font-semibold': value === opt.value,
                      'bg-[#303644] text-white': highlightedIndex === idx && value !== opt.value,
                      'text-slate-300 hover:text-white': value !== opt.value && highlightedIndex !== idx
                  }"

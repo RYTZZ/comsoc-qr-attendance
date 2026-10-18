@@ -48,12 +48,12 @@
                             <form x-show="isEditing" x-cloak method="POST" action="{{ route('admin.programs.update', $prog) }}" id="edit-form-{{ $prog->id }}" class="flex flex-wrap items-center gap-2">
                                 @csrf
                                 @method('PUT')
-                                <input type="text" name="name" x-model="progName" required placeholder="Full Program Name"
-                                       class="rounded-lg bg-slate-950 border border-slate-700 px-2.5 py-1 text-xs text-white focus:ring-2 focus:ring-[#7A1618] focus:outline-none min-w-[220px]">
-                                <input type="text" name="abbreviation" x-model="progAbbr" required placeholder="Abbr"
-                                       class="w-20 rounded-lg bg-slate-950 border border-slate-700 px-2.5 py-1 text-xs text-white focus:ring-2 focus:ring-[#7A1618] focus:outline-none">
+                                <input type="text" name="name" x-model="progName" required
+                                       class="rounded-lg bg-slate-950 border border-slate-700 px-2.5 py-1 text-xs text-white focus:ring-2 focus:ring-[#560E0F] focus:outline-none min-w-[220px]">
+                                <input type="text" name="abbreviation" x-model="progAbbr" required
+                                       class="w-20 rounded-lg bg-slate-950 border border-slate-700 px-2.5 py-1 text-xs text-white focus:ring-2 focus:ring-[#560E0F] focus:outline-none">
                                 <label class="flex items-center gap-1.5 text-[11px] text-slate-300">
-                                    <input type="checkbox" name="is_active" value="1" x-model="isActive" class="rounded bg-slate-950 border-slate-700 text-[#7A1618]">
+                                    <input type="checkbox" name="is_active" value="1" x-model="isActive" class="rounded bg-slate-950 border-slate-700 text-[#560E0F]">
                                     Active
                                 </label>
                             </form>
@@ -140,8 +140,7 @@
             <div>
                 <label for="prog_name" class="block font-medium text-slate-300 mb-1">Program Full Name <span class="text-red-400">*</span></label>
                 <input id="prog_name" name="name" type="text" required autofocus
-                       placeholder="e.g., Bachelor of Science in Information Technology"
-                       class="w-full rounded-xl bg-slate-950 border border-slate-700 px-3.5 py-2 text-sm text-white placeholder-slate-500 focus:ring-2 focus:ring-[#7A1618] focus:outline-none">
+                       class="w-full rounded-xl bg-slate-950 border border-slate-700 px-3.5 py-2 text-sm text-white focus:ring-2 focus:ring-[#560E0F] focus:outline-none">
                 @error('name')
                     <p class="text-red-400 text-xs mt-1">{{ $message }}</p>
                 @enderror
@@ -150,8 +149,7 @@
             <div>
                 <label for="prog_abbr" class="block font-medium text-slate-300 mb-1">Abbreviation <span class="text-red-400">*</span></label>
                 <input id="prog_abbr" name="abbreviation" type="text" required
-                       placeholder="e.g., BSIT"
-                       class="w-full rounded-xl bg-slate-950 border border-slate-700 px-3.5 py-2 text-sm text-white placeholder-slate-500 focus:ring-2 focus:ring-[#7A1618] focus:outline-none">
+                       class="w-full rounded-xl bg-slate-950 border border-slate-700 px-3.5 py-2 text-sm text-white focus:ring-2 focus:ring-[#560E0F] focus:outline-none">
                 @error('abbreviation')
                     <p class="text-red-400 text-xs mt-1">{{ $message }}</p>
                 @enderror

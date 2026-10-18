@@ -1,0 +1,617 @@
+<!DOCTYPE html>
+<html lang="en" class="h-full">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="csrf-token" content="{{ csrf_token() }}">
+    <meta name="description" content="Create your student account on COMSOC QR Attendance.">
+    <title>Student Sign Up — Computing Society QR Attendance</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Michroma&family=Sora:wght@600;700;800&family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet">
+    @vite(['resources/css/app.css', 'resources/js/app.js'])
+</head>
+<body class="h-full bg-[#0B1120] flex items-center justify-center min-h-screen p-3 sm:p-4 md:p-6 font-sans text-slate-100 relative overflow-x-hidden selection:bg-[#560E0F] selection:text-white">
+
+<x-page-loader />
+<x-public-auth-bg />
+
+<div class="w-full max-w-2xl relative z-10 py-4 sm:py-8">
+    <div class="text-center mb-5 sm:mb-6">
+        <div class="w-14 h-14 sm:w-16 sm:h-16 mx-auto mb-3 flex items-center justify-center p-2 rounded-2xl bg-[#172033]/90 border border-slate-800 shadow-xl enter-logo backdrop-blur-sm">
+            <img src="{{ asset('images/COMSOC.png') }}" alt="Computing Society Logo" class="w-full h-full object-contain">
+        </div>
+        <div class="enter-header">
+            <p class="font-brand-accent text-[10px] sm:text-[11px] text-[#dfa6a9] tracking-widest uppercase mb-1">COMPUTING SOCIETY</p>
+            <h1 class="font-brand-display text-xl sm:text-2xl md:text-3xl font-bold text-white tracking-tight">Student Registration</h1>
+            <p class="text-slate-400 mt-1 text-xs sm:text-sm">Create your student account to track attendance, earn XP, and unlock rewards</p>
+        </div>
+    </div>
+
+    <div class="card shadow-2xl border border-slate-800/80 bg-[#172033]/95 backdrop-blur-md p-4 sm:p-6 md:p-8 enter-card"
+         x-data="{
+             step: {{ $errors->hasAny(['email', 'password', 'password_confirmation', 'terms']) ? 2 : 1 }},
+             submitting: false,
+             showPass: false,
+             showConfirm: false,
+             studentId: '{{ addslashes(old('student_id', '')) }}',
+             firstName: '{{ addslashes(old('first_name', '')) }}',
+             lastName: '{{ addslashes(old('last_name', '')) }}',
+             middleName: '{{ addslashes(old('middle_name', '')) }}',
+             program: '{{ addslashes(old('program', '')) }}',
+             year: '{{ addslashes(old('year', '')) }}',
+             block: '{{ addslashes(old('block', '')) }}',
+             email: '{{ addslashes(old('email', '')) }}',
+             password: '',
+             passwordConfirmation: '',
+             termsAccepted: {{ old('terms') ? 'true' : 'false' }},
+             clientErrors: {},
+
+             get studentIdDigits() {
+                 return (this.studentId || '').replace(/\D/g, '');
+             },
+
+             validateStep1() {
+                 this.clientErrors = {};
+                 let valid = true;
+
+                 const trimmedId = (this.studentId || '').trim();
+                 if (!trimmedId) {
+                     this.clientErrors.student_id = 'Student ID is required.';
+                     valid = false;
+                 } else if (!/^[\d-]+$/.test(trimmedId)) {
+                     this.clientErrors.student_id = 'Student ID must only contain digits and hyphens.';
+                     valid = false;
+                 } else if (this.studentIdDigits.length === 0) {
+                     this.clientErrors.student_id = 'Student ID must contain at least one digit.';
+                     valid = false;
+                 } else if (this.studentIdDigits.length > 8) {
+                     this.clientErrors.student_id = 'Student ID may not exceed 8 digits.';
+                     valid = false;
+                 }
+
+                 if (!(this.firstName || '').trim()) {
+                     this.clientErrors.first_name = 'First name is required.';
+                     valid = false;
+                 }
+
+                 if (!(this.lastName || '').trim()) {
+                     this.clientErrors.last_name = 'Last name is required.';
+                     valid = false;
+                 }
+
+                 if (!(this.program || '').trim()) {
+                     this.clientErrors.program = 'Please select your academic program.';
+                     valid = false;
+                 }
+
+                 if (!(this.year || '').trim()) {
+                     this.clientErrors.year = 'Please select your year level.';
+                     valid = false;
+                 }
+
+                 if (!(this.block || '').trim()) {
+                     this.clientErrors.block = 'Please select your section block.';
+                     valid = false;
+                 }
+
+                 return valid;
+             },
+
+             goToStep2() {
+                 if (this.validateStep1()) {
+                     this.step = 2;
+                     window.scrollTo({ top: 0, behavior: 'smooth' });
+                 }
+             },
+
+             goToStep1() {
+                 this.step = 1;
+                 window.scrollTo({ top: 0, behavior: 'smooth' });
+             },
+
+             get passwordMetrics() {
+                 const p = this.password || '';
+                 if (!p) {
+                     return { score: 0, state: 'Empty', widthClass: 'w-0', colorClass: 'bg-slate-700', textClass: 'text-slate-500' };
+                 }
+
+                 let score = 0;
+                 if (p.length >= 8) score += 1;
+                 if (p.length >= 12) score += 1;
+                 if (/[a-z]/.test(p) && /[A-Z]/.test(p)) score += 1;
+                 if (/\d/.test(p)) score += 1;
+                 if (/[^a-zA-Z0-9]/.test(p)) score += 1;
+
+                 const repetitive = /(.)\1{2,}/.test(p);
+                 const sequence = /1234|2345|3456|4567|5678|6789|abcd|bcde|cdef|qwerty|asdf|password/i.test(p);
+                 if ((repetitive || sequence) && score > 1) {
+                     score -= 1;
+                 }
+
+                 if (score <= 1) {
+                     return { score: 1, state: 'Very Weak', widthClass: 'w-1/5', colorClass: 'bg-red-500', textClass: 'text-red-400' };
+                 } else if (score === 2) {
+                     return { score: 2, state: 'Weak', widthClass: 'w-2/5', colorClass: 'bg-orange-500', textClass: 'text-orange-400' };
+                 } else if (score === 3) {
+                     return { score: 3, state: 'Fair', widthClass: 'w-3/5', colorClass: 'bg-yellow-500', textClass: 'text-yellow-400' };
+                 } else if (score === 4) {
+                     return { score: 4, state: 'Strong', widthClass: 'w-4/5', colorClass: 'bg-emerald-500', textClass: 'text-emerald-400' };
+                 } else {
+                     return { score: 5, state: 'Very Strong', widthClass: 'w-full', colorClass: 'bg-teal-400', textClass: 'text-teal-300' };
+                 }
+             },
+
+             validateStep2() {
+                 this.clientErrors = {};
+                 let valid = true;
+
+                 const trimmedEmail = (this.email || '').trim();
+                 if (!trimmedEmail) {
+                     this.clientErrors.email = 'Email address is required.';
+                     valid = false;
+                 } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(trimmedEmail)) {
+                     this.clientErrors.email = 'Please provide a valid email address.';
+                     valid = false;
+                 }
+
+                 if (!this.password) {
+                     this.clientErrors.password = 'Password is required.';
+                     valid = false;
+                 } else if (this.password.length < 8) {
+                     this.clientErrors.password = 'Password must be at least 8 characters long.';
+                     valid = false;
+                 } else if (!/[a-zA-Z]/.test(this.password) || !/\d/.test(this.password)) {
+                     this.clientErrors.password = 'Password must contain both letters and numbers.';
+                     valid = false;
+                 }
+
+                 if (!this.passwordConfirmation) {
+                     this.clientErrors.password_confirmation = 'Please confirm your password.';
+                     valid = false;
+                 } else if (this.password !== this.passwordConfirmation) {
+                     this.clientErrors.password_confirmation = 'Password confirmation does not match.';
+                     valid = false;
+                 }
+
+                 if (!this.termsAccepted) {
+                     this.clientErrors.terms = 'You must accept the terms and privacy notice to continue.';
+                     valid = false;
+                 }
+
+                 return valid;
+             },
+
+             submitForm(e) {
+                 if (!this.validateStep1()) {
+                     e.preventDefault();
+                     this.step = 1;
+                     return;
+                 }
+                 if (!this.validateStep2()) {
+                     e.preventDefault();
+                     return;
+                 }
+                 this.submitting = true;
+             }
+         }"
+         @dropdown-selected.window="
+             if ($event.detail.name === 'program') { program = $event.detail.value; clientErrors.program = ''; }
+             if ($event.detail.name === 'year') { year = $event.detail.value; clientErrors.year = ''; }
+             if ($event.detail.name === 'block') { block = $event.detail.value; clientErrors.block = ''; }
+         ">
+
+        <nav aria-label="Registration Progress" class="mb-6 sm:mb-8">
+            <ol class="grid grid-cols-2 gap-2 sm:gap-4">
+                <li class="flex items-center gap-2.5 p-2 sm:p-2.5 rounded-xl border transition"
+                    :class="step === 1 ? 'bg-[#560E0F]/20 border-[#560E0F] text-white' : 'bg-slate-900/40 border-slate-800 text-slate-400'">
+                    <span class="w-6 h-6 sm:w-7 sm:h-7 rounded-lg flex items-center justify-center font-bold text-xs shrink-0"
+                          :class="step === 1 ? 'bg-[#560E0F] text-white' : (step > 1 ? 'bg-emerald-500/20 text-emerald-400 border border-emerald-500/40' : 'bg-slate-800 text-slate-400')">
+                        <template x-if="step > 1">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"/>
+                            </svg>
+                        </template>
+                        <template x-if="step <= 1">
+                            <span>1</span>
+                        </template>
+                    </span>
+                    <div class="min-w-0">
+                        <p class="text-[10px] sm:text-[11px] font-mono uppercase tracking-wider text-slate-400">Step 1 of 2</p>
+                        <p class="text-xs sm:text-sm font-semibold truncate" :class="step === 1 ? 'text-white' : 'text-slate-300'">Academic Info</p>
+                    </div>
+                </li>
+
+                <li class="flex items-center gap-2.5 p-2 sm:p-2.5 rounded-xl border transition"
+                    :class="step === 2 ? 'bg-[#560E0F]/20 border-[#560E0F] text-white' : 'bg-slate-900/40 border-slate-800 text-slate-400'">
+                    <span class="w-6 h-6 sm:w-7 sm:h-7 rounded-lg flex items-center justify-center font-bold text-xs shrink-0"
+                          :class="step === 2 ? 'bg-[#560E0F] text-white' : 'bg-slate-800 text-slate-400'">
+                        2
+                    </span>
+                    <div class="min-w-0">
+                        <p class="text-[10px] sm:text-[11px] font-mono uppercase tracking-wider text-slate-400">Step 2 of 2</p>
+                        <p class="text-xs sm:text-sm font-semibold truncate" :class="step === 2 ? 'text-white' : 'text-slate-300'">Account Security</p>
+                    </div>
+                </li>
+            </ol>
+        </nav>
+
+        @if($errors->any())
+        <div class="alert-error mb-6 flex items-start gap-2.5 bg-red-950/50 border border-red-800 text-red-200 px-4 py-3 rounded-xl text-sm" role="alert">
+            <svg class="w-5 h-5 flex-shrink-0 mt-0.5 text-red-400" fill="currentColor" viewBox="0 0 20 20" aria-hidden="true">
+                <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clip-rule="evenodd"/>
+            </svg>
+            <div>
+                <p class="font-semibold text-white">Please correct the following errors:</p>
+                <ul class="list-disc list-inside mt-1 text-xs text-red-300 space-y-0.5">
+                    @foreach($errors->all() as $error)
+                        <li>{{ $error }}</li>
+                    @endforeach
+                </ul>
+            </div>
+        </div>
+        @endif
+
+        <form method="POST" action="{{ route('signup.store') }}" @submit="submitForm($event)" class="space-y-6" novalidate>
+            @csrf
+
+            <div x-show="step === 1" x-transition:enter="transition ease-out duration-200" x-transition:enter-start="opacity-0 translate-y-1" x-transition:enter-end="opacity-100 translate-y-0" class="space-y-5">
+                <div class="border-b border-slate-800 pb-3 flex items-center justify-between">
+                    <div>
+                        <h2 class="font-brand-display text-base sm:text-lg font-bold text-white tracking-wide">Student Academic Information</h2>
+                        <p class="text-xs text-slate-400 mt-0.5">Enter your institutional student identity and enrolled program</p>
+                    </div>
+                    <span class="text-xs font-mono text-slate-500 hidden sm:inline">1 / 2</span>
+                </div>
+
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <div class="sm:col-span-2">
+                        <div class="flex items-center justify-between mb-1">
+                            <label for="student_id" class="label text-xs">Student ID / Student Number <span class="text-red-400">*</span></label>
+                            <span class="text-[11px] font-mono text-slate-400" :class="studentIdDigits.length > 8 ? 'text-red-400 font-bold' : ''">
+                                <span x-text="studentIdDigits.length"></span>/8 digits
+                            </span>
+                        </div>
+                        <input type="text"
+                               name="student_id"
+                               id="student_id"
+                               x-model="studentId"
+                               @input="clientErrors.student_id = ''"
+                               maxlength="20"
+                               autocomplete="off"
+                               aria-describedby="student-id-helper student-id-error"
+                               class="input @error('student_id') border-red-500 @enderror"
+                               :class="clientErrors.student_id ? 'border-red-500' : ''"
+                               required
+                               autofocus>
+                        <p id="student-id-helper" class="text-[11px] text-slate-400 mt-1">Maximum 8 digits. Hyphens accepted per institutional ID format.</p>
+                        <template x-if="clientErrors.student_id">
+                            <p id="student-id-error" class="text-xs text-red-400 mt-1 font-medium" x-text="clientErrors.student_id"></p>
+                        </template>
+                        @error('student_id')
+                            <p class="text-xs text-red-400 mt-1 font-medium">{{ $message }}</p>
+                        @enderror
+                    </div>
+
+                    <div>
+                        <label for="first_name" class="label text-xs">First Name <span class="text-red-400">*</span></label>
+                        <input type="text"
+                               name="first_name"
+                               id="first_name"
+                               x-model="firstName"
+                               @input="clientErrors.first_name = ''"
+                               autocomplete="given-name"
+                               class="input @error('first_name') border-red-500 @enderror"
+                               :class="clientErrors.first_name ? 'border-red-500' : ''"
+                               required>
+                        <template x-if="clientErrors.first_name">
+                            <p class="text-xs text-red-400 mt-1 font-medium" x-text="clientErrors.first_name"></p>
+                        </template>
+                        @error('first_name')
+                            <p class="text-xs text-red-400 mt-1 font-medium">{{ $message }}</p>
+                        @enderror
+                    </div>
+
+                    <div>
+                        <label for="last_name" class="label text-xs">Last Name <span class="text-red-400">*</span></label>
+                        <input type="text"
+                               name="last_name"
+                               id="last_name"
+                               x-model="lastName"
+                               @input="clientErrors.last_name = ''"
+                               autocomplete="family-name"
+                               class="input @error('last_name') border-red-500 @enderror"
+                               :class="clientErrors.last_name ? 'border-red-500' : ''"
+                               required>
+                        <template x-if="clientErrors.last_name">
+                            <p class="text-xs text-red-400 mt-1 font-medium" x-text="clientErrors.last_name"></p>
+                        </template>
+                        @error('last_name')
+                            <p class="text-xs text-red-400 mt-1 font-medium">{{ $message }}</p>
+                        @enderror
+                    </div>
+
+                    <div class="sm:col-span-2">
+                        <label for="middle_name" class="label text-xs">Middle Name <span class="text-slate-500 font-normal">(Optional)</span></label>
+                        <input type="text"
+                               name="middle_name"
+                               id="middle_name"
+                               x-model="middleName"
+                               autocomplete="additional-name"
+                               class="input @error('middle_name') border-red-500 @enderror">
+                        @error('middle_name')
+                            <p class="text-xs text-red-400 mt-1 font-medium">{{ $message }}</p>
+                        @enderror
+                    </div>
+
+                    <div class="sm:col-span-2">
+                        <label for="program" class="label text-xs">Academic Program <span class="text-red-400">*</span></label>
+                        <x-custom-dropdown
+                            name="program"
+                            id="program"
+                            :options="$programs"
+                            :value="old('program')"
+                            placeholder="Select Program"
+                            required="true"
+                            buttonClass="py-2.5 text-xs sm:text-sm bg-[#12141c]" />
+                        <template x-if="clientErrors.program">
+                            <p class="text-xs text-red-400 mt-1 font-medium" x-text="clientErrors.program"></p>
+                        </template>
+                        @error('program')
+                            <p class="text-xs text-red-400 mt-1 font-medium">{{ $message }}</p>
+                        @enderror
+                    </div>
+
+                    <div>
+                        <label for="year" class="label text-xs">Year Level <span class="text-red-400">*</span></label>
+                        <x-custom-dropdown
+                            name="year"
+                            id="year"
+                            :options="$years"
+                            :value="old('year')"
+                            placeholder="Select Year Level"
+                            required="true"
+                            buttonClass="py-2.5 text-xs sm:text-sm bg-[#12141c]" />
+                        <template x-if="clientErrors.year">
+                            <p class="text-xs text-red-400 mt-1 font-medium" x-text="clientErrors.year"></p>
+                        </template>
+                        @error('year')
+                            <p class="text-xs text-red-400 mt-1 font-medium">{{ $message }}</p>
+                        @enderror
+                    </div>
+
+                    <div>
+                        <label for="block" class="label text-xs">Block / Section <span class="text-red-400">*</span></label>
+                        <x-custom-dropdown
+                            name="block"
+                            id="block"
+                            :options="$blocks"
+                            :value="old('block')"
+                            placeholder="Select Block"
+                            required="true"
+                            buttonClass="py-2.5 text-xs sm:text-sm bg-[#12141c]" />
+                        <template x-if="clientErrors.block">
+                            <p class="text-xs text-red-400 mt-1 font-medium" x-text="clientErrors.block"></p>
+                        </template>
+                        @error('block')
+                            <p class="text-xs text-red-400 mt-1 font-medium">{{ $message }}</p>
+                        @enderror
+                    </div>
+                </div>
+
+                <div class="pt-4 flex justify-end">
+                    <button type="button"
+                            @click="goToStep2()"
+                            class="btn-primary w-full sm:w-auto min-w-[140px] justify-center py-2.5 sm:py-3 font-semibold text-sm tracking-wide transition flex items-center gap-2">
+                        <span>Continue</span>
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"/>
+                        </svg>
+                    </button>
+                </div>
+            </div>
+
+            <div x-show="step === 2" x-cloak x-transition:enter="transition ease-out duration-200" x-transition:enter-start="opacity-0 translate-y-1" x-transition:enter-end="opacity-100 translate-y-0" class="space-y-5">
+                <div class="border-b border-slate-800 pb-3 flex items-center justify-between">
+                    <div>
+                        <h2 class="font-brand-display text-base sm:text-lg font-bold text-white tracking-wide">Account Credentials</h2>
+                        <p class="text-xs text-slate-400 mt-0.5">Configure your secure sign-in email and password</p>
+                    </div>
+                    <span class="text-xs font-mono text-slate-500 hidden sm:inline">2 / 2</span>
+                </div>
+
+                <div class="space-y-4">
+                    <div>
+                        <label for="email" class="label text-xs">Email Address <span class="text-red-400">*</span></label>
+                        <input type="email"
+                               name="email"
+                               id="email"
+                               x-model="email"
+                               @input="clientErrors.email = ''"
+                               autocomplete="email"
+                               class="input @error('email') border-red-500 @enderror"
+                               :class="clientErrors.email ? 'border-red-500' : ''"
+                               required>
+                        <template x-if="clientErrors.email">
+                            <p class="text-xs text-red-400 mt-1 font-medium" x-text="clientErrors.email"></p>
+                        </template>
+                        @error('email')
+                            <p class="text-xs text-red-400 mt-1 font-medium">{{ $message }}</p>
+                        @enderror
+                    </div>
+
+                    <div>
+                        <label for="password" class="label text-xs">Password <span class="text-red-400">*</span></label>
+                        <div class="relative">
+                            <input :type="showPass ? 'text' : 'password'"
+                                   name="password"
+                                   id="password"
+                                   x-model="password"
+                                   @input="clientErrors.password = ''"
+                                   autocomplete="new-password"
+                                   aria-describedby="password-rules password-strength-live"
+                                   class="input pr-10 @error('password') border-red-500 @enderror"
+                                   :class="clientErrors.password ? 'border-red-500' : ''"
+                                   required>
+                            <button type="button"
+                                    @click="showPass = !showPass"
+                                    :aria-label="showPass ? 'Hide password' : 'Show password'"
+                                    class="absolute inset-y-0 right-0 pr-3 flex items-center text-slate-400 hover:text-white transition focus:outline-none focus:text-white">
+                                <template x-if="!showPass">
+                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                                    </svg>
+                                </template>
+                                <template x-if="showPass">
+                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.88 9.88l-3.29-3.29m7.532 7.532l3.29 3.29M3 3l18 18" />
+                                    </svg>
+                                </template>
+                            </button>
+                        </div>
+
+                        <div class="mt-2.5 p-3 rounded-xl bg-slate-950/70 border border-slate-800/90 space-y-2">
+                            <div class="flex items-center justify-between text-xs">
+                                <span class="text-slate-400 font-medium">Password Strength:</span>
+                                <span id="password-strength-live"
+                                      aria-live="polite"
+                                      class="font-semibold transition-colors duration-200"
+                                      :class="passwordMetrics.textClass"
+                                      x-text="passwordMetrics.state"></span>
+                            </div>
+
+                            <div class="w-full bg-slate-800 h-1.5 rounded-full overflow-hidden" role="progressbar" :aria-valuenow="passwordMetrics.score" aria-valuemin="0" aria-valuemax="5" :aria-valuetext="passwordMetrics.state">
+                                <div class="h-full transition-all duration-300 rounded-full"
+                                     :class="[passwordMetrics.widthClass, passwordMetrics.colorClass]"></div>
+                            </div>
+
+                            <ul id="password-rules" class="grid grid-cols-1 sm:grid-cols-2 gap-1.5 pt-1 text-[11px] text-slate-400">
+                                <li class="flex items-center gap-1.5">
+                                    <span class="w-1.5 h-1.5 rounded-full" :class="(password || '').length >= 8 ? 'bg-emerald-400' : 'bg-slate-600'"></span>
+                                    <span>At least 8 characters</span>
+                                </li>
+                                <li class="flex items-center gap-1.5">
+                                    <span class="w-1.5 h-1.5 rounded-full" :class="/[a-zA-Z]/.test(password || '') && /\d/.test(password || '') ? 'bg-emerald-400' : 'bg-slate-600'"></span>
+                                    <span>Letters and numbers</span>
+                                </li>
+                            </ul>
+                        </div>
+
+                        <template x-if="clientErrors.password">
+                            <p class="text-xs text-red-400 mt-1 font-medium" x-text="clientErrors.password"></p>
+                        </template>
+                        @error('password')
+                            <p class="text-xs text-red-400 mt-1 font-medium">{{ $message }}</p>
+                        @enderror
+                    </div>
+
+                    <div>
+                        <label for="password_confirmation" class="label text-xs">Confirm Password <span class="text-red-400">*</span></label>
+                        <div class="relative">
+                            <input :type="showConfirm ? 'text' : 'password'"
+                                   name="password_confirmation"
+                                   id="password_confirmation"
+                                   x-model="passwordConfirmation"
+                                   @input="clientErrors.password_confirmation = ''"
+                                   autocomplete="new-password"
+                                   class="input pr-10"
+                                   :class="clientErrors.password_confirmation ? 'border-red-500' : ''"
+                                   required>
+                            <button type="button"
+                                    @click="showConfirm = !showConfirm"
+                                    :aria-label="showConfirm ? 'Hide password confirmation' : 'Show password confirmation'"
+                                    class="absolute inset-y-0 right-0 pr-3 flex items-center text-slate-400 hover:text-white transition focus:outline-none focus:text-white">
+                                <template x-if="!showConfirm">
+                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                                    </svg>
+                                </template>
+                                <template x-if="showConfirm">
+                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.88 9.88l-3.29-3.29m7.532 7.532l3.29 3.29M3 3l18 18" />
+                                    </svg>
+                                </template>
+                            </button>
+                        </div>
+                        <template x-if="clientErrors.password_confirmation">
+                            <p class="text-xs text-red-400 mt-1 font-medium" x-text="clientErrors.password_confirmation"></p>
+                        </template>
+                    </div>
+                </div>
+
+                <!-- Formal Privacy Notice (Data Privacy Act of 2012 / Governance Compliance) -->
+                <div class="p-4 rounded-xl bg-slate-950/80 border border-slate-800 text-xs text-slate-300 space-y-2.5">
+                    <div class="flex items-center gap-2 text-white font-semibold">
+                        <svg class="w-4 h-4 text-emerald-400 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
+                        </svg>
+                        <span>COMSOC Privacy Notice & Consent</span>
+                    </div>
+                    <p class="text-[11px] text-slate-400 leading-relaxed">
+                        <strong>Purpose & Scope:</strong> COMSOC collects your name, student number, institutional email, program, and year level solely for identity verification, attendance tracking, permanent member credentialing, XP, and reward shop operations. We do not import external registrar lists or sell student data.
+                    </p>
+                    <p class="text-[11px] text-slate-400 leading-relaxed">
+                        <strong>Retention & Rights:</strong> Your records are securely stored, encrypted where required, and retained only for your active membership cycle and necessary organizational audits. You have the right to request access, correction of profile information, or account deactivation.
+                    </p>
+                </div>
+
+                <div>
+                    <label class="flex items-start gap-2.5 text-xs text-slate-400 cursor-pointer p-3 rounded-xl bg-slate-950/60 border border-slate-800 hover:border-slate-700 transition">
+                        <input type="checkbox"
+                               name="terms"
+                               value="1"
+                               x-model="termsAccepted"
+                               @change="clientErrors.terms = ''"
+                               required
+                               class="w-4 h-4 mt-0.5 rounded bg-slate-900 border-slate-700 text-[#560E0F] focus:ring-[#560E0F]">
+                        <span>I have read and agree to the <strong>COMSOC Privacy Notice</strong> and confirm that all information provided is accurate.</span>
+                    </label>
+                    <template x-if="clientErrors.terms">
+                        <p class="text-xs text-red-400 mt-1 font-medium" x-text="clientErrors.terms"></p>
+                    </template>
+                    @error('terms')
+                        <p class="text-xs text-red-400 mt-1 font-medium">{{ $message }}</p>
+                    @enderror
+                </div>
+
+                <div class="pt-4 flex flex-col-reverse sm:flex-row items-center justify-between gap-3">
+                    <button type="button"
+                            @click="goToStep1()"
+                            class="btn-secondary w-full sm:w-auto min-w-[120px] justify-center py-2.5 sm:py-3 text-sm flex items-center gap-2">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"/>
+                        </svg>
+                        <span>Back</span>
+                    </button>
+
+                    <button type="submit"
+                            :disabled="submitting"
+                            class="btn-primary w-full sm:w-auto min-w-[180px] justify-center py-2.5 sm:py-3 font-semibold text-sm tracking-wide transition flex items-center gap-2">
+                        <span x-show="!submitting">Create Student Account</span>
+                        <span x-show="submitting" class="flex items-center gap-2">
+                            <svg class="animate-spin -ml-1 mr-2 h-4 w-4 text-white" fill="none" viewBox="0 0 24 24">
+                                <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                                <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8H4z"></path>
+                            </svg>
+                            Creating account...
+                        </span>
+                    </button>
+                </div>
+            </div>
+
+            <div class="text-center pt-2">
+                <p class="text-xs text-slate-400">
+                    Already have an account?
+                    <a href="{{ route('login') }}" class="text-[#e69094] hover:text-white font-medium underline transition">Sign In here</a>
+                </p>
+            </div>
+        </form>
+    </div>
+
+    <x-public-branding-footer />
+</div>
+
+</body>
+</html>

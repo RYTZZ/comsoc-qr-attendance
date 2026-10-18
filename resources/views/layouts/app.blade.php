@@ -9,25 +9,129 @@
 
         <link rel="preconnect" href="https://fonts.googleapis.com">
         <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-        <link href="https://fonts.googleapis.com/css2?family=Michroma&family=Sora:wght@600;700;800&family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet">
+        <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Manrope:wght@600;700;800&family=Space+Grotesk:wght@600;700&display=swap" rel="stylesheet">
 
         @vite(['resources/css/app.css', 'resources/js/app.js'])
     </head>
-    <body class="h-full bg-[#0f1117] text-slate-100 font-sans antialiased">
-        <div class="min-h-screen bg-[#0f1117]">
+    <body class="h-full bg-[#0B1120] text-[#F8FAFC] font-sans antialiased"
+          x-data="{
+              sidebarCollapsed: localStorage.getItem('comsoc_sidebar_collapsed') === 'true',
+              mobileDrawerOpen: false,
+              toggleSidebar() {
+                  this.sidebarCollapsed = !this.sidebarCollapsed;
+                  localStorage.setItem('comsoc_sidebar_collapsed', this.sidebarCollapsed);
+                  this.$nextTick(() => { if (window.lucideIcons) window.createIcons({ icons: window.lucideIcons }); });
+              }
+          }">
+        <div class="min-h-screen bg-[#0B1120] flex">
             @include('layouts.navigation')
 
-            @isset($header)
-                <header class="bg-[#171a23] border-b border-slate-800 shadow-sm">
-                    <div class="max-w-7xl mx-auto py-5 px-4 sm:px-6 lg:px-8">
-                        {{ $header }}
+            <div class="flex-1 flex flex-col min-w-0 transition-all duration-300 ease-in-out"
+                 :class="sidebarCollapsed ? 'lg:pl-20' : 'lg:pl-64'">
+
+                <header class="sticky top-0 z-20 bg-[#172033]/95 backdrop-blur-md border-b border-[#334155] px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between shadow-md">
+                    <div class="flex items-center gap-3">
+                        <button type="button"
+                                @click="mobileDrawerOpen = true"
+                                class="lg:hidden inline-flex items-center justify-center p-2 rounded-xl text-slate-300 hover:text-white hover:bg-[#1E293B] focus:outline-none focus:ring-2 focus:ring-[#8F3033] transition"
+                                aria-label="Open navigation drawer">
+                            <i data-lucide="menu" class="w-5 h-5"></i>
+                        </button>
+
+                        <div class="lg:hidden flex items-center gap-2">
+                            <a href="{{ route('dashboard') }}" class="flex items-center gap-2">
+                                <div class="w-8 h-8 rounded-lg bg-[#0B1120] border border-[#334155] p-1 flex items-center justify-center shrink-0">
+                                    <img src="{{ asset('images/COMSOC.png') }}" alt="Computing Society Logo" class="w-full h-full object-contain">
+                                </div>
+                                <span class="font-extrabold text-[#F8FAFC] text-sm font-brand-display tracking-tight">COMSOC</span>
+                            </a>
+                        </div>
+
+                        <div class="hidden lg:flex items-center gap-2 text-xs text-slate-400">
+                            <span class="inline-block w-2 h-2 rounded-full bg-emerald-400"></span>
+                            <span class="font-medium text-[#94A3B8]">Computing Society of Sorsogon State University – Bulan Campus</span>
+                        </div>
+                    </div>
+
+                    <div class="flex items-center gap-2 sm:gap-3">
+                        <a href="{{ route('notifications.index') }}"
+                           class="relative p-2 rounded-xl text-slate-300 hover:text-white hover:bg-[#1E293B] transition focus:outline-none focus:ring-2 focus:ring-[#8F3033]"
+                           title="Notifications"
+                           aria-label="View Notifications">
+                            <i data-lucide="bell" class="w-4 h-4"></i>
+                            @php $unreadCount = Auth::user()->notifications()->whereNull('read_at')->count(); @endphp
+                            @if($unreadCount > 0)
+                            <span class="absolute top-1 right-1 flex h-2 w-2">
+                                <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-red-400 opacity-75"></span>
+                                <span class="relative inline-flex rounded-full h-2 w-2 bg-[#8F3033] ring-2 ring-[#172033]"></span>
+                            </span>
+                            @endif
+                        </a>
+
+                        <x-dropdown align="right" width="56" contentClasses="py-1 bg-[#172033] border border-[#334155] shadow-2xl rounded-xl">
+                            <x-slot name="trigger">
+                                <button type="button" class="inline-flex items-center gap-2 p-1.5 sm:px-3 sm:py-1.5 border border-[#334155] rounded-xl text-slate-200 bg-[#0B1120] hover:text-white hover:bg-[#1E293B] focus:outline-none focus:ring-2 focus:ring-[#8F3033] transition">
+                                    <div class="w-7 h-7 rounded-lg bg-[#560E0F] flex items-center justify-center text-white shrink-0 font-bold text-xs shadow-inner">
+                                        {{ strtoupper(substr(Auth::user()->name, 0, 1)) }}
+                                    </div>
+                                    <div class="hidden sm:block text-left max-w-[120px] truncate">
+                                        <div class="text-xs font-semibold text-white truncate leading-tight">{{ Auth::user()->name }}</div>
+                                        <div class="text-[10px] text-slate-400 truncate capitalize">{{ Auth::user()->role ?? 'Member' }}</div>
+                                    </div>
+                                    <i data-lucide="chevron-down" class="w-3.5 h-3.5 text-slate-400 ms-0.5"></i>
+                                </button>
+                            </x-slot>
+
+                            <x-slot name="content">
+                                <div class="px-4 py-3 border-b border-[#334155] text-xs">
+                                    <p class="font-bold text-white truncate">{{ Auth::user()->name }}</p>
+                                    <p class="text-[11px] text-slate-400 truncate mt-0.5">{{ Auth::user()->email }}</p>
+                                </div>
+
+                                <x-dropdown-link :href="route('profile.edit')" class="text-slate-300 hover:text-white hover:bg-[#1E293B] flex items-center gap-2 text-xs py-2.5">
+                                    <i data-lucide="user" class="w-4 h-4 text-slate-400"></i>
+                                    {{ __('Profile & Settings') }}
+                                </x-dropdown-link>
+
+                                @if(Auth::user()->isAdmin() || Auth::user()->isSuperAdmin() || Auth::user()->isStaff() || Auth::user()->isTreasurer())
+                                <x-dropdown-link :href="route('admin.dashboard')" class="text-amber-300 hover:text-amber-200 hover:bg-[#1E293B] flex items-center gap-2 text-xs py-2.5 font-semibold">
+                                    <i data-lucide="shield" class="w-4 h-4 text-amber-400"></i>
+                                    {{ __('Officer Dashboard') }}
+                                </x-dropdown-link>
+                                @endif
+
+                                <div class="border-t border-[#334155] my-1"></div>
+
+                                <form method="POST" action="{{ route('logout') }}">
+                                    @csrf
+                                    <x-dropdown-link :href="route('logout')"
+                                            class="text-rose-400 hover:text-rose-300 hover:bg-[#1E293B] flex items-center gap-2 text-xs py-2.5"
+                                            onclick="event.preventDefault(); this.closest('form').submit();">
+                                        <i data-lucide="log-out" class="w-4 h-4 text-rose-400"></i>
+                                        {{ __('Log Out') }}
+                                    </x-dropdown-link>
+                                </form>
+                            </x-slot>
+                        </x-dropdown>
                     </div>
                 </header>
-            @endisset
 
-            <main>
-                {{ $slot }}
-            </main>
+                @isset($header)
+                    <div class="bg-[#172033] border-b border-[#334155] shadow-sm">
+                        <div class="max-w-7xl mx-auto py-5 px-4 sm:px-6 lg:px-8">
+                            {{ $header }}
+                        </div>
+                    </div>
+                @endisset
+
+                <main class="flex-1 pb-28 lg:pb-10">
+                    {{ $slot }}
+                </main>
+            </div>
         </div>
+
+
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+        @stack('scripts')
     </body>
 </html>

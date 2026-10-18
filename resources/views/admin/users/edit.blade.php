@@ -91,7 +91,7 @@
         <div>
             <label class="flex items-center gap-2 p-3 rounded-xl bg-slate-950 border border-slate-800 cursor-pointer">
                 <input type="checkbox" name="is_active" value="1" {{ old('is_active', $user->is_active) ? 'checked' : '' }}
-                       class="rounded bg-slate-900 border-slate-700 text-[#7A1618] focus:ring-[#7A1618]">
+                       class="rounded bg-slate-900 border-slate-700 text-[#560E0F] focus:ring-[#560E0F]">
                 <span class="text-slate-300 text-xs font-medium">Account is Active</span>
             </label>
         </div>
@@ -102,12 +102,12 @@
             <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div>
                     <label for="password" class="label">New Password</label>
-                    <input id="password" name="password" type="password" minlength="8" class="input w-full" placeholder="Min. 8 characters" />
+                    <input id="password" name="password" type="password" minlength="8" class="input w-full" />
                     @error('password')<p class="text-red-400 text-xs mt-1">{{ $message }}</p>@enderror
                 </div>
                 <div>
                     <label for="password_confirmation" class="label">Confirm New Password</label>
-                    <input id="password_confirmation" name="password_confirmation" type="password" minlength="8" class="input w-full" placeholder="Re-enter password" />
+                    <input id="password_confirmation" name="password_confirmation" type="password" minlength="8" class="input w-full" />
                 </div>
             </div>
         </div>

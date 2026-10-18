@@ -27,7 +27,7 @@ class EventController extends Controller
                     $q->where('status', $status);
                 }
             })
-            ->when($request->search, fn($q) => $q->where('name', 'like', "%{$request->search}%"))
+            ->when($request->search, fn($q) => $q->whereLike('name', "%{$request->search}%"))
             ->orderByDesc('event_date')
             ->paginate(15)
             ->withQueryString();
@@ -124,17 +124,69 @@ class EventController extends Controller
         return $this->saveConfiguration($request, $event);
     }
 
+    public function approve(Request $request, Event $event): RedirectResponse
+    {
+        $user = auth()->user();
+        if (!$user->isPresident() && !$user->isSuperAdmin()) {
+            abort(403, 'Unauthorized: Only the President or Super Admin can approve events.');
+        }
+
+        if ($event->status !== 'draft') {
+            return back()->with('error', "Cannot approve event: Only draft events can be approved (Current status: {$event->status_label}).");
+        }
+
+        $validated = $request->validate([
+            'notes' => ['nullable', 'string', 'max:1000'],
+        ]);
+
+        $old = ['status' => $event->status, 'approved_by' => $event->approved_by, 'approved_at' => $event->approved_at];
+        $event->update([
+            'status' => 'approved',
+            'approved_by' => $user->id,
+            'approved_at' => now(),
+            'approval_notes' => $validated['notes'] ?? null,
+            'is_published' => false,
+        ]);
+
+        AuditLogger::log('event.approved', $event, $old, $event->fresh()->toArray(), 'Event approved by ' . $user->name . '. Notes: ' . ($validated['notes'] ?? 'None'));
+
+        return back()->with('success', "Event '{$event->name}' has been approved and is ready to be published.");
+    }
+
     public function publish(Event $event): RedirectResponse
     {
+        $user = auth()->user();
+        if (!$user->isSuperAdmin() && !$user->isPresident() && !$user->isExecutiveSecretary() && !$user->isAdmin()) {
+            abort(403, 'Unauthorized to publish events.');
+        }
+
+        // Prevent unapproved events from being published
+        if (!in_array($event->status, ['approved', 'draft']) && $event->is_published) {
+            return back()->with('info', "Event '{$event->name}' is already published.");
+        }
+
+        if ($event->status === 'draft' && !$event->approved_at) {
+            // Auto-approval only if Super Admin or President is directly publishing
+            if ($user->isSuperAdmin() || $user->isPresident()) {
+                $event->update([
+                    'approved_by' => $user->id,
+                    'approved_at' => now(),
+                    'approval_notes' => 'Directly published by ' . $user->role,
+                ]);
+            } else {
+                return redirect()->back()->with('error', "Workflow violation: Event '{$event->name}' must be reviewed and approved by the President before publishing.");
+            }
+        }
+
         $old = ['is_published' => $event->is_published, 'status' => $event->status];
         $event->update([
             'is_published' => true,
-            'status' => 'registration_open',
+            'status' => 'published',
         ]);
 
-        AuditLogger::log('event.published', $event, $old, $event->fresh()->toArray(), 'Event published by super admin.');
+        AuditLogger::log('event.published', $event, $old, $event->fresh()->toArray(), 'Event published by ' . $user->name . '.');
 
-        return back()->with('success', "Event '{$event->name}' has been published and is now open for registration.");
+        return back()->with('success', "Event '{$event->name}' has been published and is now visible to participants.");
     }
 
     public function closeRegistration(Event $event): RedirectResponse
@@ -144,21 +196,30 @@ class EventController extends Controller
             'status' => 'registration_closed',
         ]);
 
-        AuditLogger::log('event.registration_closed', $event, $old, $event->fresh()->toArray(), 'Registration closed by super admin.');
+        AuditLogger::log('event.registration_closed', $event, $old, $event->fresh()->toArray(), 'Registration closed by ' . auth()->user()->name . '.');
 
         return back()->with('success', "Registration for event '{$event->name}' has been closed.");
     }
 
     public function complete(Event $event): RedirectResponse
     {
+        $user = auth()->user();
+        if (!$user->isSuperAdmin() && !$user->isPresident() && !$user->isExecutiveSecretary() && !$user->isAdmin()) {
+            abort(403, 'Unauthorized to finalize event.');
+        }
+
+        if (!in_array($event->status, ['published', 'registration_open', 'registration_closed', 'ongoing'])) {
+            return back()->with('error', "Only active or published events can transition to Completed.");
+        }
+
         $old = ['status' => $event->status];
         $event->update([
             'status' => 'completed',
         ]);
 
-        AuditLogger::log('event.completed', $event, $old, $event->fresh()->toArray(), 'Event marked as completed by super admin.');
+        AuditLogger::log('event.completed', $event, $old, $event->fresh()->toArray(), 'Event marked as completed by ' . $user->name . '. Attendance reconciliation ready.');
 
-        return back()->with('success', "Event '{$event->name}' has been marked as completed.");
+        return back()->with('success', "Event '{$event->name}' has been marked as completed. Post-event reconciliation finalized.");
     }
 
     public function archive(Event $event): RedirectResponse
@@ -248,9 +309,13 @@ class EventController extends Controller
             'requires_registration' => ['nullable', 'boolean'],
             'allow_non_students' => ['nullable', 'boolean'],
             'is_published' => ['nullable', 'boolean'],
-            'status' => ['nullable', 'in:draft,registration_open,registration_closed,ongoing,completed,archived'],
+            'status' => ['nullable', 'in:draft,approved,published,registration_open,registration_closed,ongoing,completed,archived'],
             'attendance_enabled' => ['nullable', 'boolean'],
             'snack_distribution_enabled' => ['nullable', 'boolean'],
+            'cover_image' => ['nullable', 'string', 'max:255'],
+            'participation_requirements' => ['nullable', 'string'],
+            'reward_xp' => ['nullable', 'integer', 'min:0'],
+            'reward_points' => ['nullable', 'integer', 'min:0'],
             'logo' => ['nullable', 'image', 'mimes:jpeg,png,jpg,webp', 'max:3072'],
             'sessions' => ['nullable', 'array'],
             'sessions.*.enabled' => ['nullable', 'boolean'],

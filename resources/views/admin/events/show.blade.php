@@ -81,7 +81,7 @@
                 @csrf
                 <div>
                     <label class="label">Session Name *</label>
-                    <input type="text" name="name" class="input" placeholder="e.g. Morning Snack" required>
+                    <input type="text" name="name" class="input" required>
                 </div>
                 <div>
                     <label class="label">Type</label>
@@ -97,11 +97,11 @@
                 </div>
                 <div>
                     <label class="label">Item Name</label>
-                    <input type="text" name="item_name" class="input" placeholder="e.g. Sandwich">
+                    <input type="text" name="item_name" class="input">
                 </div>
                 <div>
                     <label class="label">Total Quantity</label>
-                    <input type="number" name="total_quantity" class="input" min="0" placeholder="0">
+                    <input type="number" name="total_quantity" class="input" min="0">
                 </div>
                 <div class="col-span-2 sm:col-span-3 flex justify-end">
                     <button type="submit" class="btn-secondary btn-sm">Add Snack Session</button>

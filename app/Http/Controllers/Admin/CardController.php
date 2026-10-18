@@ -18,8 +18,8 @@ class CardController extends Controller
             ->when($request->status, fn($q) => $q->where('status', $request->status))
             ->when($request->batch, fn($q) => $q->whereHas('qrCode', fn($qr) => $qr->where('batch_number', $request->batch)))
             ->when($request->search, fn($q) => $q->whereHas('qrCode.membership.student', fn($s) =>
-                $s->where('student_number', 'like', "%{$request->search}%")
-                ->orWhere('last_name', 'ilike', "%{$request->search}%")
+                $s->where(fn($g) => $g->whereLike('student_number', "%{$request->search}%")
+                    ->orWhereLike('last_name', "%{$request->search}%"))
             ))
             ->orderByDesc('updated_at')
             ->paginate(20)

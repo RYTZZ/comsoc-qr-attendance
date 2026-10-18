@@ -47,7 +47,7 @@
                         <td style="background-color: #ffffff; border-radius: 12px; overflow: hidden; border: 1px solid #e2e8f0; box-shadow: 0 2px 4px rgba(0, 0, 0, 0.04);">
                             <table border="0" cellpadding="0" cellspacing="0" width="100%">
                                 <tr>
-                                    <td height="4" style="background-color: #7A1618; line-height: 4px; font-size: 4px;">&nbsp;</td>
+                                    <td height="4" style="background-color: #560E0F; line-height: 4px; font-size: 4px;">&nbsp;</td>
                                 </tr>
                                 <tr>
                                     <td class="card-padding" style="padding: 36px 36px 32px 36px;">
@@ -78,8 +78,8 @@
                                                 <td align="center">
                                                     <table border="0" cellpadding="0" cellspacing="0">
                                                         <tr>
-                                                            <td align="center" bgcolor="#7A1618" style="border-radius: 8px;">
-                                                                <a href="{{ $actionUrl }}" target="_blank" style="display: inline-block; padding: 13px 28px; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; font-size: 14px; font-weight: 600; color: #ffffff !important; text-decoration: none; border-radius: 8px; background-color: #7A1618; letter-spacing: 0.2px;">
+                                                            <td align="center" bgcolor="#560E0F" style="border-radius: 8px;">
+                                                                <a href="{{ $actionUrl }}" target="_blank" style="display: inline-block; padding: 13px 28px; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; font-size: 14px; font-weight: 600; color: #ffffff !important; text-decoration: none; border-radius: 8px; background-color: #560E0F; letter-spacing: 0.2px;">
                                                                     {{ $actionText }}
                                                                 </a>
                                                             </td>
@@ -94,7 +94,7 @@
                                         <table border="0" cellpadding="0" cellspacing="0" width="100%" style="margin: 24px 0;">
                                             <tr>
                                                 <td align="center" style="background-color: #f8fafc; border: 1px solid #e2e8f0; border-radius: 8px; padding: 18px 24px;">
-                                                    <div style="font-size: 30px; font-weight: 800; color: #7A1618; letter-spacing: 8px; font-family: 'SFMono-Regular', Consolas, 'Liberation Mono', Menlo, monospace;">
+                                                    <div style="font-size: 30px; font-weight: 800; color: #560E0F; letter-spacing: 8px; font-family: 'SFMono-Regular', Consolas, 'Liberation Mono', Menlo, monospace;">
                                                         {{ $otp }}
                                                     </div>
                                                     <div style="font-size: 11px; color: #64748b; margin-top: 4px; text-transform: uppercase; letter-spacing: 1.5px; font-weight: 600;">
@@ -108,7 +108,7 @@
                                         @if(isset($notice))
                                         <table border="0" cellpadding="0" cellspacing="0" width="100%" style="margin: 24px 0 0 0;">
                                             <tr>
-                                                <td style="background-color: #f8fafc; border-left: 3px solid #7A1618; border-radius: 0 6px 6px 0; padding: 12px 16px; font-size: 13px; color: #64748b; line-height: 1.55;">
+                                                <td style="background-color: #f8fafc; border-left: 3px solid #560E0F; border-radius: 0 6px 6px 0; padding: 12px 16px; font-size: 13px; color: #64748b; line-height: 1.55;">
                                                     {{ $notice }}
                                                 </td>
                                             </tr>

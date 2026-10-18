@@ -47,7 +47,7 @@
                     @csrf
                     <div>
                         <label for="resolution_notes" class="label">Resolution Summary / Action Taken <span class="text-red-400">*</span></label>
-                        <textarea id="resolution_notes" name="resolution_notes" rows="3" required class="input" placeholder="Document the action taken..."></textarea>
+                        <textarea id="resolution_notes" name="resolution_notes" rows="3" required class="input"></textarea>
                     </div>
                     <div class="flex justify-end">
                         <button type="submit" class="btn-primary">Mark as Resolved</button>

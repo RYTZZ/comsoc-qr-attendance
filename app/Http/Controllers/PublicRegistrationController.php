@@ -6,8 +6,11 @@ use App\Models\Event;
 use App\Models\EventRegistration;
 use App\Models\Organization;
 use App\Models\Program;
+use App\Support\RowLock;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 use Illuminate\View\View;
 
 class PublicRegistrationController extends Controller
@@ -131,13 +134,8 @@ class PublicRegistrationController extends Controller
             'program.in' => 'Please select a valid Program from the options provided.',
         ]);
 
-        $exists = EventRegistration::where('event_id', $event->id)
-            ->where('email', strtolower(trim($validated['email'])))
-            ->exists();
-
-        if ($exists) {
-            return back()->with('error', 'You have already registered for this event.')->withInput();
-        }
+        $cleanEmail = strtolower(trim($validated['email']));
+        $cleanFullName = trim($validated['full_name']);
 
         $selectedOrg = null;
         $finalOrgDisplayName = $validated['organization'];
@@ -150,10 +148,11 @@ class PublicRegistrationController extends Controller
             $selectedOrg = Organization::where('name', $validated['organization'])->first();
         }
 
-        $registration = EventRegistration::create([
+        $payload = [
             'event_id' => $event->id,
-            'full_name' => trim($validated['full_name']),
-            'email' => strtolower(trim($validated['email'])),
+            'user_id' => auth()->id(),
+            'full_name' => $cleanFullName,
+            'email' => $cleanEmail,
             'phone' => $request->input('phone'),
             'organization_id' => $selectedOrg?->id,
             'organization' => $finalOrgDisplayName,
@@ -167,7 +166,70 @@ class PublicRegistrationController extends Controller
                 : null,
             'confirmed' => true,
             'status' => 'pending',
-        ]);
+        ];
+
+        try {
+            $outcome = DB::transaction(function () use ($event, $cleanEmail, $cleanFullName, $payload) {
+                $locked = RowLock::acquire(Event::class, $event->id);
+
+                if (!$locked || !$locked->allow_non_students || !$locked->is_published) {
+                    return ['status' => 'closed'];
+                }
+
+                $duplicate = EventRegistration::where('event_id', $locked->id)
+                    ->where(function ($query) use ($cleanEmail, $cleanFullName) {
+                        $query->where('email', $cleanEmail)
+                            ->orWhere('full_name', $cleanFullName);
+                    })
+                    ->exists();
+
+                if ($duplicate) {
+                    return ['status' => 'duplicate'];
+                }
+
+                if ($locked->isFull()) {
+                    return ['status' => 'full'];
+                }
+
+                if (!$locked->isRegistrationOpen()) {
+                    return ['status' => 'closed'];
+                }
+
+                return ['status' => 'created', 'registration' => EventRegistration::create($payload)];
+            });
+        } catch (\Throwable $e) {
+            Log::error('Public registration failed', ['event_id' => $event->id, 'exception' => get_class($e)]);
+            return back()->with('error', 'We could not complete your registration right now. Please try again.')->withInput();
+        }
+
+        if ($outcome['status'] === 'full') {
+            return back()->with('error', 'Registration is full for this event. No additional registrations can be accepted.')->withInput();
+        }
+
+        if ($outcome['status'] === 'closed') {
+            return back()->with('error', 'Registration for this event is now closed.')->withInput();
+        }
+
+        if ($outcome['status'] === 'duplicate') {
+            if ($request->expectsJson() || $request->ajax()) {
+                return response()->json([
+                    'success' => false,
+                    'is_duplicate' => true,
+                    'message' => 'You have already registered for this event.',
+                ], 409);
+            }
+
+            return back()
+                ->with('duplicate_error', 'You have already registered for this event.')
+                ->with('error', 'You have already registered for this event.')
+                ->withInput();
+        }
+
+        $registration = $outcome['registration'];
+        $request->session()->put('public_registration_ids', array_merge(
+            (array) $request->session()->get('public_registration_ids', []),
+            [$registration->id]
+        ));
 
         return redirect()->route('public.register.success', [
             'event' => $event,
@@ -182,7 +244,8 @@ class PublicRegistrationController extends Controller
         }
 
         $registration = null;
-        if ($request->has('registration') && $event) {
+        $allowedIds = (array) $request->session()->get('public_registration_ids', []);
+        if ($request->has('registration') && $event && in_array((int) $request->query('registration'), array_map('intval', $allowedIds), true)) {
             $registration = EventRegistration::where('event_id', $event->id)
                 ->where('id', $request->query('registration'))
                 ->first();

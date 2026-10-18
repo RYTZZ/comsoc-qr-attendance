@@ -34,12 +34,12 @@ class UserController extends Controller
             ->when($request->search, function ($q) use ($request) {
                 $search = $request->search;
                 $q->where(function ($sub) use ($search) {
-                    $sub->where('name', 'like', "%{$search}%")
-                        ->orWhere('email', 'like', "%{$search}%")
-                        ->orWhere('username', 'like', "%{$search}%")
+                    $sub->whereLike('name', "%{$search}%")
+                        ->orWhereLike('email', "%{$search}%")
+                        ->orWhereLike('username', "%{$search}%")
                         ->orWhereHas('kiosk', function ($kq) use ($search) {
-                            $kq->where('name', 'like', "%{$search}%")
-                               ->orWhere('identifier', 'like', "%{$search}%");
+                            $kq->whereLike('name', "%{$search}%")
+                               ->orWhereLike('identifier', "%{$search}%");
                         });
                 });
             });
@@ -53,11 +53,15 @@ class UserController extends Controller
         $roles = [
             '' => 'All Roles',
             'super_admin' => 'Super Admin',
-            'admin' => 'Admin',
-            'kiosk' => 'Kiosk',
-            'staff' => 'Staff',
+            'president' => 'President',
+            'executive_secretary' => 'Executive Secretary',
+            'event_staff' => 'Event Staff',
+            'auditor' => 'Auditor',
+            'admin' => 'Admin (Legacy)',
+            'staff' => 'Staff (Legacy)',
             'treasurer' => 'Treasurer',
-            'student' => 'Student',
+            'kiosk' => 'Kiosk',
+            'student' => 'Student / Member',
         ];
 
         $statuses = [
@@ -135,7 +139,7 @@ class UserController extends Controller
         $validated = $request->validate([
             'name' => ['required', 'string', 'max:255'],
             'email' => ['required', 'string', 'max:255', 'unique:users,email', 'unique:users,username'],
-            'role' => ['required', Rule::in(['admin', 'super_admin', 'staff', 'treasurer'])],
+            'role' => ['required', Rule::in(['super_admin', 'president', 'executive_secretary', 'event_staff', 'auditor', 'admin', 'staff', 'treasurer'])],
             'password' => ['required', 'string', Password::min(8), 'confirmed'],
             'is_active' => ['nullable', 'boolean'],
         ]);
@@ -245,7 +249,7 @@ class UserController extends Controller
         $validated = $request->validate([
             'name' => ['required', 'string', 'max:255'],
             'email' => ['required', 'string', 'max:255', Rule::unique('users', 'email')->ignore($user->id)],
-            'role' => ['required', Rule::in(['super_admin', 'admin', 'treasurer', 'staff', 'student'])],
+            'role' => ['required', Rule::in(['super_admin', 'president', 'executive_secretary', 'event_staff', 'auditor', 'admin', 'treasurer', 'staff', 'student'])],
             'is_active' => ['nullable', 'boolean'],
             'password' => ['nullable', 'string', Password::min(8), 'confirmed'],
         ]);

@@ -10,12 +10,12 @@
     <link href="https://fonts.googleapis.com/css2?family=Michroma&family=Sora:wght@600;700;800&family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet">
     @vite(['resources/css/app.css', 'resources/js/app.js'])
 </head>
-<body class="h-full bg-[#0f1117] font-sans" x-data="snackKiosk()" x-init="init()">
+<body class="h-full bg-[#0B1120] font-sans" x-data="snackKiosk()" x-init="init()">
 
 <div class="min-h-screen flex flex-col items-center justify-between p-3 sm:p-6 max-w-lg mx-auto w-full">
     <div class="w-full flex items-center justify-between py-2 border-b border-slate-800/80 mb-2">
         <div class="flex items-center gap-2.5 min-w-0">
-            <div class="w-9 h-9 rounded-xl bg-[#171a23] border border-slate-800 p-1 flex items-center justify-center shadow shrink-0">
+            <div class="w-9 h-9 rounded-xl bg-[#172033] border border-slate-800 p-1 flex items-center justify-center shadow shrink-0">
                 <img src="{{ asset('images/COMSOC.png') }}" alt="Computing Society Logo" class="w-full h-full object-contain">
             </div>
             <div class="min-w-0">
@@ -136,7 +136,6 @@
                            x-model="token"
                            @keydown.enter="submitClaim()"
                            @input="if(token.length >= 32) submitClaim()"
-                           placeholder="Tap here or scan QR..."
                            class="input text-center font-mono text-xs sm:text-sm h-12 bg-slate-950 border-slate-700 text-white focus:ring-2 focus:ring-amber-500"
                            :disabled="scanning"
                            autofocus

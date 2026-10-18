@@ -4,20 +4,21 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>Registration Submitted — {{ $event->name }}</title>
-    <link rel="preconnect" href="https://fonts.bunny.net">
-    <link href="https://fonts.bunny.net/css?family=inter:300,400,500,600,700" rel="stylesheet" />
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Manrope:wght@600;700;800&family=Space+Grotesk:wght@500;600;700&display=swap" rel="stylesheet">
     @vite(['resources/css/app.css', 'resources/js/app.js'])
 </head>
-<body class="bg-[#0f1117] text-slate-100 min-h-screen flex flex-col font-sans antialiased selection:bg-[#7A1618] selection:text-white relative overflow-x-hidden">
+<body class="bg-[#0B1120] text-slate-100 min-h-screen flex flex-col font-sans antialiased selection:bg-[#560E0F] selection:text-white relative overflow-x-hidden">
     <x-public-auth-bg />
 
     <div class="relative overflow-hidden flex-1 flex flex-col items-center justify-center p-4 py-10 z-10">
         <div class="w-full max-w-lg relative z-10 text-center">
-            <div class="w-16 h-16 mx-auto mb-3 flex items-center justify-center p-1.5 rounded-2xl bg-[#171a23]/90 border border-slate-800 shadow-xl enter-logo backdrop-blur-sm">
+            <div class="w-16 h-16 mx-auto mb-3 flex items-center justify-center p-1.5 rounded-2xl bg-[#172033]/90 border border-slate-800 shadow-xl enter-logo backdrop-blur-sm">
                 <img src="{{ asset('images/COMSOC.png') }}" alt="Computing Society Logo" class="w-full h-full object-contain">
             </div>
 
-            <div class="bg-[#171a23]/95 border border-slate-800 backdrop-blur-md rounded-2xl shadow-2xl p-6 sm:p-8 text-left enter-card">
+            <div class="bg-[#172033]/95 border border-slate-800 backdrop-blur-md rounded-2xl shadow-2xl p-6 sm:p-8 text-left enter-card">
                 <div class="text-center mb-6">
                     <div class="inline-flex items-center justify-center w-12 h-12 rounded-full bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 mb-3">
                         <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -103,6 +104,9 @@
                     <svg class="w-4 h-4 shrink-0 mt-0.5 text-brand-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
                     </svg>
+                    <span>Please save or bookmark your confirmation details. You will receive an official notification once your registration is approved.</span>
+                </div>
+
                 @php
                     $calDate = $event->event_date ? $event->event_date->format('Ymd') : date('Ymd');
                     $calTitle = urlencode($event->name . ' - ComSoc');

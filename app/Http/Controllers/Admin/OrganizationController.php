@@ -16,7 +16,7 @@ class OrganizationController extends Controller
         $query = Organization::withCount('eventRegistrations');
 
         if ($search = $request->input('search')) {
-            $query->where('name', 'like', "%{$search}%");
+            $query->whereLike('name', "%{$search}%");
         }
 
         if ($status = $request->input('status')) {

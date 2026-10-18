@@ -14,7 +14,7 @@
                 Create Admin
             </a>
 
-            <a href="{{ route('admin.users.create', ['type' => 'kiosk']) }}" class="btn-secondary btn-sm text-[#cc7478] border-[#7A1618]/40 hover:bg-[#7A1618]/20">
+            <a href="{{ route('admin.users.create', ['type' => 'kiosk']) }}" class="btn-secondary btn-sm text-[#cc7478] border-[#560E0F]/40 hover:bg-[#560E0F]/20">
                 <svg class="w-4 h-4 mr-1.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/>
                 </svg>
@@ -28,8 +28,7 @@
     <form method="GET" action="{{ route('admin.users.index') }}" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-3 items-center">
         <div class="relative lg:col-span-2">
             <input type="text" name="search" value="{{ request('search') }}"
-                   placeholder="Search name, username, email, kiosk..."
-                   class="w-full rounded-xl bg-slate-950 border border-slate-700 px-3 py-2 pl-9 text-xs text-white placeholder-slate-500 focus:ring-2 focus:ring-[#7A1618] focus:outline-none">
+                   class="w-full rounded-xl bg-slate-950 border border-slate-700 px-3 py-2 pl-9 text-xs text-white placeholder-slate-500 focus:ring-2 focus:ring-[#560E0F] focus:outline-none">
             <svg class="w-4 h-4 text-slate-500 absolute left-3 top-2.5 pointer-events-none" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
             </svg>
@@ -83,7 +82,7 @@
                         <td class="py-3 px-4">
                             <div class="font-semibold text-white flex items-center gap-1.5">
                                 @if($user->role === 'kiosk')
-                                    <span class="w-2 h-2 rounded-full bg-[#7A1618]"></span>
+                                    <span class="w-2 h-2 rounded-full bg-[#560E0F]"></span>
                                 @endif
                                 {{ $user->name }}
                             </div>
@@ -98,7 +97,7 @@
                             <span class="badge uppercase text-[10px] font-semibold
                                 @if($user->role === 'super_admin') bg-rose-500/15 text-rose-300 border-rose-500/30
                                 @elseif($user->role === 'admin') bg-amber-500/15 text-amber-300 border-amber-500/30
-                                @elseif($user->role === 'kiosk') bg-[#7A1618]/25 text-rose-200 border-[#7A1618]/40
+                                @elseif($user->role === 'kiosk') bg-[#560E0F]/25 text-rose-200 border-[#560E0F]/40
                                 @elseif($user->role === 'treasurer') bg-indigo-500/15 text-indigo-300 border-indigo-500/30
                                 @elseif($user->role === 'staff') bg-blue-500/15 text-blue-300 border-blue-500/30
                                 @else bg-slate-500/15 text-slate-300 border-slate-500/30 @endif">
@@ -164,7 +163,7 @@
                             </button>
 
                             @if($user->role === 'kiosk' && $user->kiosk)
-                                <a href="{{ route('kiosk.attendance', $user->kiosk) }}" target="_blank" class="btn-secondary btn-sm text-[#cc7478] border-[#7A1618]/30">
+                                <a href="{{ route('kiosk.attendance', $user->kiosk) }}" target="_blank" class="btn-secondary btn-sm text-[#cc7478] border-[#560E0F]/30">
                                     Launch ↗
                                 </a>
                             @endif
@@ -179,13 +178,13 @@
                                         <div>
                                             <label class="block font-medium text-slate-300 mb-1">New Password (min. 8 characters)</label>
                                             <input type="password" name="password" required minlength="8"
-                                                   class="w-full rounded-xl bg-slate-950 border border-slate-700 px-3.5 py-2 text-sm text-white focus:ring-2 focus:ring-[#7A1618] focus:outline-none">
+                                                   class="w-full rounded-xl bg-slate-950 border border-slate-700 px-3.5 py-2 text-sm text-white focus:ring-2 focus:ring-[#560E0F] focus:outline-none">
                                         </div>
 
                                         <div>
                                             <label class="block font-medium text-slate-300 mb-1">Confirm New Password</label>
                                             <input type="password" name="password_confirmation" required minlength="8"
-                                                   class="w-full rounded-xl bg-slate-950 border border-slate-700 px-3.5 py-2 text-sm text-white focus:ring-2 focus:ring-[#7A1618] focus:outline-none">
+                                                   class="w-full rounded-xl bg-slate-950 border border-slate-700 px-3.5 py-2 text-sm text-white focus:ring-2 focus:ring-[#560E0F] focus:outline-none">
                                         </div>
                                     </div>
 

@@ -1,25 +1,46 @@
-<x-layouts.admin :title="'Dashboard'">
-<div class="page-header">
-    <div>
-        <h1 class="page-title">Dashboard</h1>
-        @if($activeYear)
-        <p class="text-sm text-slate-500 mt-1">{{ $activeYear->label }}</p>
-        @endif
+<x-layouts.admin :title="'Executive & Administrative Dashboard'">
+<div class="mb-6 p-5 rounded-2xl bg-gradient-to-r from-slate-900 via-slate-900 to-indigo-950/40 border border-slate-800 shadow-xl flex flex-col md:flex-row md:items-center justify-between gap-4">
+    <div class="flex items-center gap-4">
+        <div class="w-14 h-14 rounded-2xl bg-[#560E0F] border border-[#8F3033]/60 flex items-center justify-center text-white text-xl font-bold font-brand-display shadow-lg shrink-0">
+            {{ strtoupper(substr(auth()->user()->name, 0, 1)) }}
+        </div>
+        <div>
+            <div class="flex flex-wrap items-center gap-2">
+                <h1 class="text-xl sm:text-2xl font-bold text-white tracking-tight">Welcome, {{ auth()->user()->name }}!</h1>
+                <span class="px-2.5 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider bg-indigo-500/10 text-indigo-400 border border-indigo-500/20">
+                    {{ str_replace('_', ' ', auth()->user()->role) }}
+                </span>
+                @if(auth()->user()->member_id)
+                <span class="px-2 py-0.5 rounded text-[10px] font-mono bg-slate-800 text-slate-300 border border-slate-700">
+                    {{ auth()->user()->member_id }}
+                </span>
+                @endif
+            </div>
+            <p class="text-xs text-slate-400 mt-1">
+                COMSOC Executive Administration • {{ auth()->user()->email }} @if($activeYear)• <span class="text-slate-300">{{ $activeYear->label }}</span>@endif
+            </p>
+        </div>
     </div>
-    <a href="{{ route('admin.events.create') }}" class="btn-primary w-full sm:w-auto">
-        <i data-lucide="plus" class="w-4 h-4 mr-1"></i>
-        New Event
-    </a>
+    <div class="flex items-center gap-2 self-start md:self-auto">
+        <a href="{{ route('admin.events.create') }}" class="btn-primary text-xs flex items-center gap-1.5 shadow-md">
+            <i data-lucide="plus" class="w-4 h-4"></i>
+            <span>New Event</span>
+        </a>
+        <a href="{{ route('profile.edit') }}" class="btn-secondary text-xs flex items-center gap-1.5">
+            <i data-lucide="user-cog" class="w-4 h-4"></i>
+            <span>My Profile</span>
+        </a>
+    </div>
 </div>
 
-<div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4 mb-6 sm:mb-8">
+<div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4 mb-6">
     <div class="stat-card">
         <div class="stat-icon bg-indigo-950 text-indigo-400">
             <i data-lucide="users" class="w-6 h-6"></i>
         </div>
         <div>
             <p class="text-2xl font-bold text-white">{{ number_format($stats['total_students']) }}</p>
-            <p class="text-xs text-slate-400 mt-0.5">Total Students</p>
+            <p class="text-xs text-slate-400 mt-0.5">Enrolled Students</p>
         </div>
     </div>
 
@@ -39,7 +60,7 @@
         </div>
         <div>
             <p class="text-2xl font-bold text-white">{{ number_format($stats['todays_scans']) }}</p>
-            <p class="text-xs text-slate-400 mt-0.5">Scans Today</p>
+            <p class="text-xs text-slate-400 mt-0.5">Attendance Today</p>
         </div>
     </div>
 
@@ -54,8 +75,85 @@
     </div>
 </div>
 
+<!-- Pending Operations & Review Action Tray -->
+<div class="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-6">
+    <a href="{{ route('admin.missions.index') }}" class="p-4 rounded-xl border transition flex items-center justify-between {{ $stats['pending_submissions'] > 0 ? 'bg-amber-950/30 border-amber-500/40 hover:bg-amber-950/40' : 'bg-[#172033] border-slate-800 hover:border-slate-700' }}">
+        <div class="flex items-center gap-3">
+            <div class="w-10 h-10 rounded-lg bg-amber-500/20 text-amber-400 flex items-center justify-center">
+                <i data-lucide="target" class="w-5 h-5"></i>
+            </div>
+            <div>
+                <p class="text-xs font-semibold text-slate-400">Pending Missions</p>
+                <p class="text-lg font-bold text-white">{{ $stats['pending_submissions'] }} to review</p>
+            </div>
+        </div>
+        <i data-lucide="chevron-right" class="w-5 h-5 text-slate-500"></i>
+    </a>
+
+    <a href="{{ route('admin.shop.index', ['tab' => 'requests']) }}" class="p-4 rounded-xl border transition flex items-center justify-between {{ $stats['pending_redemptions'] > 0 ? 'bg-indigo-950/30 border-indigo-500/40 hover:bg-indigo-950/40' : 'bg-[#172033] border-slate-800 hover:border-slate-700' }}">
+        <div class="flex items-center gap-3">
+            <div class="w-10 h-10 rounded-lg bg-indigo-500/20 text-indigo-400 flex items-center justify-center">
+                <i data-lucide="gift" class="w-5 h-5"></i>
+            </div>
+            <div>
+                <p class="text-xs font-semibold text-slate-400">Pending Claims</p>
+                <p class="text-lg font-bold text-white">{{ $stats['pending_redemptions'] }} unfulfilled</p>
+            </div>
+        </div>
+        <i data-lucide="chevron-right" class="w-5 h-5 text-slate-500"></i>
+    </a>
+
+    <a href="{{ route('admin.incidents.index') }}" class="p-4 rounded-xl border transition flex items-center justify-between {{ $stats['open_incidents'] > 0 ? 'bg-rose-950/30 border-rose-500/40 hover:bg-rose-950/40' : 'bg-[#172033] border-slate-800 hover:border-slate-700' }}">
+        <div class="flex items-center gap-3">
+            <div class="w-10 h-10 rounded-lg bg-rose-500/20 text-rose-400 flex items-center justify-center">
+                <i data-lucide="shield-alert" class="w-5 h-5"></i>
+            </div>
+            <div>
+                <p class="text-xs font-semibold text-slate-400">Security & Incidents</p>
+                <p class="text-lg font-bold text-white">{{ $stats['open_incidents'] }} open flags</p>
+            </div>
+        </div>
+        <i data-lucide="chevron-right" class="w-5 h-5 text-slate-500"></i>
+    </a>
+</div>
+
+<!-- Gamification, XP & Rewards Summary -->
+<div class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
+    <div class="card p-4 bg-[#172033] border border-slate-800">
+        <span class="text-[11px] font-semibold text-slate-400 uppercase tracking-wider block mb-1">XP Distributed</span>
+        <div class="flex items-baseline gap-1.5">
+            <span class="text-xl font-bold font-mono text-[#dfa6a9]">{{ number_format($stats['total_xp_distributed']) }}</span>
+            <span class="text-xs text-slate-500">XP</span>
+        </div>
+    </div>
+
+    <div class="card p-4 bg-[#172033] border border-slate-800">
+        <span class="text-[11px] font-semibold text-slate-400 uppercase tracking-wider block mb-1">Points Economy</span>
+        <div class="flex items-baseline gap-1.5">
+            <span class="text-xl font-bold font-mono text-amber-300">{{ number_format($stats['total_points_distributed']) }}</span>
+            <span class="text-xs text-slate-500">granted</span>
+        </div>
+    </div>
+
+    <div class="card p-4 bg-[#172033] border border-slate-800">
+        <span class="text-[11px] font-semibold text-slate-400 uppercase tracking-wider block mb-1">Mission Completion</span>
+        <div class="flex items-baseline gap-1.5">
+            <span class="text-xl font-bold font-mono text-emerald-400">{{ $stats['mission_completion_rate'] }}%</span>
+            <span class="text-xs text-slate-500">({{ $stats['approved_submissions'] }} approved)</span>
+        </div>
+    </div>
+
+    <div class="card p-4 bg-[#172033] border border-slate-800">
+        <span class="text-[11px] font-semibold text-slate-400 uppercase tracking-wider block mb-1">Reward Inventory</span>
+        <div class="flex items-baseline gap-1.5">
+            <span class="text-xl font-bold font-mono text-cyan-400">{{ number_format($stats['available_inventory']) }}</span>
+            <span class="text-xs text-slate-500">units in stock</span>
+        </div>
+    </div>
+</div>
+
 <!-- Real-Time Membership Headcount & Live Metric Gauge -->
-<div class="card p-5 mb-6 bg-gradient-to-r from-[#171a23] via-[#1a1e2b] to-[#171a23] border-slate-800">
+<div class="card p-5 mb-6 bg-gradient-to-r from-[#172033] via-[#1a1e2b] to-[#172033] border-slate-800">
     <div class="flex flex-col md:flex-row items-start md:items-center justify-between gap-4 mb-3">
         <div>
             <div class="flex items-center gap-2">
@@ -70,7 +168,7 @@
         </div>
     </div>
     <div class="w-full bg-slate-900 rounded-full h-3.5 p-0.5 border border-slate-800 overflow-hidden">
-        <div class="bg-gradient-to-r from-[#7A1618] via-[#a82528] to-emerald-500 h-full rounded-full transition-all duration-700"
+        <div class="bg-gradient-to-r from-[#560E0F] via-[#a82528] to-emerald-500 h-full rounded-full transition-all duration-700"
              style="width: {{ min(100, max(2, $stats['membership_rate'])) }}%"></div>
     </div>
     <div class="flex items-center justify-between text-[11px] text-slate-400 mt-2">
@@ -99,7 +197,7 @@
         <div class="space-y-3">
             @foreach($stats['upcoming_events'] as $event)
             <a href="{{ route('admin.events.show', $event) }}" class="flex items-center gap-3 p-3.5 rounded-xl bg-slate-900/60 border border-slate-800/80 hover:border-slate-700 transition-colors">
-                <div class="w-11 h-11 rounded-xl bg-[#7A1618]/20 border border-[#7A1618]/30 flex flex-col items-center justify-center flex-shrink-0">
+                <div class="w-11 h-11 rounded-xl bg-[#560E0F]/20 border border-[#560E0F]/30 flex flex-col items-center justify-center flex-shrink-0">
                     <span class="text-[#dfa6a9] text-xs font-bold">{{ $event->event_date ? $event->event_date->format('d') : '--' }}</span>
                     <span class="text-[#dfa6a9] text-[9px] uppercase font-mono">{{ $event->event_date ? $event->event_date->format('M') : 'TBA' }}</span>
                 </div>
@@ -219,6 +317,18 @@
                     <i data-lucide="calendar-plus" class="w-6 h-6"></i>
                 </div>
                 <p class="text-xs font-medium text-slate-300 group-hover:text-white leading-tight">New Event</p>
+            </a>
+            <a href="{{ route('admin.announcements.index') }}" class="p-3 sm:p-4 rounded-xl bg-slate-800 hover:bg-slate-700 active:scale-[0.98] transition text-center group flex flex-col items-center justify-center min-h-[90px]">
+                <div class="mb-1.5 flex items-center justify-center text-slate-400 group-hover:text-white transition">
+                    <i data-lucide="megaphone" class="w-6 h-6"></i>
+                </div>
+                <p class="text-xs font-medium text-slate-300 group-hover:text-white leading-tight">Announcements</p>
+            </a>
+            <a href="{{ route('admin.opportunities.index') }}" class="p-3 sm:p-4 rounded-xl bg-slate-800 hover:bg-slate-700 active:scale-[0.98] transition text-center group flex flex-col items-center justify-center min-h-[90px]">
+                <div class="mb-1.5 flex items-center justify-center text-slate-400 group-hover:text-white transition">
+                    <i data-lucide="briefcase" class="w-6 h-6"></i>
+                </div>
+                <p class="text-xs font-medium text-slate-300 group-hover:text-white leading-tight">Opportunities</p>
             </a>
             <a href="{{ route('admin.attendance.index') }}" class="p-3 sm:p-4 rounded-xl bg-slate-800 hover:bg-slate-700 active:scale-[0.98] transition text-center group flex flex-col items-center justify-center min-h-[90px]">
                 <div class="mb-1.5 flex items-center justify-center text-slate-400 group-hover:text-white transition">

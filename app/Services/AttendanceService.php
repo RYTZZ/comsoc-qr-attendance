@@ -11,7 +11,10 @@ use Illuminate\Support\Facades\DB;
 
 class AttendanceService
 {
-    public function __construct(private QrCodeService $qrService) {}
+    public function __construct(
+        private QrCodeService $qrService,
+        private RewardService $rewardService
+    ) {}
 
     public function scan(string $token, Event $event, AttendanceSession $session, Kiosk $kiosk, User $staff): array
     {
@@ -49,10 +52,10 @@ class AttendanceService
         }
 
         if ($session->event_id !== $event->id) {
-            return ['success' => false, 'message' => 'Session does not belong to this event.', 'code' => 'session_mismatch'];
+            return ['success' => false, 'message' => 'Invalid attendance session for this event.', 'code' => 'session_mismatch'];
         }
 
-        if ($participant['type'] === 'non_student' && isset($participant['registration'])) {
+        if (isset($participant['registration'])) {
             if ($participant['registration']->event_id !== $event->id) {
                 return [
                     'success' => false,
@@ -119,6 +122,17 @@ class AttendanceService
             $studentNumber = null;
             if ($participant['type'] === 'student' && isset($participant['membership']->student)) {
                 $studentNumber = $participant['membership']->student->student_number;
+                $user = User::where('student_id', $participant['membership']->student->id)->first();
+                if ($user) {
+                    $this->rewardService->awardForEventAttendance($user, $event, $session->id);
+                    \App\Services\NotificationService::send(
+                        $user,
+                        'attendance_confirmed',
+                        'Attendance Confirmed: ' . $event->name,
+                        'Your attendance was scanned for ' . $session->name . ' (' . ucfirst($action) . ' - ' . ucfirst($status) . ').',
+                        route('events.show', $event)
+                    );
+                }
             }
 
             return [

@@ -49,7 +49,11 @@ class AuthenticatedSessionController extends Controller
             return redirect()->route('kiosk.hub');
         }
 
-        return redirect()->intended(route('admin.dashboard'));
+        if (in_array($user->role, ['super_admin', 'president', 'executive_secretary', 'admin', 'treasurer', 'staff', 'event_staff', 'auditor'])) {
+            return redirect()->intended(route('admin.dashboard'));
+        }
+
+        return redirect()->intended(route('dashboard'));
     }
 
     public function destroy(Request $request): RedirectResponse

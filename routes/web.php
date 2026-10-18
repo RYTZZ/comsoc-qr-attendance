@@ -38,10 +38,14 @@ Route::get('/dashboard', function () {
         }
         return redirect()->route('kiosk.hub');
     }
+    if ($user->role === 'student') {
+        return app(\App\Http\Controllers\MemberDashboardController::class)->index(request());
+    }
     return redirect()->route('admin.dashboard');
 })->middleware(['auth'])->name('dashboard');
 
 Route::get('/register', [PublicRegistrationController::class, 'index'])->name('public.register');
+Route::name('register')->get('/register-alias', fn() => redirect()->route('public.register'));
 Route::post('/register', [PublicRegistrationController::class, 'store'])
     ->middleware('throttle:15,1')
     ->name('public.register.store');
@@ -67,12 +71,125 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
 
+    // Dynamic QR Attendance Pass
+    Route::get('/attendance/my-qr', [\App\Http\Controllers\MemberQrCodeController::class, 'show'])->name('member.dynamic_qr');
+    Route::post('/attendance/my-qr/refresh', [\App\Http\Controllers\MemberQrCodeController::class, 'refresh'])
+        ->middleware('throttle:60,1')
+        ->name('member.dynamic_qr.refresh');
+
+    Route::get('/events', [\App\Http\Controllers\MemberEventController::class, 'index'])->name('events.index');
+    Route::get('/events/{event}', [\App\Http\Controllers\MemberEventController::class, 'show'])->name('events.show');
+    Route::post('/events/{event}/join', [\App\Http\Controllers\MemberEventController::class, 'register'])->name('events.join');
+
+    Route::get('/tickets', [\App\Http\Controllers\MemberTicketController::class, 'index'])->name('tickets.index');
+    Route::get('/tickets/{ticket}', [\App\Http\Controllers\MemberTicketController::class, 'show'])->name('tickets.show');
+    Route::get('/tickets/{ticket}/qr', [\App\Http\Controllers\MemberTicketController::class, 'downloadQr'])->name('tickets.qr');
+
+    Route::get('/ledger', [\App\Http\Controllers\MemberLedgerController::class, 'index'])->name('ledger.index');
+
+    Route::get('/missions', [\App\Http\Controllers\MemberMissionController::class, 'index'])->name('missions.index');
+    Route::get('/missions/{mission}', [\App\Http\Controllers\MemberMissionController::class, 'show'])->name('missions.show');
+    Route::post('/missions/{mission}/submit', [\App\Http\Controllers\MemberMissionController::class, 'submit'])
+        ->middleware('throttle:20,1')
+        ->name('missions.submit');
+
+    Route::get('/shop', [\App\Http\Controllers\MemberShopController::class, 'index'])->name('shop.index');
+    Route::get('/shop/{reward}', [\App\Http\Controllers\MemberShopController::class, 'show'])->name('shop.show');
+    Route::post('/shop/{reward}/redeem', [\App\Http\Controllers\MemberShopController::class, 'redeem'])
+        ->middleware('throttle:20,1')
+        ->name('shop.redeem');
+
+    Route::get('/leaderboard', [\App\Http\Controllers\MemberLeaderboardController::class, 'index'])->name('leaderboard.index');
+
+    Route::prefix('directory')->name('directory.')->group(function () {
+        Route::get('/', [\App\Http\Controllers\MemberDirectoryController::class, 'index'])->name('index');
+        Route::get('/profile/edit', [\App\Http\Controllers\MemberDirectoryController::class, 'editProfile'])->name('profile.edit');
+        Route::put('/profile', [\App\Http\Controllers\MemberDirectoryController::class, 'updateProfile'])->name('profile.update');
+        Route::get('/{user}', [\App\Http\Controllers\MemberDirectoryController::class, 'show'])->name('show');
+    });
+
+    Route::prefix('opportunities')->name('opportunities.')->group(function () {
+        Route::get('/', [\App\Http\Controllers\MemberJobOpportunityController::class, 'index'])->name('index');
+        Route::get('/{opportunity}', [\App\Http\Controllers\MemberJobOpportunityController::class, 'show'])->name('show');
+        Route::post('/{opportunity}/bookmark', [\App\Http\Controllers\MemberJobOpportunityController::class, 'toggleBookmark'])->name('bookmark');
+    });
+
+    Route::prefix('notifications')->name('notifications.')->group(function () {
+        Route::get('/', [\App\Http\Controllers\NotificationController::class, 'index'])->name('index');
+        Route::post('/read-all', [\App\Http\Controllers\NotificationController::class, 'markAllAsRead'])->name('read-all');
+        Route::post('/{notification}/read', [\App\Http\Controllers\NotificationController::class, 'markAsRead'])->name('read');
+        Route::delete('/{notification}', [\App\Http\Controllers\NotificationController::class, 'destroy'])->name('destroy');
+    });
+
+    Route::prefix('announcements')->name('announcements.')->group(function () {
+        Route::get('/', [\App\Http\Controllers\AnnouncementController::class, 'index'])->name('index');
+        Route::get('/{announcement}', [\App\Http\Controllers\AnnouncementController::class, 'show'])->name('show');
+        Route::post('/{announcement}/acknowledge', [\App\Http\Controllers\AnnouncementController::class, 'acknowledge'])->name('acknowledge');
+    });
+
+    // Member Help Desk & Dispute Center
+    Route::prefix('helpdesk')->name('helpdesk.')->group(function () {
+        Route::get('/', [\App\Http\Controllers\MemberSupportTicketController::class, 'index'])->name('index');
+        Route::get('/create', [\App\Http\Controllers\MemberSupportTicketController::class, 'create'])->name('create');
+        Route::post('/', [\App\Http\Controllers\MemberSupportTicketController::class, 'store'])
+            ->middleware('throttle:15,1')
+            ->name('store');
+        Route::get('/{ticket}', [\App\Http\Controllers\MemberSupportTicketController::class, 'show'])->name('show');
+        Route::post('/{ticket}/reply', [\App\Http\Controllers\MemberSupportTicketController::class, 'reply'])
+            ->middleware('throttle:30,1')
+            ->name('reply');
+        Route::get('/messages/{message}/attachment', [\App\Http\Controllers\MemberSupportTicketController::class, 'downloadAttachment'])->name('attachment');
+    });
+
+    // Project Collaboration & Team Finder
+    Route::prefix('projects')->name('projects.')->group(function () {
+        Route::get('/', [\App\Http\Controllers\ProjectCollaborationController::class, 'index'])->name('index');
+        Route::get('/create', [\App\Http\Controllers\ProjectCollaborationController::class, 'create'])->name('create');
+        Route::post('/', [\App\Http\Controllers\ProjectCollaborationController::class, 'store'])->name('store');
+        Route::get('/{project}', [\App\Http\Controllers\ProjectCollaborationController::class, 'show'])->name('show');
+        Route::post('/{project}/apply', [\App\Http\Controllers\ProjectCollaborationController::class, 'apply'])
+            ->middleware('throttle:20,1')
+            ->name('apply');
+        Route::post('/applications/{application}/decide', [\App\Http\Controllers\ProjectCollaborationController::class, 'decideApplication'])->name('applications.decide');
+        Route::post('/{project}/milestones', [\App\Http\Controllers\ProjectCollaborationController::class, 'addMilestone'])->name('milestones.store');
+    });
+
+    // Volunteer Opportunities Board
+    Route::prefix('volunteers')->name('volunteers.')->group(function () {
+        Route::get('/', [\App\Http\Controllers\VolunteerOpportunityController::class, 'index'])->name('index');
+        Route::get('/create', [\App\Http\Controllers\VolunteerOpportunityController::class, 'create'])->name('create');
+        Route::post('/', [\App\Http\Controllers\VolunteerOpportunityController::class, 'store'])->name('store');
+        Route::get('/{opportunity}', [\App\Http\Controllers\VolunteerOpportunityController::class, 'show'])->name('show');
+        Route::post('/{opportunity}/apply', [\App\Http\Controllers\VolunteerOpportunityController::class, 'apply'])
+            ->middleware('throttle:20,1')
+            ->name('apply');
+        Route::post('/applications/{application}/decide', [\App\Http\Controllers\VolunteerOpportunityController::class, 'decideApplication'])->name('applications.decide');
+        Route::post('/applications/{application}/approve-hours', [\App\Http\Controllers\VolunteerOpportunityController::class, 'approveHours'])->name('applications.approve-hours');
+    });
+
+    // Event Organizer Workspace & Live Scanner
+    Route::middleware(['role:event_organizer,staff,comsoc_admin,admin,super_admin'])->prefix('organizer')->name('organizer.')->group(function () {
+        Route::get('/scanner', [\App\Http\Controllers\OrganizerScannerController::class, 'index'])->name('scanner');
+        Route::post('/scanner/scan', [\App\Http\Controllers\OrganizerScannerController::class, 'scan'])
+            ->middleware('throttle:120,1')
+            ->name('scanner.scan');
+        Route::post('/attendance/correct-missing-timeout', [\App\Http\Controllers\OrganizerScannerController::class, 'correctMissingTimeOut'])
+            ->middleware('throttle:30,1')
+            ->name('attendance.correct-timeout');
+    });
+
     Route::middleware(['role:kiosk,staff,treasurer,admin,super_admin'])->group(function () {
         Route::get('/kiosk/{kiosk}', [AttendanceKioskController::class, 'show'])->name('kiosk.attendance');
-        Route::post('/kiosk/{kiosk}/scan', [AttendanceKioskController::class, 'scan'])->name('kiosk.scan');
-        Route::post('/kiosk/{kiosk}/lookup', [AttendanceKioskController::class, 'manualLookup'])->name('kiosk.lookup');
+        Route::post('/kiosk/{kiosk}/scan', [AttendanceKioskController::class, 'scan'])
+            ->middleware('throttle:60,1')
+            ->name('kiosk.scan');
+        Route::post('/kiosk/{kiosk}/lookup', [AttendanceKioskController::class, 'manualLookup'])
+            ->middleware('throttle:60,1')
+            ->name('kiosk.lookup');
         Route::get('/kiosk/{kiosk}/snack', [SnackKioskController::class, 'show'])->name('kiosk.snack');
-        Route::post('/kiosk/{kiosk}/snack/scan', [SnackKioskController::class, 'scan'])->name('kiosk.snack.scan');
+        Route::post('/kiosk/{kiosk}/snack/scan', [SnackKioskController::class, 'scan'])
+            ->middleware('throttle:60,1')
+            ->name('kiosk.snack.scan');
 
         Route::prefix('staff/incidents')->name('staff.incidents.')->group(function () {
             Route::get('/create', [\App\Http\Controllers\Staff\IncidentController::class, 'create'])->name('create');
@@ -82,9 +199,18 @@ Route::middleware(['auth', 'verified'])->group(function () {
         });
     });
 
-    Route::middleware(['role:admin,super_admin,treasurer'])->prefix('admin')->name('admin.')->group(function () {
+    Route::middleware(['role:admin,super_admin,treasurer,president,executive_secretary,auditor'])->prefix('admin')->name('admin.')->group(function () {
 
         Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
+
+        // Raffles Management (Events & Attendance Rewards)
+        Route::prefix('raffles')->name('raffles.')->group(function () {
+            Route::get('/', [\App\Http\Controllers\Admin\RaffleController::class, 'index'])->name('index');
+            Route::post('/', [\App\Http\Controllers\Admin\RaffleController::class, 'store'])->name('store');
+            Route::get('/{raffle}', [\App\Http\Controllers\Admin\RaffleController::class, 'show'])->name('show');
+            Route::post('/{raffle}/draw', [\App\Http\Controllers\Admin\RaffleController::class, 'draw'])->name('draw');
+            Route::post('/winners/{winner}/claim', [\App\Http\Controllers\Admin\RaffleController::class, 'claim'])->name('claim');
+        });
 
         Route::middleware(['role:super_admin'])->group(function () {
             Route::resource('academic-years', AcademicYearController::class)->except(['show']);
@@ -108,11 +234,19 @@ Route::middleware(['auth', 'verified'])->group(function () {
             Route::post('users/{user}/toggle-active', [UserController::class, 'toggleActive'])->name('users.toggle-active');
             Route::post('users/{user}/reset-password', [UserController::class, 'resetPassword'])->name('users.reset-password');
 
+            Route::get('students/exp-points', [\App\Http\Controllers\Admin\StudentExpPointsController::class, 'index'])->name('students.exp-points.index');
+            Route::post('students/exp-points/adjust', [\App\Http\Controllers\Admin\StudentExpPointsController::class, 'adjust'])->name('students.exp-points.adjust');
+
             Route::get('audit-logs', [AuditLogController::class, 'index'])->name('audit-logs.index');
             Route::get('audit-logs/{auditLog}', [AuditLogController::class, 'show'])->name('audit-logs.show');
+        });
+
+        // Event Management & Approval Workflow
+        Route::middleware(['role:super_admin,president,executive_secretary,admin'])->group(function () {
             Route::resource('events', EventController::class)->except(['index', 'show']);
             Route::get('events/{event}/configure', [EventController::class, 'configure'])->name('events.configure');
             Route::post('events/{event}/configure', [EventController::class, 'saveConfiguration'])->name('events.configure.save');
+            Route::post('events/{event}/approve', [EventController::class, 'approve'])->name('events.approve');
             Route::post('events/{event}/publish', [EventController::class, 'publish'])->name('events.publish');
             Route::post('events/{event}/close-registration', [EventController::class, 'closeRegistration'])->name('events.close-registration');
             Route::post('events/{event}/complete', [EventController::class, 'complete'])->name('events.complete');
@@ -172,5 +306,97 @@ Route::middleware(['auth', 'verified'])->group(function () {
         Route::get('reports/incidents', [ReportController::class, 'incidents'])->name('reports.incidents');
 
         Route::resource('kiosks', KioskController::class)->only(['index', 'store', 'update', 'destroy']);
+
+        Route::prefix('economy')->name('economy.')->group(function () {
+            Route::get('/', [\App\Http\Controllers\Admin\RewardEconomyController::class, 'index'])->name('index');
+            Route::post('/rules', [\App\Http\Controllers\Admin\RewardEconomyController::class, 'storeRule'])->name('rules.store');
+            Route::put('/rules/{rule}', [\App\Http\Controllers\Admin\RewardEconomyController::class, 'updateRule'])->name('rules.update');
+            Route::post('/levels', [\App\Http\Controllers\Admin\RewardEconomyController::class, 'storeLevel'])->name('levels.store');
+            Route::put('/levels/{level}', [\App\Http\Controllers\Admin\RewardEconomyController::class, 'updateLevel'])->name('levels.update');
+            Route::post('/adjust', [\App\Http\Controllers\Admin\RewardEconomyController::class, 'adjustMemberBalance'])->name('adjust');
+        });
+
+        Route::prefix('missions')->name('missions.')->group(function () {
+            Route::get('/', [\App\Http\Controllers\Admin\AdminMissionController::class, 'index'])->name('index');
+            Route::post('/', [\App\Http\Controllers\Admin\AdminMissionController::class, 'store'])->name('store');
+            Route::post('/submissions/{submission}/approve', [\App\Http\Controllers\Admin\AdminMissionController::class, 'approveSubmission'])->name('approve');
+            Route::post('/submissions/{submission}/reject', [\App\Http\Controllers\Admin\AdminMissionController::class, 'rejectSubmission'])->name('reject');
+        });
+
+        Route::prefix('rewards')->name('rewards.')->group(function () {
+            Route::get('/', [\App\Http\Controllers\Admin\AdminRewardShopController::class, 'index'])->name('index');
+            Route::post('/', [\App\Http\Controllers\Admin\AdminRewardShopController::class, 'store'])->name('store');
+            Route::put('/{reward}', [\App\Http\Controllers\Admin\AdminRewardShopController::class, 'update'])->name('update');
+            Route::delete('/{reward}', [\App\Http\Controllers\Admin\AdminRewardShopController::class, 'destroy'])->name('destroy');
+            Route::post('/{reward}/toggle-active', [\App\Http\Controllers\Admin\AdminRewardShopController::class, 'toggleActive'])->name('toggle-active');
+            Route::post('/{reward}/archive', [\App\Http\Controllers\Admin\AdminRewardShopController::class, 'archive'])->name('archive');
+            Route::post('/{redemption}/fulfill', [\App\Http\Controllers\Admin\AdminRewardShopController::class, 'fulfill'])->name('fulfill');
+            Route::post('/{redemption}/reject', [\App\Http\Controllers\Admin\AdminRewardShopController::class, 'reject'])->name('reject');
+            
+            // Collection Desk & Claim Verification
+            Route::get('/collection', [\App\Http\Controllers\Admin\RewardCollectionController::class, 'index'])->name('collection');
+            Route::post('/collection/verify', [\App\Http\Controllers\Admin\RewardCollectionController::class, 'verify'])->name('collection.verify');
+            Route::post('/collection/{redemption}/cancel', [\App\Http\Controllers\Admin\RewardCollectionController::class, 'cancel'])->name('collection.cancel');
+        });
+
+        Route::prefix('shop')->name('shop.')->group(function () {
+            Route::get('/', [\App\Http\Controllers\Admin\AdminRewardShopController::class, 'index'])->name('index');
+            Route::post('/', [\App\Http\Controllers\Admin\AdminRewardShopController::class, 'store'])->name('store');
+            Route::put('/{reward}', [\App\Http\Controllers\Admin\AdminRewardShopController::class, 'update'])->name('update');
+            Route::delete('/{reward}', [\App\Http\Controllers\Admin\AdminRewardShopController::class, 'destroy'])->name('destroy');
+            Route::post('/{reward}/toggle-active', [\App\Http\Controllers\Admin\AdminRewardShopController::class, 'toggleActive'])->name('toggle-active');
+            Route::post('/{reward}/archive', [\App\Http\Controllers\Admin\AdminRewardShopController::class, 'archive'])->name('archive');
+            Route::post('/{redemption}/fulfill', [\App\Http\Controllers\Admin\AdminRewardShopController::class, 'fulfill'])->name('fulfill');
+            Route::post('/{redemption}/reject', [\App\Http\Controllers\Admin\AdminRewardShopController::class, 'reject'])->name('reject');
+        });
+
+        Route::prefix('achievements')->name('achievements.')->group(function () {
+            Route::get('/', [\App\Http\Controllers\Admin\AdminAchievementController::class, 'index'])->name('index');
+            Route::post('/', [\App\Http\Controllers\Admin\AdminAchievementController::class, 'store'])->name('store');
+            Route::put('/{achievement}', [\App\Http\Controllers\Admin\AdminAchievementController::class, 'update'])->name('update');
+            Route::post('/{achievement}/award', [\App\Http\Controllers\Admin\AdminAchievementController::class, 'awardMember'])->name('award');
+        });
+
+        Route::prefix('opportunities')->name('opportunities.')->group(function () {
+            Route::get('/', [\App\Http\Controllers\Admin\AdminJobOpportunityController::class, 'index'])->name('index');
+            Route::post('/', [\App\Http\Controllers\Admin\AdminJobOpportunityController::class, 'store'])->name('store');
+            Route::put('/{opportunity}', [\App\Http\Controllers\Admin\AdminJobOpportunityController::class, 'update'])->name('update');
+            Route::post('/{opportunity}/toggle-active', [\App\Http\Controllers\Admin\AdminJobOpportunityController::class, 'toggleActive'])->name('toggle-active');
+        });
+
+        Route::prefix('announcements')->name('announcements.')->group(function () {
+            Route::get('/', [\App\Http\Controllers\Admin\AdminAnnouncementController::class, 'index'])->name('index');
+            Route::post('/', [\App\Http\Controllers\Admin\AdminAnnouncementController::class, 'store'])->name('store');
+            Route::get('/{announcement}', [\App\Http\Controllers\Admin\AdminAnnouncementController::class, 'show'])->name('show');
+            Route::put('/{announcement}', [\App\Http\Controllers\Admin\AdminAnnouncementController::class, 'update'])->name('update');
+            Route::post('/{announcement}/toggle-active', [\App\Http\Controllers\Admin\AdminAnnouncementController::class, 'toggleActive'])->name('toggle-active');
+            Route::delete('/{announcement}', [\App\Http\Controllers\Admin\AdminAnnouncementController::class, 'destroy'])->name('destroy');
+        });
+
+        // Admin Help Desk & Dispute Center
+        Route::prefix('support')->name('support.')->group(function () {
+            Route::get('/', [\App\Http\Controllers\Admin\AdminSupportTicketController::class, 'index'])->name('index');
+            Route::get('/{ticket}', [\App\Http\Controllers\Admin\AdminSupportTicketController::class, 'show'])->name('show');
+            Route::post('/{ticket}/reply', [\App\Http\Controllers\Admin\AdminSupportTicketController::class, 'reply'])->name('reply');
+            Route::post('/{ticket}/assign', [\App\Http\Controllers\Admin\AdminSupportTicketController::class, 'assign'])->name('assign');
+            Route::post('/{ticket}/resolve', [\App\Http\Controllers\Admin\AdminSupportTicketController::class, 'resolve'])->name('resolve');
+            Route::post('/{ticket}/escalate', [\App\Http\Controllers\Admin\AdminSupportTicketController::class, 'escalate'])->name('escalate');
+        });
+
+        // Module 3: Event Analytics & Impact Reports
+        Route::prefix('analytics')->name('analytics.')->group(function () {
+            Route::get('/', [\App\Http\Controllers\Admin\EventAnalyticsController::class, 'index'])->name('index');
+            Route::get('/export/csv', [\App\Http\Controllers\Admin\EventAnalyticsController::class, 'exportCsv'])->name('export.csv');
+        });
+
+        Route::prefix('seasons')->name('seasons.')->group(function () {
+            Route::get('/', [\App\Http\Controllers\Admin\SeasonManagementController::class, 'index'])->name('index');
+            Route::post('/', [\App\Http\Controllers\Admin\SeasonManagementController::class, 'store'])->name('store');
+            Route::put('/{season}', [\App\Http\Controllers\Admin\SeasonManagementController::class, 'update'])->name('update');
+            Route::get('/report', [\App\Http\Controllers\Admin\SeasonManagementController::class, 'semesterReport'])->name('report');
+            Route::get('/{season}/preview-reset', [\App\Http\Controllers\Admin\SeasonManagementController::class, 'previewReset'])->name('preview-reset');
+            Route::post('/{season}/execute-reset', [\App\Http\Controllers\Admin\SeasonManagementController::class, 'executeReset'])->name('execute-reset');
+            Route::get('/{season}/snapshots', [\App\Http\Controllers\Admin\SeasonManagementController::class, 'showSnapshots'])->name('snapshots');
+        });
     });
 });

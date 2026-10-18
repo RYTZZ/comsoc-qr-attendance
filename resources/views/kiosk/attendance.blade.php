@@ -63,7 +63,7 @@
         }
     </style>
 </head>
-<body class="h-full bg-[#0f1117] font-sans text-slate-100 transition-all duration-200"
+<body class="h-full bg-[#0B1120] font-sans text-slate-100 transition-all duration-200"
       :class="{
           'screen-flash-success': flashEffect === 'success',
           'screen-flash-duplicate': flashEffect === 'duplicate',
@@ -74,7 +74,7 @@
 <div class="min-h-screen flex flex-col justify-between p-3 sm:p-6 max-w-6xl mx-auto w-full">
     <header class="w-full flex items-center justify-between py-3 border-b border-slate-800/80 mb-4 shrink-0">
         <div class="flex items-center gap-2.5 min-w-0">
-            <div class="w-10 h-10 rounded-xl bg-[#171a23] border border-slate-800 p-1.5 flex items-center justify-center shadow shrink-0">
+            <div class="w-10 h-10 rounded-xl bg-[#172033] border border-slate-800 p-1.5 flex items-center justify-center shadow shrink-0">
                 <img src="{{ asset('images/COMSOC.png') }}" alt="Computing Society Logo" class="w-full h-full object-contain">
             </div>
             <div class="min-w-0">
@@ -124,8 +124,8 @@
                         <button type="button"
                                 @click="open = !open"
                                 @keydown.escape.window="open = false"
-                                :class="open ? 'ring-2 ring-[#7A1618] border-transparent shadow-md' : 'border-slate-700 hover:border-slate-600'"
-                                class="w-full flex items-center justify-between gap-2 rounded-xl bg-[#12141c] border px-3.5 py-2.5 text-xs sm:text-sm text-left transition focus:outline-none focus:ring-2 focus:ring-[#7A1618]">
+                                :class="open ? 'ring-2 ring-[#560E0F] border-transparent shadow-md' : 'border-slate-700 hover:border-slate-600'"
+                                class="w-full flex items-center justify-between gap-2 rounded-xl bg-[#12141c] border px-3.5 py-2.5 text-xs sm:text-sm text-left transition focus:outline-none focus:ring-2 focus:ring-[#560E0F]">
                             <span class="truncate block"
                                   :class="selectedEventId ? 'text-white font-medium' : 'text-slate-500'"
                                   x-text="eventsData[selectedEventId] ? eventsData[selectedEventId].name : '-- Choose an Event --'">
@@ -149,7 +149,7 @@
                              class="absolute z-50 mt-1.5 w-full rounded-xl bg-[#1e222d] border border-slate-700/80 shadow-2xl py-1 text-xs sm:text-sm max-h-60 overflow-y-auto focus:outline-none">
                             <template x-for="(ev, evId) in eventsData" :key="evId">
                                 <div @click="selectedEventId = evId; open = false; onEventChanged()"
-                                     :class="selectedEventId === evId ? 'bg-[#7A1618] text-white font-semibold' : 'text-slate-300 hover:bg-[#303644] hover:text-white'"
+                                     :class="selectedEventId === evId ? 'bg-[#560E0F] text-white font-semibold' : 'text-slate-300 hover:bg-[#303644] hover:text-white'"
                                      class="flex items-center justify-between px-3.5 py-2.5 cursor-pointer transition select-none">
                                     <span x-text="ev.name" class="truncate"></span>
                                     <span x-show="selectedEventId === evId" class="text-white ml-2">
@@ -163,18 +163,56 @@
                     </div>
                 </div>
 
+                <div x-show="selectedEventId && sessions.length === 0" class="p-3 bg-amber-500/10 border border-amber-500/20 rounded-xl flex items-center gap-2.5 text-amber-300 text-xs">
+                    <svg class="w-4 h-4 shrink-0 text-amber-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/>
+                    </svg>
+                    <span>This event has no attendance sessions configured.</span>
+                </div>
+
                 <div x-show="sessions.length > 0">
-                    <label class="label text-xs font-semibold text-slate-300">Attendance Session *</label>
+                    <div class="flex items-center justify-between mb-1.5">
+                        <label class="label text-xs font-semibold text-slate-300">Attendance Session *</label>
+                        <template x-if="getSelectedSession()">
+                            <span class="text-[11px] font-mono" :class="isSessionOpen(getSelectedSession()) ? 'text-emerald-400' : 'text-amber-400'">
+                                <span class="inline-block w-1.5 h-1.5 rounded-full mr-1" :class="isSessionOpen(getSelectedSession()) ? 'bg-emerald-400' : 'bg-amber-400'"></span>
+                                <span x-text="isSessionOpen(getSelectedSession()) ? 'Session Open' : 'Session Closed'"></span>
+                            </span>
+                        </template>
+                    </div>
                     <div class="grid grid-cols-2 sm:grid-cols-4 gap-2">
                         <template x-for="session in sessions" :key="session.id">
                             <button type="button" @click="selectSession(session.id)"
                                     :class="selectedSessionId === session.id
                                         ? 'border-indigo-500 bg-indigo-950/80 text-indigo-200 shadow-md ring-1 ring-indigo-500/50'
                                         : 'border-slate-800 bg-slate-950 text-slate-400 hover:border-slate-700'"
-                                    class="border rounded-xl px-2.5 py-2.5 text-xs font-semibold transition-all text-center min-h-[44px] flex items-center justify-center active:scale-[0.98]"
-                                    x-text="session.label || formatSessionType(session.type)">
+                                    class="border rounded-xl px-2.5 py-2.5 text-xs font-semibold transition-all text-center min-h-[44px] flex flex-col items-center justify-center active:scale-[0.98]">
+                                <span x-text="session.label || formatSessionType(session.type)"></span>
+                                <span x-show="session.opens_at && session.closes_at"
+                                      class="text-[10px] text-slate-400 font-mono mt-0.5"
+                                      x-text="formatTimeWindow(session.opens_at, session.closes_at)"></span>
                             </button>
                         </template>
+                    </div>
+                </div>
+
+                <div x-show="selectedEventId && getSelectedSession()" class="p-3 bg-indigo-950/40 border border-indigo-500/30 rounded-xl flex items-center justify-between gap-3 text-xs">
+                    <div class="flex items-center gap-2.5 min-w-0">
+                        <span class="w-2.5 h-2.5 rounded-full shrink-0" :class="isSessionOpen(getSelectedSession()) ? 'bg-emerald-400' : 'bg-amber-400'"></span>
+                        <div class="min-w-0">
+                            <p class="font-bold text-white truncate" x-text="eventsData[selectedEventId]?.name"></p>
+                            <p class="text-indigo-300 font-medium">
+                                <span x-text="'● ' + (getSelectedSession()?.label || formatSessionType(getSelectedSession()?.type))"></span>
+                                <template x-if="getSelectedSession()?.opens_at && getSelectedSession()?.closes_at">
+                                    <span class="text-slate-400 font-mono ml-2" x-text="formatTimeWindow(getSelectedSession()?.opens_at, getSelectedSession()?.closes_at)"></span>
+                                </template>
+                            </p>
+                        </div>
+                    </div>
+                    <div class="shrink-0 text-right">
+                        <span class="text-[10px] font-bold px-2 py-0.5 rounded-full"
+                              :class="isSessionOpen(getSelectedSession()) ? 'bg-emerald-500/20 text-emerald-300 border border-emerald-500/30' : 'bg-amber-500/20 text-amber-300 border border-amber-500/30'"
+                              x-text="isSessionOpen(getSelectedSession()) ? 'OPEN NOW' : 'OUTSIDE WINDOW'"></span>
                     </div>
                 </div>
             </div>
@@ -192,13 +230,26 @@
                                     <p class="text-[11px] text-slate-400">Position attendee QR code clearly within the view</p>
                                 </div>
                                 <div class="flex items-center gap-2">
-                                    <div x-show="cameras.length > 0" class="relative">
-                                        <select x-model="activeCameraId" @change="switchCamera(activeCameraId)"
-                                                class="text-[11px] bg-slate-900 border border-slate-700 text-slate-300 rounded-lg px-2.5 py-1.5 focus:ring-1 focus:ring-indigo-500 focus:outline-none">
+                                    <div x-show="cameras.length > 0" class="relative" x-data="{ camDropdownOpen: false }" @click.away="camDropdownOpen = false">
+                                        <button type="button" @click="camDropdownOpen = !camDropdownOpen"
+                                                class="flex items-center gap-1.5 text-[11px] bg-slate-900 border border-slate-700 text-slate-300 rounded-lg px-2.5 py-1.5 hover:border-slate-500 focus:ring-1 focus:ring-indigo-500 focus:outline-none">
+                                            <span x-text="cameras.find(c => c.id === activeCameraId)?.label || ('Camera ' + (activeCameraId ? activeCameraId.slice(0, 6) : '1'))"></span>
+                                            <svg class="w-3 h-3 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+                                            </svg>
+                                        </button>
+                                        <div x-show="camDropdownOpen" x-cloak
+                                             class="absolute right-0 mt-1 w-48 rounded-lg bg-slate-900 border border-slate-700 shadow-xl z-50 py-1 text-[11px] max-h-48 overflow-y-auto">
                                             <template x-for="cam in cameras" :key="cam.id">
-                                                <option :value="cam.id" x-text="cam.label || ('Camera ' + cam.id.slice(0, 6))"></option>
+                                                <button type="button"
+                                                        @click="activeCameraId = cam.id; switchCamera(cam.id); camDropdownOpen = false"
+                                                        :class="activeCameraId === cam.id ? 'bg-[#560E0F] text-white' : 'text-slate-300 hover:bg-slate-800 hover:text-white'"
+                                                        class="w-full text-left px-3 py-1.5 flex items-center justify-between">
+                                                    <span x-text="cam.label || ('Camera ' + cam.id.slice(0, 6))" class="truncate"></span>
+                                                    <span x-show="activeCameraId === cam.id">✓</span>
+                                                </button>
                                             </template>
-                                        </select>
+                                        </div>
                                     </div>
                                     <button type="button"
                                             @click="openManualModal = true"
@@ -228,13 +279,13 @@
                                     </div>
                                 </div>
 
-                                <div x-show="cameraStatus === 'starting'" class="absolute inset-0 bg-[#171a23]/95 flex flex-col items-center justify-center p-6 text-center z-10" x-cloak>
+                                <div x-show="cameraStatus === 'starting'" class="absolute inset-0 bg-[#172033]/95 flex flex-col items-center justify-center p-6 text-center z-10" x-cloak>
                                     <div class="w-10 h-10 border-4 border-indigo-500 border-t-transparent rounded-full animate-spin mb-3"></div>
                                     <p class="font-bold text-white text-sm">Starting Camera...</p>
                                     <p class="text-xs text-slate-400 mt-1">Please allow camera permissions if prompted by browser</p>
                                 </div>
 
-                                <div x-show="cameraStatus === 'permission_denied'" class="absolute inset-0 bg-[#171a23]/95 flex flex-col items-center justify-center p-6 text-center z-10 space-y-3" x-cloak>
+                                <div x-show="cameraStatus === 'permission_denied'" class="absolute inset-0 bg-[#172033]/95 flex flex-col items-center justify-center p-6 text-center z-10 space-y-3" x-cloak>
                                     <div class="w-12 h-12 rounded-full bg-red-500/10 text-red-400 flex items-center justify-center mx-auto border border-red-500/20">
                                         <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 13a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
                                     </div>
@@ -247,7 +298,7 @@
                                     </button>
                                 </div>
 
-                                <div x-show="cameraStatus === 'insecure_context'" class="absolute inset-0 bg-[#171a23]/95 flex flex-col items-center justify-center p-6 text-center z-10 space-y-3" x-cloak>
+                                <div x-show="cameraStatus === 'insecure_context'" class="absolute inset-0 bg-[#172033]/95 flex flex-col items-center justify-center p-6 text-center z-10 space-y-3" x-cloak>
                                     <div class="w-12 h-12 rounded-full bg-amber-500/10 text-amber-400 flex items-center justify-center mx-auto border border-amber-500/20">
                                         <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m0 0v2m0-2h2m-2 0H10m11-6V7a4 4 0 00-8 0v2M5 9h14a2 2 0 012 2v8a2 2 0 01-2 2H5a2 2 0 01-2-2V11a2 2 0 012-2z"/></svg>
                                     </div>
@@ -257,7 +308,7 @@
                                     </p>
                                 </div>
 
-                                <div x-show="cameraStatus === 'not_found'" class="absolute inset-0 bg-[#171a23]/95 flex flex-col items-center justify-center p-6 text-center z-10 space-y-3" x-cloak>
+                                <div x-show="cameraStatus === 'not_found'" class="absolute inset-0 bg-[#172033]/95 flex flex-col items-center justify-center p-6 text-center z-10 space-y-3" x-cloak>
                                     <div class="w-12 h-12 rounded-full bg-amber-500/10 text-amber-400 flex items-center justify-center mx-auto border border-amber-500/20">
                                         <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/></svg>
                                     </div>
@@ -285,7 +336,6 @@
                                 <input type="text"
                                        x-model="token"
                                        @keydown.enter="submitScan()"
-                                       placeholder="Manual / Barcode Scanner input fallback..."
                                        class="input text-xs font-mono h-10 bg-slate-950 border-slate-800 text-white focus:ring-1 focus:ring-indigo-500"
                                        :disabled="scanning"
                                        id="kiosk-token-input"
@@ -301,7 +351,7 @@
                     </div>
 
                     <div class="lg:col-span-5 space-y-4">
-                        <div class="card border-slate-800 p-4 sm:p-5 bg-[#171a23]">
+                        <div class="card border-slate-800 p-4 sm:p-5 bg-[#172033]">
                             <div class="flex items-center justify-between pb-3 border-b border-slate-800 mb-3">
                                 <h3 class="text-xs font-bold text-slate-400 uppercase tracking-wider">LATEST SCAN</h3>
                                 <span x-show="latestScan" class="text-[10px] text-emerald-400 font-mono">Recorded</span>
@@ -353,7 +403,7 @@
                             </template>
                         </div>
 
-                        <div class="card border-slate-800 p-4 sm:p-5 bg-[#171a23]">
+                        <div class="card border-slate-800 p-4 sm:p-5 bg-[#172033]">
                             <div class="flex items-center justify-between pb-3 border-b border-slate-800 mb-3">
                                 <div class="flex items-center gap-2">
                                     <span class="w-2 h-2 rounded-full bg-emerald-400"></span>
@@ -446,7 +496,7 @@
          x-transition:leave-end="opacity-0"
          class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm"
          x-cloak>
-        <div class="card max-w-md w-full border-slate-700 bg-[#171a23] shadow-2xl space-y-4 p-5"
+        <div class="card max-w-md w-full border-slate-700 bg-[#172033] shadow-2xl space-y-4 p-5"
              @click.away="openManualModal = false">
             <div class="flex items-center justify-between pb-3 border-b border-slate-800">
                 <div class="flex items-center gap-2">
@@ -472,7 +522,6 @@
                     <input type="text"
                            x-model="manualQuery"
                            @input.debounce.300ms="performManualLookup()"
-                           placeholder="Type student number (e.g. 2024-...) or name..."
                            class="input text-xs font-mono bg-slate-950 border-slate-700 text-white w-full pr-8">
                     <div class="absolute right-2.5 top-2.5" x-show="manualLoading">
                         <svg class="animate-spin w-4 h-4 text-indigo-400" fill="none" viewBox="0 0 24 24">
@@ -618,8 +667,48 @@ function kioskApp() {
             if (!this.selectedEventId || !this.eventsData[this.selectedEventId]) return;
             this.sessions = this.eventsData[this.selectedEventId].sessions || [];
             if (this.sessions.length > 0) {
-                this.selectedSessionId = this.sessions[0].id;
+                const openSession = this.sessions.find(s => this.isSessionOpen(s));
+                if (openSession) {
+                    this.selectedSessionId = openSession.id;
+                } else {
+                    this.selectedSessionId = this.sessions[0].id;
+                }
             }
+        },
+
+        getSelectedSession() {
+            if (!this.selectedSessionId) return null;
+            return this.sessions.find(s => s.id === this.selectedSessionId) || null;
+        },
+
+        isSessionOpen(session) {
+            if (!session || !session.is_active) return false;
+            if (!session.opens_at || !session.closes_at) return true;
+            const now = new Date();
+            const currentH = String(now.getHours()).padStart(2, '0');
+            const currentM = String(now.getMinutes()).padStart(2, '0');
+            const currentS = String(now.getSeconds()).padStart(2, '0');
+            const currentTimeStr = `${currentH}:${currentM}:${currentS}`;
+            const openTimeStr = session.opens_at.length === 5 ? `${session.opens_at}:00` : session.opens_at;
+            const closeTimeStr = session.closes_at.length === 5 ? `${session.closes_at}:00` : session.closes_at;
+            return currentTimeStr >= openTimeStr && currentTimeStr <= closeTimeStr;
+        },
+
+        formatTimeString(timeStr) {
+            if (!timeStr) return '';
+            const parts = timeStr.split(':');
+            if (parts.length < 2) return timeStr;
+            let h = parseInt(parts[0], 10);
+            const m = parts[1];
+            const ampm = h >= 12 ? 'PM' : 'AM';
+            h = h % 12;
+            h = h ? h : 12;
+            return `${String(h).padStart(2, '0')}:${m} ${ampm}`;
+        },
+
+        formatTimeWindow(opensAt, closesAt) {
+            if (!opensAt || !closesAt) return '';
+            return `${this.formatTimeString(opensAt)} – ${this.formatTimeString(closesAt)}`;
         },
 
         selectSession(sessionId) {
@@ -832,8 +921,19 @@ function kioskApp() {
                 return;
             }
 
+            if (this.sessions.length === 0) {
+                this.showFeedback('error', null, 'This event has no attendance sessions configured.');
+                return;
+            }
+
             if (!this.selectedSessionId) {
                 this.showFeedback('error', null, 'Please select an attendance session.');
+                return;
+            }
+
+            const currentSession = this.getSelectedSession();
+            if (currentSession && !this.isSessionOpen(currentSession)) {
+                this.showFeedback('error', null, 'No attendance session is currently open for this event.');
                 return;
             }
 

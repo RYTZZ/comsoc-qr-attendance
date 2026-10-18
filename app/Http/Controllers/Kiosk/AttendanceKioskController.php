@@ -89,6 +89,15 @@ class AttendanceKioskController extends Controller
 
         $event = Event::findOrFail($request->event_id);
         $session = AttendanceSession::findOrFail($request->session_id);
+
+        if ($session->event_id !== $event->id) {
+            return response()->json(['success' => false, 'message' => 'Invalid attendance session for this event.', 'code' => 'session_mismatch'], 422);
+        }
+
+        if (!$session->is_active) {
+            return response()->json(['success' => false, 'message' => 'This attendance session is inactive.', 'code' => 'session_inactive'], 422);
+        }
+
         $staff = auth()->user() ?? $kiosk->assignedStaff ?? $kiosk->user;
 
         if (!$staff) {
@@ -121,9 +130,9 @@ class AttendanceKioskController extends Controller
         }
 
         $students = \App\Models\Student::where(function ($q) use ($query) {
-                $q->where('student_number', 'like', "%{$query}%")
-                  ->orWhere('first_name', 'like', "%{$query}%")
-                  ->orWhere('last_name', 'like', "%{$query}%");
+                $q->whereLike('student_number', "%{$query}%")
+                  ->orWhereLike('first_name', "%{$query}%")
+                  ->orWhereLike('last_name', "%{$query}%");
             })
             ->with(['memberships.activeQrCode'])
             ->limit(8)

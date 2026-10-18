@@ -42,6 +42,7 @@ class EventRegistration extends Model
 
     protected $fillable = [
         'event_id',
+        'user_id',
         'full_name',
         'email',
         'organization_id',
@@ -55,6 +56,7 @@ class EventRegistration extends Model
         'food_restriction_details',
         'confirmed',
         'status',
+        'ticket_code',
         'reviewed_by',
         'reviewed_at',
         'rejection_reason',
@@ -67,6 +69,20 @@ class EventRegistration extends Model
         'reviewed_at' => 'datetime',
         'qr_expires_at' => 'datetime',
     ];
+
+    protected static function booted(): void
+    {
+        static::creating(function (EventRegistration $reg) {
+            if (empty($reg->ticket_code)) {
+                $reg->ticket_code = 'TCK-' . strtoupper(Str::random(10));
+            }
+        });
+    }
+
+    public function user(): BelongsTo
+    {
+        return $this->belongsTo(User::class);
+    }
 
     public function organizationRecord(): BelongsTo
     {
@@ -89,8 +105,8 @@ class EventRegistration extends Model
             'status' => 'approved',
             'reviewed_by' => $admin->id,
             'reviewed_at' => now(),
-            'qr_token' => Str::random(48),
-            'qr_expires_at' => $this->event->ends_at ?? $this->event->event_date->endOfDay(),
+            'qr_token' => $this->qr_token ?: Str::random(48),
+            'qr_expires_at' => $this->event->ends_at ?? ($this->event->event_date ? $this->event->event_date->endOfDay() : now()->addMonths(3)),
         ]);
     }
 

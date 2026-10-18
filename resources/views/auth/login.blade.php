@@ -4,31 +4,31 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="csrf-token" content="{{ csrf_token() }}">
-    <meta name="description" content="Sign in to ComSoc QR Attendance System.">
-    <title>Sign In — Computing Society QR Attendance</title>
+    <meta name="description" content="Sign in to COMSOC QR Attendance, EXP & Rewards System.">
+    <title>Sign In — COMSOC QR Attendance, EXP & Rewards System</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Michroma&family=Sora:wght@600;700;800&family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Manrope:wght@600;700;800&family=Space+Grotesk:wght@600;700&display=swap" rel="stylesheet">
     @vite(['resources/css/app.css', 'resources/js/app.js'])
 </head>
-<body class="h-full bg-[#0f1117] flex items-center justify-center min-h-screen p-4 font-sans text-slate-100 relative overflow-x-hidden selection:bg-[#7A1618] selection:text-white">
+<body class="h-full bg-[#0B1120] flex items-center justify-center min-h-screen p-4 font-sans text-[#F8FAFC] relative overflow-x-hidden selection:bg-[#560E0F] selection:text-white">
 
 <x-page-loader />
 <x-public-auth-bg />
 
 <div class="w-full max-w-md relative z-10">
     <div class="text-center mb-8">
-        <div class="w-20 h-20 mx-auto mb-4 flex items-center justify-center p-2 rounded-2xl bg-[#171a23]/90 border border-slate-800 shadow-xl enter-logo backdrop-blur-sm">
+        <div class="w-20 h-20 mx-auto mb-4 flex items-center justify-center p-2 rounded-2xl bg-[#172033]/90 border border-[#334155] shadow-2xl enter-logo backdrop-blur-sm">
             <img src="{{ asset('images/COMSOC.png') }}" alt="Computing Society Logo" class="w-full h-full object-contain">
         </div>
         <div class="enter-header">
-            <p class="font-brand-accent text-[11px] text-[#dfa6a9] tracking-widest uppercase mb-1">COMPUTING SOCIETY</p>
-            <h1 class="font-brand-display text-2xl sm:text-3xl font-bold text-white tracking-tight">QR Attendance System</h1>
-            <p class="text-slate-400 mt-1 text-xs sm:text-sm">Manage memberships, events, and attendance records</p>
+            <p class="font-brand-accent text-[11px] text-[#df747a] tracking-widest uppercase mb-1 font-bold">COMPUTING SOCIETY ORGANIZATION</p>
+            <h1 class="font-brand-display text-2xl sm:text-3xl font-extrabold text-white tracking-tight">QR Attendance & EXP</h1>
+            <p class="text-[#94A3B8] mt-1 text-xs sm:text-sm">Sorsogon State University – Bulan Campus</p>
         </div>
     </div>
 
-    <div class="card shadow-2xl border border-slate-800/80 bg-[#171a23]/95 backdrop-blur-md enter-card">
+    <div class="card shadow-2xl border border-[#334155] bg-[#172033]/95 backdrop-blur-md enter-card">
         <h2 class="font-brand-display text-base font-bold text-white mb-6">Sign in to your account</h2>
 
         @if($errors->any())
@@ -46,16 +46,17 @@
             @csrf
 
             <div>
-                <label for="email" class="label">Email or Username</label>
+                <label for="email" class="label">Student Number, Email, or Username</label>
                 <input type="text" name="email" id="email" value="{{ old('email') }}"
-                       class="input" placeholder="you@comsoc.local or username" required autofocus autocomplete="username">
+                       placeholder="e.g. 2023-01042 or user@sorsu.edu.ph"
+                       class="input" required autofocus autocomplete="username">
             </div>
 
             <div x-data="{ show: false }">
                 <label for="password" class="label">Password</label>
                 <div class="relative">
                     <input :type="show ? 'text' : 'password'" name="password" id="password"
-                           class="input pr-10" placeholder="••••••••" required autocomplete="current-password">
+                           class="input pr-10" required autocomplete="current-password">
                     <button type="button" @click="show = !show"
                             class="absolute inset-y-0 right-0 pr-3 flex items-center text-slate-400 hover:text-white transition">
                         <template x-if="!show">
@@ -74,20 +75,26 @@
             </div>
 
             <div class="flex items-center justify-between">
-                <label class="flex items-center gap-2 text-sm text-slate-400 cursor-pointer">
-                    <input type="checkbox" name="remember" class="w-4 h-4 rounded bg-slate-800 border-slate-600 text-indigo-600">
+                <label class="flex items-center gap-2 text-sm text-[#94A3B8] cursor-pointer">
+                    <input type="checkbox" name="remember" class="w-4 h-4 rounded bg-[#0B1120] border-[#334155] text-[#560E0F] focus:ring-[#8F3033]">
                     Remember me
                 </label>
                 @if(Route::has('password.request'))
-                <a href="{{ route('password.request') }}" class="text-sm text-indigo-400 hover:text-indigo-300 transition-colors">Forgot password?</a>
+                <a href="{{ route('password.request') }}" class="text-sm text-[#df747a] hover:text-white transition-colors">Forgot password?</a>
                 @endif
             </div>
 
-            <button type="submit" class="btn-primary w-full justify-center py-2.5 mt-2">
+            <button type="submit" class="btn-primary w-full justify-center py-3 mt-2 shadow-xl">
                 Sign In
             </button>
         </form>
 
+        <div class="mt-6 pt-5 border-t border-[#334155] text-center">
+            <p class="text-xs text-[#94A3B8]">
+                New student member?
+                <a href="{{ route('signup') }}" class="text-[#df747a] hover:text-white font-semibold underline transition">Create Student Account</a>
+            </p>
+        </div>
     </div>
 
     <x-public-branding-footer />
