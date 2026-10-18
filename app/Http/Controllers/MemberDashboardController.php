@@ -81,7 +81,7 @@ class MemberDashboardController extends Controller
             ->get();
 
         // Section D: Rewards and Achievements
-        $featuredRewards = Reward::where('is_active', true)
+        $featuredRewards = Reward::published()
             ->where(function ($q) {
                 $q->whereNull('stock')->orWhere('stock', '>', 0);
             })

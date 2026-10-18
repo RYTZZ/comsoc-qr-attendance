@@ -419,6 +419,12 @@ class StudentRewardShopVisibilityTest extends TestCase
         $shopRes->assertSee('Apparel');
         $shopRes->assertSee('5 left');
 
+        // 1b. Check student dashboard featured rewards visibility
+        $dashboardRes = $this->actingAs($this->student)->get(route('dashboard'));
+        $dashboardRes->assertOk();
+        $dashboardRes->assertSee('BSIT PROGRAM SHIRT');
+        $dashboardRes->assertSee('450 EXP');
+
         // 2. Check shop show page
         $showRes = $this->actingAs($this->student)->get(route('shop.show', $shirt));
         $showRes->assertOk();
