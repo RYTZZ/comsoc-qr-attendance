@@ -15,45 +15,88 @@ class MemberQrCodeController extends Controller
 
     /**
      * Dedicated full-screen dynamic QR pass view for members.
-     * Optionally scoped to an event (via ?event_id=...).
+     * Enforces event-specific pass requirement:
+     * - No eligible joined events: passState = 'no_events' (or 'pending'/'revoked' if registrations exist)
+     * - Exactly one eligible joined event: passState = 'active'
+     * - Multiple eligible joined events: allows selecting an event, or defaults to selected/first
      */
     public function show(Request $request): View
     {
         $user = $request->user();
         $student = $user->student;
-        $eventId = $request->input('event_id');
+
+        // Fetch all registrations for this user
+        $allRegistrations = \App\Models\EventRegistration::with(['event'])
+            ->where(function ($q) use ($user, $student) {
+                $q->where('user_id', $user->id)
+                  ->orWhere('email', strtolower($user->email));
+                if ($student) {
+                    $q->orWhere('email', strtolower($student->email));
+                }
+            })
+            ->get();
+
+        // Filter approved registrations with active, published events
+        $approvedRegistrations = $allRegistrations->filter(function ($reg) {
+            return $reg->status === 'approved'
+                && $reg->event
+                && ($reg->event->is_published || $reg->event->status === 'published')
+                && !in_array($reg->event->status, ['draft', 'archived']);
+        });
+
+        $pendingRegistrations = $allRegistrations->filter(fn($reg) => $reg->status === 'pending');
+        $revokedRegistrations = $allRegistrations->filter(fn($reg) => in_array($reg->status, ['rejected', 'cancelled', 'revoked']));
+
+        $requestedEventId = $request->input('event_id');
         $event = null;
         $eventRegistration = null;
-        $passState = 'active'; // 'active', 'not_joined', 'pending', 'revoked'
+        $passState = 'no_events'; // 'active', 'no_events', 'pending', 'revoked'
 
-        if ($eventId) {
-            $event = \App\Models\Event::where('id', $eventId)->first();
-            if ($event) {
-                $eventRegistration = \App\Models\EventRegistration::where('event_id', $event->id)
-                    ->where(function ($q) use ($user, $student) {
-                        $q->where('user_id', $user->id)
-                          ->orWhere('email', strtolower($user->email));
-                        if ($student) {
-                            $q->orWhere('email', strtolower($student->email));
-                        }
-                    })
-                    ->first();
+        if ($requestedEventId) {
+            $event = \App\Models\Event::where('id', $requestedEventId)->first();
+            $eventRegistration = $allRegistrations->firstWhere('event_id', $requestedEventId);
 
-                if (!$eventRegistration) {
-                    $passState = 'not_joined';
-                } elseif ($eventRegistration->status === 'pending') {
-                    $passState = 'pending';
-                } elseif (in_array($eventRegistration->status, ['rejected', 'cancelled', 'revoked'])) {
+            if (!$eventRegistration) {
+                $passState = 'no_events';
+            } elseif ($eventRegistration->status === 'pending') {
+                $passState = 'pending';
+            } elseif (in_array($eventRegistration->status, ['rejected', 'cancelled', 'revoked'])) {
+                $passState = 'revoked';
+            } elseif ($eventRegistration->status === 'approved') {
+                if (!$user->is_active || !$user->is_eligible) {
                     $passState = 'revoked';
-                } elseif (!$user->is_active || !$user->is_eligible) {
-                    $passState = 'revoked';
+                } else {
+                    $passState = 'active';
                 }
+            }
+        } else {
+            // No event_id parameter specified in query string
+            if ($approvedRegistrations->isNotEmpty()) {
+                // Default to the first (or most recently joined) approved event
+                $eventRegistration = $approvedRegistrations->first();
+                $event = $eventRegistration->event;
+
+                if (!$user->is_active || !$user->is_eligible) {
+                    $passState = 'revoked';
+                } else {
+                    $passState = 'active';
+                }
+            } elseif ($pendingRegistrations->isNotEmpty()) {
+                $eventRegistration = $pendingRegistrations->first();
+                $event = $eventRegistration->event;
+                $passState = 'pending';
+            } elseif ($revokedRegistrations->isNotEmpty()) {
+                $eventRegistration = $revokedRegistrations->first();
+                $event = $eventRegistration->event;
+                $passState = 'revoked';
+            } else {
+                $passState = 'no_events';
             }
         }
 
-        // Only generate valid token if state is active
+        // Only generate valid token if state is active and an approved event exists
         $tokenData = null;
-        if ($passState === 'active') {
+        if ($passState === 'active' && $event) {
             $tokenData = $this->dynamicQrService->generateTokenForUser($user, $event);
         }
 
@@ -61,6 +104,8 @@ class MemberQrCodeController extends Controller
             'user' => $user,
             'event' => $event,
             'eventRegistration' => $eventRegistration,
+            'approvedRegistrations' => $approvedRegistrations,
+            'pendingRegistrations' => $pendingRegistrations,
             'passState' => $passState,
             'initialQrPayload' => $tokenData['qr_payload'] ?? '',
             'initialManualToken' => $tokenData['manual_token'] ?? '',
@@ -87,27 +132,55 @@ class MemberQrCodeController extends Controller
 
         $eventId = $request->input('event_id');
         $event = null;
+
         if ($eventId) {
             $event = \App\Models\Event::where('id', $eventId)->first();
-            if ($event) {
-                $registration = \App\Models\EventRegistration::where('event_id', $event->id)
-                    ->where('status', 'approved')
-                    ->where(function ($q) use ($user, $student) {
-                        $q->where('user_id', $user->id)
-                          ->orWhere('email', strtolower($user->email));
-                        if ($student) {
-                            $q->orWhere('email', strtolower($student->email));
-                        }
-                    })
-                    ->first();
+        } else {
+            // Find user's first approved active event
+            $firstApproved = \App\Models\EventRegistration::with('event')
+                ->where('status', 'approved')
+                ->where(function ($q) use ($user, $student) {
+                    $q->where('user_id', $user->id)
+                      ->orWhere('email', strtolower($user->email));
+                    if ($student) {
+                        $q->orWhere('email', strtolower($student->email));
+                    }
+                })
+                ->whereHas('event', function ($eq) {
+                    $eq->where(function ($sub) {
+                        $sub->where('is_published', true)->orWhere('status', 'published');
+                    })->whereNotIn('status', ['draft', 'archived']);
+                })
+                ->latest()
+                ->first();
 
-                if (!$registration) {
-                    return response()->json([
-                        'success' => false,
-                        'message' => 'Join this event to access your Dynamic Attendance QR Code.',
-                    ], 403);
+            $event = $firstApproved?->event;
+        }
+
+        if (!$event) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Join an event through Events & Activities to access its Dynamic Attendance QR Code.',
+            ], 403);
+        }
+
+        // Verify registration for this event is approved
+        $registration = \App\Models\EventRegistration::where('event_id', $event->id)
+            ->where('status', 'approved')
+            ->where(function ($q) use ($user, $student) {
+                $q->where('user_id', $user->id)
+                  ->orWhere('email', strtolower($user->email));
+                if ($student) {
+                    $q->orWhere('email', strtolower($student->email));
                 }
-            }
+            })
+            ->first();
+
+        if (!$registration) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Join this event to access your Dynamic Attendance QR Code.',
+            ], 403);
         }
 
         $tokenData = $this->dynamicQrService->generateTokenForUser($user, $event);

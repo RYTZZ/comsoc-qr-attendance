@@ -57,11 +57,29 @@ class DynamicAttendancePassAndDirectoryTest extends TestCase
             'is_eligible' => true,
         ]);
 
+        $admin = User::factory()->create(['role' => 'super_admin']);
+        $event = Event::create([
+            'academic_year_id' => $this->academicYear->id,
+            'created_by' => $admin->id,
+            'name' => 'General Assembly 2026',
+            'status' => 'published',
+            'event_date' => Carbon::today()->toDateString(),
+        ]);
+
+        \App\Models\EventRegistration::create([
+            'event_id' => $event->id,
+            'user_id' => $user->id,
+            'full_name' => $user->name,
+            'email' => $user->email,
+            'status' => 'approved',
+            'registered_at' => now(),
+        ]);
+
         $response = $this->actingAs($user)->get(route('member.dynamic_qr'));
         $response->assertStatus(200);
 
         // Check required prompt & labels
-        $response->assertSee('Official Dynamic Attendance Pass');
+        $response->assertSee('Event Dynamic Attendance Pass');
         $response->assertSee('Manual Attendance Token');
         $response->assertSee("Enter this token in the manual attendance lookup.");
         $response->assertSee('Copy');
@@ -80,9 +98,9 @@ class DynamicAttendancePassAndDirectoryTest extends TestCase
     }
 
     /**
-     * Test dynamic QR refresh returns synchronized payload and manual token.
+     * Test dynamic QR shows no pass notification when student has no joined events.
      */
-    public function test_dynamic_qr_refresh_returns_synchronized_manual_token(): void
+    public function test_dynamic_qr_shows_no_pass_notification_when_no_joined_events(): void
     {
         $user = User::factory()->create([
             'role' => 'student',
@@ -90,7 +108,49 @@ class DynamicAttendancePassAndDirectoryTest extends TestCase
             'is_eligible' => true,
         ]);
 
-        $response = $this->actingAs($user)->postJson(route('member.dynamic_qr.refresh'));
+        $response = $this->actingAs($user)->get(route('member.dynamic_qr'));
+        $response->assertStatus(200);
+        $response->assertSee('No Event Attendance QR Available');
+        $response->assertSee("You haven't joined any eligible events or activities yet", false);
+        $response->assertSee(route('events.index'));
+
+        // Refresh endpoint must reject unregistered student
+        $refreshRes = $this->actingAs($user)->postJson(route('member.dynamic_qr.refresh'));
+        $refreshRes->assertStatus(403);
+    }
+
+    /**
+     * Test dynamic QR refresh returns synchronized payload and manual token for registered student.
+     */
+    public function test_dynamic_qr_refresh_returns_synchronized_manual_token(): void
+    {
+        $admin = User::factory()->create(['role' => 'super_admin']);
+        $event = Event::create([
+            'academic_year_id' => $this->academicYear->id,
+            'created_by' => $admin->id,
+            'name' => 'General Assembly 2026',
+            'status' => 'published',
+            'event_date' => Carbon::today()->toDateString(),
+        ]);
+
+        $user = User::factory()->create([
+            'role' => 'student',
+            'is_active' => true,
+            'is_eligible' => true,
+        ]);
+
+        \App\Models\EventRegistration::create([
+            'event_id' => $event->id,
+            'user_id' => $user->id,
+            'full_name' => $user->name,
+            'email' => $user->email,
+            'status' => 'approved',
+            'registered_at' => now(),
+        ]);
+
+        $response = $this->actingAs($user)->postJson(route('member.dynamic_qr.refresh'), [
+            'event_id' => $event->id,
+        ]);
         $response->assertStatus(200);
         $response->assertJsonStructure([
             'payload',

@@ -44,7 +44,24 @@
                 <div class="absolute -top-24 -left-24 w-48 h-48 bg-[#560E0F]/30 rounded-full blur-3xl pointer-events-none"></div>
                 <div class="absolute -bottom-24 -right-24 w-48 h-48 bg-[#8F3033]/25 rounded-full blur-3xl pointer-events-none"></div>
 
-                @if(isset($event))
+                @if(isset($approvedRegistrations) && $approvedRegistrations->count() > 1)
+                    <!-- Multi-Event Selector Dropdown -->
+                    <div class="mb-4 w-full text-left" x-data="{ open: false }">
+                        <label class="block text-[10px] uppercase font-bold text-slate-400 tracking-wider mb-1 font-mono">
+                            Select Joined Event Pass ({{ $approvedRegistrations->count() }} Available)
+                        </label>
+                        <div class="relative">
+                            <select onchange="window.location.href = '{{ route('member.dynamic_qr') }}?event_id=' + this.value"
+                                    class="input-dark text-xs w-full py-2 px-3 bg-[#0B1120] border border-[#334155] rounded-xl text-white font-semibold focus:border-[#8F3033]">
+                                @foreach($approvedRegistrations as $appReg)
+                                    <option value="{{ $appReg->event->id }}" {{ $event && $event->id === $appReg->event->id ? 'selected' : '' }}>
+                                        {{ $appReg->event->name }} ({{ $appReg->event->formatted_schedule_day ?? 'Scheduled' }})
+                                    </option>
+                                @endforeach
+                            </select>
+                        </div>
+                    </div>
+                @elseif(isset($event))
                     <div class="mb-3 px-3 py-1.5 rounded-xl bg-slate-900/80 border border-slate-800 text-center w-full">
                         <span class="text-[10px] uppercase font-bold text-slate-400 tracking-wider block font-mono">Event Attendance Pass</span>
                         <h2 class="text-sm font-bold text-white font-brand-display truncate">{{ $event->name }}</h2>
@@ -54,71 +71,79 @@
                 <div class="mb-4">
                     <span class="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full text-xs font-bold text-white shadow-sm border border-[#8F3033]/50 bg-burgundy-deep">
                         <span class="w-2 h-2 rounded-full bg-[#df747a] animate-ping"></span>
-                        {{ isset($event) ? 'Event Dynamic Attendance Pass' : 'Official Dynamic Attendance Pass' }}
+                        {{ isset($event) ? 'Event Dynamic Attendance Pass' : 'Dynamic Attendance Pass' }}
                     </span>
                 </div>
 
-                @if(($passState ?? 'active') === 'not_joined')
-                    <!-- Case A: Student has not joined the event -->
-                    <div class="w-full p-6 bg-slate-900/90 rounded-2xl border border-slate-800 space-y-4 my-2">
-                        <div class="w-14 h-14 mx-auto rounded-2xl bg-amber-500/10 border border-amber-500/30 flex items-center justify-center text-amber-400">
-                            <i data-lucide="ticket" class="w-7 h-7"></i>
+                @if(($passState ?? 'no_events') === 'no_events' || ($passState ?? 'no_events') === 'not_joined')
+                    <!-- Case A: Student has not joined an event -->
+                    <div class="w-full p-6 sm:p-8 bg-slate-900/90 rounded-2xl border border-slate-800 space-y-4 my-2">
+                        <div class="w-16 h-16 mx-auto rounded-2xl bg-amber-500/10 border border-amber-500/30 flex items-center justify-center text-amber-400 shadow-inner">
+                            <i data-lucide="ticket" class="w-8 h-8"></i>
                         </div>
-                        <div class="space-y-1">
-                            <h3 class="text-base font-bold text-white font-brand-display">Registration Required</h3>
-                            <p class="text-xs text-amber-300 font-semibold leading-relaxed">
-                                Join this event to access your Dynamic Attendance QR Code.
+                        <div class="space-y-2">
+                            <h3 class="text-base font-bold text-white font-brand-display">No Event Attendance QR Available</h3>
+                            <p class="text-xs text-slate-300 leading-relaxed font-medium">
+                                You haven't joined any eligible events or activities yet. Join an event through Events & Activities to access its Dynamic Attendance QR Code.
                             </p>
                             <p class="text-[11px] text-[#94A3B8] leading-relaxed">
-                                Each event requires its own authorized pass. Once you join, your 30-second rotating QR pass will become available here.
+                                Each event requires its own authorized pass. Once your registration is confirmed, your 30-second rolling QR pass will be displayed here.
                             </p>
                         </div>
-                        @if(isset($event))
-                            <a href="{{ route('events.show', $event) }}" class="btn-primary w-full text-xs py-2.5 flex items-center justify-center gap-2 shadow-lg shadow-[#560E0F]/20">
-                                <i data-lucide="calendar-plus" class="w-4 h-4"></i>
-                                <span>Join Event Now</span>
+                        <div class="pt-2">
+                            <a href="{{ route('events.index') }}" class="btn-primary w-full text-xs py-2.5 flex items-center justify-center gap-2 shadow-lg shadow-[#560E0F]/30 font-bold">
+                                <i data-lucide="calendar" class="w-4 h-4"></i>
+                                <span>Browse Events & Activities</span>
                             </a>
-                        @else
-                            <a href="{{ route('events.index') }}" class="btn-primary w-full text-xs py-2.5 flex items-center justify-center gap-2">
-                                <span>Browse Events</span>
-                            </a>
-                        @endif
-                    </div>
-                @elseif(($passState ?? 'active') === 'pending')
-                    <!-- Case A pending approval: Registration pending -->
-                    <div class="w-full p-6 bg-slate-900/90 rounded-2xl border border-slate-800 space-y-4 my-2">
-                        <div class="w-14 h-14 mx-auto rounded-2xl bg-amber-500/10 border border-amber-500/30 flex items-center justify-center text-amber-400">
-                            <i data-lucide="clock" class="w-7 h-7"></i>
                         </div>
-                        <div class="space-y-1">
-                            <h3 class="text-base font-bold text-white font-brand-display">Registration Pending Review</h3>
-                            <p class="text-xs text-slate-300 leading-relaxed">
-                                Your event pass will activate once your registration is approved by the event coordinator.
+                    </div>
+                @elseif(($passState ?? 'no_events') === 'pending')
+                    <!-- Case A pending approval: Registration pending review -->
+                    <div class="w-full p-6 sm:p-8 bg-slate-900/90 rounded-2xl border border-slate-800 space-y-4 my-2">
+                        <div class="w-16 h-16 mx-auto rounded-2xl bg-amber-500/10 border border-amber-500/30 flex items-center justify-center text-amber-400 shadow-inner">
+                            <i data-lucide="clock" class="w-8 h-8"></i>
+                        </div>
+                        <div class="space-y-2">
+                            <h3 class="text-base font-bold text-white font-brand-display">Registration Pending Approval</h3>
+                            <p class="text-xs text-slate-300 leading-relaxed font-medium">
+                                Your registration for <strong>{{ $event->name ?? 'the event' }}</strong> is currently awaiting coordinator review.
+                            </p>
+                            <p class="text-[11px] text-[#94A3B8] leading-relaxed">
+                                Your Dynamic Attendance QR code will automatically activate once your registration has been approved.
                             </p>
                         </div>
-                        @if(isset($eventRegistration))
-                            <a href="{{ route('tickets.show', $eventRegistration) }}" class="btn-secondary w-full text-xs py-2 flex items-center justify-center gap-1.5">
-                                <span>View Ticket Details</span>
+                        <div class="pt-2 flex flex-col gap-2">
+                            @if(isset($eventRegistration))
+                                <a href="{{ route('tickets.show', $eventRegistration) }}" class="btn-primary w-full text-xs py-2.5 flex items-center justify-center gap-1.5 font-bold">
+                                    <i data-lucide="ticket" class="w-4 h-4"></i>
+                                    <span>View Registration Pass</span>
+                                </a>
+                            @endif
+                            <a href="{{ route('events.index') }}" class="btn-secondary w-full text-xs py-2 flex items-center justify-center gap-1.5">
+                                <span>Browse Other Events</span>
                             </a>
-                        @endif
+                        </div>
                     </div>
-                @elseif(($passState ?? 'active') === 'revoked')
+                @elseif(($passState ?? 'no_events') === 'revoked')
                     <!-- Case C: Cancelled / Revoked / Ineligible -->
-                    <div class="w-full p-6 bg-slate-900/90 rounded-2xl border border-slate-800 space-y-4 my-2">
-                        <div class="w-14 h-14 mx-auto rounded-2xl bg-rose-500/10 border border-rose-500/30 flex items-center justify-center text-rose-400">
-                            <i data-lucide="shield-alert" class="w-7 h-7"></i>
+                    <div class="w-full p-6 sm:p-8 bg-slate-900/90 rounded-2xl border border-slate-800 space-y-4 my-2">
+                        <div class="w-16 h-16 mx-auto rounded-2xl bg-rose-500/10 border border-rose-500/30 flex items-center justify-center text-rose-400 shadow-inner">
+                            <i data-lucide="shield-alert" class="w-8 h-8"></i>
                         </div>
-                        <div class="space-y-1">
+                        <div class="space-y-2">
                             <h3 class="text-base font-bold text-rose-400 font-brand-display">Event Pass Inactive</h3>
-                            <p class="text-xs text-slate-300 leading-relaxed">
-                                Your registration for this event has been cancelled, rejected, or your member account is ineligible. A valid QR pass cannot be issued.
+                            <p class="text-xs text-slate-300 leading-relaxed font-medium">
+                                Your registration for this event has been cancelled or rejected, or your member account is not in good standing.
+                            </p>
+                            <p class="text-[11px] text-[#94A3B8] leading-relaxed">
+                                An active QR pass cannot be issued. Please contact the event organizers or ComSoc officers if you require assistance.
                             </p>
                         </div>
-                        @if(isset($event))
-                            <a href="{{ route('events.show', $event) }}" class="btn-secondary w-full text-xs py-2 flex items-center justify-center gap-1.5">
-                                <span>Return to Event</span>
+                        <div class="pt-2">
+                            <a href="{{ route('events.index') }}" class="btn-secondary w-full text-xs py-2.5 flex items-center justify-center gap-1.5">
+                                <span>Return to Events & Activities</span>
                             </a>
-                        @endif
+                        </div>
                     </div>
                 @else
                     <!-- Case B: Joined & Eligible - Active 30s Dynamic Rolling QR -->

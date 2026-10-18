@@ -440,8 +440,9 @@ class EventSpecificDynamicQrSecurityTest extends TestCase
         // Case A: Unregistered student viewing event-scoped QR
         $resNotJoined = $this->actingAs($this->unregisteredStudentUser)->get(route('member.dynamic_qr', ['event_id' => $this->eventA->id]));
         $resNotJoined->assertOk();
-        $resNotJoined->assertSee('Join this event to access your Dynamic Attendance QR Code.');
-        $resNotJoined->assertSee('Join Event Now');
+        $resNotJoined->assertSee('No Event Attendance QR Available');
+        $resNotJoined->assertSee("You haven't joined any eligible events or activities yet", false);
+        $resNotJoined->assertSee('Browse Events & Activities', false);
         $resNotJoined->assertDontSee('id="qrcode-canvas"', false);
 
         // Case A refresh call is rejected
@@ -495,7 +496,7 @@ class EventSpecificDynamicQrSecurityTest extends TestCase
         $resCancelled = $this->actingAs($cancelledUser)->get(route('member.dynamic_qr', ['event_id' => $this->eventA->id]));
         $resCancelled->assertOk();
         $resCancelled->assertSee('Event Pass Inactive');
-        $resCancelled->assertSee('Your registration for this event has been cancelled, rejected, or your member account is ineligible.');
+        $resCancelled->assertSee('Your registration for this event has been cancelled or rejected, or your member account is not in good standing.');
         $resCancelled->assertDontSee('id="qrcode-canvas"', false);
 
         $refreshCancelled = $this->actingAs($cancelledUser)->postJson(route('member.dynamic_qr.refresh'), [
