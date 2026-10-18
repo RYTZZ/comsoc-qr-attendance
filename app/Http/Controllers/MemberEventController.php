@@ -106,8 +106,29 @@ class MemberEventController extends Controller
         $user = auth()->user();
         $student = $user->student;
 
+        // Validate based on event field settings
+        $rules = [];
+        if ($event->tshirt_enabled) {
+            $tshirtRule = ['nullable', 'string', 'in:' . implode(',', EventRegistration::TSHIRT_SIZES)];
+            if ($event->tshirt_required) {
+                $tshirtRule[0] = 'required';
+            }
+            $rules['tshirt_size'] = $tshirtRule;
+        }
+
+        if ($event->dietary_enabled) {
+            $dietaryRule = ['nullable', 'string', 'in:' . implode(',', EventRegistration::FOOD_RESTRICTIONS)];
+            if ($event->dietary_required) {
+                $dietaryRule[0] = 'required';
+            }
+            $rules['food_restrictions'] = $dietaryRule;
+            $rules['food_restriction_details'] = ['nullable', 'string', 'max:500'];
+        }
+
+        $validatedFields = $request->validate($rules);
+
         try {
-            $registration = \Illuminate\Support\Facades\DB::transaction(function () use ($event, $user, $student, $request) {
+            $registration = \Illuminate\Support\Facades\DB::transaction(function () use ($event, $user, $student, $validatedFields) {
                 $lockedEvent = \App\Support\RowLock::acquire(Event::class, $event->id);
                 if (!$lockedEvent || !$lockedEvent->isRegistrationOpen()) {
                     throw new \RuntimeException('Registration for this event is closed or at full capacity.');
@@ -128,9 +149,19 @@ class MemberEventController extends Controller
                     throw new \RuntimeException('You are already registered for this event.');
                 }
 
-                $tshirtSize = $request->input('tshirt_size', 'L');
-                if (!in_array($tshirtSize, EventRegistration::TSHIRT_SIZES)) {
-                    $tshirtSize = 'L';
+                $tshirtSize = null;
+                if ($lockedEvent->tshirt_enabled) {
+                    $tshirtSize = $validatedFields['tshirt_size'] ?? null;
+                    if (!$tshirtSize && $lockedEvent->tshirt_required) {
+                        $tshirtSize = 'L';
+                    }
+                }
+
+                $foodRestrictions = null;
+                $foodRestrictionDetails = null;
+                if ($lockedEvent->dietary_enabled) {
+                    $foodRestrictions = $validatedFields['food_restrictions'] ?? ($lockedEvent->dietary_required ? 'None' : null);
+                    $foodRestrictionDetails = $validatedFields['food_restriction_details'] ?? null;
                 }
 
                 $fullName = $student ? "{$student->first_name} {$student->last_name}" : $user->name;
@@ -147,8 +178,8 @@ class MemberEventController extends Controller
                     'program' => $program,
                     'year_level' => $yearLevel,
                     'tshirt_size' => $tshirtSize,
-                    'food_restrictions' => $request->input('food_restrictions', 'None'),
-                    'food_restriction_details' => $request->input('food_restriction_details'),
+                    'food_restrictions' => $foodRestrictions,
+                    'food_restriction_details' => $foodRestrictionDetails,
                     'confirmed' => true,
                     'status' => 'approved',
                     'reviewed_by' => $user->id,

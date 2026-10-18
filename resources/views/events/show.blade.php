@@ -208,25 +208,55 @@
                                 <form method="POST" action="{{ route('events.join', $event) }}" class="space-y-4">
                                     @csrf
 
-                                    <div>
-                                        <label class="block text-xs font-semibold text-slate-300 mb-1">T-Shirt Size Preference</label>
-                                        <x-custom-dropdown
-                                            name="tshirt_size"
-                                            :options="array_map(fn($s) => ['value' => $s, 'label' => 'Size ' . $s], \App\Models\EventRegistration::TSHIRT_SIZES)"
-                                            selected="L"
-                                            placeholder="Select T-Shirt Size"
-                                        />
-                                    </div>
+                                    @if($event->tshirt_enabled)
+                                        <div>
+                                            <label class="block text-xs font-semibold text-slate-300 mb-1 flex items-center justify-between">
+                                                <span>T-Shirt Size Preference</span>
+                                                @if($event->tshirt_required)
+                                                    <span class="text-[10px] text-rose-400 font-bold uppercase tracking-wider">Required</span>
+                                                @else
+                                                    <span class="text-[10px] text-slate-400 font-normal">Optional</span>
+                                                @endif
+                                            </label>
+                                            <x-custom-dropdown
+                                                name="tshirt_size"
+                                                :options="array_merge(
+                                                    $event->tshirt_required ? [] : [['value' => '', 'label' => 'None / Not Applicable']],
+                                                    array_map(fn($s) => ['value' => $s, 'label' => 'Size ' . $s], \App\Models\EventRegistration::TSHIRT_SIZES)
+                                                )"
+                                                :selected="old('tshirt_size', $event->tshirt_required ? 'L' : '')"
+                                                placeholder="Select T-Shirt Size"
+                                            />
+                                            @error('tshirt_size')
+                                                <p class="text-[11px] text-rose-400 mt-1">{{ $message }}</p>
+                                            @enderror
+                                        </div>
+                                    @endif
 
-                                    <div>
-                                        <label class="block text-xs font-semibold text-slate-300 mb-1">Dietary Restrictions</label>
-                                        <x-custom-dropdown
-                                            name="food_restrictions"
-                                            :options="array_map(fn($f) => ['value' => $f, 'label' => $f], \App\Models\EventRegistration::FOOD_RESTRICTIONS)"
-                                            selected="None"
-                                            placeholder="Select Restriction"
-                                        />
-                                    </div>
+                                    @if($event->dietary_enabled)
+                                        <div>
+                                            <label class="block text-xs font-semibold text-slate-300 mb-1 flex items-center justify-between">
+                                                <span>Dietary Restrictions</span>
+                                                @if($event->dietary_required)
+                                                    <span class="text-[10px] text-rose-400 font-bold uppercase tracking-wider">Required</span>
+                                                @else
+                                                    <span class="text-[10px] text-slate-400 font-normal">Optional</span>
+                                                @endif
+                                            </label>
+                                            <x-custom-dropdown
+                                                name="food_restrictions"
+                                                :options="array_merge(
+                                                    $event->dietary_required ? [] : [['value' => '', 'label' => 'None / Not Specified']],
+                                                    array_map(fn($f) => ['value' => $f, 'label' => $f], \App\Models\EventRegistration::FOOD_RESTRICTIONS)
+                                                )"
+                                                :selected="old('food_restrictions', $event->dietary_required ? 'None' : '')"
+                                                placeholder="Select Restriction"
+                                            />
+                                            @error('food_restrictions')
+                                                <p class="text-[11px] text-rose-400 mt-1">{{ $message }}</p>
+                                            @enderror
+                                        </div>
+                                    @endif
 
                                     <button type="submit" class="btn-primary w-full text-xs py-2.5 font-bold shadow-lg shadow-[#560E0F]/20 flex items-center justify-center gap-2">
                                         <i data-lucide="ticket" class="w-4 h-4"></i>

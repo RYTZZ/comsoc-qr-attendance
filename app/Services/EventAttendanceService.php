@@ -49,13 +49,14 @@ class EventAttendanceService
             ];
         }
 
-        // 3. Authenticate dynamic QR token & check single-use anti-replay
-        $tokenValidation = $this->dynamicQrService->validateAndConsumeToken($qrTokenPayload, $organizer);
+        // 3. Authenticate dynamic QR token & check single-use anti-replay (scoped to event)
+        $tokenValidation = $this->dynamicQrService->validateAndConsumeToken($qrTokenPayload, $organizer, $event);
         if (!$tokenValidation['valid']) {
             $resultType = match ($tokenValidation['code']) {
                 'expired_token' => 'Expired',
                 'already_used' => 'Duplicate',
                 'ineligible_member' => 'Ineligible',
+                'event_mismatch' => 'Wrong event',
                 default => 'Invalid token',
             };
 
@@ -69,6 +70,33 @@ class EventAttendanceService
 
         /** @var User $member */
         $member = $tokenValidation['user'];
+
+        // 3b. Verify event registration eligibility: Student must be registered or joined for this event
+        $student = $member->student;
+        $isRegistered = \App\Models\EventRegistration::where('event_id', $event->id)
+            ->where('status', 'approved')
+            ->where(function ($q) use ($member, $student) {
+                $q->where('user_id', $member->id)
+                  ->orWhere('email', strtolower($member->email));
+                if ($student) {
+                    $q->orWhere('email', strtolower($student->email));
+                }
+            })
+            ->exists();
+
+        if ($event->requires_registration && !$isRegistered) {
+            return [
+                'success' => false,
+                'code' => 'not_registered',
+                'message' => "Registration Required: {$member->display_name} has not registered for this event.",
+                'result_type' => 'Ineligible',
+                'member' => [
+                    'name' => $member->display_name,
+                    'student_number' => $member->student_number,
+                ],
+            ];
+        }
+
         $action = $session->isInSession() ? 'in' : 'out';
 
         // 4. Validate time-in / time-out sequencing:

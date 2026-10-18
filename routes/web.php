@@ -83,6 +83,9 @@ Route::middleware(['auth', 'verified', 'require_password_change'])->group(functi
 
     Route::get('/tickets', [\App\Http\Controllers\MemberTicketController::class, 'index'])->name('tickets.index');
     Route::get('/tickets/{ticket}', [\App\Http\Controllers\MemberTicketController::class, 'show'])->name('tickets.show');
+    Route::post('/tickets/{ticket}/refresh-qr', [\App\Http\Controllers\MemberTicketController::class, 'refreshQr'])
+        ->middleware('throttle:60,1')
+        ->name('tickets.refresh_qr');
     Route::get('/tickets/{ticket}/qr', [\App\Http\Controllers\MemberTicketController::class, 'downloadQr'])->name('tickets.qr');
 
     Route::get('/ledger', [\App\Http\Controllers\MemberLedgerController::class, 'index'])->name('ledger.index');

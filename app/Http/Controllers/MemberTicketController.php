@@ -3,12 +3,18 @@
 namespace App\Http\Controllers;
 
 use App\Models\EventRegistration;
+use App\Services\DynamicQrService;
 use App\Services\QrPngRenderer;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\View\View;
 
 class MemberTicketController extends Controller
 {
+    public function __construct(
+        private DynamicQrService $dynamicQrService
+    ) {}
+
     public function index(): View
     {
         $user = auth()->user();
@@ -44,14 +50,19 @@ class MemberTicketController extends Controller
         $attendanceSessions = $event->attendanceSessions()->where('is_active', true)->orderBy('opens_at')->get();
 
         $attendanceRecords = collect();
-        if ($ticket->qr_token) {
+        if ($ticket->qr_token || $ticket->user_id) {
             $attendanceRecords = $event->attendanceRecords()
                 ->where(function ($q) use ($ticket, $student) {
-                    $q->where('qr_token', $ticket->qr_token)
-                      ->orWhere(function ($sub) use ($ticket) {
-                          $sub->where('participant_type', 'non_student')
-                              ->where('participant_id', $ticket->id);
-                      });
+                    if ($ticket->qr_token) {
+                        $q->where('qr_token', $ticket->qr_token);
+                    }
+                    if ($ticket->user_id) {
+                        $q->orWhere('user_id', $ticket->user_id);
+                    }
+                    $q->orWhere(function ($sub) use ($ticket) {
+                        $sub->where('participant_type', 'non_student')
+                            ->where('participant_id', $ticket->id);
+                    });
                     if ($student) {
                         $subQueryStudent = function ($sub2) use ($student) {
                             $sub2->where('participant_type', 'student')
@@ -63,12 +74,28 @@ class MemberTicketController extends Controller
                 ->get();
         }
 
-        return view('tickets.show', compact('ticket', 'event', 'attendanceSessions', 'attendanceRecords'));
+        // Generate event-specific dynamic rolling QR token for approved ticket holders
+        $dynamicPass = null;
+        if ($ticket->status === 'approved' && $user->is_active && $user->is_eligible) {
+            $tokenData = $this->dynamicQrService->generateTokenForUser($user, $event);
+            $dynamicPass = [
+                'payload' => $tokenData['qr_payload'],
+                'manual_token' => $tokenData['manual_token'],
+                'formatted_manual_token' => $tokenData['formatted_manual_token'],
+                'expires_at' => $tokenData['expires_at'],
+                'ttl' => DynamicQrService::TOKEN_TTL_SECONDS,
+            ];
+        }
+
+        return view('tickets.show', compact('ticket', 'event', 'attendanceSessions', 'attendanceRecords', 'dynamicPass'));
     }
 
-    public function downloadQr(EventRegistration $ticket)
+    /**
+     * API endpoint called every 30 seconds to refresh the event-specific rolling dynamic QR pass.
+     */
+    public function refreshQr(EventRegistration $ticket, Request $request): JsonResponse
     {
-        $user = auth()->user();
+        $user = $request->user();
         $student = $user->student;
 
         $canView = $ticket->user_id === $user->id
@@ -76,14 +103,45 @@ class MemberTicketController extends Controller
             || ($student && strtolower($ticket->email) === strtolower($student->email))
             || $user->isAdmin();
 
-        abort_unless($canView, 403);
-        abort_unless($ticket->qr_token, 404);
+        if (!$canView) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Unauthorized access to this event pass.',
+            ], 403);
+        }
 
-        $qrImage = QrPngRenderer::generate($ticket->qr_token, 300, 1);
-        $filename = 'ticket_' . $ticket->ticket_code . '.png';
+        if ($ticket->status !== 'approved') {
+            return response()->json([
+                'success' => false,
+                'message' => 'Registration pass is not active or approved.',
+            ], 403);
+        }
 
-        return response($qrImage)
-            ->header('Content-Type', 'image/png')
-            ->header('Content-Disposition', 'attachment; filename="' . $filename . '"');
+        if (!$user->is_active || !$user->is_eligible) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Member account is inactive or ineligible.',
+            ], 403);
+        }
+
+        $event = $ticket->event;
+        $tokenData = $this->dynamicQrService->generateTokenForUser($user, $event);
+
+        return response()->json([
+            'success' => true,
+            'payload' => $tokenData['qr_payload'],
+            'manual_token' => $tokenData['manual_token'],
+            'formatted_manual_token' => $tokenData['formatted_manual_token'],
+            'expires_at' => $tokenData['expires_at'],
+            'ttl' => $tokenData['ttl'],
+            'timestamp' => now()->toIso8601String(),
+        ]);
+    }
+
+    public function downloadQr(EventRegistration $ticket)
+    {
+        // Direct static download is discontinued for security; redirect to dynamic pass view.
+        return redirect()->route('tickets.show', $ticket)
+            ->with('info', 'Static QR pass downloads have been replaced with the secure 30-second Dynamic QR Pass.');
     }
 }

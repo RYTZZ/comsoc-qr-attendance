@@ -17,13 +17,15 @@ class DynamicQrService
     /**
      * Generate a new rolling single-use QR payload and short human-friendly manual token for a member.
      * The payload is signed and encrypted with an expiration timestamp and unique token identifier.
+     * Optionally scoped to an event (for event-specific dynamic passes).
      */
-    public function generateTokenForUser(User $user): array
+    public function generateTokenForUser(User $user, ?\App\Models\Event $event = null): array
     {
         // Generate cryptographic token
         $rawEntropy = Str::random(32);
         $expiresAt = now()->addSeconds(self::TOKEN_TTL_SECONDS);
-        $tokenHash = hash('sha256', $rawEntropy . $user->id . $expiresAt->timestamp);
+        $eventId = $event?->id;
+        $tokenHash = hash('sha256', $rawEntropy . $user->id . ($eventId ?? '') . $expiresAt->timestamp);
 
         // Generate easy-to-type, unambiguous 6-character manual attendance token (e.g., "7K9-MP4")
         $manualToken = $this->generateUniqueManualToken();
@@ -32,6 +34,7 @@ class DynamicQrService
         // Store active token record with TTL
         DynamicQrToken::create([
             'user_id' => $user->id,
+            'event_id' => $eventId,
             'token_hash' => $tokenHash,
             'manual_token' => $manualToken,
             'expires_at' => $expiresAt,
@@ -43,10 +46,11 @@ class DynamicQrService
             ->where('expires_at', '<', now()->subMinutes(5))
             ->delete();
 
-        // Build signed payload string: "v1|userId|expiresAt|tokenHash"
+        // Build signed payload string: "v1|userId|eventId|expiresAt|tokenHash"
         $payloadData = [
             'v' => 1,
             'uid' => $user->id,
+            'eid' => $eventId,
             'exp' => $expiresAt->timestamp,
             'hash' => $tokenHash,
             'man' => $manualToken,
@@ -62,6 +66,7 @@ class DynamicQrService
             'formatted_manual_token' => $formattedToken,
             'expires_at' => $expiresAt->toIso8601String(),
             'ttl' => self::TOKEN_TTL_SECONDS,
+            'event_id' => $eventId,
             'member' => [
                 'name' => $user->display_name,
                 'student_number' => $user->student_number ?? 'N/A',
@@ -107,22 +112,23 @@ class DynamicQrService
 
     /**
      * Validate and atomically consume a dynamic QR token or manual token scanned/entered by an organizer.
+     * Optionally validates that the token was issued for the expected event.
      */
-    public function validateAndConsumeToken(string $scannedString, User $organizer): array
+    public function validateAndConsumeToken(string $scannedString, User $organizer, ?\App\Models\Event $expectedEvent = null): array
     {
         $raw = trim($scannedString);
 
         // Check if this is a manual token input (e.g., "7K9-MP4" or "7K9MP4")
         $cleanManual = preg_replace('/[^A-Za-z0-9]/', '', strtoupper($raw));
         if (strlen($cleanManual) === 6 && preg_match('/^[A-Z0-9]{6}$/', $cleanManual)) {
-            return $this->validateAndConsumeManualToken($cleanManual, $organizer);
+            return $this->validateAndConsumeManualToken($cleanManual, $organizer, $expectedEvent);
         }
 
         $decoded = base64_decode($raw, true);
         if (!$decoded || !str_contains($decoded, '::')) {
             // Check if string directly matches a manual token in database
             if (strlen($cleanManual) > 0) {
-                return $this->validateAndConsumeManualToken($cleanManual, $organizer);
+                return $this->validateAndConsumeManualToken($cleanManual, $organizer, $expectedEvent);
             }
 
             return [
@@ -166,7 +172,20 @@ class DynamicQrService
             ];
         }
 
-        // 3. Check database record & anti-replay single-use constraint
+        // 3. Event-specific scope check (if payload has event_id or expectedEvent is specified)
+        if ($expectedEvent) {
+            $payloadEventId = $payload['eid'] ?? null;
+            if ($payloadEventId && $payloadEventId !== $expectedEvent->id) {
+                return [
+                    'valid' => false,
+                    'code' => 'event_mismatch',
+                    'message' => 'This QR pass was issued for a different event.',
+                    'user' => null,
+                ];
+            }
+        }
+
+        // 4. Check database record & anti-replay single-use constraint
         $tokenRecord = DynamicQrToken::where('token_hash', $payload['hash'])
             ->where('user_id', $payload['uid'])
             ->first();
@@ -180,6 +199,15 @@ class DynamicQrService
             ];
         }
 
+        if ($expectedEvent && $tokenRecord->event_id && $tokenRecord->event_id !== $expectedEvent->id) {
+            return [
+                'valid' => false,
+                'code' => 'event_mismatch',
+                'message' => 'This QR pass was issued for a different event.',
+                'user' => null,
+            ];
+        }
+
         if ($tokenRecord->is_consumed) {
             return [
                 'valid' => false,
@@ -189,7 +217,7 @@ class DynamicQrService
             ];
         }
 
-        // 4. Resolve member user
+        // 5. Resolve member user
         $member = User::find($payload['uid']);
         if (!$member) {
             return [
@@ -209,7 +237,7 @@ class DynamicQrService
             ];
         }
 
-        // 5. Atomically consume token
+        // 6. Atomically consume token
         $tokenRecord->update([
             'is_consumed' => true,
             'consumed_at' => now(),
@@ -228,34 +256,44 @@ class DynamicQrService
     /**
      * Validate and atomically consume a human-friendly manual attendance token.
      */
-    public function validateAndConsumeManualToken(string $rawToken, User $organizer): array
+    public function validateAndConsumeManualToken(string $rawToken, User $organizer, ?\App\Models\Event $expectedEvent = null): array
     {
         $normalized = preg_replace('/[^A-Za-z0-9]/', '', strtoupper($rawToken));
 
+        $tokenQuery = function ($t) use ($expectedEvent) {
+            $q = DynamicQrToken::where('manual_token', $t)
+                ->where('expires_at', '>', now()->subSeconds(5))
+                ->where('is_consumed', false);
+            if ($expectedEvent) {
+                $q->where(function ($sub) use ($expectedEvent) {
+                    $sub->whereNull('event_id')->orWhere('event_id', $expectedEvent->id);
+                });
+            }
+            return $q->latest()->first();
+        };
+
         // Attempt exact match first
-        $tokenRecord = DynamicQrToken::where('manual_token', $normalized)
-            ->where('expires_at', '>', now()->subSeconds(5))
-            ->where('is_consumed', false)
-            ->latest()
-            ->first();
+        $tokenRecord = $tokenQuery($normalized);
 
         // If not found, check with ambiguous replacements (O -> 0, I -> 1 or vice-versa)
         if (!$tokenRecord) {
             $trans = strtr($normalized, ['O' => '0', '0' => 'O', 'I' => '1', '1' => 'I', 'L' => '1']);
-            $tokenRecord = DynamicQrToken::where('manual_token', $trans)
-                ->where('expires_at', '>', now()->subSeconds(5))
-                ->where('is_consumed', false)
-                ->latest()
-                ->first();
+            $tokenRecord = $tokenQuery($trans);
         }
 
-        // If still not found, check if it already expired or was consumed
+        // If still not found, check if it already expired, was consumed, or was for another event
         if (!$tokenRecord) {
-            $consumedOrExpired = DynamicQrToken::where(function ($q) use ($normalized) {
-                $q->where('manual_token', $normalized);
-            })->latest()->first();
+            $consumedOrExpired = DynamicQrToken::where('manual_token', $normalized)->latest()->first();
 
             if ($consumedOrExpired) {
+                if ($expectedEvent && $consumedOrExpired->event_id && $consumedOrExpired->event_id !== $expectedEvent->id) {
+                    return [
+                        'valid' => false,
+                        'code' => 'event_mismatch',
+                        'message' => 'This attendance token was issued for a different event.',
+                        'user' => null,
+                    ];
+                }
                 if ($consumedOrExpired->is_consumed) {
                     return [
                         'valid' => false,

@@ -54,6 +54,13 @@ class EventController extends Controller
             $data['location'] = $data['venue_name'];
         }
 
+        $data['requires_registration'] = $request->boolean('requires_registration');
+        $data['allow_non_students'] = $request->boolean('allow_non_students');
+        $data['tshirt_enabled'] = $request->boolean('tshirt_enabled');
+        $data['tshirt_required'] = $data['tshirt_enabled'] && $request->boolean('tshirt_required');
+        $data['dietary_enabled'] = $request->boolean('dietary_enabled');
+        $data['dietary_required'] = $data['dietary_enabled'] && $request->boolean('dietary_required');
+
         $event = Event::create($data);
 
         AuditLogger::log('event.created', $event, [], $event->toArray());
@@ -105,6 +112,14 @@ class EventController extends Controller
                 $data['registration_deadline'] = null;
             }
         }
+
+        // Handle boolean checkboxes that may not be submitted when unchecked
+        $data['requires_registration'] = $request->boolean('requires_registration');
+        $data['allow_non_students'] = $request->boolean('allow_non_students');
+        $data['tshirt_enabled'] = $request->boolean('tshirt_enabled');
+        $data['tshirt_required'] = $data['tshirt_enabled'] && $request->boolean('tshirt_required');
+        $data['dietary_enabled'] = $request->boolean('dietary_enabled');
+        $data['dietary_required'] = $data['dietary_enabled'] && $request->boolean('dietary_required');
 
         $old = $event->toArray();
         $event->update($data);
@@ -332,6 +347,10 @@ class EventController extends Controller
             'attendance_ends_at' => ['nullable', 'date_format:H:i'],
             'max_participants' => ['nullable', 'integer', 'min:1'],
             'requires_registration' => ['nullable', 'boolean'],
+            'tshirt_enabled' => ['nullable', 'boolean'],
+            'tshirt_required' => ['nullable', 'boolean'],
+            'dietary_enabled' => ['nullable', 'boolean'],
+            'dietary_required' => ['nullable', 'boolean'],
             'allow_non_students' => ['nullable', 'boolean'],
             'is_published' => ['nullable', 'boolean'],
             'status' => ['nullable', 'in:draft,approved,published,registration_open,registration_closed,ongoing,completed,archived'],

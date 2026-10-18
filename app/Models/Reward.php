@@ -13,6 +13,8 @@ class Reward extends Model
 
     public const CATEGORIES = [
         'Computing Society merchandise',
+        'Apparel',
+        'T-shirts',
         'Tote bags',
         'Caps',
         'Pins',

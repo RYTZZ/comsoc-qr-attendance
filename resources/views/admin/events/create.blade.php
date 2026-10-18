@@ -256,6 +256,88 @@
                 </div>
             </label>
         </div>
+
+        <div class="pt-4 border-t border-slate-800/80 space-y-4"
+             x-data="{
+                 tshirtEnabled: {{ old('tshirt_enabled', true) ? 'true' : 'false' }},
+                 dietaryEnabled: {{ old('dietary_enabled', true) ? 'true' : 'false' }}
+             }">
+            <div>
+                <h3 class="text-xs font-bold uppercase tracking-wider text-slate-300 flex items-center gap-2">
+                    <i data-lucide="sliders" class="w-3.5 h-3.5 text-[#e07e83]"></i>
+                    Registration Form Custom Fields
+                </h3>
+                <p class="text-[11px] text-slate-400 mt-0.5">Enable or disable specific attendee preference fields and decide whether each field is optional or mandatory.</p>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <!-- T-Shirt Preference Setting -->
+                <div class="p-4 rounded-xl bg-slate-950/70 border border-slate-800 space-y-3">
+                    <div class="flex items-center justify-between">
+                        <label class="flex items-center gap-2.5 cursor-pointer">
+                            <input type="checkbox" name="tshirt_enabled" value="1" x-model="tshirtEnabled" class="w-4 h-4 rounded bg-[#12141c] border-slate-700 text-[#560E0F] focus:ring-[#560E0F]" />
+                            <span class="text-xs font-bold text-white flex items-center gap-1.5">
+                                <i data-lucide="shirt" class="w-3.5 h-3.5 text-indigo-400"></i>
+                                T-Shirt Size Preference
+                            </span>
+                        </label>
+                        <span class="text-[10px] uppercase font-bold px-2 py-0.5 rounded"
+                              :class="tshirtEnabled ? 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/20' : 'bg-slate-800 text-slate-400'">
+                            <span x-text="tshirtEnabled ? 'Enabled' : 'Disabled'"></span>
+                        </span>
+                    </div>
+
+                    <p class="text-[11px] text-slate-400">Collects t-shirt size choice from registering attendees.</p>
+
+                    <div x-show="tshirtEnabled" x-transition class="pt-2 border-t border-slate-800/80 flex items-center justify-between">
+                        <span class="text-[11px] text-slate-300 font-medium">Field Requirement:</span>
+                        <div class="flex items-center gap-3 text-xs">
+                            <label class="flex items-center gap-1.5 cursor-pointer text-slate-300">
+                                <input type="radio" name="tshirt_required" value="0" {{ old('tshirt_required', '0') === '1' ? '' : 'checked' }} class="text-[#560E0F] focus:ring-[#560E0F]" />
+                                <span>Optional (Default)</span>
+                            </label>
+                            <label class="flex items-center gap-1.5 cursor-pointer text-slate-300">
+                                <input type="radio" name="tshirt_required" value="1" {{ old('tshirt_required') === '1' ? 'checked' : '' }} class="text-[#560E0F] focus:ring-[#560E0F]" />
+                                <span class="text-rose-400 font-semibold">Required</span>
+                            </label>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Dietary Restrictions Setting -->
+                <div class="p-4 rounded-xl bg-slate-950/70 border border-slate-800 space-y-3">
+                    <div class="flex items-center justify-between">
+                        <label class="flex items-center gap-2.5 cursor-pointer">
+                            <input type="checkbox" name="dietary_enabled" value="1" x-model="dietaryEnabled" class="w-4 h-4 rounded bg-[#12141c] border-slate-700 text-[#560E0F] focus:ring-[#560E0F]" />
+                            <span class="text-xs font-bold text-white flex items-center gap-1.5">
+                                <i data-lucide="utensils" class="w-3.5 h-3.5 text-amber-400"></i>
+                                Dietary Restrictions
+                            </span>
+                        </label>
+                        <span class="text-[10px] uppercase font-bold px-2 py-0.5 rounded"
+                              :class="dietaryEnabled ? 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/20' : 'bg-slate-800 text-slate-400'">
+                            <span x-text="dietaryEnabled ? 'Enabled' : 'Disabled'"></span>
+                        </span>
+                    </div>
+
+                    <p class="text-[11px] text-slate-400">Collects food allergy and dietary requirements from registering attendees.</p>
+
+                    <div x-show="dietaryEnabled" x-transition class="pt-2 border-t border-slate-800/80 flex items-center justify-between">
+                        <span class="text-[11px] text-slate-300 font-medium">Field Requirement:</span>
+                        <div class="flex items-center gap-3 text-xs">
+                            <label class="flex items-center gap-1.5 cursor-pointer text-slate-300">
+                                <input type="radio" name="dietary_required" value="0" {{ old('dietary_required', '0') === '1' ? '' : 'checked' }} class="text-[#560E0F] focus:ring-[#560E0F]" />
+                                <span>Optional (Default)</span>
+                            </label>
+                            <label class="flex items-center gap-1.5 cursor-pointer text-slate-300">
+                                <input type="radio" name="dietary_required" value="1" {{ old('dietary_required') === '1' ? 'checked' : '' }} class="text-[#560E0F] focus:ring-[#560E0F]" />
+                                <span class="text-rose-400 font-semibold">Required</span>
+                            </label>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
     <div class="card space-y-4">
         <div class="border-b border-slate-800 pb-3 flex items-center justify-between">
             <div class="flex items-center gap-2">

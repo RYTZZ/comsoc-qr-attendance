@@ -13,6 +13,7 @@ class DynamicQrToken extends Model
 
     protected $fillable = [
         'user_id',
+        'event_id',
         'token_hash',
         'manual_token',
         'expires_at',
@@ -30,6 +31,11 @@ class DynamicQrToken extends Model
     public function user(): BelongsTo
     {
         return $this->belongsTo(User::class);
+    }
+
+    public function event(): BelongsTo
+    {
+        return $this->belongsTo(Event::class);
     }
 
     public function consumer(): BelongsTo
