@@ -39,6 +39,11 @@ class AttendanceSession extends Model
         };
     }
 
+    public function getNameAttribute(): string
+    {
+        return $this->getLabelAttribute();
+    }
+
     public function isInSession(): bool
     {
         return in_array($this->type, ['morning_in', 'afternoon_in']);

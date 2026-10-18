@@ -225,7 +225,7 @@ class EventAttendanceService
         // Award through authoritative ExpLedgerService
         $expirationDays = $event->exp_expiration_days; // null = non-expiring
 
-        return $this->expLedgerService->creditExp(
+        $creditResult = $this->expLedgerService->creditExp(
             user: $member,
             amount: $calculatedExp,
             sourceType: 'attendance',
@@ -235,6 +235,37 @@ class EventAttendanceService
             idempotencyKey: $idempotencyKey,
             actor: $actor
         );
+
+        // Also credit configured event points (if any) to point ledger and season stats
+        $pointsAmount = (int) ($event->reward_points ?? 0);
+        if ($creditResult['awarded'] && $pointsAmount > 0) {
+            $pointsKey = $idempotencyKey . '_points';
+            $existingPt = \App\Models\PointTransaction::where('idempotency_key', $pointsKey)->first();
+            if (!$existingPt) {
+                $activeSeason = \App\Models\Season::where('is_active', true)->first();
+                \App\Models\PointTransaction::create([
+                    'user_id' => $member->id,
+                    'season_id' => $activeSeason?->id,
+                    'amount' => $pointsAmount,
+                    'transaction_type' => 'event_attendance',
+                    'source_type' => Event::class,
+                    'source_id' => $event->id,
+                    'description' => "Event Attendance Points: {$event->name} ({$outSession->label})",
+                    'idempotency_key' => $pointsKey,
+                    'created_by' => $actor?->id,
+                ]);
+
+                if ($activeSeason) {
+                    $stat = \App\Models\MemberSeasonStat::firstOrCreate(
+                        ['user_id' => $member->id, 'season_id' => $activeSeason->id],
+                        ['season_xp' => 0, 'redeemable_points' => 0, 'current_level' => 1]
+                    );
+                    $stat->increment('redeemable_points', $pointsAmount);
+                }
+            }
+        }
+
+        return $creditResult;
     }
 
     /**

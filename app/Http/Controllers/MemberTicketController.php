@@ -41,7 +41,7 @@ class MemberTicketController extends Controller
         abort_unless($canView, 403);
 
         $event = $ticket->event;
-        $attendanceSessions = $event->attendanceSessions()->where('is_active', true)->orderBy('order')->get();
+        $attendanceSessions = $event->attendanceSessions()->where('is_active', true)->orderBy('opens_at')->get();
 
         $attendanceRecords = collect();
         if ($ticket->qr_token) {

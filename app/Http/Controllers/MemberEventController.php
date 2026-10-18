@@ -76,7 +76,7 @@ class MemberEventController extends Controller
 
         $activeSessions = $event->attendanceSessions()
             ->where('is_active', true)
-            ->orderBy('order')
+            ->orderBy('opens_at')
             ->get();
 
         $attendanceRecords = collect();

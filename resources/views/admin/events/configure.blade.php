@@ -678,7 +678,37 @@
 
     <div class="card space-y-4">
         <div class="border-b border-slate-800 pb-3 flex items-center justify-between">
-            <h2 class="section-title text-base font-brand-display">6. Additional Settings</h2>
+            <div class="flex items-center gap-2">
+                <i data-lucide="award" class="w-4 h-4 text-amber-400"></i>
+                <h2 class="section-title text-base font-brand-display">6. Rewards & Recognition</h2>
+            </div>
+            <span class="text-[11px] text-slate-500 font-mono">EXP & Points Economy</span>
+        </div>
+
+        <p class="text-xs text-slate-400">
+            Configure the rewards awarded to eligible participants upon verified attendance completion.
+        </p>
+
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div>
+                <label for="reward_xp" class="label">EXP Earned</label>
+                <input id="reward_xp" name="reward_xp" type="number" min="0" value="{{ old('reward_xp', $event->reward_xp ?? 50) }}" class="input font-mono" placeholder="e.g. 50" />
+                <p class="text-[11px] text-slate-500 mt-1">Amount of EXP credited to qualifying attendees.</p>
+                @error('reward_xp')<p class="text-red-400 text-xs mt-1">{{ $message }}</p>@enderror
+            </div>
+
+            <div>
+                <label for="reward_points" class="label">Points Earned</label>
+                <input id="reward_points" name="reward_points" type="number" min="0" value="{{ old('reward_points', $event->reward_points ?? 10) }}" class="input font-mono" placeholder="e.g. 10" />
+                <p class="text-[11px] text-slate-500 mt-1">Amount of points awarded for the season standings.</p>
+                @error('reward_points')<p class="text-red-400 text-xs mt-1">{{ $message }}</p>@enderror
+            </div>
+        </div>
+    </div>
+
+    <div class="card space-y-4">
+        <div class="border-b border-slate-800 pb-3 flex items-center justify-between">
+            <h2 class="section-title text-base font-brand-display">7. Additional Settings</h2>
             <span class="text-[11px] text-slate-500 font-mono">Snacks & Lifecycle State</span>
         </div>
 
