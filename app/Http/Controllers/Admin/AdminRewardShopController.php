@@ -20,6 +20,8 @@ class AdminRewardShopController extends Controller
         $tab = $request->input('tab', 'requests');
         $eventFilter = $request->input('event_id');
         $catalogStatusFilter = $request->input('catalog_status', 'all');
+        $categoryFilter = $request->input('category', 'all');
+        $search = $request->input('search');
 
         $redemptionsQuery = RewardRedemption::with(['user.student', 'reward', 'fulfiller']);
 
@@ -27,7 +29,15 @@ class AdminRewardShopController extends Controller
             $redemptionsQuery->where('status', $statusFilter);
         }
 
-        $redemptions = $redemptionsQuery->latest()->paginate(15, ['*'], 'requests_page');
+        if ($search && $tab === 'requests') {
+            $redemptionsQuery->where(function ($q) use ($search) {
+                $q->where('claim_code', 'like', "%{$search}%")
+                    ->orWhere('item_title_snapshot', 'like', "%{$search}%")
+                    ->orWhereHas('user', fn($uq) => $uq->where('name', 'like', "%{$search}%"));
+            });
+        }
+
+        $redemptions = $redemptionsQuery->latest()->paginate(15, ['*'], 'requests_page')->withQueryString();
 
         $rewardsQuery = Reward::with(['event'])->withCount('redemptions');
         if ($eventFilter) {
@@ -38,8 +48,19 @@ class AdminRewardShopController extends Controller
             $rewardsQuery->where('status', $catalogStatusFilter);
         }
 
+        if ($categoryFilter && $categoryFilter !== 'all') {
+            $rewardsQuery->where('category', $categoryFilter);
+        }
+
+        if ($search && $tab !== 'requests') {
+            $rewardsQuery->where(function ($q) use ($search) {
+                $q->where('title', 'like', "%{$search}%")
+                    ->orWhere('description', 'like', "%{$search}%");
+            });
+        }
+
         $rewards = $rewardsQuery->orderBy('created_at', 'desc')
-            ->paginate(15, ['*'], 'catalog_page');
+            ->paginate(15, ['*'], 'catalog_page')->withQueryString();
 
         $pendingCount = RewardRedemption::whereIn('status', ['pending', 'pending_collection'])->count();
         $events = \App\Models\Event::orderByDesc('event_date')->get();
@@ -60,6 +81,8 @@ class AdminRewardShopController extends Controller
             'rewards' => $rewards,
             'statusFilter' => $statusFilter,
             'catalogStatusFilter' => $catalogStatusFilter,
+            'categoryFilter' => $categoryFilter,
+            'search' => $search,
             'eventFilter' => $eventFilter,
             'tab' => $tab,
             'pendingCount' => $pendingCount,

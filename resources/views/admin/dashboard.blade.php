@@ -354,6 +354,12 @@
                 </div>
                 <p class="text-xs font-medium text-slate-300 group-hover:text-white leading-tight">Reward Economy</p>
             </a>
+            <a href="{{ route('admin.shop.index') }}" class="p-3 sm:p-4 rounded-xl bg-slate-800 hover:bg-slate-700 active:scale-[0.98] transition text-center group flex flex-col items-center justify-center min-h-[90px]">
+                <div class="mb-1.5 flex items-center justify-center text-slate-400 group-hover:text-white transition">
+                    <i data-lucide="gift" class="w-6 h-6 text-emerald-400"></i>
+                </div>
+                <p class="text-xs font-medium text-slate-300 group-hover:text-white leading-tight">Reward Shop</p>
+            </a>
             @if(auth()->user()->isSuperAdmin())
             <a href="{{ route('admin.students.exp-points.index') }}" class="p-3 sm:p-4 rounded-xl bg-slate-800 hover:bg-slate-700 active:scale-[0.98] transition text-center group flex flex-col items-center justify-center min-h-[90px]">
                 <div class="mb-1.5 flex items-center justify-center text-slate-400 group-hover:text-white transition">

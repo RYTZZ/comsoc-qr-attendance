@@ -330,15 +330,24 @@ class EventController extends Controller
             $opens = Carbon::parse($validated['registration_opens_at']);
             $deadline = Carbon::parse($validated['registration_deadline']);
             if ($opens->gt($deadline)) {
-                back()->withInput()->withErrors(['registration_opens_at' => 'Registration opening date & time must be before registration closing date & time.'])->throwResponse();
+                back()->withInput()->withErrors(['registration_opens_at' => 'Registration opening date & time must be before or equal to registration closing date & time.'])->throwResponse();
             }
         }
 
-        if (!empty($validated['registration_deadline']) && !empty($validated['starts_at'])) {
+        if (!empty($validated['registration_deadline'])) {
             $deadline = Carbon::parse($validated['registration_deadline']);
-            $starts = Carbon::parse($validated['starts_at']);
-            if ($deadline->gt($starts)) {
-                back()->withInput()->withErrors(['registration_deadline' => 'Registration closing date & time must be before or equal to event start time.'])->throwResponse();
+
+            // Validate against event completion/end time if provided, otherwise event start time
+            if (!empty($validated['ends_at'])) {
+                $ends = Carbon::parse($validated['ends_at']);
+                if ($deadline->gt($ends)) {
+                    back()->withInput()->withErrors(['registration_deadline' => 'Registration closing date & time cannot be after the event end time.'])->throwResponse();
+                }
+            } elseif (!empty($validated['starts_at'])) {
+                $starts = Carbon::parse($validated['starts_at']);
+                if ($deadline->gt($starts)) {
+                    back()->withInput()->withErrors(['registration_deadline' => 'Registration closing date & time must be before or equal to event start time when no end time is specified.'])->throwResponse();
+                }
             }
         }
 

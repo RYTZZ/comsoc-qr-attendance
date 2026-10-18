@@ -182,4 +182,96 @@ class AdminRewardPublishingAndNavigationTest extends TestCase
             'reward_id' => $reward->id,
         ]);
     }
+
+    public function test_per_member_redemption_limit_is_enforced(): void
+    {
+        $reward = Reward::create([
+            'title' => 'Limited Exclusive Pin',
+            'reward_type' => 'merchandise',
+            'category' => 'Pins',
+            'points_cost' => 10,
+            'min_level' => 1,
+            'stock' => 50,
+            'redemption_limit_per_member' => 1,
+            'status' => 'published',
+            'is_active' => true,
+        ]);
+
+        // Award plenty of EXP credits to member via ExpLedgerService
+        app(\App\Services\ExpLedgerService::class)->creditExp(
+            user: $this->member,
+            amount: 500,
+            sourceType: 'adjustment',
+            description: 'Test credits'
+        );
+
+        // First redemption succeeds
+        $firstResponse = $this->actingAs($this->member)->post(route('shop.redeem', $reward));
+        $firstResponse->assertSessionHas('success');
+        $this->assertDatabaseHas('reward_redemptions', [
+            'user_id' => $this->member->id,
+            'reward_id' => $reward->id,
+        ]);
+
+        // Second redemption attempt fails due to per-member limit
+        $secondResponse = $this->actingAs($this->member)->post(route('shop.redeem', $reward));
+        $secondResponse->assertSessionHas('error');
+        $this->assertEquals(1, \App\Models\RewardRedemption::where('user_id', $this->member->id)->where('reward_id', $reward->id)->count());
+    }
+
+    public function test_member_with_insufficient_exp_cannot_redeem_reward(): void
+    {
+        $reward = Reward::create([
+            'title' => 'Premium Mechanical Keyboard',
+            'reward_type' => 'physical',
+            'category' => 'Computing Society merchandise',
+            'points_cost' => 500,
+            'min_level' => 1,
+            'stock' => 5,
+            'status' => 'published',
+            'is_active' => true,
+        ]);
+
+        // Member has only 50 EXP
+        app(\App\Services\ExpLedgerService::class)->creditExp(
+            user: $this->member,
+            amount: 50,
+            sourceType: 'adjustment',
+            description: 'Test credits'
+        );
+
+        $response = $this->actingAs($this->member)->post(route('shop.redeem', $reward));
+        $response->assertSessionHas('error');
+        $this->assertDatabaseMissing('reward_redemptions', [
+            'user_id' => $this->member->id,
+            'reward_id' => $reward->id,
+        ]);
+    }
+
+    public function test_super_admin_can_archive_reward(): void
+    {
+        $reward = Reward::create([
+            'title' => 'Temporary Promo Cap',
+            'reward_type' => 'merchandise',
+            'category' => 'Caps',
+            'points_cost' => 40,
+            'min_level' => 1,
+            'stock' => 10,
+            'status' => 'published',
+            'is_active' => true,
+        ]);
+
+        $response = $this->actingAs($this->superAdmin)->post(route('admin.shop.archive', $reward));
+        $response->assertRedirect();
+        $reward->refresh();
+
+        $this->assertEquals('archived', $reward->status);
+        $this->assertFalse($reward->is_active);
+        $this->assertTrue($reward->is_archived);
+
+        // Member should no longer see archived reward in catalog
+        session()->flush();
+        $catalogResponse = $this->actingAs($this->member)->get(route('shop.index'));
+        $catalogResponse->assertDontSee('Temporary Promo Cap');
+    }
 }

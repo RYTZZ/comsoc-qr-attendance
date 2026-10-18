@@ -76,6 +76,21 @@ class MarketplaceService
                 ];
             }
 
+            // Check per-member redemption limit
+            if ($lockedReward->redemption_limit_per_member !== null && $lockedReward->redemption_limit_per_member > 0) {
+                $userRedemptionsCount = RewardRedemption::where('user_id', $user->id)
+                    ->where('reward_id', $lockedReward->id)
+                    ->whereNotIn('status', ['cancelled', 'refunded', 'rejected'])
+                    ->count();
+
+                if ($userRedemptionsCount >= $lockedReward->redemption_limit_per_member) {
+                    return [
+                        'success' => false,
+                        'message' => "Redemption limit reached. You can only redeem this reward up to {$lockedReward->redemption_limit_per_member} time(s).",
+                    ];
+                }
+            }
+
             // Check level requirement (driven by Lifetime EXP)
             $userLifetime = $user->getLifetimeExp();
             $userLevel = \App\Models\Level::forXp($userLifetime)->level;

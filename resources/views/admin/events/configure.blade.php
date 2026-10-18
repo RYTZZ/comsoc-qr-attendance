@@ -249,6 +249,7 @@
             <div>
                 <label for="registration_deadline" class="label">Registration Closes Date & Time</label>
                 <input id="registration_deadline" name="registration_deadline" type="datetime-local" value="{{ old('registration_deadline', $event->registration_deadline?->format('Y-m-d\TH:i')) }}" class="input" />
+                <p class="text-[10px] text-slate-500 mt-1">Can remain open up until event completion/end time.</p>
                 @error('registration_deadline')<p class="text-red-400 text-xs mt-1">{{ $message }}</p>@enderror
             </div>
         </div>

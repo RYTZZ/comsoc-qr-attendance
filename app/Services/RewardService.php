@@ -342,6 +342,20 @@ class RewardService
                 ];
             }
 
+            if ($lockedReward->redemption_limit_per_member !== null && $lockedReward->redemption_limit_per_member > 0) {
+                $userRedemptionsCount = RewardRedemption::where('user_id', $user->id)
+                    ->where('reward_id', $lockedReward->id)
+                    ->whereNotIn('status', ['cancelled', 'refunded', 'rejected'])
+                    ->count();
+
+                if ($userRedemptionsCount >= $lockedReward->redemption_limit_per_member) {
+                    return [
+                        'success' => false,
+                        'message' => "Redemption limit reached. You can only redeem this reward up to {$lockedReward->redemption_limit_per_member} time(s).",
+                    ];
+                }
+            }
+
             $activeSeason = Season::where('is_active', true)->first() ?: Season::latest('start_date')->first();
 
             $stat = $activeSeason

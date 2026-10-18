@@ -281,4 +281,200 @@ class EventEditTest extends TestCase
             'late_threshold' => '13:30',
         ]);
     }
+
+    public function test_reported_scenario_registration_opens_8am_closes_5pm_same_day(): void
+    {
+        $admin = User::factory()->create(['role' => 'super_admin']);
+        $ay = AcademicYear::create([
+            'label' => 'AY 2026-2027',
+            'year_start' => 2026,
+            'year_end' => 2027,
+            'semester' => '1st',
+            'is_active' => true,
+        ]);
+
+        $response = $this->actingAs($admin)->post(route('admin.events.store'), [
+            'name' => 'ComSoc Tech Day 2026',
+            'academic_year_id' => $ay->id,
+            'event_date' => '2026-10-22',
+            'starts_at' => '2026-10-22 08:30:00',
+            'ends_at' => '2026-10-22 17:00:00',
+            'venue_name' => 'Campus Gymnasium',
+            'registration_opens_at' => '2026-10-22T08:00',
+            'registration_deadline' => '2026-10-22T17:00',
+            'requires_registration' => '1',
+            'is_published' => '1',
+            'status' => 'published',
+        ]);
+
+        $response->assertSessionHasNoErrors();
+        $response->assertRedirect();
+        $this->assertDatabaseHas('events', [
+            'name' => 'ComSoc Tech Day 2026',
+            'registration_opens_at' => '2026-10-22 08:00:00',
+            'registration_deadline' => '2026-10-22 17:00:00',
+        ]);
+    }
+
+    public function test_registration_closing_at_exact_event_end_is_allowed(): void
+    {
+        $admin = User::factory()->create(['role' => 'super_admin']);
+        $ay = AcademicYear::create([
+            'label' => 'AY 2026-2027',
+            'year_start' => 2026,
+            'year_end' => 2027,
+            'semester' => '1st',
+            'is_active' => true,
+        ]);
+
+        $response = $this->actingAs($admin)->post(route('admin.events.store'), [
+            'name' => 'Hackathon Registration At End',
+            'academic_year_id' => $ay->id,
+            'event_date' => '2026-11-05',
+            'starts_at' => '2026-11-05 09:00:00',
+            'ends_at' => '2026-11-05 18:00:00',
+            'venue_name' => 'Innovation Lab',
+            'registration_opens_at' => '2026-11-01T08:00',
+            'registration_deadline' => '2026-11-05T18:00',
+        ]);
+
+        $response->assertSessionHasNoErrors();
+        $this->assertDatabaseHas('events', [
+            'name' => 'Hackathon Registration At End',
+            'registration_deadline' => '2026-11-05 18:00:00',
+        ]);
+    }
+
+    public function test_registration_closing_at_exact_event_start_is_allowed(): void
+    {
+        $admin = User::factory()->create(['role' => 'super_admin']);
+        $ay = AcademicYear::create([
+            'label' => 'AY 2026-2027',
+            'year_start' => 2026,
+            'year_end' => 2027,
+            'semester' => '1st',
+            'is_active' => true,
+        ]);
+
+        $response = $this->actingAs($admin)->post(route('admin.events.store'), [
+            'name' => 'Seminar Registration At Start',
+            'academic_year_id' => $ay->id,
+            'event_date' => '2026-11-10',
+            'starts_at' => '2026-11-10 09:00:00',
+            'ends_at' => '2026-11-10 12:00:00',
+            'venue_name' => 'AVR Hall',
+            'registration_opens_at' => '2026-11-01T08:00',
+            'registration_deadline' => '2026-11-10T09:00',
+        ]);
+
+        $response->assertSessionHasNoErrors();
+        $this->assertDatabaseHas('events', [
+            'name' => 'Seminar Registration At Start',
+            'registration_deadline' => '2026-11-10 09:00:00',
+        ]);
+    }
+
+    public function test_registration_closing_after_event_end_is_rejected(): void
+    {
+        $admin = User::factory()->create(['role' => 'super_admin']);
+        $ay = AcademicYear::create([
+            'label' => 'AY 2026-2027',
+            'year_start' => 2026,
+            'year_end' => 2027,
+            'semester' => '1st',
+            'is_active' => true,
+        ]);
+
+        $response = $this->actingAs($admin)->post(route('admin.events.store'), [
+            'name' => 'Overextended Registration Event',
+            'academic_year_id' => $ay->id,
+            'event_date' => '2026-11-12',
+            'starts_at' => '2026-11-12 08:00:00',
+            'ends_at' => '2026-11-12 17:00:00',
+            'venue_name' => 'AVR Hall',
+            'registration_opens_at' => '2026-11-01T08:00',
+            'registration_deadline' => '2026-11-12T17:01',
+        ]);
+
+        $response->assertSessionHasErrors(['registration_deadline']);
+    }
+
+    public function test_registration_closing_before_opening_is_rejected(): void
+    {
+        $admin = User::factory()->create(['role' => 'super_admin']);
+        $ay = AcademicYear::create([
+            'label' => 'AY 2026-2027',
+            'year_start' => 2026,
+            'year_end' => 2027,
+            'semester' => '1st',
+            'is_active' => true,
+        ]);
+
+        $response = $this->actingAs($admin)->post(route('admin.events.store'), [
+            'name' => 'Inverted Registration Event',
+            'academic_year_id' => $ay->id,
+            'event_date' => '2026-11-15',
+            'starts_at' => '2026-11-15 08:00:00',
+            'ends_at' => '2026-11-15 17:00:00',
+            'venue_name' => 'AVR Hall',
+            'registration_opens_at' => '2026-11-10T12:00',
+            'registration_deadline' => '2026-11-09T12:00',
+        ]);
+
+        $response->assertSessionHasErrors(['registration_opens_at']);
+    }
+
+    public function test_simultaneous_registration_open_and_close_is_allowed(): void
+    {
+        $admin = User::factory()->create(['role' => 'super_admin']);
+        $ay = AcademicYear::create([
+            'label' => 'AY 2026-2027',
+            'year_start' => 2026,
+            'year_end' => 2027,
+            'semester' => '1st',
+            'is_active' => true,
+        ]);
+
+        $response = $this->actingAs($admin)->post(route('admin.events.store'), [
+            'name' => 'Instant Registration Window',
+            'academic_year_id' => $ay->id,
+            'event_date' => '2026-11-20',
+            'starts_at' => '2026-11-20 08:00:00',
+            'ends_at' => '2026-11-20 17:00:00',
+            'venue_name' => 'Campus Gym',
+            'registration_opens_at' => '2026-11-20T08:00',
+            'registration_deadline' => '2026-11-20T08:00',
+        ]);
+
+        $response->assertSessionHasNoErrors();
+    }
+
+    public function test_multi_day_event_registration_closing_on_final_day_end_is_allowed(): void
+    {
+        $admin = User::factory()->create(['role' => 'super_admin']);
+        $ay = AcademicYear::create([
+            'label' => 'AY 2026-2027',
+            'year_start' => 2026,
+            'year_end' => 2027,
+            'semester' => '1st',
+            'is_active' => true,
+        ]);
+
+        $response = $this->actingAs($admin)->post(route('admin.events.store'), [
+            'name' => '3-Day Computing Convention',
+            'academic_year_id' => $ay->id,
+            'event_date' => '2026-11-25',
+            'starts_at' => '2026-11-25 08:00:00',
+            'ends_at' => '2026-11-27 17:00:00',
+            'venue_name' => 'Convention Center',
+            'registration_opens_at' => '2026-11-01T08:00',
+            'registration_deadline' => '2026-11-27T17:00',
+        ]);
+
+        $response->assertSessionHasNoErrors();
+        $this->assertDatabaseHas('events', [
+            'name' => '3-Day Computing Convention',
+            'registration_deadline' => '2026-11-27 17:00:00',
+        ]);
+    }
 }
