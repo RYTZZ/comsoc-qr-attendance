@@ -367,6 +367,12 @@
                 </div>
                 <p class="text-xs font-medium text-slate-300 group-hover:text-white leading-tight">Manage EXP & Points</p>
             </a>
+            <a href="{{ route('admin.users.index') }}" class="p-3 sm:p-4 rounded-xl bg-slate-800 hover:bg-slate-700 active:scale-[0.98] transition text-center group flex flex-col items-center justify-center min-h-[90px]">
+                <div class="mb-1.5 flex items-center justify-center text-slate-400 group-hover:text-white transition">
+                    <i data-lucide="shield" class="w-6 h-6 text-rose-400"></i>
+                </div>
+                <p class="text-xs font-medium text-slate-300 group-hover:text-white leading-tight">Officer Accounts</p>
+            </a>
             @endif
         </div>
     </div>

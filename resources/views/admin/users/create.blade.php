@@ -37,30 +37,63 @@
             <div>
                 <label for="admin_name" class="label">Full Name <span class="text-red-400">*</span></label>
                 <input id="admin_name" name="name" type="text" value="{{ old('name') }}"
+                       placeholder="e.g. Maria Santos"
                        class="input w-full" :required="accountType === 'admin'" />
                 @error('name')<p class="text-red-400 text-xs mt-1">{{ $message }}</p>@enderror
             </div>
 
-            <div>
-                <label for="admin_email" class="label">Username or Email Address <span class="text-red-400">*</span></label>
-                <input id="admin_email" name="email" type="text" value="{{ old('email') }}"
-                       class="input w-full" :required="accountType === 'admin'" />
-                @error('email')<p class="text-red-400 text-xs mt-1">{{ $message }}</p>@enderror
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div>
+                    <label for="admin_email" class="label">Email Address <span class="text-red-400">*</span></label>
+                    <input id="admin_email" name="email" type="email" value="{{ old('email') }}"
+                           placeholder="officer@domain.com"
+                           class="input w-full" :required="accountType === 'admin'" />
+                    @error('email')<p class="text-red-400 text-xs mt-1">{{ $message }}</p>@enderror
+                </div>
+
+                <div>
+                    <label for="admin_student_number" class="label">Student Number / Employee ID (Optional)</label>
+                    <input id="admin_student_number" name="student_number" type="text" value="{{ old('student_number') }}"
+                           placeholder="e.g. 2024-00123"
+                           class="input w-full" />
+                    @error('student_number')<p class="text-red-400 text-xs mt-1">{{ $message }}</p>@enderror
+                </div>
             </div>
 
-            <div>
-                <label for="admin_role" class="label">Administrative Role <span class="text-red-400">*</span></label>
-                <x-custom-dropdown name="role"
-                                   id="admin_role"
-                                   :options="[
-                                       'admin' => 'Admin (Operations & Registrations)',
-                                       'super_admin' => 'Super Admin (Full System Privileges)',
-                                       'staff' => 'Staff (Event Support)',
-                                       'treasurer' => 'Treasurer (Fee & Card Handler)',
-                                   ]"
-                                   :value="old('role', 'admin')"
-                                   placeholder="Select Role" />
-                @error('role')<p class="text-red-400 text-xs mt-1">{{ $message }}</p>@enderror
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div>
+                    <label for="officer_position" class="label">Organizational Position</label>
+                    @php
+                        $positionOpts = array_merge(['' => 'Select Position (Optional)'], $positions ?? []);
+                    @endphp
+                    <x-custom-dropdown name="officer_position"
+                                       id="officer_position"
+                                       :options="$positionOpts"
+                                       :value="old('officer_position')"
+                                       placeholder="Select Position" />
+                    <p class="text-[11px] text-slate-500 mt-1">E.g., Treasurer, Auditor, Event Organizer, PIO.</p>
+                    @error('officer_position')<p class="text-red-400 text-xs mt-1">{{ $message }}</p>@enderror
+                </div>
+
+                <div>
+                    <label for="admin_role" class="label">System Role & Permissions <span class="text-red-400">*</span></label>
+                    <x-custom-dropdown name="role"
+                                       id="admin_role"
+                                       :options="$systemRoles ?? [
+                                           'super_admin' => 'Super Admin (Full System Privileges)',
+                                           'president' => 'President',
+                                           'executive_secretary' => 'Executive Secretary',
+                                           'treasurer' => 'Treasurer',
+                                           'auditor' => 'Auditor',
+                                           'event_staff' => 'Event Staff / Organizer',
+                                           'staff' => 'Staff (Operations)',
+                                           'admin' => 'Admin (Legacy)',
+                                       ]"
+                                       :value="old('role', 'staff')"
+                                       placeholder="Select System Role" />
+                    <p class="text-[11px] text-slate-500 mt-1">Controls application access according to least-privilege.</p>
+                    @error('role')<p class="text-red-400 text-xs mt-1">{{ $message }}</p>@enderror
+                </div>
             </div>
         </div>
 
@@ -120,11 +153,17 @@
             </div>
         </div>
 
-        <div>
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
             <label class="flex items-center gap-2 p-3 rounded-xl bg-slate-950 border border-slate-800 cursor-pointer">
-                <input type="checkbox" name="is_active" value="1" checked
+                <input type="checkbox" name="is_active" value="1" {{ old('is_active', '1') ? 'checked' : '' }}
                        class="rounded bg-slate-900 border-slate-700 text-[#560E0F] focus:ring-[#560E0F]">
                 <span class="text-slate-300 text-xs font-medium">Account is Active immediately</span>
+            </label>
+
+            <label class="flex items-center gap-2 p-3 rounded-xl bg-slate-950 border border-slate-800 cursor-pointer">
+                <input type="checkbox" name="must_change_password" value="1" {{ old('must_change_password', '1') ? 'checked' : '' }}
+                       class="rounded bg-slate-900 border-slate-700 text-[#560E0F] focus:ring-[#560E0F]">
+                <span class="text-slate-300 text-xs font-medium">Require password change on first login</span>
             </label>
         </div>
 

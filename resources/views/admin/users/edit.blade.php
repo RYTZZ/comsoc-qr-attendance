@@ -49,51 +49,86 @@
                                    :value="old('assigned_event_id', $user->kiosk?->assigned_event_id)"
                                    placeholder="Select Assigned Event" />
                 @error('assigned_event_id')<p class="text-red-400 text-xs mt-1">{{ $message }}</p>@enderror
-            </div>
-
-        @else
+            </div>        @else
             <div>
                 <label for="name" class="label">Full Name <span class="text-red-400">*</span></label>
                 <input id="name" name="name" type="text" value="{{ old('name', $user->name) }}" required class="input w-full" />
                 @error('name')<p class="text-red-400 text-xs mt-1">{{ $message }}</p>@enderror
             </div>
 
-            <div>
-                <label for="email" class="label">Username or Email Address <span class="text-red-400">*</span></label>
-                <input id="email" name="email" type="text" value="{{ old('email', $user->email) }}" required class="input w-full" />
-                @error('email')<p class="text-red-400 text-xs mt-1">{{ $message }}</p>@enderror
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div>
+                    <label for="email" class="label">Email Address <span class="text-red-400">*</span></label>
+                    <input id="email" name="email" type="email" value="{{ old('email', $user->email) }}" required class="input w-full" />
+                    @error('email')<p class="text-red-400 text-xs mt-1">{{ $message }}</p>@enderror
+                </div>
+
+                <div>
+                    <label for="student_number" class="label">Student Number / Employee ID (Optional)</label>
+                    <input id="student_number" name="student_number" type="text" value="{{ old('student_number', $user->student_number) }}" class="input w-full" />
+                    @error('student_number')<p class="text-red-400 text-xs mt-1">{{ $message }}</p>@enderror
+                </div>
             </div>
 
-            <div>
-                <label for="role" class="label">Role Assignment <span class="text-red-400">*</span></label>
-                @if(auth()->id() === $user->id)
-                    <input type="hidden" name="role" value="{{ $user->role }}">
-                    <div class="px-3.5 py-2 rounded-xl bg-slate-950 border border-slate-800 text-sm text-slate-400">
-                        {{ ucfirst(str_replace('_', ' ', $user->role)) }} (Cannot modify your own role)
-                    </div>
-                @else
-                    <x-custom-dropdown name="role"
-                                       id="role"
-                                       :options="[
-                                           'admin' => 'Admin',
-                                           'super_admin' => 'Super Admin',
-                                           'staff' => 'Staff',
-                                           'treasurer' => 'Treasurer',
-                                           'student' => 'Student',
-                                       ]"
-                                       :value="old('role', $user->role)"
-                                       placeholder="Select Role" />
-                @endif
-                @error('role')<p class="text-red-400 text-xs mt-1">{{ $message }}</p>@enderror
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div>
+                    <label for="officer_position" class="label">Organizational Position</label>
+                    @php
+                        $editPositionOpts = array_merge(['' => 'None / Not Applicable'], $positions ?? []);
+                    @endphp
+                    <x-custom-dropdown name="officer_position"
+                                       id="officer_position"
+                                       :options="$editPositionOpts"
+                                       :value="old('officer_position', $user->officer_position)"
+                                       placeholder="Select Position" />
+                    @error('officer_position')<p class="text-red-400 text-xs mt-1">{{ $message }}</p>@enderror
+                </div>
+
+                <div>
+                    <label for="role" class="label">System Role & Permissions <span class="text-red-400">*</span></label>
+                    @if(auth()->id() === $user->id)
+                        <input type="hidden" name="role" value="{{ $user->role }}">
+                        <div class="px-3.5 py-2.5 rounded-xl bg-slate-950 border border-slate-800 text-sm text-slate-400">
+                            {{ ucfirst(str_replace('_', ' ', $user->role)) }} (Cannot modify your own role)
+                        </div>
+                    @else
+                        <x-custom-dropdown name="role"
+                                           id="role"
+                                           :options="$systemRoles ?? [
+                                               'super_admin' => 'Super Admin',
+                                               'president' => 'President',
+                                               'executive_secretary' => 'Executive Secretary',
+                                               'treasurer' => 'Treasurer',
+                                               'auditor' => 'Auditor',
+                                               'event_staff' => 'Event Staff / Organizer',
+                                               'staff' => 'Staff',
+                                               'admin' => 'Admin (Legacy)',
+                                               'student' => 'Student',
+                                           ]"
+                                           :value="old('role', $user->role)"
+                                           placeholder="Select Role" />
+                    @endif
+                    @error('role')<p class="text-red-400 text-xs mt-1">{{ $message }}</p>@enderror
+                </div>
             </div>
         @endif
 
-        <div>
-            <label class="flex items-center gap-2 p-3 rounded-xl bg-slate-950 border border-slate-800 cursor-pointer">
-                <input type="checkbox" name="is_active" value="1" {{ old('is_active', $user->is_active) ? 'checked' : '' }}
-                       class="rounded bg-slate-900 border-slate-700 text-[#560E0F] focus:ring-[#560E0F]">
-                <span class="text-slate-300 text-xs font-medium">Account is Active</span>
-            </label>
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-2">
+            <div>
+                <label class="flex items-center gap-2 p-3 rounded-xl bg-slate-950 border border-slate-800 cursor-pointer">
+                    <input type="checkbox" name="is_active" value="1" {{ old('is_active', $user->is_active) ? 'checked' : '' }}
+                           class="rounded bg-slate-900 border-slate-700 text-[#560E0F] focus:ring-[#560E0F]">
+                    <span class="text-slate-300 text-xs font-medium">Account is Active</span>
+                </label>
+            </div>
+
+            <div>
+                <label class="flex items-center gap-2 p-3 rounded-xl bg-slate-950 border border-slate-800 cursor-pointer">
+                    <input type="checkbox" name="must_change_password" value="1" {{ old('must_change_password', $user->must_change_password) ? 'checked' : '' }}
+                           class="rounded bg-slate-900 border-slate-700 text-[#560E0F] focus:ring-[#560E0F]">
+                    <span class="text-slate-300 text-xs font-medium">Require Password Change on Next Login</span>
+                </label>
+            </div>
         </div>
 
         <div class="border-t border-slate-800 pt-4">

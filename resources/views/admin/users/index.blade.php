@@ -25,9 +25,10 @@
 </div>
 
 <div class="card p-4 mb-6">
-    <form method="GET" action="{{ route('admin.users.index') }}" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-3 items-center">
+    <form method="GET" action="{{ route('admin.users.index') }}" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-6 gap-3 items-center">
         <div class="relative lg:col-span-2">
             <input type="text" name="search" value="{{ request('search') }}"
+                   placeholder="Search name, email, student #, position..."
                    class="w-full rounded-xl bg-slate-950 border border-slate-700 px-3 py-2 pl-9 text-xs text-white placeholder-slate-500 focus:ring-2 focus:ring-[#560E0F] focus:outline-none">
             <svg class="w-4 h-4 text-slate-500 absolute left-3 top-2.5 pointer-events-none" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
@@ -42,6 +43,13 @@
         </div>
 
         <div>
+            <x-custom-dropdown name="position"
+                               :options="$positions"
+                               :value="request('position')"
+                               placeholder="All Positions" />
+        </div>
+
+        <div>
             <x-custom-dropdown name="status"
                                :options="$statuses"
                                :value="request('status')"
@@ -49,14 +57,8 @@
         </div>
 
         <div class="flex items-center gap-2">
-            <div class="flex-1">
-                <x-custom-dropdown name="event_id"
-                                   :options="$eventOptions"
-                                   :value="request('event_id')"
-                                   placeholder="All Events" />
-            </div>
             <a href="{{ route('admin.users.index') }}" class="btn-secondary btn-sm" title="Reset Filters">Reset</a>
-            <button type="submit" class="btn-primary btn-sm">Filter</button>
+            <button type="submit" class="btn-primary btn-sm flex-1">Filter</button>
         </div>
     </form>
 </div>
@@ -66,10 +68,10 @@
         <table class="w-full text-left text-xs">
             <thead class="bg-slate-950/60 text-slate-400 border-b border-slate-800">
                 <tr>
-                    <th class="py-3 px-4">Name / Identifier</th>
-                    <th class="py-3 px-4">Account Type</th>
-                    <th class="py-3 px-4">Username / Email</th>
-                    <th class="py-3 px-4">Status</th>
+                    <th class="py-3 px-4">Name & Position</th>
+                    <th class="py-3 px-4">System Role</th>
+                    <th class="py-3 px-4">Username / Email / ID</th>
+                    <th class="py-3 px-4">Status & Security</th>
                     <th class="py-3 px-4">Assigned Event</th>
                     <th class="py-3 px-4">Last Activity</th>
                     <th class="py-3 px-4">Created Date</th>
@@ -83,9 +85,23 @@
                             <div class="font-semibold text-white flex items-center gap-1.5">
                                 @if($user->role === 'kiosk')
                                     <span class="w-2 h-2 rounded-full bg-[#560E0F]"></span>
+                                @elseif($user->role === 'super_admin')
+                                    <span class="w-2 h-2 rounded-full bg-rose-500"></span>
+                                @elseif(in_array($user->role, ['president', 'executive_secretary']))
+                                    <span class="w-2 h-2 rounded-full bg-amber-400"></span>
+                                @else
+                                    <span class="w-2 h-2 rounded-full bg-indigo-400"></span>
                                 @endif
                                 {{ $user->name }}
                             </div>
+                            @if($user->officer_position)
+                                <div class="text-[11px] font-medium text-amber-300 flex items-center gap-1 mt-0.5">
+                                    <svg class="w-3 h-3 text-amber-400/80 shrink-0" fill="currentColor" viewBox="0 0 20 20">
+                                        <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
+                                    </svg>
+                                    <span>{{ $user->officer_position }}</span>
+                                </div>
+                            @endif
                             @if($user->kiosk)
                                 <div class="text-[11px] font-mono text-[#cc7478]">
                                     Code: {{ $user->kiosk->identifier }}
@@ -96,10 +112,12 @@
                         <td class="py-3 px-4">
                             <span class="badge uppercase text-[10px] font-semibold
                                 @if($user->role === 'super_admin') bg-rose-500/15 text-rose-300 border-rose-500/30
-                                @elseif($user->role === 'admin') bg-amber-500/15 text-amber-300 border-amber-500/30
+                                @elseif($user->role === 'president') bg-amber-500/15 text-amber-300 border-amber-500/30
+                                @elseif($user->role === 'executive_secretary') bg-amber-500/15 text-amber-300 border-amber-500/30
                                 @elseif($user->role === 'kiosk') bg-[#560E0F]/25 text-rose-200 border-[#560E0F]/40
-                                @elseif($user->role === 'treasurer') bg-indigo-500/15 text-indigo-300 border-indigo-500/30
-                                @elseif($user->role === 'staff') bg-blue-500/15 text-blue-300 border-blue-500/30
+                                @elseif($user->role === 'treasurer') bg-emerald-500/15 text-emerald-300 border-emerald-500/30
+                                @elseif($user->role === 'auditor') bg-cyan-500/15 text-cyan-300 border-cyan-500/30
+                                @elseif(in_array($user->role, ['event_staff', 'staff'])) bg-blue-500/15 text-blue-300 border-blue-500/30
                                 @else bg-slate-500/15 text-slate-300 border-slate-500/30 @endif">
                                 {{ str_replace('_', ' ', $user->role) }}
                             </span>
@@ -107,17 +125,31 @@
 
                         <td class="py-3 px-4">
                             <div class="font-mono text-slate-200">{{ $user->username ?? $user->email }}</div>
-                            @if($user->username && $user->email && !str_ends_with($user->email, '@kiosk.local'))
-                                <div class="text-[11px] text-slate-500">{{ $user->email }}</div>
+                            @if($user->username && $user->email && !str_ends_with($user->email, '@kiosk.local') && !str_ends_with($user->email, '@admin.local'))
+                                <div class="text-[11px] text-slate-400">{{ $user->email }}</div>
+                            @endif
+                            @if($user->student_number)
+                                <div class="text-[10px] font-mono text-slate-400">ID: {{ $user->student_number }}</div>
                             @endif
                         </td>
 
                         <td class="py-3 px-4">
-                            @if($user->is_active)
-                                <span class="badge badge-active">Active</span>
-                            @else
-                                <span class="badge badge-inactive">Inactive</span>
-                            @endif
+                            <div class="flex flex-col gap-1">
+                                <div>
+                                    @if($user->is_active)
+                                        <span class="badge badge-active">Active</span>
+                                    @else
+                                        <span class="badge badge-inactive">Inactive</span>
+                                    @endif
+                                </div>
+                                @if($user->must_change_password)
+                                    <div>
+                                        <span class="px-1.5 py-0.5 rounded text-[10px] font-bold uppercase tracking-wider bg-amber-500/20 text-amber-300 border border-amber-500/30" title="User must update password on next sign-in">
+                                            Password Reset Required
+                                        </span>
+                                    </div>
+                                @endif
+                            </div>
                         </td>
 
                         <td class="py-3 px-4">
@@ -150,7 +182,7 @@
                                 <form method="POST" action="{{ route('admin.users.toggle-active', $user) }}" class="inline">
                                     @csrf
                                     <button type="submit"
-                                            class="btn-secondary btn-sm {{ $user->is_active ? 'text-amber-400 border-amber-500/20' : 'text-emerald-400 border-emerald-500/20' }}">
+                                            class="btn-secondary btn-sm {{ $user->is_active ? 'text-amber-400 border-amber-500/20 hover:bg-amber-950/20' : 'text-emerald-400 border-emerald-500/20 hover:bg-emerald-950/20' }}">
                                         {{ $user->is_active ? 'Deactivate' : 'Activate' }}
                                     </button>
                                 </form>
@@ -171,20 +203,28 @@
                             <x-modal name="reset-modal-{{ $user->id }}" focusable>
                                 <form method="POST" action="{{ route('admin.users.reset-password', $user) }}" class="p-6 text-left">
                                     @csrf
-                                    <h3 class="text-base font-semibold text-white mb-1">Reset Password</h3>
-                                    <p class="text-xs text-slate-400 mb-4">Set a new secure password for <strong class="text-white">{{ $user->name }}</strong> ({{ $user->username ?? $user->email }}).</p>
+                                    <h3 class="text-base font-semibold text-white mb-1">Reset Account Password</h3>
+                                    <p class="text-xs text-slate-400 mb-4">Set a secure temporary or permanent password for <strong class="text-white">{{ $user->name }}</strong> ({{ $user->username ?? $user->email }}).</p>
 
                                     <div class="space-y-3 text-xs">
                                         <div>
-                                            <label class="block font-medium text-slate-300 mb-1">New Password (min. 8 characters)</label>
+                                            <label class="block font-medium text-slate-300 mb-1">New Password (min. 8 characters) <span class="text-red-400">*</span></label>
                                             <input type="password" name="password" required minlength="8"
                                                    class="w-full rounded-xl bg-slate-950 border border-slate-700 px-3.5 py-2 text-sm text-white focus:ring-2 focus:ring-[#560E0F] focus:outline-none">
                                         </div>
 
                                         <div>
-                                            <label class="block font-medium text-slate-300 mb-1">Confirm New Password</label>
+                                            <label class="block font-medium text-slate-300 mb-1">Confirm New Password <span class="text-red-400">*</span></label>
                                             <input type="password" name="password_confirmation" required minlength="8"
                                                    class="w-full rounded-xl bg-slate-950 border border-slate-700 px-3.5 py-2 text-sm text-white focus:ring-2 focus:ring-[#560E0F] focus:outline-none">
+                                        </div>
+
+                                        <div class="pt-1">
+                                            <label class="flex items-center gap-2 p-2.5 rounded-xl bg-slate-900 border border-slate-800 cursor-pointer">
+                                                <input type="checkbox" name="require_change" value="1" checked
+                                                       class="rounded bg-slate-950 border-slate-700 text-[#560E0F] focus:ring-[#560E0F]">
+                                                <span class="text-slate-300 text-xs">Require password change on first login</span>
+                                            </label>
                                         </div>
                                     </div>
 

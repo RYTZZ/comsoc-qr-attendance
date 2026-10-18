@@ -244,7 +244,7 @@
             <a href="{{ route('admin.users.index') }}"
                class="sidebar-link {{ request()->routeIs('admin.users.*') ? 'active' : '' }}">
                 <i data-lucide="shield" class="sidebar-link-icon"></i>
-                Accounts
+                Officer & Staff Accounts
             </a>
             @endif
         </nav>

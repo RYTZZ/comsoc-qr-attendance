@@ -21,6 +21,7 @@ class UserController extends Controller
     {
         $query = User::with(['student', 'kiosk.assignedEvent', 'creator'])
             ->when($request->role, fn($q) => $q->where('role', $request->role))
+            ->when($request->position, fn($q) => $q->where('officer_position', $request->position))
             ->when($request->filled('status'), function ($q) use ($request) {
                 if ($request->status === 'active') {
                     $q->where('is_active', true);
@@ -37,6 +38,8 @@ class UserController extends Controller
                     $sub->whereLike('name', "%{$search}%")
                         ->orWhereLike('email', "%{$search}%")
                         ->orWhereLike('username', "%{$search}%")
+                        ->orWhereLike('student_number', "%{$search}%")
+                        ->orWhereLike('officer_position', "%{$search}%")
                         ->orWhereHas('kiosk', function ($kq) use ($search) {
                             $kq->whereLike('name', "%{$search}%")
                                ->orWhereLike('identifier', "%{$search}%");
@@ -55,14 +58,16 @@ class UserController extends Controller
             'super_admin' => 'Super Admin',
             'president' => 'President',
             'executive_secretary' => 'Executive Secretary',
-            'event_staff' => 'Event Staff',
-            'auditor' => 'Auditor',
-            'admin' => 'Admin (Legacy)',
-            'staff' => 'Staff (Legacy)',
             'treasurer' => 'Treasurer',
-            'kiosk' => 'Kiosk',
+            'auditor' => 'Auditor',
+            'event_staff' => 'Event Staff / Organizer',
+            'staff' => 'Staff',
+            'admin' => 'Admin (Legacy)',
+            'kiosk' => 'Kiosk Terminal',
             'student' => 'Student / Member',
         ];
+
+        $positions = array_merge(['' => 'All Positions'], User::POSITIONS);
 
         $statuses = [
             '' => 'All Statuses',
@@ -75,14 +80,17 @@ class UserController extends Controller
             $eventOptions[$ev->id] = $ev->name;
         }
 
-        return view('admin.users.index', compact('users', 'events', 'roles', 'statuses', 'eventOptions'));
+        return view('admin.users.index', compact('users', 'events', 'roles', 'positions', 'statuses', 'eventOptions'));
     }
 
     public function create(Request $request): View
     {
         $events = Event::orderByDesc('event_date')->get();
         $initialType = $request->query('type', 'admin');
-        return view('admin.users.create', compact('events', 'initialType'));
+        $positions = User::POSITIONS;
+        $systemRoles = User::SYSTEM_ROLES;
+
+        return view('admin.users.create', compact('events', 'initialType', 'positions', 'systemRoles'));
     }
 
     public function store(Request $request): RedirectResponse
@@ -139,12 +147,16 @@ class UserController extends Controller
         $validated = $request->validate([
             'name' => ['required', 'string', 'max:255'],
             'email' => ['required', 'string', 'max:255', 'unique:users,email', 'unique:users,username'],
+            'student_number' => ['nullable', 'string', 'max:50', 'unique:users,student_number'],
+            'officer_position' => ['nullable', 'string', 'max:100'],
             'role' => ['required', Rule::in(['super_admin', 'president', 'executive_secretary', 'event_staff', 'auditor', 'admin', 'staff', 'treasurer'])],
             'password' => ['required', 'string', Password::min(8), 'confirmed'],
             'is_active' => ['nullable', 'boolean'],
+            'must_change_password' => ['nullable', 'boolean'],
         ]);
 
         $status = $request->boolean('is_active', true);
+        $mustChangePassword = $request->boolean('must_change_password', true);
 
         $input = trim($validated['email']);
         $isEmail = filter_var($input, FILTER_VALIDATE_EMAIL);
@@ -155,9 +167,12 @@ class UserController extends Controller
             'name' => trim($validated['name']),
             'email' => $email,
             'username' => $username,
+            'student_number' => !empty($validated['student_number']) ? trim($validated['student_number']) : null,
+            'officer_position' => !empty($validated['officer_position']) ? trim($validated['officer_position']) : null,
             'password' => Hash::make($validated['password']),
             'role' => $validated['role'],
             'is_active' => $status,
+            'must_change_password' => $mustChangePassword,
             'created_by' => auth()->id(),
         ]);
 
@@ -165,7 +180,9 @@ class UserController extends Controller
             'name' => $user->name,
             'email' => $user->email,
             'role' => $user->role,
+            'officer_position' => $user->officer_position,
             'is_active' => $status,
+            'must_change_password' => $mustChangePassword,
         ]);
 
         return redirect()->route('admin.users.index')->with('success', "Account '{$user->name}' created successfully.");
@@ -175,7 +192,10 @@ class UserController extends Controller
     {
         $user->load(['kiosk', 'student']);
         $events = Event::orderByDesc('event_date')->get();
-        return view('admin.users.edit', compact('user', 'events'));
+        $positions = User::POSITIONS;
+        $systemRoles = User::SYSTEM_ROLES;
+
+        return view('admin.users.edit', compact('user', 'events', 'positions', 'systemRoles'));
     }
 
     public function update(Request $request, User $user): RedirectResponse
@@ -249,8 +269,11 @@ class UserController extends Controller
         $validated = $request->validate([
             'name' => ['required', 'string', 'max:255'],
             'email' => ['required', 'string', 'max:255', Rule::unique('users', 'email')->ignore($user->id)],
+            'student_number' => ['nullable', 'string', 'max:50', Rule::unique('users', 'student_number')->ignore($user->id)],
+            'officer_position' => ['nullable', 'string', 'max:100'],
             'role' => ['required', Rule::in(['super_admin', 'president', 'executive_secretary', 'event_staff', 'auditor', 'admin', 'treasurer', 'staff', 'student'])],
             'is_active' => ['nullable', 'boolean'],
+            'must_change_password' => ['nullable', 'boolean'],
             'password' => ['nullable', 'string', Password::min(8), 'confirmed'],
         ]);
 
@@ -281,13 +304,16 @@ class UserController extends Controller
             }
         }
 
-        $old = $user->only(['name', 'email', 'role', 'is_active']);
+        $old = $user->only(['name', 'email', 'student_number', 'officer_position', 'role', 'is_active', 'must_change_password']);
 
         $updateData = [
             'name' => trim($validated['name']),
             'email' => trim($validated['email']),
+            'student_number' => !empty($validated['student_number']) ? trim($validated['student_number']) : null,
+            'officer_position' => !empty($validated['officer_position']) ? trim($validated['officer_position']) : null,
             'role' => $validated['role'],
             'is_active' => $isActive,
+            'must_change_password' => $request->boolean('must_change_password', false),
         ];
 
         if (!empty($validated['password'])) {
@@ -296,7 +322,7 @@ class UserController extends Controller
 
         $user->update($updateData);
 
-        AuditLogger::log('account.updated', $user, $old, $user->fresh()->only(['name', 'email', 'role', 'is_active']));
+        AuditLogger::log('account.updated', $user, $old, $user->fresh()->only(['name', 'email', 'student_number', 'officer_position', 'role', 'is_active', 'must_change_password']));
 
         return redirect()->route('admin.users.index')->with('success', "Account '{$user->name}' updated.");
     }
@@ -349,14 +375,19 @@ class UserController extends Controller
 
         $validated = $request->validate([
             'password' => ['required', 'string', Password::min(8), 'confirmed'],
+            'require_change' => ['nullable', 'boolean'],
         ]);
+
+        $mustChange = $request->boolean('require_change', true);
 
         $user->update([
             'password' => Hash::make($validated['password']),
+            'must_change_password' => $mustChange,
         ]);
 
         AuditLogger::log('account.password_reset', $user, [], [
             'reset_by' => $currentUser->id,
+            'must_change_password' => $mustChange,
         ]);
 
         return back()->with('success', "Password for '{$user->name}' has been reset successfully.");

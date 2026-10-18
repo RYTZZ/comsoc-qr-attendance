@@ -13,6 +13,38 @@ class User extends Authenticatable
 {
     use HasFactory, HasUuids, Notifiable;
 
+    public const POSITIONS = [
+        'President' => 'President',
+        'Vice President - Internal' => 'Vice President — Internal',
+        'Vice President - External' => 'Vice President — External',
+        'Secretary' => 'Secretary',
+        'Assistant Secretary' => 'Assistant Secretary',
+        'Executive Secretary' => 'Executive Secretary',
+        'Treasurer' => 'Treasurer',
+        'Assistant Treasurer' => 'Assistant Treasurer',
+        'Auditor' => 'Auditor',
+        'Public Information Officer' => 'Public Information Officer (PIO)',
+        'Business Manager' => 'Business Manager',
+        'Liaison Officer' => 'Liaison Officer',
+        'Event Organizer' => 'Event Organizer',
+        'Event Staff' => 'Event Staff',
+        'Technical Staff' => 'Technical Staff',
+        'Creative & Design Officer' => 'Creative & Design Officer',
+        'Officer' => 'Officer',
+        'Staff' => 'Staff',
+    ];
+
+    public const SYSTEM_ROLES = [
+        'super_admin' => 'Super Admin (Full Administrative Authority)',
+        'president' => 'President (Executive Management)',
+        'executive_secretary' => 'Executive Secretary (Administrative Operations)',
+        'treasurer' => 'Treasurer (Finance & Rewards)',
+        'auditor' => 'Auditor (Audit & Oversight)',
+        'event_staff' => 'Event Staff / Organizer (Events & Attendance)',
+        'staff' => 'Staff (Operational Support)',
+        'admin' => 'Admin (General Operations)',
+    ];
+
     protected $fillable = [
         'member_id',
         'name',
@@ -23,6 +55,7 @@ class User extends Authenticatable
         'preferred_email',
         'password',
         'role',
+        'officer_position',
         'can_collect_rewards',
         'student_id',
         'created_by',

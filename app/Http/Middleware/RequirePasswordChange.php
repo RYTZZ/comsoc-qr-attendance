@@ -12,10 +12,11 @@ class RequirePasswordChange
     {
         $user = $request->user();
 
-        if ($user && $user->role === 'student' && $user->must_change_password) {
-            if (!$request->routeIs('student.password.change', 'student.password.update', 'logout')) {
-                return redirect()->route('student.password.change')
-                    ->with('force_change', true);
+        if ($user && $user->must_change_password) {
+            // Allow password update routes, profile page, and logout
+            if (!$request->routeIs('password.update', 'profile.edit', 'logout')) {
+                return redirect()->route('profile.edit')
+                    ->with('error', 'Security Policy: You are required to update your temporary or reset password before continuing.');
             }
         }
 
