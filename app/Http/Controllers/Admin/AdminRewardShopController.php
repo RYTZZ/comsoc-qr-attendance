@@ -19,6 +19,7 @@ class AdminRewardShopController extends Controller
         $statusFilter = $request->input('status', 'all');
         $tab = $request->input('tab', 'requests');
         $eventFilter = $request->input('event_id');
+        $catalogStatusFilter = $request->input('catalog_status', 'all');
 
         $redemptionsQuery = RewardRedemption::with(['user.student', 'reward', 'fulfiller']);
 
@@ -33,21 +34,40 @@ class AdminRewardShopController extends Controller
             $rewardsQuery->where('event_id', $eventFilter);
         }
 
+        if ($catalogStatusFilter && $catalogStatusFilter !== 'all') {
+            $rewardsQuery->where('status', $catalogStatusFilter);
+        }
+
         $rewards = $rewardsQuery->orderBy('created_at', 'desc')
             ->paginate(15, ['*'], 'catalog_page');
 
-        $pendingCount = RewardRedemption::where('status', 'pending')->count();
+        $pendingCount = RewardRedemption::whereIn('status', ['pending', 'pending_collection'])->count();
         $events = \App\Models\Event::orderByDesc('event_date')->get();
+
+        // Economy Overview Real Metrics
+        $summary = [
+            'total_rewards' => Reward::count(),
+            'published_rewards' => Reward::where('status', 'published')->where('is_active', true)->where('is_archived', false)->count(),
+            'draft_rewards' => Reward::where('status', 'draft')->count(),
+            'out_of_stock' => Reward::whereNotNull('stock')->where('stock', '<=', 0)->count(),
+            'total_redemptions' => RewardRedemption::count(),
+            'pending_claims' => $pendingCount,
+            'fulfilled_claims' => RewardRedemption::whereIn('status', ['fulfilled', 'claimed'])->count(),
+        ];
 
         return view('admin.shop.index', [
             'redemptions' => $redemptions,
             'rewards' => $rewards,
             'statusFilter' => $statusFilter,
+            'catalogStatusFilter' => $catalogStatusFilter,
             'eventFilter' => $eventFilter,
             'tab' => $tab,
             'pendingCount' => $pendingCount,
             'categories' => Reward::CATEGORIES,
+            'types' => Reward::TYPES,
+            'statuses' => Reward::STATUSES,
             'events' => $events,
+            'summary' => $summary,
         ]);
     }
 
@@ -56,6 +76,7 @@ class AdminRewardShopController extends Controller
         $validated = $request->validate([
             'title' => ['required', 'string', 'max:255'],
             'category' => ['required', 'string', 'max:100'],
+            'reward_type' => ['nullable', 'string', 'in:' . implode(',', array_keys(Reward::TYPES))],
             'event_id' => ['nullable', 'exists:events,id'],
             'points_cost' => ['required', 'integer', 'min:0'],
             'min_level' => ['required', 'integer', 'min:1', 'max:100'],
@@ -63,9 +84,13 @@ class AdminRewardShopController extends Controller
             'description' => ['nullable', 'string', 'max:2000'],
             'eligibility_notes' => ['nullable', 'string', 'max:1000'],
             'fulfillment_instructions' => ['nullable', 'string', 'max:1000'],
+            'starts_at' => ['nullable', 'date'],
+            'ends_at' => ['nullable', 'date', 'after_or_equal:starts_at'],
+            'redemption_limit_per_member' => ['nullable', 'integer', 'min:1'],
             'image_url' => ['nullable', 'url', 'max:500'],
             'image_file' => ['nullable', 'image', 'mimes:jpg,jpeg,png,webp', 'max:3072'],
-            'is_active' => ['nullable', 'boolean'],
+            'action' => ['nullable', 'string', 'in:publish,draft'],
+            'status' => ['nullable', 'string', 'in:draft,published,archived'],
         ]);
 
         $imagePath = null;
@@ -75,9 +100,13 @@ class AdminRewardShopController extends Controller
 
         $stock = $validated['stock'] !== null && $validated['stock'] !== '' ? (int) $validated['stock'] : null;
 
+        $targetStatus = $request->input('action') === 'draft' ? 'draft' : ($validated['status'] ?? 'published');
+        $isActive = ($targetStatus === 'published');
+
         $reward = Reward::create([
             'title' => $validated['title'],
             'category' => $validated['category'],
+            'reward_type' => $validated['reward_type'] ?? 'physical',
             'event_id' => $validated['event_id'] ?? null,
             'points_cost' => $validated['points_cost'],
             'min_level' => $validated['min_level'],
@@ -86,10 +115,15 @@ class AdminRewardShopController extends Controller
             'description' => $validated['description'] ?? null,
             'eligibility_notes' => $validated['eligibility_notes'] ?? null,
             'fulfillment_instructions' => $validated['fulfillment_instructions'] ?? null,
+            'starts_at' => $validated['starts_at'] ?? null,
+            'ends_at' => $validated['ends_at'] ?? null,
+            'redemption_limit_per_member' => $validated['redemption_limit_per_member'] ?? null,
             'image_url' => $validated['image_url'] ?? null,
             'image_path' => $imagePath,
-            'is_active' => $request->boolean('is_active', true),
-            'is_archived' => false,
+            'is_active' => $isActive,
+            'is_archived' => ($targetStatus === 'archived'),
+            'status' => $targetStatus,
+            'published_at' => $isActive ? now() : null,
         ]);
 
         AuditLog::create([
@@ -98,12 +132,17 @@ class AdminRewardShopController extends Controller
             'details' => json_encode([
                 'reward_id' => $reward->id,
                 'title' => $reward->title,
+                'status' => $reward->status,
                 'points_cost' => $reward->points_cost,
                 'event_id' => $reward->event_id,
             ]),
         ]);
 
-        return redirect()->route('admin.shop.index', ['tab' => 'catalog'])->with('success', 'Reward item created successfully.');
+        $msg = $targetStatus === 'draft'
+            ? "Reward '{$reward->title}' saved as draft (hidden from students)."
+            : "Reward '{$reward->title}' created and published to catalog.";
+
+        return redirect()->route('admin.shop.index', ['tab' => 'catalog'])->with('success', $msg);
     }
 
     public function update(Request $request, Reward $reward): RedirectResponse
@@ -111,6 +150,7 @@ class AdminRewardShopController extends Controller
         $validated = $request->validate([
             'title' => ['required', 'string', 'max:255'],
             'category' => ['required', 'string', 'max:100'],
+            'reward_type' => ['nullable', 'string', 'in:' . implode(',', array_keys(Reward::TYPES))],
             'event_id' => ['nullable', 'exists:events,id'],
             'points_cost' => ['required', 'integer', 'min:0'],
             'min_level' => ['required', 'integer', 'min:1', 'max:100'],
@@ -118,9 +158,12 @@ class AdminRewardShopController extends Controller
             'description' => ['nullable', 'string', 'max:2000'],
             'eligibility_notes' => ['nullable', 'string', 'max:1000'],
             'fulfillment_instructions' => ['nullable', 'string', 'max:1000'],
+            'starts_at' => ['nullable', 'date'],
+            'ends_at' => ['nullable', 'date', 'after_or_equal:starts_at'],
+            'redemption_limit_per_member' => ['nullable', 'integer', 'min:1'],
             'image_url' => ['nullable', 'url', 'max:500'],
             'image_file' => ['nullable', 'image', 'mimes:jpg,jpeg,png,webp', 'max:3072'],
-            'is_active' => ['nullable', 'boolean'],
+            'status' => ['nullable', 'string', 'in:draft,published,archived'],
         ]);
 
         if ($request->hasFile('image_file')) {
@@ -132,8 +175,13 @@ class AdminRewardShopController extends Controller
 
         $stock = $validated['stock'] !== null && $validated['stock'] !== '' ? (int) $validated['stock'] : null;
 
+        $targetStatus = $validated['status'] ?? $reward->status ?? 'published';
+
         $reward->title = $validated['title'];
         $reward->category = $validated['category'];
+        if (isset($validated['reward_type'])) {
+            $reward->reward_type = $validated['reward_type'];
+        }
         $reward->event_id = $validated['event_id'] ?? null;
         $reward->points_cost = $validated['points_cost'];
         $reward->min_level = $validated['min_level'];
@@ -144,10 +192,21 @@ class AdminRewardShopController extends Controller
         $reward->description = $validated['description'] ?? null;
         $reward->eligibility_notes = $validated['eligibility_notes'] ?? null;
         $reward->fulfillment_instructions = $validated['fulfillment_instructions'] ?? null;
+        $reward->starts_at = $validated['starts_at'] ?? null;
+        $reward->ends_at = $validated['ends_at'] ?? null;
+        $reward->redemption_limit_per_member = $validated['redemption_limit_per_member'] ?? null;
+
         if ($request->filled('image_url')) {
             $reward->image_url = $validated['image_url'];
         }
-        $reward->is_active = $request->boolean('is_active');
+
+        $reward->status = $targetStatus;
+        $reward->is_active = ($targetStatus === 'published');
+        $reward->is_archived = ($targetStatus === 'archived');
+        if ($targetStatus === 'published' && !$reward->published_at) {
+            $reward->published_at = now();
+        }
+
         $reward->save();
 
         AuditLog::create([
@@ -156,11 +215,12 @@ class AdminRewardShopController extends Controller
             'details' => json_encode([
                 'reward_id' => $reward->id,
                 'title' => $reward->title,
+                'status' => $reward->status,
                 'event_id' => $reward->event_id,
             ]),
         ]);
 
-        return redirect()->route('admin.shop.index', ['tab' => 'catalog'])->with('success', 'Reward item updated successfully.');
+        return redirect()->route('admin.shop.index', ['tab' => 'catalog'])->with('success', "Reward item '{$reward->title}' updated successfully.");
     }
 
     public function fulfill(Request $request, RewardRedemption $redemption): RedirectResponse
@@ -250,9 +310,31 @@ class AdminRewardShopController extends Controller
         return back()->with('success', "Reward item '{$reward->title}' has been {$status}.");
     }
 
+    public function publish(Reward $reward): RedirectResponse
+    {
+        $reward->update([
+            'status' => 'published',
+            'is_active' => true,
+            'is_archived' => false,
+            'published_at' => $reward->published_at ?? now(),
+        ]);
+
+        AuditLog::create([
+            'user_id' => auth()->id(),
+            'action' => 'published_reward_item',
+            'details' => json_encode([
+                'reward_id' => $reward->id,
+                'title' => $reward->title,
+            ]),
+        ]);
+
+        return back()->with('success', "Reward item '{$reward->title}' is now published and available to eligible members.");
+    }
+
     public function archive(Reward $reward): RedirectResponse
     {
         $reward->update([
+            'status' => 'archived',
             'is_active' => false,
             'is_archived' => true,
         ]);

@@ -353,6 +353,41 @@
                 </div>
             </div>
 
+            <div>
+                <p class="px-3 mb-2 text-[10px] font-bold uppercase tracking-widest text-[#94A3B8]">Community</p>
+                <div class="space-y-1">
+                    <a href="{{ route('directory.index') }}"
+                       class="flex items-center gap-3 px-3 py-2.5 rounded-xl text-xs font-semibold transition {{ request()->routeIs('directory.*') ? 'bg-burgundy-gradient text-white shadow-md' : 'text-[#94A3B8] hover:text-white hover:bg-[#1E293B]' }}">
+                        <i data-lucide="users" class="w-4 h-4 shrink-0 {{ request()->routeIs('directory.*') ? 'text-white' : 'text-[#94A3B8]' }}"></i>
+                        <span>{{ __('Member Directory') }}</span>
+                    </a>
+
+                    <a href="{{ route('announcements.index') }}"
+                       class="flex items-center gap-3 px-3 py-2.5 rounded-xl text-xs font-semibold transition {{ request()->routeIs('announcements.*') ? 'bg-burgundy-gradient text-white shadow-md' : 'text-[#94A3B8] hover:text-white hover:bg-[#1E293B]' }}">
+                        <i data-lucide="megaphone" class="w-4 h-4 shrink-0 {{ request()->routeIs('announcements.*') ? 'text-white' : 'text-[#94A3B8]' }}"></i>
+                        <span>{{ __('Announcements') }}</span>
+                    </a>
+
+                    <a href="{{ route('projects.index') }}"
+                       class="flex items-center gap-3 px-3 py-2.5 rounded-xl text-xs font-semibold transition {{ request()->routeIs('projects.*') ? 'bg-burgundy-gradient text-white shadow-md' : 'text-[#94A3B8] hover:text-white hover:bg-[#1E293B]' }}">
+                        <i data-lucide="code-2" class="w-4 h-4 shrink-0 {{ request()->routeIs('projects.*') ? 'text-white' : 'text-[#94A3B8]' }}"></i>
+                        <span>{{ __('Project Collaboration') }}</span>
+                    </a>
+
+                    <a href="{{ route('volunteers.index') }}"
+                       class="flex items-center gap-3 px-3 py-2.5 rounded-xl text-xs font-semibold transition {{ request()->routeIs('volunteers.*') ? 'bg-burgundy-gradient text-white shadow-md' : 'text-[#94A3B8] hover:text-white hover:bg-[#1E293B]' }}">
+                        <i data-lucide="heart-handshake" class="w-4 h-4 shrink-0 {{ request()->routeIs('volunteers.*') ? 'text-white' : 'text-[#94A3B8]' }}"></i>
+                        <span>{{ __('Volunteer Board') }}</span>
+                    </a>
+
+                    <a href="{{ route('helpdesk.index') }}"
+                       class="flex items-center gap-3 px-3 py-2.5 rounded-xl text-xs font-semibold transition {{ request()->routeIs('helpdesk.*') ? 'bg-burgundy-gradient text-white shadow-md' : 'text-[#94A3B8] hover:text-white hover:bg-[#1E293B]' }}">
+                        <i data-lucide="life-buoy" class="w-4 h-4 shrink-0 {{ request()->routeIs('helpdesk.*') ? 'text-white' : 'text-[#94A3B8]' }}"></i>
+                        <span>{{ __('Help Desk & Disputes') }}</span>
+                    </a>
+                </div>
+            </div>
+
             @if(Auth::user()->isEventOrganizer() || Auth::user()->isAdmin() || Auth::user()->isSuperAdmin())
             <div>
                 <p class="px-3 mb-2 text-[10px] font-bold uppercase tracking-widest text-amber-400">Event Operations</p>
@@ -455,9 +490,9 @@
 
         <button type="button"
                 @click="mobileDrawerOpen = true"
-                class="flex flex-col items-center justify-center py-2 px-1 rounded-xl transition-all duration-150 min-h-[48px] {{ request()->routeIs('profile.*', 'notifications.*', 'ledger.*', 'missions.*', 'directory.*', 'opportunities.*', 'announcements.*', 'admin.*', 'organizer.*') ? 'bg-burgundy-gradient text-white shadow-md' : 'text-[#94A3B8] hover:text-[#F8FAFC] hover:bg-[#1E293B]' }}"
+                class="flex flex-col items-center justify-center py-2 px-1 rounded-xl transition-all duration-150 min-h-[48px] {{ request()->routeIs('profile.*', 'notifications.*', 'ledger.*', 'missions.*', 'directory.*', 'opportunities.*', 'announcements.*', 'projects.*', 'volunteers.*', 'helpdesk.*', 'admin.*', 'organizer.*') ? 'bg-burgundy-gradient text-white shadow-md' : 'text-[#94A3B8] hover:text-[#F8FAFC] hover:bg-[#1E293B]' }}"
                 aria-label="Profile and more modules">
-            <i data-lucide="user" class="w-5 h-5 shrink-0 {{ request()->routeIs('profile.*', 'notifications.*', 'ledger.*', 'missions.*', 'directory.*', 'opportunities.*', 'announcements.*', 'admin.*', 'organizer.*') ? 'text-white' : 'text-[#94A3B8]' }}"></i>
+            <i data-lucide="user" class="w-5 h-5 shrink-0 {{ request()->routeIs('profile.*', 'notifications.*', 'ledger.*', 'missions.*', 'directory.*', 'opportunities.*', 'announcements.*', 'projects.*', 'volunteers.*', 'helpdesk.*', 'admin.*', 'organizer.*') ? 'text-white' : 'text-[#94A3B8]' }}"></i>
             <span class="text-[10px] font-semibold mt-1 truncate">Menu</span>
         </button>
     </div>

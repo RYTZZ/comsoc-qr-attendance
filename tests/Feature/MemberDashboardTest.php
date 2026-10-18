@@ -95,4 +95,47 @@ class MemberDashboardTest extends TestCase
         $response->assertSee('Git Hero Quest');
         $response->assertDontSee('<select', false);
     }
+
+    public function test_mobile_navigation_contains_community_features_and_valid_routes(): void
+    {
+        $user = User::factory()->create([
+            'role' => 'student',
+            'is_active' => true,
+        ]);
+
+        $response = $this->actingAs($user)->get('/dashboard');
+        $response->assertOk();
+
+        // Verify the 4 missing features are present in the response
+        $response->assertSee(route('projects.index'), false);
+        $response->assertSee(route('volunteers.index'), false);
+        $response->assertSee(route('helpdesk.index'), false);
+        $response->assertSee(route('directory.index'), false);
+
+        $response->assertSee('Project Collaboration');
+        $response->assertSee('Volunteer Board');
+        $response->assertSee('Help Desk &amp; Disputes', false);
+        $response->assertSee('Member Directory');
+    }
+
+    public function test_community_feature_pages_accessible_to_authenticated_member(): void
+    {
+        $user = User::factory()->create([
+            'role' => 'student',
+            'is_active' => true,
+        ]);
+
+        $this->actingAs($user)->get(route('projects.index'))->assertOk();
+        $this->actingAs($user)->get(route('volunteers.index'))->assertOk();
+        $this->actingAs($user)->get(route('helpdesk.index'))->assertOk();
+        $this->actingAs($user)->get(route('directory.index'))->assertOk();
+    }
+
+    public function test_unauthenticated_user_cannot_access_community_features(): void
+    {
+        $this->get(route('projects.index'))->assertRedirect('/login');
+        $this->get(route('volunteers.index'))->assertRedirect('/login');
+        $this->get(route('helpdesk.index'))->assertRedirect('/login');
+        $this->get(route('directory.index'))->assertRedirect('/login');
+    }
 }

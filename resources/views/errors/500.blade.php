@@ -32,6 +32,12 @@
             {{ $message ?? 'A database error occurred while processing your request. Please try again shortly or contact the COMSOC administrators.' }}
         </p>
 
+        @if(!empty($correlationId))
+            <p class="text-[11px] font-mono text-slate-400 mt-2 bg-slate-800/60 py-1 px-2.5 rounded-lg border border-slate-700/50 inline-block">
+                Reference ID: <span class="text-rose-300 font-semibold select-all">{{ $correlationId }}</span>
+            </p>
+        @endif
+
         <div class="mt-6 flex flex-col sm:flex-row items-center justify-center gap-3">
             <a href="{{ url('/') }}" class="w-full sm:w-auto px-5 py-2.5 rounded-xl font-semibold text-xs text-white bg-[#560E0F] hover:bg-[#8F3033] transition shadow-md focus:outline-none focus:ring-2 focus:ring-[#560E0F] focus:ring-offset-2 focus:ring-offset-[#172033]">
                 Return Home

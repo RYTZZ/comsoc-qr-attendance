@@ -47,10 +47,24 @@ class MarketplaceService
             /** @var Reward $lockedReward */
             $lockedReward = Reward::where('id', $reward->id)->lockForUpdate()->first();
 
-            if (!$lockedReward || !$lockedReward->is_active) {
+            if (!$lockedReward || !$lockedReward->isPublished()) {
                 return [
                     'success' => false,
-                    'message' => 'This reward item is no longer available.',
+                    'message' => 'This reward item is currently in draft or unavailable for redemption.',
+                ];
+            }
+
+            if ($lockedReward->starts_at && $lockedReward->starts_at->isFuture()) {
+                return [
+                    'success' => false,
+                    'message' => 'This reward item is not yet available for redemption.',
+                ];
+            }
+
+            if ($lockedReward->ends_at && $lockedReward->ends_at->isPast()) {
+                return [
+                    'success' => false,
+                    'message' => 'The redemption period for this reward has expired.',
                 ];
             }
 

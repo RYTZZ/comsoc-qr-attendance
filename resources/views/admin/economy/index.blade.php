@@ -1,32 +1,36 @@
-<x-app-layout>
-    <x-slot name="header">
-        <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-            <div>
-                <div class="flex items-center gap-2">
-                    <span class="px-2 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider bg-[#560E0F]/30 border border-[#560E0F]/60 text-[#dfa6a9]">
-                        Administration
-                    </span>
-                    <span class="text-xs text-slate-400">Progression System</span>
-                </div>
-                <h1 class="text-2xl font-bold text-white font-brand-display tracking-tight mt-1">
-                    Reward Rules & Economy Control
-                </h1>
-                <p class="text-xs text-slate-400 mt-0.5">
-                    Configure activity XP/Points payout rules, level thresholds, and manage auditable member balance adjustments.
-                </p>
-            </div>
-
+<x-layouts.admin :title="'Reward Rules & Economy Control'">
+<div class="space-y-6">
+    <div class="page-header flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+        <div>
             <div class="flex items-center gap-2">
-                <a href="{{ route('admin.dashboard') }}" class="btn-secondary text-xs flex items-center gap-1.5">
-                    <i data-lucide="layout-dashboard" class="w-4 h-4"></i>
-                    <span>Admin Dashboard</span>
-                </a>
+                <span class="px-2 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider bg-[#560E0F]/30 border border-[#560E0F]/60 text-[#dfa6a9]">
+                    Administration
+                </span>
+                <span class="text-xs text-slate-400">Progression System</span>
             </div>
+            <h1 class="page-title text-2xl font-bold text-white font-brand-display tracking-tight mt-1">
+                Reward Rules & Economy Control
+            </h1>
+            <p class="text-xs text-slate-400 mt-0.5">
+                Configure activity XP/Points payout rules, level thresholds, and manage auditable member balance adjustments.
+            </p>
         </div>
-    </x-slot>
 
-    <div class="py-8">
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-8">
+        <div class="flex items-center gap-2">
+            <a href="{{ route('admin.dashboard') }}" class="btn-secondary text-xs flex items-center gap-1.5">
+                <i data-lucide="layout-dashboard" class="w-4 h-4"></i>
+                <span>Admin Dashboard</span>
+            </a>
+            @if(auth()->user()->isSuperAdmin())
+            <a href="{{ route('admin.students.exp-points.index') }}" class="btn-secondary text-xs flex items-center gap-1.5">
+                <i data-lucide="award" class="w-4 h-4 text-amber-400"></i>
+                <span>Manage EXP & Points</span>
+            </a>
+            @endif
+        </div>
+    </div>
+
+    <div class="space-y-8">
 
             <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
 
@@ -273,7 +277,7 @@
                 </div>
 
             </div>
-
         </div>
     </div>
-</x-app-layout>
+</div>
+</x-layouts.admin>

@@ -1,32 +1,66 @@
-<x-app-layout>
-    <x-slot name="header">
-        <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-            <div>
-                <div class="flex items-center gap-2">
-                    <span class="px-2 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider bg-amber-500/20 border border-amber-500/40 text-amber-300">
-                        Officer Operations
-                    </span>
-                    <span class="text-xs text-slate-400">Merch & Rewards Management</span>
-                </div>
-                <h1 class="text-2xl font-bold text-white font-brand-display tracking-tight mt-1">
-                    Reward Shop & Redemptions
-                </h1>
-                <p class="text-xs text-slate-400 mt-0.5">
-                    Manage available merchandise, configure points cost and inventory stock, and fulfill or reject member redemption orders.
-                </p>
-            </div>
-
+<x-layouts.admin :title="'Reward Management & Publishing Catalog'">
+<div class="space-y-6">
+    <div class="page-header flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+        <div>
             <div class="flex items-center gap-2">
-                <a href="{{ route('admin.economy.index') }}" class="btn-secondary text-xs flex items-center gap-1.5">
-                    <i data-lucide="coins" class="w-4 h-4"></i>
-                    <span>Reward Economy</span>
-                </a>
+                <span class="px-2 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider bg-[#560E0F]/30 border border-[#560E0F]/60 text-[#dfa6a9]">
+                    Reward Operations & Publishing
+                </span>
+                <span class="text-xs text-slate-400">Merchandise, Bundles & Vouchers</span>
             </div>
+            <h1 class="page-title text-2xl font-bold text-white font-brand-display tracking-tight mt-1">
+                Reward Management & Publishing Catalog
+            </h1>
+            <p class="text-xs text-slate-400 mt-0.5">
+                Create, manage, and publish society merchandise, tote bags, caps, pins, mouse pads, kits, and discount vouchers for members.
+            </p>
         </div>
-    </x-slot>
 
-    <div class="py-8">
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-6">
+        <div class="flex items-center gap-2">
+            <a href="{{ route('admin.economy.index') }}" class="btn-secondary text-xs flex items-center gap-1.5">
+                <i data-lucide="coins" class="w-4 h-4 text-indigo-400"></i>
+                <span>Reward Economy</span>
+            </a>
+            @if(auth()->user()->isSuperAdmin())
+            <a href="{{ route('admin.students.exp-points.index') }}" class="btn-secondary text-xs flex items-center gap-1.5">
+                <i data-lucide="award" class="w-4 h-4 text-amber-400"></i>
+                <span>Manage EXP & Points</span>
+            </a>
+            @endif
+            <a href="{{ route('admin.rewards.collection') }}" class="btn-secondary text-xs flex items-center gap-1.5">
+                <i data-lucide="qr-code" class="w-4 h-4 text-emerald-400"></i>
+                <span>Collection Desk</span>
+            </a>
+        </div>
+    </div>
+
+    <!-- Reward Economy Dashboard Overview Tray -->
+    <div class="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-6 gap-3">
+        <div class="card p-4 bg-[#172033] border border-slate-800">
+            <span class="text-[10px] font-bold uppercase tracking-wider text-slate-400 block mb-1">Total Rewards</span>
+            <p class="text-xl font-bold font-mono text-white">{{ number_format($summary['total_rewards']) }}</p>
+        </div>
+        <div class="card p-4 bg-[#172033] border border-slate-800">
+            <span class="text-[10px] font-bold uppercase tracking-wider text-emerald-400 block mb-1">Published</span>
+            <p class="text-xl font-bold font-mono text-emerald-400">{{ number_format($summary['published_rewards']) }}</p>
+        </div>
+        <div class="card p-4 bg-[#172033] border border-slate-800">
+            <span class="text-[10px] font-bold uppercase tracking-wider text-amber-400 block mb-1">Drafts</span>
+            <p class="text-xl font-bold font-mono text-amber-400">{{ number_format($summary['draft_rewards']) }}</p>
+        </div>
+        <div class="card p-4 bg-[#172033] border border-slate-800">
+            <span class="text-[10px] font-bold uppercase tracking-wider text-rose-400 block mb-1">Out of Stock</span>
+            <p class="text-xl font-bold font-mono text-rose-400">{{ number_format($summary['out_of_stock']) }}</p>
+        </div>
+        <div class="card p-4 bg-[#172033] border border-slate-800">
+            <span class="text-[10px] font-bold uppercase tracking-wider text-indigo-400 block mb-1">Total Redemptions</span>
+            <p class="text-xl font-bold font-mono text-indigo-300">{{ number_format($summary['total_redemptions']) }}</p>
+        </div>
+        <div class="card p-4 bg-[#172033] border border-slate-800">
+            <span class="text-[10px] font-bold uppercase tracking-wider text-cyan-400 block mb-1">Pending Claims</span>
+            <p class="text-xl font-bold font-mono text-cyan-300">{{ number_format($summary['pending_claims']) }}</p>
+        </div>
+    </div>
 
             @if(session('success'))
                 <div class="p-4 rounded-xl bg-emerald-500/10 border border-emerald-500/30 text-emerald-400 text-sm flex items-center gap-3">
@@ -268,22 +302,28 @@
                                 <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
                                     <div>
                                         <label class="block text-xs font-semibold text-slate-300 mb-1">
-                                            Category <span class="text-rose-400">*</span>
+                                            Reward Type <span class="text-rose-400">*</span>
                                         </label>
-                                        @php
-                                            $adminCatOptions = [];
-                                            foreach($categories as $c) {
-                                                $adminCatOptions[] = ['value' => $c, 'label' => $c];
-                                            }
-                                        @endphp
-                                        <x-custom-dropdown
-                                            name="category"
-                                            :options="$adminCatOptions"
-                                            selected="Merchandise"
-                                            placeholder="Select Category"
-                                        />
+                                        <select name="reward_type" required class="input-dark text-xs w-full">
+                                            @foreach($types as $typeKey => $typeLabel)
+                                                <option value="{{ $typeKey }}">{{ $typeLabel }}</option>
+                                            @endforeach
+                                        </select>
                                     </div>
 
+                                    <div>
+                                        <label class="block text-xs font-semibold text-slate-300 mb-1">
+                                            Category <span class="text-rose-400">*</span>
+                                        </label>
+                                        <select name="category" required class="input-dark text-xs w-full">
+                                            @foreach($categories as $cat)
+                                                <option value="{{ $cat }}">{{ $cat }}</option>
+                                            @endforeach
+                                        </select>
+                                    </div>
+                                </div>
+
+                                <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
                                     <div>
                                         <label class="block text-xs font-semibold text-slate-300 mb-1">
                                             Points Cost <span class="text-rose-400">*</span>
@@ -291,9 +331,7 @@
                                         <input type="number" name="points_cost" min="0" value="50" required
                                                class="input-dark text-xs w-full font-mono">
                                     </div>
-                                </div>
 
-                                <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
                                     <div>
                                         <label class="block text-xs font-semibold text-slate-300 mb-1">
                                             Min Level Req <span class="text-rose-400">*</span>
@@ -301,13 +339,41 @@
                                         <input type="number" name="min_level" min="1" max="100" value="1" required
                                                class="input-dark text-xs w-full font-mono">
                                     </div>
+                                </div>
+
+                                <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                                    <div>
+                                        <label class="block text-xs font-semibold text-slate-300 mb-1">
+                                            Inventory Stock (Physical / Merch / Kit)
+                                        </label>
+                                        <input type="number" name="stock" min="0" placeholder="e.g. 25 (blank = unlimited)"
+                                               class="input-dark text-xs w-full font-mono">
+                                    </div>
 
                                     <div>
                                         <label class="block text-xs font-semibold text-slate-300 mb-1">
-                                            Stock (Blank for Unlimited)
+                                            Per-Member Limit (Optional)
                                         </label>
-                                        <input type="number" name="stock" min="0" placeholder="e.g. 25"
+                                        <input type="number" name="redemption_limit_per_member" min="1" placeholder="e.g. 1 per student"
                                                class="input-dark text-xs w-full font-mono">
+                                    </div>
+                                </div>
+
+                                <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                                    <div>
+                                        <label class="block text-xs font-semibold text-slate-300 mb-1">
+                                            Publication Start (Optional)
+                                        </label>
+                                        <input type="datetime-local" name="starts_at"
+                                               class="input-dark text-xs w-full">
+                                    </div>
+
+                                    <div>
+                                        <label class="block text-xs font-semibold text-slate-300 mb-1">
+                                            Publication End / Expiry (Optional)
+                                        </label>
+                                        <input type="datetime-local" name="ends_at"
+                                               class="input-dark text-xs w-full">
                                     </div>
                                 </div>
 
@@ -315,7 +381,7 @@
                                     <label class="block text-xs font-semibold text-slate-300 mb-1">
                                         Description
                                     </label>
-                                    <textarea name="description" rows="3"
+                                    <textarea name="description" rows="3" placeholder="Describe the item, sizing, inclusions, or bundle details..."
                                               class="input-dark text-xs w-full"></textarea>
                                 </div>
 
@@ -354,18 +420,14 @@
                                     </div>
                                 </div>
 
-                                <div class="flex items-center gap-2 pt-2">
-                                    <input type="checkbox" name="is_active" id="create_is_active" value="1" checked
-                                           class="rounded border-slate-700 bg-slate-800 text-[#560E0F] focus:ring-[#560E0F]">
-                                    <label for="create_is_active" class="text-xs text-slate-300">
-                                        Publish immediately to member reward catalog
-                                    </label>
-                                </div>
-
-                                <div class="pt-3">
-                                    <button type="submit" class="w-full btn-primary py-2 text-xs flex items-center justify-center gap-2">
-                                        <i data-lucide="plus" class="w-3.5 h-3.5"></i>
-                                        <span>Create & Publish Reward</span>
+                                <div class="pt-3 flex items-center gap-2">
+                                    <button type="submit" name="action" value="draft" class="btn-secondary text-xs py-2 px-3 w-1/2 flex items-center justify-center gap-1.5">
+                                        <i data-lucide="file-edit" class="w-3.5 h-3.5 text-amber-400"></i>
+                                        <span>Save as Draft</span>
+                                    </button>
+                                    <button type="submit" name="action" value="publish" class="btn-primary text-xs py-2 px-3 w-1/2 flex items-center justify-center gap-1.5">
+                                        <i data-lucide="upload-cloud" class="w-3.5 h-3.5"></i>
+                                        <span>Publish Reward</span>
                                     </button>
                                 </div>
                             </form>
@@ -376,12 +438,18 @@
                         <div class="card bg-[#172033] border border-slate-800 p-6 rounded-2xl">
                             <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-4 border-b border-slate-800">
                                 <div>
-                                    <h2 class="text-base font-bold text-white font-brand-display">Published Catalog Items</h2>
-                                    <p class="text-[11px] text-slate-400">Edit existing items, adjust inventory, view reservation breakdown, and configure event links.</p>
+                                    <h2 class="text-base font-bold text-white font-brand-display">Rewards Catalog Items</h2>
+                                    <p class="text-[11px] text-slate-400">Manage drafts, publish merchandise/kits, adjust inventory, view reservation breakdown, and configure event links.</p>
                                 </div>
                                 <div class="flex items-center gap-2">
                                     <form method="GET" action="{{ route('admin.shop.index') }}" class="flex items-center gap-2">
                                         <input type="hidden" name="tab" value="catalog">
+                                        <select name="catalog_status" onchange="this.form.submit()" class="input-dark text-xs py-1 px-2.5">
+                                            <option value="">All Statuses</option>
+                                            <option value="draft" {{ request('catalog_status') === 'draft' ? 'selected' : '' }}>Drafts</option>
+                                            <option value="published" {{ request('catalog_status') === 'published' ? 'selected' : '' }}>Published</option>
+                                            <option value="archived" {{ request('catalog_status') === 'archived' ? 'selected' : '' }}>Archived</option>
+                                        </select>
                                         <select name="event_id" onchange="this.form.submit()" class="input-dark text-xs py-1 px-2.5">
                                             <option value="">All Events</option>
                                             @foreach($events as $ev)
@@ -396,7 +464,7 @@
 
                             @if($rewards->isEmpty())
                                 <div class="p-8 text-center">
-                                    <p class="text-xs text-slate-400">No reward items have been added to the catalog yet.</p>
+                                    <p class="text-xs text-slate-400">No reward items found matching your filters.</p>
                                 </div>
                             @else
                                 <div class="divide-y divide-slate-800/80 mt-4" x-data="{ editModal: false, activeReward: null }">
@@ -414,30 +482,45 @@
                                                 <div>
                                                     <div class="flex flex-wrap items-center gap-2">
                                                         <span class="text-sm font-bold text-white">{{ $reward->title }}</span>
-                                                        <span class="px-2 py-0.2 rounded-full text-[10px] font-bold {{ $reward->is_active ? 'bg-emerald-500/20 text-emerald-300' : 'bg-slate-800 text-slate-400' }}">
-                                                            {{ $reward->is_active ? 'Active' : 'Unpublished' }}
-                                                        </span>
-                                                        @if($reward->is_archived)
-                                                            <span class="px-2 py-0.2 rounded-full text-[10px] font-bold bg-amber-500/20 text-amber-300">
+                                                        
+                                                        @if($reward->status === 'draft')
+                                                            <span class="px-2 py-0.5 rounded-full text-[10px] font-bold bg-amber-500/20 text-amber-300 border border-amber-500/30">
+                                                                Draft
+                                                            </span>
+                                                        @elseif($reward->status === 'archived' || $reward->is_archived)
+                                                            <span class="px-2 py-0.5 rounded-full text-[10px] font-bold bg-slate-800 text-slate-400 border border-slate-700">
                                                                 Archived
                                                             </span>
+                                                        @else
+                                                            <span class="px-2 py-0.5 rounded-full text-[10px] font-bold bg-emerald-500/20 text-emerald-300 border border-emerald-500/30">
+                                                                Published
+                                                            </span>
                                                         @endif
+
+                                                        <span class="px-2 py-0.5 rounded-full text-[10px] font-semibold bg-purple-500/20 text-purple-300 border border-purple-500/30">
+                                                            {{ ucfirst($reward->reward_type ?? 'physical') }}
+                                                        </span>
+
                                                         @if($reward->event)
-                                                            <span class="px-2 py-0.2 rounded-full text-[10px] font-semibold bg-indigo-500/20 text-indigo-300 border border-indigo-500/30">
+                                                            <span class="px-2 py-0.5 rounded-full text-[10px] font-semibold bg-indigo-500/20 text-indigo-300 border border-indigo-500/30">
                                                                 {{ $reward->event->name }}
                                                             </span>
                                                         @endif
                                                     </div>
-                                                    <div class="text-[11px] text-slate-400 flex flex-wrap items-center gap-3 mt-1">
+                                                    <div class="text-[11px] text-slate-400 flex flex-wrap items-center gap-3 mt-1.5">
                                                         <span>{{ $reward->category }}</span>
                                                         <span>•</span>
                                                         <span class="text-amber-400 font-bold">{{ number_format($reward->points_cost) }} pts</span>
                                                         <span>•</span>
-                                                        <span class="text-emerald-400 font-medium">Available: {{ $reward->stock === null ? 'Unlimited' : $reward->stock }}</span>
+                                                        <span class="text-emerald-400 font-medium">Stock: {{ $reward->stock === null ? 'Unlimited' : $reward->stock }}</span>
                                                         <span>•</span>
                                                         <span class="text-indigo-300">Reserved: {{ $reward->reserved_quantity }}</span>
                                                         <span>•</span>
                                                         <span class="text-slate-300">Claimed: {{ $reward->claimed_quantity }}</span>
+                                                        @if($reward->redemption_limit_per_member)
+                                                            <span>•</span>
+                                                            <span class="text-sky-400">Limit: {{ $reward->redemption_limit_per_member }}/user</span>
+                                                        @endif
                                                     </div>
                                                 </div>
                                             </div>
@@ -450,14 +533,24 @@
                                                     <span>Edit</span>
                                                 </button>
 
-                                                <form action="{{ route('admin.shop.toggle-active', $reward) }}" method="POST" class="inline">
-                                                    @csrf
-                                                    <button type="submit" class="btn-secondary text-xs py-1.5 px-3">
-                                                        {{ $reward->is_active ? 'Unpublish' : 'Publish' }}
-                                                    </button>
-                                                </form>
+                                                @if($reward->status === 'draft')
+                                                    <form action="{{ route('admin.shop.publish', $reward) }}" method="POST" class="inline">
+                                                        @csrf
+                                                        <button type="submit" class="btn-primary text-xs py-1.5 px-3 flex items-center gap-1 bg-emerald-600 hover:bg-emerald-500">
+                                                            <i data-lucide="upload-cloud" class="w-3.5 h-3.5"></i>
+                                                            <span>Publish</span>
+                                                        </button>
+                                                    </form>
+                                                @else
+                                                    <form action="{{ route('admin.shop.toggle-active', $reward) }}" method="POST" class="inline">
+                                                        @csrf
+                                                        <button type="submit" class="btn-secondary text-xs py-1.5 px-3">
+                                                            {{ $reward->is_active ? 'Disable' : 'Enable' }}
+                                                        </button>
+                                                    </form>
+                                                @endif
 
-                                                @if(!$reward->is_archived)
+                                                @if($reward->status !== 'archived' && !$reward->is_archived)
                                                     <form action="{{ route('admin.shop.archive', $reward) }}" method="POST" class="inline">
                                                         @csrf
                                                         <button type="submit" class="btn-secondary text-xs py-1.5 px-3 text-amber-400">
@@ -498,6 +591,26 @@
                                                         <input type="text" name="title" :value="activeReward?.title" required class="input-dark text-xs w-full">
                                                     </div>
 
+                                                    <div class="grid grid-cols-2 gap-3">
+                                                        <div>
+                                                            <label class="block text-xs font-semibold text-slate-300 mb-1">Status</label>
+                                                            <select name="status" :value="activeReward?.status" class="input-dark text-xs w-full">
+                                                                <option value="draft">Draft</option>
+                                                                <option value="published">Published</option>
+                                                                <option value="archived">Archived</option>
+                                                            </select>
+                                                        </div>
+
+                                                        <div>
+                                                            <label class="block text-xs font-semibold text-slate-300 mb-1">Reward Type</label>
+                                                            <select name="reward_type" :value="activeReward?.reward_type" class="input-dark text-xs w-full">
+                                                                @foreach($types as $typeKey => $typeLabel)
+                                                                    <option value="{{ $typeKey }}">{{ $typeLabel }}</option>
+                                                                @endforeach
+                                                            </select>
+                                                        </div>
+                                                    </div>
+
                                                     <div>
                                                         <label class="block text-xs font-semibold text-slate-300 mb-1">Associated Event</label>
                                                         <select name="event_id" :value="activeReward?.event_id" class="input-dark text-xs w-full">
@@ -511,7 +624,11 @@
                                                     <div class="grid grid-cols-2 gap-3">
                                                         <div>
                                                             <label class="block text-xs font-semibold text-slate-300 mb-1">Category</label>
-                                                            <input type="text" name="category" :value="activeReward?.category" required class="input-dark text-xs w-full">
+                                                            <select name="category" :value="activeReward?.category" required class="input-dark text-xs w-full">
+                                                                @foreach($categories as $cat)
+                                                                    <option value="{{ $cat }}">{{ $cat }}</option>
+                                                                @endforeach
+                                                            </select>
                                                         </div>
 
                                                         <div>
@@ -520,7 +637,7 @@
                                                         </div>
                                                     </div>
 
-                                                    <div class="grid grid-cols-2 gap-3">
+                                                    <div class="grid grid-cols-3 gap-3">
                                                         <div>
                                                             <label class="block text-xs font-semibold text-slate-300 mb-1">Min Level</label>
                                                             <input type="number" name="min_level" :value="activeReward?.min_level" required class="input-dark text-xs w-full font-mono">
@@ -530,11 +647,33 @@
                                                             <label class="block text-xs font-semibold text-slate-300 mb-1">Stock</label>
                                                             <input type="number" name="stock" :value="activeReward?.stock" class="input-dark text-xs w-full font-mono">
                                                         </div>
+
+                                                        <div>
+                                                            <label class="block text-xs font-semibold text-slate-300 mb-1">User Limit</label>
+                                                            <input type="number" name="redemption_limit_per_member" :value="activeReward?.redemption_limit_per_member" class="input-dark text-xs w-full font-mono">
+                                                        </div>
+                                                    </div>
+
+                                                    <div class="grid grid-cols-2 gap-3">
+                                                        <div>
+                                                            <label class="block text-xs font-semibold text-slate-300 mb-1">Starts At</label>
+                                                            <input type="datetime-local" name="starts_at" :value="activeReward?.starts_at ? activeReward.starts_at.substring(0, 16) : ''" class="input-dark text-xs w-full">
+                                                        </div>
+
+                                                        <div>
+                                                            <label class="block text-xs font-semibold text-slate-300 mb-1">Ends At</label>
+                                                            <input type="datetime-local" name="ends_at" :value="activeReward?.ends_at ? activeReward.ends_at.substring(0, 16) : ''" class="input-dark text-xs w-full">
+                                                        </div>
                                                     </div>
 
                                                     <div>
                                                         <label class="block text-xs font-semibold text-slate-300 mb-1">Description</label>
                                                         <textarea name="description" rows="2" :value="activeReward?.description" class="input-dark text-xs w-full"></textarea>
+                                                    </div>
+
+                                                    <div>
+                                                        <label class="block text-xs font-semibold text-slate-300 mb-1">Eligibility Notes</label>
+                                                        <input type="text" name="eligibility_notes" :value="activeReward?.eligibility_notes" class="input-dark text-xs w-full">
                                                     </div>
 
                                                     <div>
@@ -588,4 +727,5 @@
 
         </div>
     </div>
-</x-app-layout>
+</x-layouts.admin>
+

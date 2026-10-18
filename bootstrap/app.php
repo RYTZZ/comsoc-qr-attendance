@@ -34,7 +34,10 @@ return Application::configure(basePath: dirname(__DIR__))
     })
     ->withExceptions(function (Exceptions $exceptions): void {
         $exceptions->render(function (\Illuminate\Database\QueryException $e, \Illuminate\Http\Request $request) {
+            $correlationId = (string) \Illuminate\Support\Str::uuid();
+
             \Illuminate\Support\Facades\Log::error('Database Query Error: ' . $e->getMessage(), [
+                'correlation_id' => $correlationId,
                 'sqlstate' => $e->getCode(),
                 'url' => $request->fullUrl(),
                 'method' => $request->method(),
@@ -45,6 +48,7 @@ return Application::configure(basePath: dirname(__DIR__))
             if ($request->expectsJson()) {
                 return response()->json([
                     'success' => false,
+                    'correlation_id' => $correlationId,
                     'message' => config('app.debug')
                         ? 'A database query exception occurred: ' . $e->getMessage()
                         : 'A temporary database processing error occurred. Please try again later.',
@@ -53,6 +57,7 @@ return Application::configure(basePath: dirname(__DIR__))
 
             if (!config('app.debug')) {
                 return response()->view('errors.500', [
+                    'correlationId' => $correlationId,
                     'message' => 'A database error occurred while processing your request. Please try again shortly.',
                 ], 500);
             }

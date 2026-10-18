@@ -48,15 +48,48 @@
                         <form method="GET" action="{{ route('directory.index') }}" class="flex flex-wrap items-center gap-2">
                             <input type="hidden" name="tab" value="directory">
 
-                            <div class="relative w-full sm:w-48">
+                            <div class="relative w-full sm:w-44">
                                 <span class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-slate-500">
                                     <i data-lucide="search" class="w-3.5 h-3.5"></i>
                                 </span>
                                 <input type="text" name="search" value="{{ $search }}"
+                                       placeholder="Search members..."
                                        class="input-dark pl-9 pr-3 py-1.5 text-xs w-full">
                             </div>
 
-                            <div class="w-40">
+                            <div class="w-36">
+                                @php
+                                    $programOptions = [['value' => 'all', 'label' => 'All Programs']];
+                                    foreach($programs as $p) {
+                                        $programOptions[] = ['value' => $p->code, 'label' => $p->code];
+                                    }
+                                @endphp
+                                <x-custom-dropdown
+                                    name="program"
+                                    :options="$programOptions"
+                                    :selected="$selectedProgram"
+                                    placeholder="Program"
+                                    onchange="this.closest('form').submit()"
+                                />
+                            </div>
+
+                            <div class="w-36">
+                                @php
+                                    $yearOptions = [['value' => 'all', 'label' => 'All Years']];
+                                    foreach($yearLevels as $yl) {
+                                        $yearOptions[] = ['value' => $yl, 'label' => $yl];
+                                    }
+                                @endphp
+                                <x-custom-dropdown
+                                    name="year_level"
+                                    :options="$yearOptions"
+                                    :selected="$selectedYearLevel"
+                                    placeholder="Year Level"
+                                    onchange="this.closest('form').submit()"
+                                />
+                            </div>
+
+                            <div class="w-36">
                                 @php
                                     $skillOptions = [['value' => 'all', 'label' => 'All Skills']];
                                     foreach($skills as $s) {
@@ -72,7 +105,7 @@
                                 />
                             </div>
 
-                            <div class="w-44">
+                            <div class="w-40">
                                 @php
                                     $catOptions = [['value' => 'all', 'label' => 'All Domains']];
                                     foreach($projectCategories as $pc) {
@@ -92,7 +125,7 @@
                                 Filter
                             </button>
 
-                            @if($search || ($selectedSkill && $selectedSkill !== 'all') || ($selectedCategory && $selectedCategory !== 'all'))
+                            @if($search || ($selectedSkill && $selectedSkill !== 'all') || ($selectedCategory && $selectedCategory !== 'all') || ($selectedProgram && $selectedProgram !== 'all') || ($selectedYearLevel && $selectedYearLevel !== 'all'))
                                 <a href="{{ route('directory.index', ['tab' => 'directory']) }}" class="btn-secondary text-xs py-1.5 px-2.5">
                                     Reset
                                 </a>
@@ -193,7 +226,7 @@
                     </div>
 
                     <div class="p-4 border-t border-slate-800">
-                        {{ $members->appends(['tab' => 'directory', 'search' => $search, 'skill_id' => $selectedSkill, 'project_category' => $selectedCategory, 'program' => $selectedProgram])->links() }}
+                        {{ $members->appends(['tab' => 'directory', 'search' => $search, 'skill_id' => $selectedSkill, 'project_category' => $selectedCategory, 'program' => $selectedProgram, 'year_level' => $selectedYearLevel])->links() }}
                     </div>
                 @endif
             @else

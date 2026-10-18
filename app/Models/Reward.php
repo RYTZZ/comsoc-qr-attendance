@@ -12,18 +12,36 @@ class Reward extends Model
     use HasFactory, HasUuids;
 
     public const CATEGORIES = [
+        'Computing Society merchandise',
         'Tote bags',
         'Caps',
         'Pins',
         'Mouse pads',
+        'Kits and bundles',
         'Discount vouchers',
+        'Event merchandise',
         'Other merchandise',
         'Others',
+    ];
+
+    public const TYPES = [
+        'physical' => 'Physical Item',
+        'merchandise' => 'Society Merchandise',
+        'kit' => 'Kit or Bundle',
+        'voucher' => 'Discount Voucher',
+        'digital' => 'Digital Reward',
+    ];
+
+    public const STATUSES = [
+        'draft' => 'Draft',
+        'published' => 'Published',
+        'archived' => 'Archived',
     ];
 
     protected $fillable = [
         'title',
         'category',
+        'reward_type',
         'event_id',
         'description',
         'points_cost',
@@ -35,6 +53,11 @@ class Reward extends Model
         'image_path',
         'is_active',
         'is_archived',
+        'status',
+        'published_at',
+        'starts_at',
+        'ends_at',
+        'redemption_limit_per_member',
         'fulfillment_instructions',
     ];
 
@@ -45,7 +68,39 @@ class Reward extends Model
         'initial_quantity' => 'integer',
         'is_active' => 'boolean',
         'is_archived' => 'boolean',
+        'published_at' => 'datetime',
+        'starts_at' => 'datetime',
+        'ends_at' => 'datetime',
+        'redemption_limit_per_member' => 'integer',
     ];
+
+    public function scopePublished($query)
+    {
+        return $query->where('status', 'published')
+            ->where('is_active', true)
+            ->where('is_archived', false)
+            ->where(function ($q) {
+                $q->whereNull('starts_at')->orWhere('starts_at', '<=', now());
+            })
+            ->where(function ($q) {
+                $q->whereNull('ends_at')->orWhere('ends_at', '>=', now());
+            });
+    }
+
+    public function isDraft(): bool
+    {
+        return $this->status === 'draft' || (!$this->is_active && !$this->is_archived);
+    }
+
+    public function isPublished(): bool
+    {
+        return $this->status === 'published' && $this->is_active && !$this->is_archived;
+    }
+
+    public function isArchived(): bool
+    {
+        return $this->status === 'archived' || $this->is_archived;
+    }
 
     public function redemptions(): HasMany
     {

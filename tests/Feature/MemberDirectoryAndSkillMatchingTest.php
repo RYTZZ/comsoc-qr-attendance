@@ -19,10 +19,24 @@ class MemberDirectoryAndSkillMatchingTest extends TestCase
     {
         $viewer = User::factory()->create(['role' => 'student']);
 
+        $student = Student::create([
+            'student_number' => '20260001',
+            'first_name' => 'Alice',
+            'last_name' => 'Developer',
+            'email' => 'alice@example.com',
+            'program' => 'BSIT',
+            'year_level' => '3rd Year',
+            'block' => '1',
+        ]);
+
         $skillPhp = Skill::create(['name' => 'PHP & Laravel', 'category' => 'Backend']);
         $skillReact = Skill::create(['name' => 'React', 'category' => 'Frontend']);
 
-        $alice = User::factory()->create(['name' => 'Alice Developer', 'role' => 'student']);
+        $alice = User::factory()->create([
+            'name' => 'Alice Developer',
+            'role' => 'student',
+            'student_id' => $student->id,
+        ]);
         UserProfile::create(['user_id' => $alice->id, 'is_public' => true, 'bio' => 'Fullstack Laravel dev']);
         $alice->skills()->attach($skillPhp->id);
 

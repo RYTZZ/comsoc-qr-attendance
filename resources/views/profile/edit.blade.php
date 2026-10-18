@@ -122,7 +122,9 @@
                                 <div class="grid grid-cols-2 sm:grid-cols-3 gap-2 mt-1">
                                     @php
                                         $commonSkills = ['PHP', 'Laravel', 'JavaScript', 'React', 'Python', 'TailwindCSS', 'MySQL', 'Git', 'Linux'];
-                                        $userSkillNames = $user->skills->pluck('name')->toArray();
+                                        $userSkillNames = old('skills') !== null 
+                                            ? (array) old('skills') 
+                                            : $user->skills->pluck('name')->toArray();
                                     @endphp
                                     @foreach($commonSkills as $sk)
                                     <label class="flex items-center gap-2 p-2 rounded-xl bg-[#0B1120] border border-[#334155] text-xs text-slate-300 hover:border-[#8F3033]/60 cursor-pointer">
@@ -133,6 +135,8 @@
                                     </label>
                                     @endforeach
                                 </div>
+                                <x-input-error class="mt-1" :messages="$errors->get('skills')" />
+                                <x-input-error class="mt-1" :messages="$errors->get('skills.*')" />
                             </div>
 
                             <div class="pt-2">

@@ -32,7 +32,6 @@
                 @endif
             </div>
         </div>
-    </x-slot>
 
     <div class="py-6 space-y-6">
 

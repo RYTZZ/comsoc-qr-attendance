@@ -114,6 +114,14 @@
                 Kiosks
             </a>
 
+            @if(auth()->user()->isEventOrganizer() || auth()->user()->isAdmin() || auth()->user()->isSuperAdmin())
+            <a href="{{ route('organizer.scanner') }}"
+               class="sidebar-link {{ request()->routeIs('organizer.scanner*') ? 'active' : '' }}">
+                <i data-lucide="scan-line" class="sidebar-link-icon text-amber-400"></i>
+                Organizer Scanner
+            </a>
+            @endif
+
             <div class="pt-4 pb-1">
                 <p class="px-3 text-xs font-semibold text-slate-500 uppercase tracking-wider">Operations & Admin</p>
             </div>
@@ -138,6 +146,8 @@
                 @if($openIncidents > 0)
                 <span class="ml-auto badge-open text-xs px-1.5 py-0.5">{{ $openIncidents }}</span>
                 @endif
+            </a>
+
             <a href="{{ route('admin.support.index') }}"
                class="sidebar-link {{ request()->routeIs('admin.support.*') ? 'active' : '' }}">
                 <i data-lucide="life-buoy" class="sidebar-link-icon"></i>
@@ -179,9 +189,9 @@
             </a>
 
             <a href="{{ route('admin.shop.index') }}"
-               class="sidebar-link {{ request()->routeIs('admin.shop.*') ? 'active' : '' }}">
+               class="sidebar-link {{ request()->routeIs('admin.shop.*') || request()->routeIs('admin.rewards.*') ? 'active' : '' }}">
                 <i data-lucide="gift" class="sidebar-link-icon"></i>
-                Reward Shop & Claims
+                Reward Catalog & Management
                 @php $pendingClaims = \App\Models\RewardRedemption::where('status','pending')->count(); @endphp
                 @if($pendingClaims > 0)
                 <span class="ml-auto bg-amber-500/20 text-amber-300 border border-amber-500/30 text-[10px] font-bold px-1.5 py-0.5 rounded">{{ $pendingClaims }}</span>

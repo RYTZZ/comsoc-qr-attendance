@@ -328,6 +328,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
             Route::post('/', [\App\Http\Controllers\Admin\AdminRewardShopController::class, 'store'])->name('store');
             Route::put('/{reward}', [\App\Http\Controllers\Admin\AdminRewardShopController::class, 'update'])->name('update');
             Route::delete('/{reward}', [\App\Http\Controllers\Admin\AdminRewardShopController::class, 'destroy'])->name('destroy');
+            Route::post('/{reward}/publish', [\App\Http\Controllers\Admin\AdminRewardShopController::class, 'publish'])->name('publish');
             Route::post('/{reward}/toggle-active', [\App\Http\Controllers\Admin\AdminRewardShopController::class, 'toggleActive'])->name('toggle-active');
             Route::post('/{reward}/archive', [\App\Http\Controllers\Admin\AdminRewardShopController::class, 'archive'])->name('archive');
             Route::post('/{redemption}/fulfill', [\App\Http\Controllers\Admin\AdminRewardShopController::class, 'fulfill'])->name('fulfill');
@@ -344,6 +345,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
             Route::post('/', [\App\Http\Controllers\Admin\AdminRewardShopController::class, 'store'])->name('store');
             Route::put('/{reward}', [\App\Http\Controllers\Admin\AdminRewardShopController::class, 'update'])->name('update');
             Route::delete('/{reward}', [\App\Http\Controllers\Admin\AdminRewardShopController::class, 'destroy'])->name('destroy');
+            Route::post('/{reward}/publish', [\App\Http\Controllers\Admin\AdminRewardShopController::class, 'publish'])->name('publish');
             Route::post('/{reward}/toggle-active', [\App\Http\Controllers\Admin\AdminRewardShopController::class, 'toggleActive'])->name('toggle-active');
             Route::post('/{reward}/archive', [\App\Http\Controllers\Admin\AdminRewardShopController::class, 'archive'])->name('archive');
             Route::post('/{redemption}/fulfill', [\App\Http\Controllers\Admin\AdminRewardShopController::class, 'fulfill'])->name('fulfill');

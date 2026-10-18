@@ -119,37 +119,49 @@
 
 <!-- Gamification, XP & Rewards Summary -->
 <div class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
-    <div class="card p-4 bg-[#172033] border border-slate-800">
-        <span class="text-[11px] font-semibold text-slate-400 uppercase tracking-wider block mb-1">XP Distributed</span>
+    <a href="{{ route('admin.economy.index') }}" class="card p-4 bg-[#172033] border border-slate-800 hover:border-indigo-500/50 hover:bg-slate-800/60 transition group block">
+        <div class="flex items-center justify-between mb-1">
+            <span class="text-[11px] font-semibold text-slate-400 uppercase tracking-wider group-hover:text-white transition">Reward Economy</span>
+            <i data-lucide="arrow-up-right" class="w-3.5 h-3.5 text-slate-500 group-hover:text-indigo-400 transition"></i>
+        </div>
         <div class="flex items-baseline gap-1.5">
             <span class="text-xl font-bold font-mono text-[#dfa6a9]">{{ number_format($stats['total_xp_distributed']) }}</span>
-            <span class="text-xs text-slate-500">XP</span>
+            <span class="text-xs text-slate-500">XP Distributed</span>
         </div>
-    </div>
+    </a>
 
-    <div class="card p-4 bg-[#172033] border border-slate-800">
-        <span class="text-[11px] font-semibold text-slate-400 uppercase tracking-wider block mb-1">Points Economy</span>
+    <a href="{{ auth()->user()->isSuperAdmin() ? route('admin.students.exp-points.index') : route('admin.economy.index') }}" class="card p-4 bg-[#172033] border border-slate-800 hover:border-amber-500/50 hover:bg-slate-800/60 transition group block">
+        <div class="flex items-center justify-between mb-1">
+            <span class="text-[11px] font-semibold text-slate-400 uppercase tracking-wider group-hover:text-white transition">{{ auth()->user()->isSuperAdmin() ? 'Manage EXP & Points' : 'Points Economy' }}</span>
+            <i data-lucide="arrow-up-right" class="w-3.5 h-3.5 text-slate-500 group-hover:text-amber-400 transition"></i>
+        </div>
         <div class="flex items-baseline gap-1.5">
             <span class="text-xl font-bold font-mono text-amber-300">{{ number_format($stats['total_points_distributed']) }}</span>
-            <span class="text-xs text-slate-500">granted</span>
+            <span class="text-xs text-slate-500">points granted</span>
         </div>
-    </div>
+    </a>
 
-    <div class="card p-4 bg-[#172033] border border-slate-800">
-        <span class="text-[11px] font-semibold text-slate-400 uppercase tracking-wider block mb-1">Mission Completion</span>
+    <a href="{{ route('admin.missions.index') }}" class="card p-4 bg-[#172033] border border-slate-800 hover:border-emerald-500/50 hover:bg-slate-800/60 transition group block">
+        <div class="flex items-center justify-between mb-1">
+            <span class="text-[11px] font-semibold text-slate-400 uppercase tracking-wider group-hover:text-white transition">Mission Completion</span>
+            <i data-lucide="arrow-up-right" class="w-3.5 h-3.5 text-slate-500 group-hover:text-emerald-400 transition"></i>
+        </div>
         <div class="flex items-baseline gap-1.5">
             <span class="text-xl font-bold font-mono text-emerald-400">{{ $stats['mission_completion_rate'] }}%</span>
             <span class="text-xs text-slate-500">({{ $stats['approved_submissions'] }} approved)</span>
         </div>
-    </div>
+    </a>
 
-    <div class="card p-4 bg-[#172033] border border-slate-800">
-        <span class="text-[11px] font-semibold text-slate-400 uppercase tracking-wider block mb-1">Reward Inventory</span>
+    <a href="{{ route('admin.shop.index') }}" class="card p-4 bg-[#172033] border border-slate-800 hover:border-cyan-500/50 hover:bg-slate-800/60 transition group block">
+        <div class="flex items-center justify-between mb-1">
+            <span class="text-[11px] font-semibold text-slate-400 uppercase tracking-wider group-hover:text-white transition">Reward Inventory</span>
+            <i data-lucide="arrow-up-right" class="w-3.5 h-3.5 text-slate-500 group-hover:text-cyan-400 transition"></i>
+        </div>
         <div class="flex items-baseline gap-1.5">
             <span class="text-xl font-bold font-mono text-cyan-400">{{ number_format($stats['available_inventory']) }}</span>
             <span class="text-xs text-slate-500">units in stock</span>
         </div>
-    </div>
+    </a>
 </div>
 
 <!-- Real-Time Membership Headcount & Live Metric Gauge -->
@@ -336,6 +348,20 @@
                 </div>
                 <p class="text-xs font-medium text-slate-300 group-hover:text-white leading-tight">Attendance Logs</p>
             </a>
+            <a href="{{ route('admin.economy.index') }}" class="p-3 sm:p-4 rounded-xl bg-slate-800 hover:bg-slate-700 active:scale-[0.98] transition text-center group flex flex-col items-center justify-center min-h-[90px]">
+                <div class="mb-1.5 flex items-center justify-center text-slate-400 group-hover:text-white transition">
+                    <i data-lucide="coins" class="w-6 h-6 text-indigo-400"></i>
+                </div>
+                <p class="text-xs font-medium text-slate-300 group-hover:text-white leading-tight">Reward Economy</p>
+            </a>
+            @if(auth()->user()->isSuperAdmin())
+            <a href="{{ route('admin.students.exp-points.index') }}" class="p-3 sm:p-4 rounded-xl bg-slate-800 hover:bg-slate-700 active:scale-[0.98] transition text-center group flex flex-col items-center justify-center min-h-[90px]">
+                <div class="mb-1.5 flex items-center justify-center text-slate-400 group-hover:text-white transition">
+                    <i data-lucide="award" class="w-6 h-6 text-amber-400"></i>
+                </div>
+                <p class="text-xs font-medium text-slate-300 group-hover:text-white leading-tight">Manage EXP & Points</p>
+            </a>
+            @endif
         </div>
     </div>
 </div>

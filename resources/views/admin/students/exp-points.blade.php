@@ -1,36 +1,38 @@
-<x-app-layout>
-    <x-slot name="header">
-        <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-            <div>
-                <div class="flex items-center gap-2">
-                    <span class="px-2 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider bg-rose-500/20 border border-rose-500/40 text-rose-300">
-                        Super Admin Exclusive
-                    </span>
-                    <span class="text-xs text-slate-400">Governance & Economy Operations</span>
-                </div>
-                <h1 class="text-2xl font-bold text-white font-brand-display tracking-tight mt-1">
-                    Manage Student EXP & Points
-                </h1>
-                <p class="text-xs text-slate-400 mt-0.5">
-                    Manual distribution and adjustments for student Lifetime EXP and Spendable Raffle Points with full audit ledger tracking.
-                </p>
-            </div>
-
+<x-layouts.admin :title="'Manage Student EXP & Points'">
+<div class="space-y-6">
+    <div class="page-header flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+        <div>
             <div class="flex items-center gap-2">
-                <a href="{{ route('admin.economy.index') }}" class="btn-secondary text-xs flex items-center gap-1.5">
-                    <i data-lucide="coins" class="w-4 h-4"></i>
-                    <span>Reward Economy</span>
-                </a>
-                <a href="{{ route('admin.shop.index') }}" class="btn-secondary text-xs flex items-center gap-1.5">
-                    <i data-lucide="gift" class="w-4 h-4"></i>
-                    <span>Reward Shop</span>
-                </a>
+                <span class="px-2 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider bg-rose-500/20 border border-rose-500/40 text-rose-300">
+                    Super Admin Exclusive
+                </span>
+                <span class="text-xs text-slate-400">Governance & Economy Operations</span>
             </div>
+            <h1 class="page-title text-2xl font-bold text-white font-brand-display tracking-tight mt-1">
+                Manage Student EXP & Points
+            </h1>
+            <p class="text-xs text-slate-400 mt-0.5">
+                Manual distribution and adjustments for student Lifetime EXP and Spendable Raffle Points with full audit ledger tracking.
+            </p>
         </div>
-    </x-slot>
 
-    <div class="py-8">
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-6">
+        <div class="flex items-center gap-2">
+            <a href="{{ route('admin.economy.index') }}" class="btn-secondary text-xs flex items-center gap-1.5">
+                <i data-lucide="coins" class="w-4 h-4"></i>
+                <span>Reward Economy</span>
+            </a>
+            <a href="{{ route('admin.shop.index') }}" class="btn-secondary text-xs flex items-center gap-1.5">
+                <i data-lucide="gift" class="w-4 h-4"></i>
+                <span>Reward Shop</span>
+            </a>
+            <a href="{{ route('admin.dashboard') }}" class="btn-secondary text-xs flex items-center gap-1.5">
+                <i data-lucide="layout-dashboard" class="w-4 h-4"></i>
+                <span>Admin Dashboard</span>
+            </a>
+        </div>
+    </div>
+
+    <div class="space-y-6">
 
             @if(session('success'))
                 <div class="p-4 rounded-xl bg-emerald-500/10 border border-emerald-500/30 text-emerald-400 text-sm flex items-center gap-3">
@@ -385,7 +387,7 @@
                 </div>
 
             </div>
-
         </div>
     </div>
-</x-app-layout>
+</div>
+</x-layouts.admin>

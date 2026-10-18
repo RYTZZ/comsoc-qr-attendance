@@ -16,10 +16,11 @@ class MemberDirectoryService
         ?string $skillId = null,
         ?string $projectCategory = null,
         ?string $program = null,
+        ?string $yearLevel = null,
         int $perPage = 18,
         int $page = 1
     ): LengthAwarePaginator {
-        $query = User::with(['student.program', 'profile', 'skills'])
+        $query = User::with(['student', 'profile', 'skills'])
             ->where('role', 'student')
             ->whereHas('profile', function (Builder $pq) {
                 $pq->where('is_public', true);
@@ -56,6 +57,12 @@ class MemberDirectoryService
             });
         }
 
+        if ($yearLevel && $yearLevel !== 'all') {
+            $query->whereHas('student', function (Builder $sq) use ($yearLevel) {
+                $sq->where('year_level', $yearLevel);
+            });
+        }
+
         return $query->orderBy('name', 'asc')->paginate($perPage, ['*'], 'page', $page);
     }
 
@@ -67,7 +74,7 @@ class MemberDirectoryService
         $myCollabPreferences = $myProfile?->collaboration_preferences ?? [];
         $myProjectCategories = $myProfile?->project_categories ?? [];
 
-        $candidates = User::with(['student.program', 'profile', 'skills'])
+        $candidates = User::with(['student', 'profile', 'skills'])
             ->where('role', 'student')
             ->where('id', '!=', $user->id)
             ->whereHas('profile', function (Builder $pq) {

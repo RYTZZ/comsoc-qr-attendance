@@ -9,6 +9,7 @@ use App\Models\UserProfile;
 use App\Services\MemberDirectoryService;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Str;
 use Illuminate\View\View;
 
 class MemberDirectoryController extends Controller
@@ -32,6 +33,7 @@ class MemberDirectoryController extends Controller
         $skillId = $request->input('skill_id');
         $projectCategory = $request->input('project_category');
         $programCode = $request->input('program');
+        $yearLevel = $request->input('year_level');
 
         $skills = Skill::orderBy('name')->get();
         $programs = Program::where('is_active', true)->orderBy('code')->get();
@@ -41,6 +43,7 @@ class MemberDirectoryController extends Controller
             skillId: $skillId,
             projectCategory: $projectCategory,
             program: $programCode,
+            yearLevel: $yearLevel,
             perPage: 12,
             page: (int) $request->input('page', 1)
         );
@@ -56,11 +59,13 @@ class MemberDirectoryController extends Controller
             'matches' => $matches,
             'skills' => $skills,
             'programs' => $programs,
+            'yearLevels' => \App\Models\Student::YEAR_LEVELS,
             'projectCategories' => self::PROJECT_CATEGORIES,
             'search' => $search,
             'selectedSkill' => $skillId,
             'selectedCategory' => $projectCategory,
             'selectedProgram' => $programCode,
+            'selectedYearLevel' => $yearLevel,
         ]);
     }
 
@@ -70,7 +75,7 @@ class MemberDirectoryController extends Controller
             abort(404);
         }
 
-        $user->load(['student.program', 'skills', 'achievements', 'seasonStats.season']);
+        $user->load(['student', 'skills', 'achievements', 'seasonStats.season']);
 
         return view('directory.show', [
             'member' => $user,
@@ -137,8 +142,15 @@ class MemberDirectoryController extends Controller
             'open_to_collaborate' => $request->boolean('open_to_collaborate'),
         ]);
 
-        if (isset($validated['skill_ids'])) {
-            $user->skills()->sync($validated['skill_ids']);
+        if (!empty($validated['skill_ids']) && is_array($validated['skill_ids'])) {
+            $syncData = [];
+            foreach ($validated['skill_ids'] as $skillId) {
+                $syncData[$skillId] = [
+                    'id' => (string) Str::uuid(),
+                    'proficiency' => 'intermediate',
+                ];
+            }
+            $user->skills()->sync($syncData);
         } else {
             $user->skills()->detach();
         }

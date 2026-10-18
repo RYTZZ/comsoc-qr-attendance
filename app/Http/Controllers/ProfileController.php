@@ -17,6 +17,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Redirect;
+use Illuminate\Support\Str;
 use Illuminate\View\View;
 
 class ProfileController extends Controller
@@ -122,17 +123,20 @@ class ProfileController extends Controller
                 'is_public' => $validated['is_public'] ?? true,
             ]);
 
-            if (isset($validated['skills']) && is_array($validated['skills'])) {
-                $skillIds = [];
+            $skillIds = [];
+            if (!empty($validated['skills']) && is_array($validated['skills'])) {
                 foreach ($validated['skills'] as $skillName) {
                     $cleanedName = trim($skillName);
                     if ($cleanedName !== '') {
                         $skill = Skill::firstOrCreate(['name' => $cleanedName]);
-                        $skillIds[$skill->id] = ['proficiency' => 'intermediate'];
+                        $skillIds[$skill->id] = [
+                            'id' => (string) Str::uuid(),
+                            'proficiency' => 'intermediate',
+                        ];
                     }
                 }
-                $user->skills()->sync($skillIds);
             }
+            $user->skills()->sync($skillIds);
         });
 
         return Redirect::route('profile.edit')->with('status', 'profile-updated');

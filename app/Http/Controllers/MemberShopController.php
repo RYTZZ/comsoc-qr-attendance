@@ -25,7 +25,7 @@ class MemberShopController extends Controller
         $search = $request->input('search');
         $statusTab = $request->input('tab', 'shop');
 
-        $rewardsQuery = Reward::where('is_active', true);
+        $rewardsQuery = Reward::published();
 
         if ($selectedCategory && $selectedCategory !== 'all') {
             $rewardsQuery->where('category', $selectedCategory);
@@ -61,6 +61,10 @@ class MemberShopController extends Controller
 
     public function show(Request $request, Reward $reward): View
     {
+        if (!$reward->isPublished()) {
+            abort(404, 'Reward item not available or published.');
+        }
+
         $user = $request->user();
 
         $spendableExp = $user->getSpendableExp();

@@ -143,7 +143,7 @@
     </div>
 
     <!-- Create Announcement Modal with Audience Targeting & Acknowledgment -->
-    <x-modal name="create-announcement-modal" :show="false" maxWidth="2xl">
+    <x-modal name="create-announcement-modal" :show="$errors->any()" maxWidth="2xl">
         <form method="POST" action="{{ route('admin.announcements.store') }}" class="p-6 space-y-4">
             @csrf
             <div class="flex items-center justify-between pb-3 border-b border-slate-800">
@@ -153,9 +153,23 @@
                 </button>
             </div>
 
+            @if($errors->any())
+            <div class="p-3.5 rounded-xl bg-rose-500/10 border border-rose-500/30 text-rose-400 text-xs space-y-1">
+                <div class="font-bold flex items-center gap-1.5">
+                    <i data-lucide="alert-triangle" class="w-4 h-4"></i>
+                    <span>Please fix the following validation errors:</span>
+                </div>
+                <ul class="list-disc list-inside space-y-0.5 text-[11px] text-rose-300">
+                    @foreach($errors->all() as $err)
+                    <li>{{ $err }}</li>
+                    @endforeach
+                </ul>
+            </div>
+            @endif
+
             <div class="space-y-1">
                 <label class="text-xs font-semibold text-slate-300">Title *</label>
-                <input type="text" name="title" required placeholder="Announcement Headline" class="input-dark w-full text-xs">
+                <input type="text" name="title" required value="{{ old('title') }}" placeholder="Announcement Headline" class="input-dark w-full text-xs">
             </div>
 
             <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
@@ -180,12 +194,15 @@
             </div>
 
             <!-- Audience Targeting -->
-            <div class="p-3.5 rounded-xl bg-slate-950 border border-slate-800 space-y-3">
-                <h4 class="text-xs font-bold text-amber-400 uppercase tracking-wider">Audience Targeting</h4>
+            <div class="p-3.5 rounded-xl bg-slate-950 border border-slate-800 space-y-3" x-data="{ audienceType: 'all' }">
+                <div class="flex items-center justify-between">
+                    <h4 class="text-xs font-bold text-amber-400 uppercase tracking-wider">Audience Targeting</h4>
+                    <span class="text-[10px] text-slate-400">Target specific groups or leave as all members</span>
+                </div>
                 <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
                     <div>
                         <label class="text-[11px] text-slate-400 block mb-1">Target Audience Criterion</label>
-                        <select name="target_audience_type" class="input-dark w-full text-xs">
+                        <select name="target_audience_type" x-model="audienceType" class="input-dark w-full text-xs">
                             <option value="all">All Members (Default)</option>
                             <option value="program">By Program / Course</option>
                             <option value="year_level">By Year Level</option>
@@ -193,9 +210,13 @@
                         </select>
                     </div>
 
-                    <div>
-                        <label class="text-[11px] text-slate-400 block mb-1">Target Values (Optional)</label>
-                        <input type="text" name="target_audience_values[]" placeholder="e.g. BSIT or 1 or 2" class="input-dark w-full text-xs">
+                    <div x-show="audienceType !== 'all'" x-cloak>
+                        <label class="text-[11px] text-slate-400 block mb-1">
+                            <span x-show="audienceType === 'program'">Programs (comma-separated, e.g. BSIT, BSCS)</span>
+                            <span x-show="audienceType === 'year_level'">Year Levels (e.g. 1st Year, 2nd Year or 1, 2)</span>
+                            <span x-show="audienceType === 'role'">Roles (e.g. student, officer)</span>
+                        </label>
+                        <input type="text" name="target_audience_values" placeholder="e.g. BSIT, BSCS" class="input-dark w-full text-xs">
                     </div>
                 </div>
             </div>

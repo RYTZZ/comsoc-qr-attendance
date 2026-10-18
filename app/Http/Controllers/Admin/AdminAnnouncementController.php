@@ -52,6 +52,43 @@ class AdminAnnouncementController extends Controller
 
     public function store(Request $request): RedirectResponse
     {
+        // Normalize target_audience_values: handle comma-separated string, array of strings/nulls, and empty values
+        if ($request->has('target_audience_values')) {
+            $rawValues = $request->input('target_audience_values');
+            $parsedValues = [];
+
+            if (is_string($rawValues)) {
+                $parsedValues = array_map('trim', explode(',', $rawValues));
+            } elseif (is_array($rawValues)) {
+                foreach ($rawValues as $val) {
+                    if (is_string($val)) {
+                        foreach (explode(',', $val) as $part) {
+                            $trimmed = trim($part);
+                            if ($trimmed !== '') {
+                                $parsedValues[] = $trimmed;
+                            }
+                        }
+                    } elseif (is_numeric($val)) {
+                        $parsedValues[] = (string) $val;
+                    }
+                }
+            }
+
+            $request->merge([
+                'target_audience_values' => array_values(array_unique(array_filter($parsedValues, fn($v) => $v !== null && $v !== ''))),
+            ]);
+        } else {
+            $request->merge(['target_audience_values' => []]);
+        }
+
+        // If audience type is 'all' or empty, default to empty values
+        if ($request->input('target_audience_type') === 'all' || empty($request->input('target_audience_type'))) {
+            $request->merge([
+                'target_audience_type' => 'all',
+                'target_audience_values' => [],
+            ]);
+        }
+
         $validated = $request->validate([
             'title' => ['required', 'string', 'max:255'],
             'body' => ['required', 'string', 'max:10000'],
@@ -133,6 +170,43 @@ class AdminAnnouncementController extends Controller
 
     public function update(Request $request, Announcement $announcement): RedirectResponse
     {
+        // Normalize target_audience_values: handle comma-separated string, array of strings/nulls, and empty values
+        if ($request->has('target_audience_values')) {
+            $rawValues = $request->input('target_audience_values');
+            $parsedValues = [];
+
+            if (is_string($rawValues)) {
+                $parsedValues = array_map('trim', explode(',', $rawValues));
+            } elseif (is_array($rawValues)) {
+                foreach ($rawValues as $val) {
+                    if (is_string($val)) {
+                        foreach (explode(',', $val) as $part) {
+                            $trimmed = trim($part);
+                            if ($trimmed !== '') {
+                                $parsedValues[] = $trimmed;
+                            }
+                        }
+                    } elseif (is_numeric($val)) {
+                        $parsedValues[] = (string) $val;
+                    }
+                }
+            }
+
+            $request->merge([
+                'target_audience_values' => array_values(array_unique(array_filter($parsedValues, fn($v) => $v !== null && $v !== ''))),
+            ]);
+        } else {
+            $request->merge(['target_audience_values' => []]);
+        }
+
+        // If audience type is 'all' or empty, default to empty values
+        if ($request->input('target_audience_type') === 'all' || empty($request->input('target_audience_type'))) {
+            $request->merge([
+                'target_audience_type' => 'all',
+                'target_audience_values' => [],
+            ]);
+        }
+
         $validated = $request->validate([
             'title' => ['required', 'string', 'max:255'],
             'body' => ['required', 'string', 'max:10000'],
