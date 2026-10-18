@@ -3,6 +3,7 @@
     'id' => null,
     'options' => [],
     'value' => null,
+    'selected' => null,
     'placeholder' => 'Select an option',
     'required' => false,
     'searchable' => false,
@@ -13,7 +14,8 @@
 
 @php
     $elementId = $id ?? $name;
-    $initialValue = old($name, $value ?? '');
+    $val = $value ?? $selected ?? '';
+    $initialValue = old($name, $val);
 @endphp
 
 <div x-data="customDropdown({

@@ -21,14 +21,20 @@ class MemberShopController extends Controller
         $lifetimeExp = $user->getLifetimeExp();
         $currentLevel = \App\Models\Level::forXp($lifetimeExp)->level;
 
-        $selectedCategory = $request->input('category', 'all');
+        $rawCategory = $request->input('category');
+        $selectedCategory = ($rawCategory !== null && trim((string)$rawCategory) !== '' && trim((string)$rawCategory) !== 'all')
+            ? trim((string)$rawCategory)
+            : 'all';
         $search = $request->input('search');
         $statusTab = $request->input('tab', 'shop');
 
         $rewardsQuery = Reward::published();
 
-        if ($selectedCategory && $selectedCategory !== 'all') {
-            $rewardsQuery->where('category', $selectedCategory);
+        if ($selectedCategory !== 'all') {
+            $rewardsQuery->where(function ($q) use ($selectedCategory) {
+                $q->where('category', $selectedCategory)
+                  ->orWhereRaw('LOWER(TRIM(category)) = ?', [strtolower(trim($selectedCategory))]);
+            });
         }
 
         if ($search) {

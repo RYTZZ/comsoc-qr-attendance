@@ -94,7 +94,19 @@ class Reward extends Model
 
     public function isPublished(): bool
     {
-        return $this->status === 'published' && $this->is_active && !$this->is_archived;
+        if ($this->status !== 'published' || !$this->is_active || $this->is_archived) {
+            return false;
+        }
+
+        if ($this->starts_at && $this->starts_at->isFuture()) {
+            return false;
+        }
+
+        if ($this->ends_at && $this->ends_at->isPast()) {
+            return false;
+        }
+
+        return true;
     }
 
     public function isArchived(): bool

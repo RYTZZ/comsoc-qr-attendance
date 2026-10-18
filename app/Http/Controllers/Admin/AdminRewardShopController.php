@@ -68,8 +68,10 @@ class AdminRewardShopController extends Controller
         // Economy Overview Real Metrics
         $summary = [
             'total_rewards' => Reward::count(),
-            'published_rewards' => Reward::where('status', 'published')->where('is_active', true)->where('is_archived', false)->count(),
-            'draft_rewards' => Reward::where('status', 'draft')->count(),
+            'published_rewards' => Reward::published()->count(),
+            'draft_rewards' => Reward::where(function ($q) {
+                $q->where('status', 'draft')->orWhere('is_active', false)->orWhere('is_archived', true);
+            })->count(),
             'out_of_stock' => Reward::whereNotNull('stock')->where('stock', '<=', 0)->count(),
             'total_redemptions' => RewardRedemption::count(),
             'pending_claims' => $pendingCount,
@@ -317,7 +319,12 @@ class AdminRewardShopController extends Controller
 
     public function toggleActive(Reward $reward): RedirectResponse
     {
-        $reward->update(['is_active' => !$reward->is_active]);
+        $newActive = !$reward->is_active;
+        $reward->update([
+            'is_active' => $newActive,
+            'status' => $newActive ? 'published' : 'draft',
+            'published_at' => ($newActive && !$reward->published_at) ? now() : $reward->published_at,
+        ]);
 
         AuditLog::create([
             'user_id' => auth()->id(),
@@ -326,6 +333,7 @@ class AdminRewardShopController extends Controller
                 'reward_id' => $reward->id,
                 'title' => $reward->title,
                 'is_active' => $reward->is_active,
+                'status' => $reward->status,
             ]),
         ]);
 

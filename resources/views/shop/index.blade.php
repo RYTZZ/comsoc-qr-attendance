@@ -92,6 +92,7 @@
                                 <x-custom-dropdown
                                     name="category"
                                     :options="$catOptions"
+                                    :value="$selectedCategory"
                                     :selected="$selectedCategory"
                                     placeholder="Filter Category"
                                     onchange="this.closest('form').submit()"
