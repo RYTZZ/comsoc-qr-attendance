@@ -36,7 +36,7 @@ class MemberDirectoryController extends Controller
         $yearLevel = $request->input('year_level');
 
         $skills = Skill::orderBy('name')->get();
-        $programs = Program::where('is_active', true)->orderBy('code')->get();
+        $programs = Program::where('is_active', true)->orderBy('sort_order')->orderBy('name')->get();
 
         $members = $directoryService->searchDirectory(
             search: $search,

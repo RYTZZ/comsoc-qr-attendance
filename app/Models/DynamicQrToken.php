@@ -14,6 +14,7 @@ class DynamicQrToken extends Model
     protected $fillable = [
         'user_id',
         'token_hash',
+        'manual_token',
         'expires_at',
         'is_consumed',
         'consumed_at',

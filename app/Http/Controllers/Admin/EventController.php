@@ -248,12 +248,37 @@ class EventController extends Controller
 
     public function storeSession(Request $request, Event $event): RedirectResponse
     {
+        $opensAt = $this->normalizeTime($request->input('opens_at'));
+        $closesAt = $this->normalizeTime($request->input('closes_at'));
+        $lateThreshold = $this->normalizeTime($request->input('late_threshold'));
+
+        $request->merge([
+            'opens_at' => $opensAt,
+            'closes_at' => $closesAt,
+            'late_threshold' => $lateThreshold,
+        ]);
+
         $data = $request->validate([
             'type' => 'required|in:morning_in,morning_out,afternoon_in,afternoon_out',
             'opens_at' => 'required|date_format:H:i',
-            'closes_at' => 'required|date_format:H:i|after:opens_at',
+            'closes_at' => 'required|date_format:H:i',
             'late_threshold' => 'nullable|date_format:H:i',
         ]);
+
+        $opensMin = $this->parseTimeToMinutes($data['opens_at']);
+        $closesMin = $this->parseTimeToMinutes($data['closes_at']);
+
+        if ($opensMin === null || $closesMin === null || $opensMin >= $closesMin) {
+            back()->withInput()->withErrors(['closes_at' => 'Closing time must be after opening time.'])->throwResponse();
+        }
+
+        if (!empty($data['late_threshold'])) {
+            $lateMin = $this->parseTimeToMinutes($data['late_threshold']);
+            if ($lateMin === null || $lateMin < $opensMin || $lateMin > $closesMin) {
+                $sessionLabel = ucwords(str_replace('_', ' ', $data['type']));
+                back()->withInput()->withErrors(['late_threshold' => "{$sessionLabel} Late Threshold must be between opening and closing times."])->throwResponse();
+            }
+        }
 
         $event->attendanceSessions()->updateOrCreate(['type' => $data['type']], $data);
 
@@ -319,10 +344,32 @@ class EventController extends Controller
             'logo' => ['nullable', 'image', 'mimes:jpeg,png,jpg,webp', 'max:3072'],
             'sessions' => ['nullable', 'array'],
             'sessions.*.enabled' => ['nullable', 'boolean'],
-            'sessions.*.opens_at' => ['nullable', 'date_format:H:i'],
-            'sessions.*.closes_at' => ['nullable', 'date_format:H:i'],
-            'sessions.*.late_threshold' => ['nullable', 'date_format:H:i'],
+            'sessions.*.opens_at' => ['nullable'],
+            'sessions.*.closes_at' => ['nullable'],
+            'sessions.*.late_threshold' => ['nullable'],
         ];
+
+        // Pre-normalize session times if provided in various valid formats (12-hr, seconds, etc.)
+        if ($request->has('sessions') && is_array($request->input('sessions'))) {
+            $sessions = $request->input('sessions');
+            foreach ($sessions as $key => $session) {
+                if (is_array($session)) {
+                    foreach (['opens_at', 'closes_at', 'late_threshold'] as $timeField) {
+                        if (isset($session[$timeField])) {
+                            $sessions[$key][$timeField] = $this->normalizeTime($session[$timeField]);
+                        }
+                    }
+                }
+            }
+            $request->merge(['sessions' => $sessions]);
+        }
+
+        if ($request->has('attendance_starts_at')) {
+            $request->merge(['attendance_starts_at' => $this->normalizeTime($request->input('attendance_starts_at'))]);
+        }
+        if ($request->has('attendance_ends_at')) {
+            $request->merge(['attendance_ends_at' => $this->normalizeTime($request->input('attendance_ends_at'))]);
+        }
 
         $validated = $request->validate($rules);
 
@@ -368,54 +415,64 @@ class EventController extends Controller
 
             foreach (['morning_in', 'morning_out', 'afternoon_in', 'afternoon_out'] as $type) {
                 if (!empty($sess[$type]['enabled'])) {
-                    if (empty($sess[$type]['opens_at'])) {
+                    $opensMin = $this->parseTimeToMinutes($sess[$type]['opens_at'] ?? null);
+                    $closesMin = $this->parseTimeToMinutes($sess[$type]['closes_at'] ?? null);
+
+                    if ($opensMin === null) {
                         back()->withInput()->withErrors(["sessions.{$type}.opens_at" => ucwords(str_replace('_', ' ', $type)) . ' opening time is required.'])->throwResponse();
                     }
-                    if (empty($sess[$type]['closes_at'])) {
+                    if ($closesMin === null) {
                         back()->withInput()->withErrors(["sessions.{$type}.closes_at" => ucwords(str_replace('_', ' ', $type)) . ' closing time is required.'])->throwResponse();
                     }
-                    if ($sess[$type]['opens_at'] >= $sess[$type]['closes_at']) {
+                    if ($opensMin >= $closesMin) {
                         back()->withInput()->withErrors(["sessions.{$type}.closes_at" => ucwords(str_replace('_', ' ', $type)) . ' closing time must be after opening time.'])->throwResponse();
                     }
                 }
             }
 
             if (!empty($sess['morning_in']['enabled']) && !empty($sess['morning_in']['late_threshold'])) {
-                $late = $sess['morning_in']['late_threshold'];
-                $opens = $sess['morning_in']['opens_at'];
-                $closes = $sess['morning_in']['closes_at'];
-                if ($late < $opens || $late > $closes) {
+                $lateMin = $this->parseTimeToMinutes($sess['morning_in']['late_threshold']);
+                $opensMin = $this->parseTimeToMinutes($sess['morning_in']['opens_at'] ?? null);
+                $closesMin = $this->parseTimeToMinutes($sess['morning_in']['closes_at'] ?? null);
+
+                if ($lateMin === null || $opensMin === null || $closesMin === null || $lateMin < $opensMin || $lateMin > $closesMin) {
                     back()->withInput()->withErrors(['sessions.morning_in.late_threshold' => 'Morning Late Threshold must be between Morning IN opening and closing times.'])->throwResponse();
                 }
             }
 
             if (!empty($sess['afternoon_in']['enabled']) && !empty($sess['afternoon_in']['late_threshold'])) {
-                $late = $sess['afternoon_in']['late_threshold'];
-                $opens = $sess['afternoon_in']['opens_at'];
-                $closes = $sess['afternoon_in']['closes_at'];
-                if ($late < $opens || $late > $closes) {
+                $lateMin = $this->parseTimeToMinutes($sess['afternoon_in']['late_threshold']);
+                $opensMin = $this->parseTimeToMinutes($sess['afternoon_in']['opens_at'] ?? null);
+                $closesMin = $this->parseTimeToMinutes($sess['afternoon_in']['closes_at'] ?? null);
+
+                if ($lateMin === null || $opensMin === null || $closesMin === null || $lateMin < $opensMin || $lateMin > $closesMin) {
                     back()->withInput()->withErrors(['sessions.afternoon_in.late_threshold' => 'Afternoon Late Threshold must be between Afternoon IN opening and closing times.'])->throwResponse();
                 }
             }
 
-            if (!empty($sess['morning_in']['enabled']) && !empty($sess['morning_out']['enabled'])) {
-                if ($sess['morning_in']['opens_at'] >= $sess['morning_out']['opens_at']) {
+            $mInOpens = !empty($sess['morning_in']['enabled']) ? $this->parseTimeToMinutes($sess['morning_in']['opens_at'] ?? null) : null;
+            $mOutOpens = !empty($sess['morning_out']['enabled']) ? $this->parseTimeToMinutes($sess['morning_out']['opens_at'] ?? null) : null;
+            $aInOpens = !empty($sess['afternoon_in']['enabled']) ? $this->parseTimeToMinutes($sess['afternoon_in']['opens_at'] ?? null) : null;
+            $aOutOpens = !empty($sess['afternoon_out']['enabled']) ? $this->parseTimeToMinutes($sess['afternoon_out']['opens_at'] ?? null) : null;
+
+            if ($mInOpens !== null && $mOutOpens !== null) {
+                if ($mInOpens >= $mOutOpens) {
                     back()->withInput()->withErrors(['sessions.morning_out.opens_at' => 'Morning IN must occur earlier than Morning OUT.'])->throwResponse();
                 }
             }
 
-            if (!empty($sess['afternoon_in']['enabled']) && !empty($sess['afternoon_out']['enabled'])) {
-                if ($sess['afternoon_in']['opens_at'] >= $sess['afternoon_out']['opens_at']) {
+            if ($aInOpens !== null && $aOutOpens !== null) {
+                if ($aInOpens >= $aOutOpens) {
                     back()->withInput()->withErrors(['sessions.afternoon_out.opens_at' => 'Afternoon IN must occur earlier than Afternoon OUT.'])->throwResponse();
                 }
             }
 
-            if (!empty($sess['morning_out']['enabled']) && !empty($sess['afternoon_in']['enabled'])) {
-                if ($sess['morning_out']['opens_at'] > $sess['afternoon_in']['opens_at']) {
+            if ($mOutOpens !== null && $aInOpens !== null) {
+                if ($mOutOpens > $aInOpens) {
                     back()->withInput()->withErrors(['sessions.afternoon_in.opens_at' => 'Morning OUT cannot be later than Afternoon IN.'])->throwResponse();
                 }
-            } elseif (!empty($sess['morning_in']['enabled']) && !empty($sess['afternoon_in']['enabled'])) {
-                if ($sess['morning_in']['opens_at'] >= $sess['afternoon_in']['opens_at']) {
+            } elseif ($mInOpens !== null && $aInOpens !== null) {
+                if ($mInOpens >= $aInOpens) {
                     back()->withInput()->withErrors(['sessions.afternoon_in.opens_at' => 'Morning IN must occur before Afternoon IN.'])->throwResponse();
                 }
             }
@@ -434,9 +491,9 @@ class EventController extends Controller
     {
         foreach ($sessions as $type => $sessionData) {
             if (!empty($sessionData['enabled'])) {
-                $opens = $sessionData['opens_at'] ?? null;
-                $closes = $sessionData['closes_at'] ?? null;
-                $late = $sessionData['late_threshold'] ?? null;
+                $opens = $this->normalizeTime($sessionData['opens_at'] ?? null);
+                $closes = $this->normalizeTime($sessionData['closes_at'] ?? null);
+                $late = $this->normalizeTime($sessionData['late_threshold'] ?? null);
 
                 if ($opens && $closes) {
                     $event->attendanceSessions()->updateOrCreate(
@@ -453,6 +510,56 @@ class EventController extends Controller
                 $event->attendanceSessions()->where('type', $type)->delete();
             }
         }
+    }
+
+    /**
+     * Normalize a time value into 24-hour 'H:i' format.
+     */
+    public function normalizeTime(?string $time): ?string
+    {
+        if ($time === null) {
+            return null;
+        }
+
+        $time = trim($time);
+        if ($time === '') {
+            return null;
+        }
+
+        // Try standard 24-hr formats first
+        if (preg_match('/^([01]?[0-9]|2[0-3]):([0-5][0-9])(:[0-5][0-9])?$/', $time, $matches)) {
+            $h = str_pad($matches[1], 2, '0', STR_PAD_LEFT);
+            $m = $matches[2];
+            return "{$h}:{$m}";
+        }
+
+        // Try parsing via Carbon for 12-hour (01:15 PM) or other valid strings
+        try {
+            return Carbon::parse($time)->format('H:i');
+        } catch (\Throwable $e) {
+            return $time;
+        }
+    }
+
+    /**
+     * Parse a time string into minutes from midnight (0..1439) for reliable comparisons.
+     */
+    public function parseTimeToMinutes(?string $time): ?int
+    {
+        $normalized = $this->normalizeTime($time);
+        if ($normalized === null) {
+            return null;
+        }
+
+        $parts = explode(':', $normalized);
+        if (count($parts) < 2) {
+            return null;
+        }
+
+        $h = (int) $parts[0];
+        $m = (int) $parts[1];
+
+        return ($h * 60) + $m;
     }
 }
 

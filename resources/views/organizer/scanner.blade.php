@@ -105,6 +105,36 @@
                         <p class="text-center text-[11px] text-[#94A3B8] mt-3">
                             Aim camera at member's dynamic 30-second rolling QR pass. Immediate server-side validation.
                         </p>
+
+                        <!-- Manual Token Lookup Section -->
+                        <div class="mt-4 pt-4 border-t border-[#334155]/80">
+                            <label class="block text-xs font-bold text-white mb-1.5 font-brand-display flex items-center justify-between">
+                                <span class="flex items-center gap-1.5">
+                                    <i data-lucide="key" class="w-3.5 h-3.5 text-[#df747a]"></i>
+                                    <span>Manual Attendance Lookup</span>
+                                </span>
+                                <span class="text-[10px] text-[#94A3B8] font-normal">Can't scan QR?</span>
+                            </label>
+                            <form @submit.prevent="submitManualToken()" class="flex items-center gap-2">
+                                <div class="relative flex-1">
+                                    <input type="text"
+                                           x-model="manualTokenInput"
+                                           placeholder="e.g. 7K9-MP4"
+                                           maxlength="10"
+                                           class="w-full bg-[#0B1120] border border-[#334155] focus:border-[#df747a] focus:ring-1 focus:ring-[#df747a] rounded-xl px-3 py-2 text-xs font-mono font-bold tracking-wider text-white placeholder-[#64748B] uppercase uppercase-input outline-none transition"
+                                           :disabled="processing">
+                                </div>
+                                <button type="submit"
+                                        :disabled="processing || !manualTokenInput || manualTokenInput.trim().length < 3"
+                                        class="px-4 py-2 rounded-xl bg-burgundy-deep hover:bg-[#8F3033] text-white text-xs font-bold transition disabled:opacity-50 disabled:cursor-not-allowed shadow-sm shrink-0 flex items-center gap-1">
+                                    <i data-lucide="arrow-right" class="w-3.5 h-3.5"></i>
+                                    <span>Verify</span>
+                                </button>
+                            </form>
+                            <p class="text-[10px] text-[#64748B] mt-1.5">
+                                Enter the 6-character code shown on the student's dynamic attendance pass.
+                            </p>
+                        </div>
                     </div>
 
                     <div class="lg:col-span-5 space-y-4">
@@ -211,10 +241,18 @@
                 processing: false,
                 lastResult: null,
                 scanLog: [],
+                manualTokenInput: '',
 
                 initScanner() {
                     if (window.lucideIcons) window.createIcons({ icons: window.lucideIcons });
                     this.startCamera();
+                },
+
+                async submitManualToken() {
+                    if (!this.manualTokenInput || this.manualTokenInput.trim().length === 0) return;
+                    const token = this.manualTokenInput.trim();
+                    await this.onScanSuccess(token);
+                    this.manualTokenInput = '';
                 },
 
                 async startCamera() {

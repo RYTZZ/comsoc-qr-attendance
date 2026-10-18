@@ -11,8 +11,15 @@
 @php
     $elementId = $id ?? str_replace(['[', ']'], ['_', ''], $name);
     $initialRaw = old($name, $value ?? '');
-    if ($initialRaw && strlen($initialRaw) > 5) {
-        $initialRaw = substr($initialRaw, 0, 5);
+    if ($initialRaw) {
+        try {
+            $parsed = \Carbon\Carbon::parse($initialRaw);
+            $initialRaw = $parsed->format('H:i');
+        } catch (\Throwable $e) {
+            if (strlen($initialRaw) > 5 && !str_contains($initialRaw, ' ')) {
+                $initialRaw = substr($initialRaw, 0, 5);
+            }
+        }
     }
 @endphp
 
@@ -163,22 +170,34 @@ document.addEventListener('alpine:init', () => {
         },
 
         parseValue(val) {
-            const parts = val.split(':');
+            if (!val) return;
+            val = val.trim();
+            const ampmMatch = val.match(/(am|pm)/i);
+            const explicitAmPm = ampmMatch ? ampmMatch[1].toUpperCase() : null;
+            const cleaned = val.replace(/(am|pm)/i, '').trim();
+            const parts = cleaned.split(':');
             if (parts.length >= 2) {
                 let h = parseInt(parts[0], 10);
                 const m = parts[1].padStart(2, '0');
-                if (h === 0) {
-                    this.selectedHour = '12';
-                    this.ampm = 'AM';
-                } else if (h === 12) {
-                    this.selectedHour = '12';
-                    this.ampm = 'PM';
-                } else if (h > 12) {
-                    this.selectedHour = String(h - 12).padStart(2, '0');
-                    this.ampm = 'PM';
-                } else {
+                if (explicitAmPm) {
+                    this.ampm = explicitAmPm;
+                    if (h === 0) h = 12;
+                    if (h > 12) h = h % 12;
                     this.selectedHour = String(h).padStart(2, '0');
-                    this.ampm = 'AM';
+                } else {
+                    if (h === 0) {
+                        this.selectedHour = '12';
+                        this.ampm = 'AM';
+                    } else if (h === 12) {
+                        this.selectedHour = '12';
+                        this.ampm = 'PM';
+                    } else if (h > 12) {
+                        this.selectedHour = String(h - 12).padStart(2, '0');
+                        this.ampm = 'PM';
+                    } else {
+                        this.selectedHour = String(h).padStart(2, '0');
+                        this.ampm = 'AM';
+                    }
                 }
                 this.selectedMinute = m;
             }

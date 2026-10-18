@@ -82,6 +82,9 @@ class OrganizerScannerController extends Controller
      */
     public function scan(Request $request): JsonResponse
     {
+        $payload = $request->input('qr_payload') ?? $request->input('token') ?? $request->input('manual_token');
+        $request->merge(['qr_payload' => $payload]);
+
         $validated = $request->validate([
             'event_id' => 'required|uuid|exists:events,id',
             'session_id' => 'required|uuid|exists:attendance_sessions,id',

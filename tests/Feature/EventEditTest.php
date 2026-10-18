@@ -477,4 +477,415 @@ class EventEditTest extends TestCase
             'registration_deadline' => '2026-11-27 17:00:00',
         ]);
     }
+
+    public function test_reported_afternoon_in_configuration_is_valid(): void
+    {
+        $admin = User::factory()->create(['role' => 'super_admin']);
+        $ay = AcademicYear::create([
+            'label' => 'AY 2026-2027',
+            'year_start' => 2026,
+            'year_end' => 2027,
+            'semester' => '1st',
+            'is_active' => true,
+        ]);
+        $event = Event::create([
+            'academic_year_id' => $ay->id,
+            'created_by' => $admin->id,
+            'name' => 'Afternoon Threshold Event',
+            'event_date' => '2026-10-25',
+        ]);
+
+        // Scenario 1: Opening 01:00 PM (13:00), threshold 01:15 PM (13:15), closing 01:20 PM (13:20) -> valid
+        $response = $this->actingAs($admin)->post(route('admin.events.configure.save', $event), [
+            'name' => 'Afternoon Threshold Event',
+            'academic_year_id' => $ay->id,
+            'event_date' => '2026-10-25',
+            'attendance_enabled' => '1',
+            'sessions' => [
+                'afternoon_in' => [
+                    'enabled' => '1',
+                    'opens_at' => '13:00',
+                    'closes_at' => '13:20',
+                    'late_threshold' => '13:15',
+                ],
+                'afternoon_out' => [
+                    'enabled' => '1',
+                    'opens_at' => '16:30',
+                    'closes_at' => '16:45',
+                ],
+            ],
+        ]);
+
+        $response->assertSessionHasNoErrors();
+        $this->assertDatabaseHas('attendance_sessions', [
+            'event_id' => $event->id,
+            'type' => 'afternoon_in',
+            'opens_at' => '13:00',
+            'closes_at' => '13:20',
+            'late_threshold' => '13:15',
+        ]);
+    }
+
+    public function test_afternoon_late_threshold_at_opening_boundary_is_valid(): void
+    {
+        $admin = User::factory()->create(['role' => 'super_admin']);
+        $ay = AcademicYear::first() ?? AcademicYear::create([
+            'label' => 'AY 2026-2027',
+            'year_start' => 2026,
+            'year_end' => 2027,
+            'semester' => '1st',
+            'is_active' => true,
+        ]);
+        $event = Event::create([
+            'academic_year_id' => $ay->id,
+            'created_by' => $admin->id,
+            'name' => 'Boundary Open Test',
+            'event_date' => '2026-10-25',
+        ]);
+
+        // Scenario 2: Opening 01:00 PM, threshold 01:00 PM, closing 01:20 PM -> valid
+        $response = $this->actingAs($admin)->post(route('admin.events.configure.save', $event), [
+            'name' => 'Boundary Open Test',
+            'academic_year_id' => $ay->id,
+            'event_date' => '2026-10-25',
+            'attendance_enabled' => '1',
+            'sessions' => [
+                'afternoon_in' => [
+                    'enabled' => '1',
+                    'opens_at' => '13:00',
+                    'closes_at' => '13:20',
+                    'late_threshold' => '13:00',
+                ],
+            ],
+        ]);
+
+        $response->assertSessionHasNoErrors();
+        $this->assertDatabaseHas('attendance_sessions', [
+            'event_id' => $event->id,
+            'type' => 'afternoon_in',
+            'opens_at' => '13:00',
+            'closes_at' => '13:20',
+            'late_threshold' => '13:00',
+        ]);
+    }
+
+    public function test_afternoon_late_threshold_at_closing_boundary_is_valid(): void
+    {
+        $admin = User::factory()->create(['role' => 'super_admin']);
+        $ay = AcademicYear::first() ?? AcademicYear::create([
+            'label' => 'AY 2026-2027',
+            'year_start' => 2026,
+            'year_end' => 2027,
+            'semester' => '1st',
+            'is_active' => true,
+        ]);
+        $event = Event::create([
+            'academic_year_id' => $ay->id,
+            'created_by' => $admin->id,
+            'name' => 'Boundary Close Test',
+            'event_date' => '2026-10-25',
+        ]);
+
+        // Scenario 3: Opening 01:00 PM, threshold 01:20 PM, closing 01:20 PM -> valid
+        $response = $this->actingAs($admin)->post(route('admin.events.configure.save', $event), [
+            'name' => 'Boundary Close Test',
+            'academic_year_id' => $ay->id,
+            'event_date' => '2026-10-25',
+            'attendance_enabled' => '1',
+            'sessions' => [
+                'afternoon_in' => [
+                    'enabled' => '1',
+                    'opens_at' => '13:00',
+                    'closes_at' => '13:20',
+                    'late_threshold' => '13:20',
+                ],
+            ],
+        ]);
+
+        $response->assertSessionHasNoErrors();
+        $this->assertDatabaseHas('attendance_sessions', [
+            'event_id' => $event->id,
+            'type' => 'afternoon_in',
+            'opens_at' => '13:00',
+            'closes_at' => '13:20',
+            'late_threshold' => '13:20',
+        ]);
+    }
+
+    public function test_afternoon_late_threshold_before_opening_is_rejected(): void
+    {
+        $admin = User::factory()->create(['role' => 'super_admin']);
+        $ay = AcademicYear::first() ?? AcademicYear::create([
+            'label' => 'AY 2026-2027',
+            'year_start' => 2026,
+            'year_end' => 2027,
+            'semester' => '1st',
+            'is_active' => true,
+        ]);
+        $event = Event::create([
+            'academic_year_id' => $ay->id,
+            'created_by' => $admin->id,
+            'name' => 'Early Threshold Test',
+            'event_date' => '2026-10-25',
+        ]);
+
+        // Scenario 4: Opening 01:00 PM, threshold 12:59 PM (12:59), closing 01:20 PM -> invalid
+        $response = $this->actingAs($admin)->post(route('admin.events.configure.save', $event), [
+            'name' => 'Early Threshold Test',
+            'academic_year_id' => $ay->id,
+            'event_date' => '2026-10-25',
+            'attendance_enabled' => '1',
+            'sessions' => [
+                'afternoon_in' => [
+                    'enabled' => '1',
+                    'opens_at' => '13:00',
+                    'closes_at' => '13:20',
+                    'late_threshold' => '12:59',
+                ],
+            ],
+        ]);
+
+        $response->assertSessionHasErrors(['sessions.afternoon_in.late_threshold']);
+    }
+
+    public function test_afternoon_late_threshold_after_closing_is_rejected(): void
+    {
+        $admin = User::factory()->create(['role' => 'super_admin']);
+        $ay = AcademicYear::first() ?? AcademicYear::create([
+            'label' => 'AY 2026-2027',
+            'year_start' => 2026,
+            'year_end' => 2027,
+            'semester' => '1st',
+            'is_active' => true,
+        ]);
+        $event = Event::create([
+            'academic_year_id' => $ay->id,
+            'created_by' => $admin->id,
+            'name' => 'Late Threshold Beyond Closing',
+            'event_date' => '2026-10-25',
+        ]);
+
+        // Scenario 5: Opening 01:00 PM, threshold 01:21 PM (13:21), closing 01:20 PM -> invalid
+        $response = $this->actingAs($admin)->post(route('admin.events.configure.save', $event), [
+            'name' => 'Late Threshold Beyond Closing',
+            'academic_year_id' => $ay->id,
+            'event_date' => '2026-10-25',
+            'attendance_enabled' => '1',
+            'sessions' => [
+                'afternoon_in' => [
+                    'enabled' => '1',
+                    'opens_at' => '13:00',
+                    'closes_at' => '13:20',
+                    'late_threshold' => '13:21',
+                ],
+            ],
+        ]);
+
+        $response->assertSessionHasErrors(['sessions.afternoon_in.late_threshold']);
+    }
+
+    public function test_blank_threshold_with_afternoon_in_enabled_is_valid(): void
+    {
+        $admin = User::factory()->create(['role' => 'super_admin']);
+        $ay = AcademicYear::first() ?? AcademicYear::create([
+            'label' => 'AY 2026-2027',
+            'year_start' => 2026,
+            'year_end' => 2027,
+            'semester' => '1st',
+            'is_active' => true,
+        ]);
+        $event = Event::create([
+            'academic_year_id' => $ay->id,
+            'created_by' => $admin->id,
+            'name' => 'Blank Threshold Enabled Test',
+            'event_date' => '2026-10-25',
+        ]);
+
+        // Scenario 6: Blank threshold with Afternoon IN enabled -> valid; late_threshold is null
+        $response = $this->actingAs($admin)->post(route('admin.events.configure.save', $event), [
+            'name' => 'Blank Threshold Enabled Test',
+            'academic_year_id' => $ay->id,
+            'event_date' => '2026-10-25',
+            'attendance_enabled' => '1',
+            'sessions' => [
+                'afternoon_in' => [
+                    'enabled' => '1',
+                    'opens_at' => '13:00',
+                    'closes_at' => '13:20',
+                    'late_threshold' => '',
+                ],
+            ],
+        ]);
+
+        $response->assertSessionHasNoErrors();
+        $this->assertDatabaseHas('attendance_sessions', [
+            'event_id' => $event->id,
+            'type' => 'afternoon_in',
+            'opens_at' => '13:00',
+            'closes_at' => '13:20',
+            'late_threshold' => null,
+        ]);
+    }
+
+    public function test_blank_threshold_with_afternoon_in_disabled_is_valid(): void
+    {
+        $admin = User::factory()->create(['role' => 'super_admin']);
+        $ay = AcademicYear::first() ?? AcademicYear::create([
+            'label' => 'AY 2026-2027',
+            'year_start' => 2026,
+            'year_end' => 2027,
+            'semester' => '1st',
+            'is_active' => true,
+        ]);
+        $event = Event::create([
+            'academic_year_id' => $ay->id,
+            'created_by' => $admin->id,
+            'name' => 'Blank Threshold Disabled Test',
+            'event_date' => '2026-10-25',
+        ]);
+
+        // Scenario 7: Blank threshold with Afternoon IN disabled -> valid
+        $response = $this->actingAs($admin)->post(route('admin.events.configure.save', $event), [
+            'name' => 'Blank Threshold Disabled Test',
+            'academic_year_id' => $ay->id,
+            'event_date' => '2026-10-25',
+            'attendance_enabled' => '1',
+            'sessions' => [
+                'afternoon_in' => [
+                    'enabled' => '0',
+                    'opens_at' => '',
+                    'closes_at' => '',
+                    'late_threshold' => '',
+                ],
+            ],
+        ]);
+
+        $response->assertSessionHasNoErrors();
+        $this->assertDatabaseMissing('attendance_sessions', [
+            'event_id' => $event->id,
+            'type' => 'afternoon_in',
+        ]);
+    }
+
+    public function test_afternoon_settings_using_12hr_pm_formats_are_not_interpreted_as_am(): void
+    {
+        $admin = User::factory()->create(['role' => 'super_admin']);
+        $ay = AcademicYear::first() ?? AcademicYear::create([
+            'label' => 'AY 2026-2027',
+            'year_start' => 2026,
+            'year_end' => 2027,
+            'semester' => '1st',
+            'is_active' => true,
+        ]);
+        $event = Event::create([
+            'academic_year_id' => $ay->id,
+            'created_by' => $admin->id,
+            'name' => '12hr PM Format Test',
+            'event_date' => '2026-10-25',
+        ]);
+
+        // Scenario 8: Valid afternoon settings submitted as 12-hour PM strings must not be interpreted as AM
+        $response = $this->actingAs($admin)->post(route('admin.events.configure.save', $event), [
+            'name' => '12hr PM Format Test',
+            'academic_year_id' => $ay->id,
+            'event_date' => '2026-10-25',
+            'attendance_enabled' => '1',
+            'sessions' => [
+                'afternoon_in' => [
+                    'enabled' => '1',
+                    'opens_at' => '01:00 PM',
+                    'closes_at' => '01:20 PM',
+                    'late_threshold' => '01:15 PM',
+                ],
+            ],
+        ]);
+
+        $response->assertSessionHasNoErrors();
+        $this->assertDatabaseHas('attendance_sessions', [
+            'event_id' => $event->id,
+            'type' => 'afternoon_in',
+            'opens_at' => '13:00',
+            'closes_at' => '13:20',
+            'late_threshold' => '13:15',
+        ]);
+    }
+
+    public function test_malformed_time_values_are_handled_safely(): void
+    {
+        $admin = User::factory()->create(['role' => 'super_admin']);
+        $ay = AcademicYear::first() ?? AcademicYear::create([
+            'label' => 'AY 2026-2027',
+            'year_start' => 2026,
+            'year_end' => 2027,
+            'semester' => '1st',
+            'is_active' => true,
+        ]);
+        $event = Event::create([
+            'academic_year_id' => $ay->id,
+            'created_by' => $admin->id,
+            'name' => 'Malformed Time Test',
+            'event_date' => '2026-10-25',
+        ]);
+
+        // Scenario 9: Malformed time values must be handled safely and rejected
+        $response = $this->actingAs($admin)->post(route('admin.events.configure.save', $event), [
+            'name' => 'Malformed Time Test',
+            'academic_year_id' => $ay->id,
+            'event_date' => '2026-10-25',
+            'attendance_enabled' => '1',
+            'sessions' => [
+                'afternoon_in' => [
+                    'enabled' => '1',
+                    'opens_at' => 'invalid-time',
+                    'closes_at' => 'another-bad-value',
+                    'late_threshold' => '99:99',
+                ],
+            ],
+        ]);
+
+        $response->assertSessionHasErrors();
+    }
+
+    public function test_saving_and_reloading_preserves_afternoon_configured_times(): void
+    {
+        $admin = User::factory()->create(['role' => 'super_admin']);
+        $ay = AcademicYear::first() ?? AcademicYear::create([
+            'label' => 'AY 2026-2027',
+            'year_start' => 2026,
+            'year_end' => 2027,
+            'semester' => '1st',
+            'is_active' => true,
+        ]);
+        $event = Event::create([
+            'academic_year_id' => $ay->id,
+            'created_by' => $admin->id,
+            'name' => 'Preserve Configuration Test',
+            'event_date' => '2026-10-25',
+        ]);
+
+        // Scenario 10: Saving and reloading the valid 01:00 PM-01:20 PM window with 01:15 PM threshold
+        $saveResponse = $this->actingAs($admin)->post(route('admin.events.configure.save', $event), [
+            'name' => 'Preserve Configuration Test',
+            'academic_year_id' => $ay->id,
+            'event_date' => '2026-10-25',
+            'attendance_enabled' => '1',
+            'sessions' => [
+                'afternoon_in' => [
+                    'enabled' => '1',
+                    'opens_at' => '13:00',
+                    'closes_at' => '13:20',
+                    'late_threshold' => '13:15',
+                ],
+            ],
+        ]);
+
+        $saveResponse->assertSessionHasNoErrors();
+
+        // Reload the configure page
+        $reloadResponse = $this->actingAs($admin)->get(route('admin.events.configure', $event));
+        $reloadResponse->assertOk();
+        $reloadResponse->assertSee('13:00');
+        $reloadResponse->assertSee('13:20');
+        $reloadResponse->assertSee('13:15');
+    }
 }

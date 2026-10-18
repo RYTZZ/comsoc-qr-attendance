@@ -61,7 +61,8 @@
                                 @php
                                     $programOptions = [['value' => 'all', 'label' => 'All Programs']];
                                     foreach($programs as $p) {
-                                        $programOptions[] = ['value' => $p->code, 'label' => $p->code];
+                                        $val = $p->abbreviation ?: ($p->name ?? '');
+                                        $programOptions[] = ['value' => $val, 'label' => $p->display_name ?: $val];
                                     }
                                 @endphp
                                 <x-custom-dropdown

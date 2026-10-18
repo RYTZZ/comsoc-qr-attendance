@@ -24,6 +24,8 @@ class MemberQrCodeController extends Controller
         return view('member.dynamic_qr', [
             'user' => $user,
             'initialQrPayload' => $tokenData['qr_payload'],
+            'initialManualToken' => $tokenData['manual_token'],
+            'initialFormattedManualToken' => $tokenData['formatted_manual_token'],
             'initialExpiresAt' => $tokenData['expires_at'],
             'ttl' => DynamicQrService::TOKEN_TTL_SECONDS,
         ]);
@@ -48,6 +50,8 @@ class MemberQrCodeController extends Controller
         return response()->json([
             'success' => true,
             'payload' => $tokenData['qr_payload'],
+            'manual_token' => $tokenData['manual_token'],
+            'formatted_manual_token' => $tokenData['formatted_manual_token'],
             'expires_at' => $tokenData['expires_at'],
             'ttl' => $tokenData['ttl'],
             'timestamp' => now()->toIso8601String(),

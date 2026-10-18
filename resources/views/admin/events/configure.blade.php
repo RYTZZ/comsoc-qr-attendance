@@ -849,58 +849,90 @@ document.addEventListener('alpine:init', () => {
             return '';
         },
 
+        timeToMinutes(timeVal) {
+            if (!timeVal) return null;
+            timeVal = String(timeVal).trim();
+            const ampmMatch = timeVal.match(/(am|pm)/i);
+            const ampm = ampmMatch ? ampmMatch[1].toUpperCase() : null;
+            const cleaned = timeVal.replace(/(am|pm)/i, '').trim();
+            const parts = cleaned.split(':');
+            if (parts.length < 2) return null;
+            let h = parseInt(parts[0], 10);
+            let m = parseInt(parts[1], 10);
+            if (isNaN(h) || isNaN(m)) return null;
+            if (ampm) {
+                if (ampm === 'PM' && h < 12) h += 12;
+                if (ampm === 'AM' && h === 12) h = 0;
+            }
+            return h * 60 + m;
+        },
+
         get attendanceValidationErrors() {
             const errors = [];
             if (!this.attendanceEnabled) return errors;
 
+            const mInOpens = this.timeToMinutes(this.morningInOpens);
+            const mInCloses = this.timeToMinutes(this.morningInCloses);
+            const mInLate = this.timeToMinutes(this.morningInLate);
+
+            const mOutOpens = this.timeToMinutes(this.morningOutOpens);
+            const mOutCloses = this.timeToMinutes(this.morningOutCloses);
+
+            const aInOpens = this.timeToMinutes(this.afternoonInOpens);
+            const aInCloses = this.timeToMinutes(this.afternoonInCloses);
+            const aInLate = this.timeToMinutes(this.afternoonInLate);
+
+            const aOutOpens = this.timeToMinutes(this.afternoonOutOpens);
+            const aOutCloses = this.timeToMinutes(this.afternoonOutCloses);
+
             if (this.morningInEnabled) {
-                if (this.morningInOpens && this.morningInCloses && this.morningInOpens >= this.morningInCloses) {
+                if (mInOpens !== null && mInCloses !== null && mInOpens >= mInCloses) {
                     errors.push('Morning IN opening time must be earlier than Morning IN closing time.');
                 }
-                if (this.morningInLate && this.morningInOpens && this.morningInCloses) {
-                    if (this.morningInLate < this.morningInOpens || this.morningInLate > this.morningInCloses) {
+                if (mInLate !== null && mInOpens !== null && mInCloses !== null) {
+                    if (mInLate < mInOpens || mInLate > mInCloses) {
                         errors.push('Morning Late Threshold (' + this.formatTimeDisplay(this.morningInLate) + ') must be between Morning IN opening (' + this.formatTimeDisplay(this.morningInOpens) + ') and closing (' + this.formatTimeDisplay(this.morningInCloses) + ').');
                     }
                 }
             }
 
             if (this.morningOutEnabled) {
-                if (this.morningOutOpens && this.morningOutCloses && this.morningOutOpens >= this.morningOutCloses) {
+                if (mOutOpens !== null && mOutCloses !== null && mOutOpens >= mOutCloses) {
                     errors.push('Morning OUT opening time must be earlier than Morning OUT closing time.');
                 }
             }
 
-            if (this.morningInEnabled && this.morningOutEnabled && this.morningInOpens && this.morningOutOpens) {
-                if (this.morningInOpens >= this.morningOutOpens) {
+            if (this.morningInEnabled && this.morningOutEnabled && mInOpens !== null && mOutOpens !== null) {
+                if (mInOpens >= mOutOpens) {
                     errors.push('Morning OUT must be later than Morning IN.');
                 }
             }
 
             if (this.afternoonInEnabled) {
-                if (this.afternoonInOpens && this.afternoonInCloses && this.afternoonInOpens >= this.afternoonInCloses) {
+                if (aInOpens !== null && aInCloses !== null && aInOpens >= aInCloses) {
                     errors.push('Afternoon IN opening time must be earlier than Afternoon IN closing time.');
                 }
-                if (this.afternoonInLate && this.afternoonInOpens && this.afternoonInCloses) {
-                    if (this.afternoonInLate < this.afternoonInOpens || this.afternoonInLate > this.afternoonInCloses) {
+                if (aInLate !== null && aInOpens !== null && aInCloses !== null) {
+                    if (aInLate < aInOpens || aInLate > aInCloses) {
                         errors.push('Afternoon Late Threshold (' + this.formatTimeDisplay(this.afternoonInLate) + ') must be between Afternoon IN opening (' + this.formatTimeDisplay(this.afternoonInOpens) + ') and closing (' + this.formatTimeDisplay(this.afternoonInCloses) + ').');
                     }
                 }
             }
 
             if (this.afternoonOutEnabled) {
-                if (this.afternoonOutOpens && this.afternoonOutCloses && this.afternoonOutOpens >= this.afternoonOutCloses) {
+                if (aOutOpens !== null && aOutCloses !== null && aOutOpens >= aOutCloses) {
                     errors.push('Afternoon OUT opening time must be earlier than Afternoon OUT closing time.');
                 }
             }
 
-            if (this.afternoonInEnabled && this.afternoonOutEnabled && this.afternoonInOpens && this.afternoonOutOpens) {
-                if (this.afternoonInOpens >= this.afternoonOutOpens) {
+            if (this.afternoonInEnabled && this.afternoonOutEnabled && aInOpens !== null && aOutOpens !== null) {
+                if (aInOpens >= aOutOpens) {
                     errors.push('Afternoon OUT must be later than Afternoon IN.');
                 }
             }
 
-            if (this.morningOutEnabled && this.afternoonInEnabled && this.morningOutOpens && this.afternoonInOpens) {
-                if (this.morningOutOpens > this.afternoonInOpens) {
+            if (this.morningOutEnabled && this.afternoonInEnabled && mOutOpens !== null && aInOpens !== null) {
+                if (mOutOpens > aInOpens) {
                     errors.push('Morning OUT (' + this.formatTimeDisplay(this.morningOutOpens) + ') cannot be later than Afternoon IN (' + this.formatTimeDisplay(this.afternoonInOpens) + ').');
                 }
             }
@@ -914,10 +946,18 @@ document.addEventListener('alpine:init', () => {
 
         formatTimeDisplay(timeVal) {
             if (!timeVal) return '';
-            const parts = timeVal.split(':');
+            timeVal = String(timeVal).trim();
+            const ampmMatch = timeVal.match(/(am|pm)/i);
+            const cleaned = timeVal.replace(/(am|pm)/i, '').trim();
+            const parts = cleaned.split(':');
             if (parts.length < 2) return timeVal;
             let h = parseInt(parts[0], 10);
-            const m = parts[1];
+            const m = parts[1].padStart(2, '0');
+            if (ampmMatch) {
+                let hour12 = h;
+                if (hour12 === 0) hour12 = 12;
+                return `${String(hour12).padStart(2, '0')}:${m} ${ampmMatch[1].toUpperCase()}`;
+            }
             const ampm = h >= 12 ? 'PM' : 'AM';
             let hour12 = h % 12;
             if (hour12 === 0) hour12 = 12;

@@ -324,8 +324,13 @@ class User extends Authenticatable
             return true;
         }
 
-        // Super Admin has access to admin, comsoc_admin, president, executive_secretary
-        if ($userRole === 'super_admin' && array_intersect(['admin', 'comsoc_admin', 'president', 'executive_secretary'], $roles)) {
+        // Super Admin has access to all administrative and organizer roles
+        if ($userRole === 'super_admin' && array_intersect(['admin', 'comsoc_admin', 'president', 'executive_secretary', 'event_organizer', 'staff', 'event_staff'], $roles)) {
+            return true;
+        }
+
+        // COMSOC Admin has access to event organizer and staff roles
+        if ($userRole === 'comsoc_admin' && array_intersect(['event_organizer', 'staff', 'event_staff'], $roles)) {
             return true;
         }
 

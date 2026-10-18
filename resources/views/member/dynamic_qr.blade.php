@@ -2,6 +2,8 @@
     <div class="min-h-[calc(100vh-4rem)] bg-[#0B1120] text-[#F8FAFC] flex flex-col justify-between p-4 sm:p-6 lg:p-8"
          x-data="dynamicQrPass({
              initialPayload: '{{ $initialQrPayload }}',
+             initialManualToken: '{{ $initialManualToken ?? '' }}',
+             initialFormattedManualToken: '{{ $initialFormattedManualToken ?? '' }}',
              initialExpiresAt: '{{ $initialExpiresAt }}',
              ttl: {{ $ttl }},
              refreshUrl: '{{ route('member.dynamic_qr.refresh') }}'
@@ -122,6 +124,46 @@
                             <span>Force Refresh</span>
                         </button>
                     </div>
+
+                    <!-- Manual Attendance Token Section -->
+                    <div class="mt-4 pt-4 border-t border-[#334155]/80 w-full text-left">
+                        <div class="flex items-center justify-between mb-1.5">
+                            <span class="text-[11px] font-bold uppercase tracking-wider text-[#94A3B8] font-brand-display flex items-center gap-1.5">
+                                <i data-lucide="key" class="w-3.5 h-3.5 text-[#df747a]"></i>
+                                <span>Manual Attendance Token</span>
+                            </span>
+                            <span class="text-[10px] text-slate-500 font-mono" x-text="formattedTimeLeft + ' left'"></span>
+                        </div>
+
+                        <div class="flex items-center gap-2 bg-[#0B1120] border-2 border-[#334155] hover:border-[#8F3033]/70 rounded-2xl p-2 sm:p-2.5 transition">
+                            <div class="flex-1 font-mono font-black text-center text-lg sm:text-xl tracking-widest text-[#F8FAFC] select-all tabular-nums"
+                                 x-text="displayManualToken">
+                                {{ $initialFormattedManualToken ?? '------' }}
+                            </div>
+
+                            <button type="button"
+                                    @click="copyToken()"
+                                    class="shrink-0 px-3 py-1.5 rounded-xl text-xs font-semibold bg-[#172033] hover:bg-[#1E293B] text-slate-200 hover:text-white border border-[#334155] transition flex items-center gap-1 shadow-sm active:scale-95"
+                                    :title="copied ? 'Copied to clipboard' : 'Copy token'">
+                                <template x-if="!copied">
+                                    <span class="flex items-center gap-1">
+                                        <i data-lucide="copy" class="w-3.5 h-3.5 text-[#df747a]"></i>
+                                        <span class="hidden sm:inline">Copy</span>
+                                    </span>
+                                </template>
+                                <template x-if="copied">
+                                    <span class="flex items-center gap-1 text-emerald-400 font-bold">
+                                        <i data-lucide="check" class="w-3.5 h-3.5"></i>
+                                        <span>Copied!</span>
+                                    </span>
+                                </template>
+                            </button>
+                        </div>
+
+                        <p class="text-[11px] text-[#94A3B8] mt-2 text-center leading-relaxed">
+                            Can't scan the QR code? Enter this token in the manual attendance lookup.
+                        </p>
+                    </div>
                 </div>
             </div>
         </div>
@@ -141,6 +183,9 @@
         function dynamicQrPass(config) {
             return {
                 payload: config.initialPayload || '',
+                manualToken: config.initialManualToken || '',
+                formattedManualToken: config.initialFormattedManualToken || '',
+                copied: false,
                 expiresAt: config.initialExpiresAt ? new Date(config.initialExpiresAt).getTime() : Date.now() + 30000,
                 ttl: config.ttl || 30,
                 timeLeft: 30,
@@ -151,11 +196,42 @@
                 timerInterval: null,
                 qrInstance: null,
 
+                get displayManualToken() {
+                    return this.formattedManualToken || this.manualToken || '------';
+                },
+
                 get formattedTimeLeft() {
                     const s = Math.max(0, Math.floor(this.timeLeft));
                     const mins = Math.floor(s / 60);
                     const secs = s % 60;
                     return String(mins).padStart(2, '0') + ':' + String(secs).padStart(2, '0');
+                },
+
+                async copyToken() {
+                    const tokenToCopy = this.formattedManualToken || this.manualToken;
+                    if (!tokenToCopy || tokenToCopy === '------') return;
+
+                    try {
+                        if (navigator.clipboard && window.isSecureContext) {
+                            await navigator.clipboard.writeText(tokenToCopy);
+                        } else {
+                            const textArea = document.createElement('textarea');
+                            textArea.value = tokenToCopy;
+                            textArea.style.position = 'fixed';
+                            textArea.style.left = '-999999px';
+                            document.body.appendChild(textArea);
+                            textArea.focus();
+                            textArea.select();
+                            document.execCommand('copy');
+                            textArea.remove();
+                        }
+                        this.copied = true;
+                        setTimeout(() => {
+                            this.copied = false;
+                        }, 2000);
+                    } catch (e) {
+                        console.error('Copy token failed:', e);
+                    }
                 },
 
                 initPass() {
@@ -252,6 +328,12 @@
                         }
 
                         this.payload = data.payload;
+                        if (data.manual_token) {
+                            this.manualToken = data.manual_token;
+                        }
+                        if (data.formatted_manual_token) {
+                            this.formattedManualToken = data.formatted_manual_token;
+                        }
                         this.expiresAt = new Date(data.expires_at).getTime();
                         this.ttl = data.ttl || 30;
                         this.renderQr(this.payload);
