@@ -16,16 +16,16 @@
     <body class="font-sans text-[#F8FAFC] antialiased bg-[#0B1120] min-h-screen relative overflow-x-hidden selection:bg-[#560E0F] selection:text-white">
         <x-public-auth-bg />
 
-        <div class="min-h-screen flex flex-col sm:justify-center items-center p-4 py-8 relative z-10">
-            <div class="mb-4">
+        <div class="min-h-screen flex flex-col justify-center items-center p-3 py-4 sm:py-6 relative z-10 overflow-y-auto">
+            <div class="mb-2 sm:mb-3">
                 <a href="/">
-                    <div class="w-16 h-16 rounded-2xl bg-[#172033]/90 border border-[#334155] p-2 shadow-xl enter-logo backdrop-blur-sm flex items-center justify-center">
+                    <div class="w-12 h-12 sm:w-14 sm:h-14 rounded-2xl bg-[#172033]/90 border border-[#334155] p-2 shadow-xl enter-logo backdrop-blur-sm flex items-center justify-center">
                         <x-application-logo class="w-full h-full" />
                     </div>
                 </a>
             </div>
 
-            <div class="w-full sm:max-w-md card shadow-2xl border border-[#334155] bg-[#172033]/95 backdrop-blur-md enter-card">
+            <div class="w-full sm:max-w-md lg:max-w-lg card shadow-2xl border border-[#334155] bg-[#172033]/95 backdrop-blur-md enter-card">
                 {{ $slot }}
             </div>
 

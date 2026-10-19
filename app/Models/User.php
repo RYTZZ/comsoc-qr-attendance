@@ -223,8 +223,27 @@ class User extends Authenticatable
     {
         $notification = new ResetPasswordNotification($token);
 
-        // Send via the mailer directly, not through the queue, so no worker is needed.
-        $this->notifyNow($notification);
+        try {
+            // Send via the mailer directly, not through the queue, so no worker is needed.
+            $this->notifyNow($notification);
+        } catch (\Symfony\Component\Mailer\Exception\TransportExceptionInterface $e) {
+            throw $e;
+        } catch (\Symfony\Component\Mime\Exception\ExceptionInterface $e) {
+            throw $e;
+        } catch (\Throwable $e) {
+            // If the failure originates in the mailer or stream transport layer, wrap as TransportException
+            if (
+                str_contains(get_class($e), 'Mail') ||
+                str_contains(get_class($e), 'Transport') ||
+                str_contains($e->getFile(), 'Mailer') ||
+                str_contains($e->getFile(), 'Mail') ||
+                str_contains($e->getMessage(), 'Connection') ||
+                str_contains($e->getMessage(), 'SMTP')
+            ) {
+                throw new \Symfony\Component\Mailer\Exception\TransportException($e->getMessage(), (int) $e->getCode(), $e);
+            }
+            throw $e;
+        }
     }
 
     public function assignedEvents(): \Illuminate\Database\Eloquent\Relations\BelongsToMany

@@ -63,7 +63,7 @@ class PasswordResetLinkController extends Controller
                     'error' => 'A temporary database processing error occurred. '
                              . 'Please try again shortly. (Ref: ' . $correlationId . ')',
                 ]);
-        } catch (\Symfony\Component\Mailer\Exception\TransportExceptionInterface $e) {
+        } catch (\Symfony\Component\Mailer\Exception\TransportExceptionInterface|\Symfony\Component\Mime\Exception\ExceptionInterface $e) {
             Log::error('Password reset — MAIL_TRANSPORT failure', [
                 'correlation_id' => $correlationId,
                 'subsystem'      => 'mail_transport',
@@ -72,9 +72,11 @@ class PasswordResetLinkController extends Controller
                 'ip'             => $request->ip(),
             ]);
 
-            // Treat as sent so as not to reveal mail configuration issues or
-            // allow enumeration of whether a token was stored.
-            $status = Password::RESET_LINK_SENT;
+            return back()->withInput($request->only('email'))
+                ->withErrors([
+                    'error' => 'Unable to send password reset email at this time due to a mail service connection issue. '
+                             . 'Please try again shortly. (Ref: ' . $correlationId . ')',
+                ]);
         } catch (\Throwable $e) {
             Log::error('Password reset — UNEXPECTED failure', [
                 'correlation_id' => $correlationId,
@@ -89,7 +91,7 @@ class PasswordResetLinkController extends Controller
             return back()->withInput($request->only('email'))
                 ->withErrors([
                     'error' => 'An unexpected error occurred while processing your request. '
-                             . 'Please try again shortly.',
+                             . 'Please try again shortly. (Ref: ' . $correlationId . ')',
                 ]);
         }
 

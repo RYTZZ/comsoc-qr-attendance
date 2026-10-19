@@ -230,9 +230,17 @@ class PasswordResetTest extends TestCase
 
         $response = $this->post('/forgot-password', ['email' => $user->email]);
 
-        // Must not blow up with a 500 error or expose the failure
-        $response->assertSessionHas('status');
-        $response->assertSessionHasNoErrors();
+        // Must not blow up with a 500 error, must not report false success, and must not leak SMTP credentials
+        $response->assertSessionHasErrors(['error']);
+        $errorMessage = session('errors')->first('error');
+        $this->assertStringContainsString('mail service connection issue', $errorMessage);
+        $this->assertStringContainsString('Ref:', $errorMessage);
+        $this->assertStringNotContainsString('SMTP Connection timeout or bad credentials', $errorMessage);
+
+        // Verify the reset token was still safely created in the database
+        $this->assertDatabaseHas('password_reset_tokens', [
+            'email' => $user->email,
+        ]);
     }
 
     public function test_password_reset_invalidates_active_device_sessions(): void
