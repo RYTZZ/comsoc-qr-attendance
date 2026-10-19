@@ -118,11 +118,8 @@
                                 <div class="w-12 h-12 mx-auto -mt-10 mb-2 rounded-2xl bg-slate-700 border-2 border-slate-400 flex items-center justify-center font-black text-white text-base shadow-lg font-brand-display">
                                     2
                                 </div>
-                                <div class="w-12 h-12 mx-auto rounded-2xl overflow-hidden border-2 border-slate-400 shadow-md mb-2 flex items-center justify-center bg-[#172033]">
-                                    <img src="{{ \App\Services\AvatarService::getUrl($second->avatar_seed, $second->avatar_style ?? 'adventurer') }}"
-                                         alt="{{ $second->nickname ?: $second->name }}"
-                                         class="w-full h-full object-cover"
-                                         loading="lazy">
+                                <div class="w-12 h-12 mx-auto mb-2 flex items-center justify-center">
+                                    <x-user-avatar :user="$second" size="lg" class="border-2 border-slate-400 shadow-md" />
                                 </div>
                                 <h3 class="text-sm font-bold text-white truncate font-brand-display">{{ $second->nickname ?: $second->name }}</h3>
                                 <p class="text-xs font-mono font-bold text-slate-300 mt-1 tabular-nums">
@@ -141,11 +138,8 @@
                                 <div class="w-14 h-14 mx-auto -mt-12 mb-2 rounded-2xl bg-amber-500 border-2 border-amber-300 flex items-center justify-center font-black text-slate-950 text-xl shadow-lg shadow-amber-500/40">
                                     <i data-lucide="crown" class="w-7 h-7"></i>
                                 </div>
-                                <div class="w-14 h-14 mx-auto rounded-2xl overflow-hidden border-2 border-amber-400 shadow-lg mb-2 flex items-center justify-center bg-[#560E0F]">
-                                    <img src="{{ \App\Services\AvatarService::getUrl($first->avatar_seed, $first->avatar_style ?? 'adventurer') }}"
-                                         alt="{{ $first->nickname ?: $first->name }}"
-                                         class="w-full h-full object-cover"
-                                         loading="lazy">
+                                <div class="w-14 h-14 mx-auto mb-2 flex items-center justify-center">
+                                    <x-user-avatar :user="$first" size="lg" class="w-14 h-14 border-2 border-amber-400 shadow-lg" />
                                 </div>
                                 <h3 class="text-base font-extrabold text-white truncate font-brand-display">{{ $first->nickname ?: $first->name }}</h3>
                                 <p class="text-sm font-mono font-black text-amber-300 mt-1 tabular-nums">
@@ -164,11 +158,8 @@
                                 <div class="w-12 h-12 mx-auto -mt-10 mb-2 rounded-2xl bg-amber-800 border-2 border-amber-600 flex items-center justify-center font-black text-white text-base shadow-lg font-brand-display">
                                     3
                                 </div>
-                                <div class="w-12 h-12 mx-auto rounded-2xl overflow-hidden border-2 border-amber-600 shadow-md mb-2 flex items-center justify-center bg-[#172033]">
-                                    <img src="{{ \App\Services\AvatarService::getUrl($third->avatar_seed, $third->avatar_style ?? 'adventurer') }}"
-                                         alt="{{ $third->nickname ?: $third->name }}"
-                                         class="w-full h-full object-cover"
-                                         loading="lazy">
+                                <div class="w-12 h-12 mx-auto mb-2 flex items-center justify-center">
+                                    <x-user-avatar :user="$third" size="lg" class="border-2 border-amber-600 shadow-md" />
                                 </div>
                                 <h3 class="text-sm font-bold text-white truncate font-brand-display">{{ $third->nickname ?: $third->name }}</h3>
                                 <p class="text-xs font-mono font-bold text-amber-300 mt-1 tabular-nums">
@@ -224,12 +215,7 @@
                                         </td>
                                         <td class="py-3 px-4">
                                             <div class="flex items-center gap-2.5">
-                                                <div class="w-7 h-7 rounded-lg overflow-hidden border border-[#8F3033]/60 bg-[#172033] flex items-center justify-center shrink-0 shadow-sm">
-                                                    <img src="{{ \App\Services\AvatarService::getUrl($row->avatar_seed, $row->avatar_style ?? 'adventurer') }}"
-                                                         alt="{{ $row->nickname ?: $row->name }}"
-                                                         class="w-full h-full object-cover"
-                                                         loading="lazy">
-                                                </div>
+                                                <x-user-avatar :user="$row" size="xs" class="w-7 h-7 rounded-lg border border-[#8F3033]/60 shadow-sm" />
                                                 <span class="font-bold text-white font-brand-display">{{ $row->nickname ?: $row->name }}</span>
                                                 @if($isMe)
                                                     <span class="px-1.5 py-0.5 rounded text-[9px] font-bold bg-[#560E0F] text-white border border-[#8F3033]">YOU</span>

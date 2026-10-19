@@ -159,4 +159,35 @@ class AdventurerAvatarFeatureTest extends TestCase
 
         $response->assertSessionHasErrors(['avatar_style']);
     }
+
+    public function test_avatar_service_generates_official_adventurer_endpoint(): void
+    {
+        $this->assertEquals('adventurer', AvatarService::STYLE);
+        $url = AvatarService::getUrl('Felix');
+        $this->assertStringStartsWith('https://api.dicebear.com/9.x/adventurer/svg?seed=', $url);
+        $this->assertStringNotContainsString('adventurer-neutral', $url);
+        $this->assertStringNotContainsString('avataaars', $url);
+        $this->assertStringNotContainsString('bottts', $url);
+    }
+
+    public function test_avatar_service_sanitizes_malicious_or_empty_seeds(): void
+    {
+        $this->assertEquals(AvatarService::DEFAULT_SEED, AvatarService::sanitizeSeed(''));
+        $this->assertEquals(AvatarService::DEFAULT_SEED, AvatarService::sanitizeSeed('   '));
+        $this->assertEquals(AvatarService::DEFAULT_SEED, AvatarService::sanitizeSeed('<script>alert("xss")</script>'));
+        $this->assertEquals('Geralt_99', AvatarService::sanitizeSeed('Geralt_99'));
+    }
+
+    public function test_avatar_presets_collection_contains_diverse_adventurer_characters(): void
+    {
+        $presets = AvatarService::getPresets();
+        $this->assertCount(16, $presets);
+
+        foreach ($presets as $preset) {
+            $this->assertArrayHasKey('name', $preset);
+            $this->assertArrayHasKey('seed', $preset);
+            $this->assertArrayHasKey('url', $preset);
+            $this->assertStringStartsWith('https://api.dicebear.com/9.x/adventurer/svg?seed=', $preset['url']);
+        }
+    }
 }
