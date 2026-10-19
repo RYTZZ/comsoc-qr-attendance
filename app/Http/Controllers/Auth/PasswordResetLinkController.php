@@ -5,7 +5,9 @@ namespace App\Http\Controllers\Auth;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Password;
+use Illuminate\Support\Str;
 use Illuminate\Validation\ValidationException;
 use Illuminate\View\View;
 
@@ -22,6 +24,14 @@ class PasswordResetLinkController extends Controller
     /**
      * Handle an incoming password reset link request.
      *
+     * Failure taxonomy logged on the server side:
+     *   - TOKEN_STORAGE  : database write failed (QueryException)
+     *   - MAIL_TRANSPORT : SMTP / transport layer rejected the message
+     *   - UNEXPECTED     : any other Throwable not covered above
+     *
+     * The user-visible response is always the same success message
+     * (to prevent account enumeration) unless throttled.
+     *
      * @throws ValidationException
      */
     public function store(Request $request): RedirectResponse
@@ -30,57 +40,67 @@ class PasswordResetLinkController extends Controller
             'email' => ['required', 'email'],
         ]);
 
-        // We will send the password reset link to this user.
-        // We catch mail transport exceptions to prevent mail delivery issues
-        // from presenting as a 500 database error or disrupting the user workflow.
+        $correlationId = (string) Str::uuid();
+
         try {
             $status = Password::sendResetLink(
                 $request->only('email')
             );
-        } catch (\Symfony\Component\Mailer\Exception\TransportExceptionInterface $e) {
-            \Illuminate\Support\Facades\Log::error('Password reset email transport failure', [
-                'exception' => get_class($e),
-                'message' => $e->getMessage(),
-                'ip' => $request->ip(),
-            ]);
-
-            // Treat as link sent to the user to maintain generic response and prevent account enumeration,
-            // while logging the mailer outage internally for administrators.
-            $status = Password::RESET_LINK_SENT;
         } catch (\Illuminate\Database\QueryException $e) {
-            $correlationId = (string) \Illuminate\Support\Str::uuid();
-            \Illuminate\Support\Facades\Log::error('Password reset database query failure', [
+            Log::error('Password reset — TOKEN_STORAGE failure', [
                 'correlation_id' => $correlationId,
-                'sqlstate' => $e->getCode(),
-                'exception' => get_class($e),
-                'message' => $e->getMessage(),
-                'ip' => $request->ip(),
+                'subsystem'      => 'token_repository',
+                'exception'      => get_class($e),
+                'sqlstate'       => $e->getCode(),
+                'message'        => $e->getMessage(),
+                'ip'             => $request->ip(),
             ]);
 
+            // Surface a correlation ID so administrators can find the log entry,
+            // but do not expose the SQL error to the user.
             return back()->withInput($request->only('email'))
                 ->withErrors([
-                    'error' => 'A temporary database processing error occurred. Please try again shortly. Reference: ' . $correlationId,
+                    'error' => 'A temporary database processing error occurred. '
+                             . 'Please try again shortly. (Ref: ' . $correlationId . ')',
                 ]);
+        } catch (\Symfony\Component\Mailer\Exception\TransportExceptionInterface $e) {
+            Log::error('Password reset — MAIL_TRANSPORT failure', [
+                'correlation_id' => $correlationId,
+                'subsystem'      => 'mail_transport',
+                'exception'      => get_class($e),
+                'message'        => $e->getMessage(),
+                'ip'             => $request->ip(),
+            ]);
+
+            // Treat as sent so as not to reveal mail configuration issues or
+            // allow enumeration of whether a token was stored.
+            $status = Password::RESET_LINK_SENT;
         } catch (\Throwable $e) {
-            \Illuminate\Support\Facades\Log::error('Unexpected error during password reset request', [
-                'exception' => get_class($e),
-                'message' => $e->getMessage(),
-                'ip' => $request->ip(),
+            Log::error('Password reset — UNEXPECTED failure', [
+                'correlation_id' => $correlationId,
+                'subsystem'      => 'unknown',
+                'exception'      => get_class($e),
+                'message'        => $e->getMessage(),
+                'file'           => $e->getFile(),
+                'line'           => $e->getLine(),
+                'ip'             => $request->ip(),
             ]);
 
             return back()->withInput($request->only('email'))
                 ->withErrors([
-                    'error' => 'An unexpected error occurred while processing your request. Please try again shortly.',
+                    'error' => 'An unexpected error occurred while processing your request. '
+                             . 'Please try again shortly.',
                 ]);
         }
 
-        // Prevent account enumeration by always displaying the success message when the user doesn't exist.
-        // If throttled (TOO_MANY_REQUESTS), respect throttling and show error.
+        // RESET_THROTTLED: the user must wait before requesting another token.
         if ($status === Password::RESET_THROTTLED) {
             return back()->withInput($request->only('email'))
                 ->withErrors(['email' => __($status)]);
         }
 
+        // For both RESET_LINK_SENT and USER_NOT_FOUND, always show the success
+        // message to prevent account enumeration.
         return back()->with('status', __(Password::RESET_LINK_SENT));
     }
 }

@@ -11,24 +11,24 @@
     <link href="https://fonts.googleapis.com/css2?family=Michroma&family=Sora:wght@600;700;800&family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet">
     @vite(['resources/css/app.css', 'resources/js/app.js'])
 </head>
-<body class="h-full bg-[#0B1120] flex items-center justify-center min-h-screen p-3 sm:p-4 md:p-6 font-sans text-slate-100 relative overflow-x-hidden selection:bg-[#560E0F] selection:text-white">
+<body class="h-full bg-[#0B1120] flex items-center justify-center min-h-screen p-2 sm:p-3 md:p-4 font-sans text-slate-100 relative overflow-x-hidden selection:bg-[#560E0F] selection:text-white">
 
 <x-page-loader />
 <x-public-auth-bg />
 
-<div class="w-full max-w-2xl relative z-10 py-4 sm:py-8">
-    <div class="text-center mb-5 sm:mb-6">
-        <div class="w-14 h-14 sm:w-16 sm:h-16 mx-auto mb-3 flex items-center justify-center p-2 rounded-2xl bg-[#172033]/90 border border-slate-800 shadow-xl enter-logo backdrop-blur-sm">
+<div class="w-full max-w-2xl relative z-10 py-2 sm:py-4">
+    <div class="text-center mb-3 sm:mb-4">
+        <div class="w-12 h-12 sm:w-14 sm:h-14 mx-auto mb-2 flex items-center justify-center p-2 rounded-2xl bg-[#172033]/90 border border-slate-800 shadow-xl enter-logo backdrop-blur-sm">
             <img src="{{ asset('images/COMSOC.png') }}" alt="Computing Society Logo" class="w-full h-full object-contain">
         </div>
         <div class="enter-header">
-            <p class="font-brand-accent text-[10px] sm:text-[11px] text-[#dfa6a9] tracking-widest uppercase mb-1">COMPUTING SOCIETY</p>
-            <h1 class="font-brand-display text-xl sm:text-2xl md:text-3xl font-bold text-white tracking-tight">Student Registration</h1>
-            <p class="text-slate-400 mt-1 text-xs sm:text-sm">Create your student account to track attendance, earn XP, and unlock rewards</p>
+            <p class="font-brand-accent text-[10px] sm:text-[11px] text-[#dfa6a9] tracking-widest uppercase mb-0.5">COMPUTING SOCIETY</p>
+            <h1 class="font-brand-display text-lg sm:text-xl md:text-2xl font-bold text-white tracking-tight">Student Registration</h1>
+            <p class="text-slate-400 mt-0.5 text-xs">Create your student account to track attendance, earn XP, and unlock rewards</p>
         </div>
     </div>
 
-    <div class="card shadow-2xl border border-slate-800/80 bg-[#172033]/95 backdrop-blur-md p-4 sm:p-6 md:p-8 enter-card"
+    <div class="card shadow-2xl border border-slate-800/80 bg-[#172033]/95 backdrop-blur-md p-4 sm:p-5 md:p-6 enter-card"
          x-data="{
              step: {{ $errors->hasAny(['email', 'password', 'password_confirmation', 'terms']) ? 2 : 1 }},
              submitting: false,
@@ -206,7 +206,7 @@
              if ($event.detail.name === 'block') { block = $event.detail.value; clientErrors.block = ''; }
          ">
 
-        <nav aria-label="Registration Progress" class="mb-6 sm:mb-8">
+        <nav aria-label="Registration Progress" class="mb-4 sm:mb-5">
             <ol class="grid grid-cols-2 gap-2 sm:gap-4">
                 <li class="flex items-center gap-2.5 p-2 sm:p-2.5 rounded-xl border transition"
                     :class="step === 1 ? 'bg-[#560E0F]/20 border-[#560E0F] text-white' : 'bg-slate-900/40 border-slate-800 text-slate-400'">
@@ -260,7 +260,7 @@
         <form method="POST" action="{{ route('signup.store') }}" @submit="submitForm($event)" class="space-y-6" novalidate>
             @csrf
 
-            <div x-show="step === 1" x-transition:enter="transition ease-out duration-200" x-transition:enter-start="opacity-0 translate-y-1" x-transition:enter-end="opacity-100 translate-y-0" class="space-y-5">
+            <div x-show="step === 1" x-transition:enter="transition ease-out duration-200" x-transition:enter-start="opacity-0 translate-y-1" x-transition:enter-end="opacity-100 translate-y-0" class="space-y-4">
                 <div class="border-b border-slate-800 pb-3 flex items-center justify-between">
                     <div>
                         <h2 class="font-brand-display text-base sm:text-lg font-bold text-white tracking-wide">Student Academic Information</h2>
@@ -404,7 +404,7 @@
                     </div>
                 </div>
 
-                <div class="pt-4 flex justify-end">
+                <div class="pt-2 flex justify-end">
                     <button type="button"
                             @click="goToStep2()"
                             class="btn-primary w-full sm:w-auto min-w-[140px] justify-center py-2.5 sm:py-3 font-semibold text-sm tracking-wide transition flex items-center gap-2">
@@ -416,7 +416,7 @@
                 </div>
             </div>
 
-            <div x-show="step === 2" x-cloak x-transition:enter="transition ease-out duration-200" x-transition:enter-start="opacity-0 translate-y-1" x-transition:enter-end="opacity-100 translate-y-0" class="space-y-5">
+            <div x-show="step === 2" x-cloak x-transition:enter="transition ease-out duration-200" x-transition:enter-start="opacity-0 translate-y-1" x-transition:enter-end="opacity-100 translate-y-0" class="space-y-3">
                 <div class="border-b border-slate-800 pb-3 flex items-center justify-between">
                     <div>
                         <h2 class="font-brand-display text-base sm:text-lg font-bold text-white tracking-wide">Account Credentials</h2>
@@ -425,15 +425,15 @@
                     <span class="text-xs font-mono text-slate-500 hidden sm:inline">2 / 2</span>
                 </div>
 
-                <div class="space-y-4">
+                <div class="space-y-3">
                     <!-- Adventurer Avatar Picker -->
-                    <div class="p-4 rounded-xl bg-slate-950/70 border border-slate-800 space-y-3">
-                        <div class="flex items-center justify-between pb-2 border-b border-slate-800/80">
+                    <div class="p-3 rounded-xl bg-slate-950/70 border border-slate-800 space-y-2">
+                        <div class="flex items-center justify-between pb-1.5 border-b border-slate-800/80">
                             <div>
                                 <label class="label text-xs font-bold text-white mb-0">Choose Your Adventurer Avatar</label>
                                 <p class="text-[11px] text-slate-400">Personalize your student profile across COMSOC Hub</p>
                             </div>
-                            <div class="w-11 h-11 rounded-xl bg-[#172033] border-2 border-[#560E0F] p-0.5 shadow-md flex items-center justify-center shrink-0 overflow-hidden">
+                            <div class="w-10 h-10 rounded-xl bg-[#172033] border-2 border-[#560E0F] p-0.5 shadow-md flex items-center justify-center shrink-0 overflow-hidden">
                                 <img :src="avatarPreviewUrl" :alt="avatarSeed" class="w-full h-full object-cover rounded-lg" />
                             </div>
                         </div>
@@ -441,8 +441,8 @@
                         <input type="hidden" name="avatar_style" :value="avatarStyle">
                         <input type="hidden" name="avatar_seed" :value="avatarSeed">
 
-                        <div class="max-h-[360px] overflow-y-auto pr-1 -mr-1 scrollbar-thin">
-                            <div class="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-6 lg:grid-cols-8 gap-2"
+                        <div class="max-h-[200px] overflow-y-auto pr-1 -mr-1 scrollbar-thin">
+                            <div class="grid grid-cols-4 sm:grid-cols-6 md:grid-cols-8 gap-1.5"
                                  role="radiogroup"
                                  aria-label="Adventurer Character Avatar options">
                                 @foreach($avatarPresets as $preset)
@@ -451,20 +451,20 @@
                                         :aria-checked="avatarSeed === '{{ $preset['seed'] }}'"
                                         aria-label="{{ $preset['name'] }}"
                                         @click="avatarSeed = '{{ $preset['seed'] }}'"
-                                        class="group relative flex flex-col items-center justify-center p-1.5 rounded-xl border transition-all duration-150 focus:outline-none focus:ring-2 focus:ring-[#8F3033] min-h-[88px]"
+                                        class="group relative flex flex-col items-center justify-center p-1 rounded-lg border transition-all duration-150 focus:outline-none focus:ring-2 focus:ring-[#8F3033] min-h-[64px]"
                                         :class="avatarSeed === '{{ $preset['seed'] }}'
                                             ? 'bg-[#560E0F]/30 border-[#df747a] ring-1 ring-[#df747a]/60 shadow'
                                             : 'bg-slate-900 border-slate-800 hover:border-slate-700 hover:bg-slate-800'">
-                                    <div class="w-10 h-10 rounded-lg overflow-hidden bg-slate-950 flex items-center justify-center border border-slate-800/80 p-0.5">
+                                    <div class="w-9 h-9 rounded-md overflow-hidden bg-slate-950 flex items-center justify-center border border-slate-800/80 p-0.5">
                                         <img src="{{ $preset['url'] }}" alt="" aria-hidden="true" class="w-full h-full object-cover group-hover:scale-105 transition-transform" loading="lazy" />
                                     </div>
-                                    <span class="text-[9px] sm:text-[10px] font-semibold mt-1 truncate max-w-full text-center"
+                                    <span class="text-[9px] font-semibold mt-0.5 truncate max-w-full text-center"
                                           :class="avatarSeed === '{{ $preset['seed'] }}' ? 'text-white font-bold' : 'text-slate-400 group-hover:text-slate-200'">
                                         {{ $preset['name'] }}
                                     </span>
                                     <div x-show="avatarSeed === '{{ $preset['seed'] }}'"
-                                         class="absolute top-1 right-1 w-3.5 h-3.5 rounded-full bg-[#560E0F] border border-[#df747a] text-white flex items-center justify-center shadow">
-                                        <svg class="w-2 h-2 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                         class="absolute top-0.5 right-0.5 w-3 h-3 rounded-full bg-[#560E0F] border border-[#df747a] text-white flex items-center justify-center shadow">
+                                        <svg class="w-1.5 h-1.5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"/>
                                         </svg>
                                     </div>
@@ -524,7 +524,7 @@
                             </button>
                         </div>
 
-                        <div class="mt-2.5 p-3 rounded-xl bg-slate-950/70 border border-slate-800/90 space-y-2">
+                        <div class="mt-1.5 p-2.5 rounded-xl bg-slate-950/70 border border-slate-800/90 space-y-1.5">
                             <div class="flex items-center justify-between text-xs">
                                 <span class="text-slate-400 font-medium">Password Strength:</span>
                                 <span id="password-strength-live"
@@ -539,7 +539,7 @@
                                      :class="[passwordMetrics.widthClass, passwordMetrics.colorClass]"></div>
                             </div>
 
-                            <ul id="password-rules" class="grid grid-cols-1 sm:grid-cols-2 gap-1.5 pt-1 text-[11px] text-slate-400">
+                            <ul id="password-rules" class="flex flex-wrap gap-x-4 gap-y-1 text-[11px] text-slate-400">
                                 <li class="flex items-center gap-1.5">
                                     <span class="w-1.5 h-1.5 rounded-full" :class="(password || '').length >= 8 ? 'bg-emerald-400' : 'bg-slate-600'"></span>
                                     <span>At least 8 characters</span>
@@ -595,18 +595,16 @@
                 </div>
 
                 <!-- Formal Privacy Notice (Data Privacy Act of 2012 / Governance Compliance) -->
-                <div class="p-4 rounded-xl bg-slate-950/80 border border-slate-800 text-xs text-slate-300 space-y-2.5">
+                <div class="p-3 rounded-xl bg-slate-950/80 border border-slate-800 text-xs text-slate-300 space-y-1.5">
                     <div class="flex items-center gap-2 text-white font-semibold">
                         <svg class="w-4 h-4 text-emerald-400 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
                         </svg>
                         <span>COMSOC Privacy Notice & Consent</span>
                     </div>
-                    <p class="text-[11px] text-slate-400 leading-relaxed">
-                        <strong>Purpose & Scope:</strong> COMSOC collects your name, student number, institutional email, program, and year level solely for identity verification, attendance tracking, permanent member credentialing, XP, and reward shop operations. We do not import external registrar lists or sell student data.
+                    <p class="text-[11px] text-slate-400 leading-snug"><strong>Purpose &amp; Scope:</strong> COMSOC collects your name, student number, institutional email, program, and year level solely for identity verification, attendance tracking, permanent member credentialing, XP, and reward shop operations. We do not import external registrar lists or sell student data.
                     </p>
-                    <p class="text-[11px] text-slate-400 leading-relaxed">
-                        <strong>Retention & Rights:</strong> Your records are securely stored, encrypted where required, and retained only for your active membership cycle and necessary organizational audits. You have the right to request access, correction of profile information, or account deactivation.
+                    <p class="text-[11px] text-slate-400 leading-snug"><strong>Retention &amp; Rights:</strong> Your records are securely stored, encrypted where required, and retained only for your active membership cycle and necessary organizational audits. You have the right to request access, correction of profile information, or account deactivation.
                     </p>
                 </div>
 
@@ -629,7 +627,7 @@
                     @enderror
                 </div>
 
-                <div class="pt-4 flex flex-col-reverse sm:flex-row items-center justify-between gap-3">
+                <div class="pt-2 flex flex-col-reverse sm:flex-row items-center justify-between gap-3">
                     <button type="button"
                             @click="goToStep1()"
                             class="btn-secondary w-full sm:w-auto min-w-[120px] justify-center py-2.5 sm:py-3 text-sm flex items-center gap-2">
@@ -654,7 +652,7 @@
                 </div>
             </div>
 
-            <div class="text-center pt-2">
+            <div class="text-center pt-1">
                 <p class="text-xs text-slate-400">
                     Already have an account?
                     <a href="{{ route('login') }}" class="text-[#e69094] hover:text-white font-medium underline transition">Sign In here</a>

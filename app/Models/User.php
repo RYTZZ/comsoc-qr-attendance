@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use Illuminate\Auth\Notifications\ResetPassword as ResetPasswordNotification;
 use Illuminate\Database\Eloquent\Concerns\HasUuids;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -198,9 +199,32 @@ class User extends Authenticatable
         return $this->hasMany(EventRegistration::class);
     }
 
-    public function notifications(): HasMany
+    /**
+     * Custom in-app notifications (App\Models\Notification).
+     *
+     * Named appNotifications() to avoid shadowing the Notifiable trait's
+     * notifications() morphMany (Illuminate\Notifications\DatabaseNotification),
+     * which is required by Password::sendResetLink() and the notify() pipeline.
+     */
+    public function appNotifications(): HasMany
     {
         return $this->hasMany(Notification::class);
+    }
+
+    /**
+     * Send the password reset notification synchronously, bypassing the queue.
+     *
+     * Production runs on Render's free tier, which does not run a persistent
+     * queue worker. Queued notifications are never processed, so reset emails
+     * were silently dropped. Sending synchronously guarantees delivery as long
+     * as the mail transport is reachable.
+     */
+    public function sendPasswordResetNotification($token): void
+    {
+        $notification = new ResetPasswordNotification($token);
+
+        // Send via the mailer directly, not through the queue, so no worker is needed.
+        $this->notifyNow($notification);
     }
 
     public function assignedEvents(): \Illuminate\Database\Eloquent\Relations\BelongsToMany

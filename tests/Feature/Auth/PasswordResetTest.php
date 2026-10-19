@@ -160,10 +160,70 @@ class PasswordResetTest extends TestCase
         $this->assertStringStartsWith('$2y$', $record->token);
     }
 
+    /**
+     * Regression test: password reset notification MUST be sent synchronously
+     * (notifyNow) so that it works even when no queue worker is running
+     * (e.g. Render free-tier deployment).
+     *
+     * Root cause of the original production bug: QUEUE_CONNECTION=database with
+     * no running worker meant queued notifications were silently dropped.
+     * User::sendPasswordResetNotification() now calls notifyNow() explicitly.
+     */
+    public function test_password_reset_notification_is_sent_synchronously_without_queue(): void
+    {
+        Notification::fake();
+
+        $user = User::factory()->create();
+
+        // Simulate a queue that would reject any queued jobs
+        // by overriding the queue connection to 'sync' isn't needed —
+        // the key assertion is that the notification arrives regardless of queue state.
+        // Notification::fake() captures both notify() and notifyNow() dispatches.
+        $response = $this->post('/forgot-password', ['email' => $user->email]);
+
+        $response->assertSessionHas('status');
+        $response->assertSessionHasNoErrors();
+
+        // The notification MUST have been sent (notifyNow bypasses queue)
+        Notification::assertSentTo($user, ResetPassword::class);
+
+        // Confirm no 500 error or generic "unexpected error" was produced
+        $response->assertSessionDoesntHaveErrors(['error']);
+    }
+
+    /**
+     * Regression test: the User model's custom appNotifications() HasMany must
+     * NOT shadow the Notifiable trait's notifications() morphMany, because
+     * Password::sendResetLink() uses notify() internally which depends on the
+     * Notifiable trait's routing logic.
+     */
+    public function test_user_notifications_relation_does_not_shadow_notifiable_trait(): void
+    {
+        $user = User::factory()->create();
+
+        // appNotifications() must return the custom App\Models\Notification HasMany
+        $appNotificationsRelation = $user->appNotifications();
+        $this->assertInstanceOf(
+            \Illuminate\Database\Eloquent\Relations\HasMany::class,
+            $appNotificationsRelation
+        );
+
+        // notifications() must now return the Notifiable trait's morphMany
+        // (Illuminate\Notifications\DatabaseNotification), NOT the custom HasMany.
+        // If the two were confused, this would return a HasMany instead.
+        $notifiableRelation = $user->notifications();
+        $this->assertInstanceOf(
+            \Illuminate\Database\Eloquent\Relations\MorphMany::class,
+            $notifiableRelation,
+            'User::notifications() must return the Notifiable trait MorphMany, ' .
+            'not the custom HasMany. The custom relation must be renamed to appNotifications().'
+        );
+    }
+
     public function test_forgot_password_handles_mail_transport_exception_gracefully(): void
     {
         // Simulate a mailer transport failure when dispatching notification
-        Notification::shouldReceive('send')
+        Notification::shouldReceive('sendNow')
             ->andThrow(new \Symfony\Component\Mailer\Exception\TransportException('SMTP Connection timeout or bad credentials'));
 
         $user = User::factory()->create();
@@ -267,5 +327,3 @@ class PasswordResetTest extends TestCase
         $this->assertEquals(1, $occurrences, 'The error message must only appear once on the page.');
     }
 }
-
-

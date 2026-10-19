@@ -57,7 +57,7 @@ class UserSessionController extends Controller
         }
 
         // Get unread security alerts created in the last 24 hours
-        $alerts = $user->notifications()
+        $alerts = $user->appNotifications()
             ->where('type', 'security_alert')
             ->whereNull('read_at')
             ->where('created_at', '>=', now()->subHours(24))
@@ -68,7 +68,7 @@ class UserSessionController extends Controller
             'valid' => true,
             'session_replaced' => false,
             'unread_alerts' => $alerts,
-            'unread_count' => $user->notifications()->whereNull('read_at')->count(),
+            'unread_count' => $user->appNotifications()->whereNull('read_at')->count(),
         ]);
     }
 

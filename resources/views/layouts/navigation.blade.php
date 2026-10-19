@@ -410,7 +410,7 @@
                             <i data-lucide="bell" class="w-4 h-4 shrink-0 {{ request()->routeIs('notifications.*') ? 'text-white' : 'text-[#94A3B8]' }}"></i>
                             <span>{{ __('Notifications') }}</span>
                         </div>
-                        @php $unreadCount = Auth::user()->notifications()->whereNull('read_at')->count(); @endphp
+                        @php $unreadCount = Auth::user()->appNotifications()->whereNull('read_at')->count(); @endphp
                         @if($unreadCount > 0)
                         <span class="px-1.5 py-0.5 rounded text-[10px] bg-rose-500/20 text-rose-300 font-bold border border-rose-500/30">
                             {{ $unreadCount }}
@@ -495,3 +495,4 @@
         </button>
     </div>
 </nav>
+

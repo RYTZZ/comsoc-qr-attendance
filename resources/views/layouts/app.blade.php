@@ -59,7 +59,7 @@
                            title="Notifications"
                            aria-label="View Notifications">
                             <i data-lucide="bell" class="w-4 h-4"></i>
-                            @php $unreadCount = Auth::user()->notifications()->whereNull('read_at')->count(); @endphp
+                            @php $unreadCount = Auth::user()->appNotifications()->whereNull('read_at')->count(); @endphp
                             @if($unreadCount > 0)
                             <span class="absolute top-1 right-1 flex h-2 w-2">
                                 <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-red-400 opacity-75"></span>
@@ -139,3 +139,4 @@
         @stack('scripts')
     </body>
 </html>
+

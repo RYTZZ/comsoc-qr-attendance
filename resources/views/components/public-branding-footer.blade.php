@@ -1,4 +1,4 @@
-<div class="text-center mt-6 space-y-1 select-none">
+<div class="text-center mt-3 space-y-1 select-none">
     <p class="text-xs font-semibold text-slate-400 tracking-tight">
         ComSoc QR Attendance System <span class="text-slate-600">•</span> <span class="text-slate-500 font-mono text-[11px]">v1.0</span>
     </p>

@@ -15,7 +15,7 @@ class NotificationController extends Controller
         $user = $request->user();
         $filter = $request->input('filter', 'all');
 
-        $query = $user->notifications()->latest();
+        $query = $user->appNotifications()->latest();
 
         if ($filter === 'unread') {
             $query->whereNull('read_at');
@@ -24,7 +24,7 @@ class NotificationController extends Controller
         }
 
         $notifications = $query->paginate(15);
-        $unreadCount = $user->notifications()->whereNull('read_at')->count();
+        $unreadCount = $user->appNotifications()->whereNull('read_at')->count();
 
         return view('notifications.index', [
             'notifications' => $notifications,
@@ -54,7 +54,7 @@ class NotificationController extends Controller
 
     public function markAllAsRead(Request $request): RedirectResponse
     {
-        $request->user()->notifications()->whereNull('read_at')->update(['read_at' => now()]);
+        $request->user()->appNotifications()->whereNull('read_at')->update(['read_at' => now()]);
 
         return back()->with('success', 'All notifications marked as read.');
     }
