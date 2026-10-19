@@ -59,7 +59,7 @@ class PasswordResetLinkController extends Controller
 
             return back()->withInput($request->only('email'))
                 ->withErrors([
-                    'email' => 'A temporary database processing error occurred. Please try again shortly. Reference: ' . $correlationId,
+                    'error' => 'A temporary database processing error occurred. Please try again shortly. Reference: ' . $correlationId,
                 ]);
         } catch (\Throwable $e) {
             \Illuminate\Support\Facades\Log::error('Unexpected error during password reset request', [
@@ -70,7 +70,7 @@ class PasswordResetLinkController extends Controller
 
             return back()->withInput($request->only('email'))
                 ->withErrors([
-                    'email' => 'An unexpected error occurred while processing your request. Please try again shortly.',
+                    'error' => 'An unexpected error occurred while processing your request. Please try again shortly.',
                 ]);
         }
 

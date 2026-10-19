@@ -226,5 +226,46 @@ class PasswordResetTest extends TestCase
             return true;
         });
     }
+
+    public function test_email_validation_error_renders_only_at_field_level(): void
+    {
+        $response = $this->from('/forgot-password')->post('/forgot-password', [
+            'email' => 'not-an-email',
+        ]);
+
+        $response->assertRedirect('/forgot-password');
+        $response->assertSessionHasErrors(['email']);
+        $response->assertSessionDoesntHaveErrors(['error']);
+
+        // Test view rendering with validation error on email
+        $view = $this->withSession([
+            'errors' => session('errors'),
+        ])->get('/forgot-password');
+
+        $view->assertStatus(200);
+        $view->assertSee('The email field must be a valid email address.');
+        // Should NOT display the top alert-error box for normal email field validation
+        $view->assertDontSee('alert-error', false);
+    }
+
+    public function test_general_error_renders_in_top_alert_without_duplicate(): void
+    {
+        // When a general processing error occurs, it should be flashed under 'error'
+        $view = $this->withSession([
+            'errors' => (new \Illuminate\Support\ViewErrorBag)->put('default', new \Illuminate\Support\MessageBag([
+                'error' => 'An unexpected error occurred while processing your request. Please try again shortly.',
+            ])),
+        ])->get('/forgot-password');
+
+        $view->assertStatus(200);
+        $view->assertSee('alert-error', false);
+        $view->assertSee('An unexpected error occurred while processing your request. Please try again shortly.');
+        
+        // Count occurrences of the message in the rendered HTML to ensure no duplicate
+        $content = $view->getContent();
+        $occurrences = substr_count($content, 'An unexpected error occurred while processing your request. Please try again shortly.');
+        $this->assertEquals(1, $occurrences, 'The error message must only appear once on the page.');
+    }
 }
+
 
