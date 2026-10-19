@@ -96,7 +96,7 @@
                 @endphp
                     <tr class="hover:bg-slate-800/30 transition">
                         <td class="py-3 px-4 font-semibold text-white">{{ $qrStudent?->display_name ?? '—' }}</td>
-                        <td class="py-3 px-4 text-slate-400 font-mono">{{ $qrStudent?->student_number ?? '—' }}</td>
+                        <td class="py-3 px-4 text-slate-400 font-mono">{{ auth()->user()?->isSuperAdmin() ? ($qrStudent?->student_number ?? '—') : ($qrStudent?->user?->member_id ?? '—') }}</td>
                         <td class="py-3 px-4 text-slate-300">
                             @if($qrStudent)
                                 <span class="text-white font-medium">{{ $qrStudent->year_level ?? '—' }}</span>

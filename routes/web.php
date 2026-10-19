@@ -70,6 +70,11 @@ Route::middleware(['auth', 'verified', 'require_password_change'])->group(functi
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
+    Route::get('/profile/sessions', [\App\Http\Controllers\UserSessionController::class, 'index'])->name('profile.sessions');
+    Route::get('/profile/sessions/poll', [\App\Http\Controllers\UserSessionController::class, 'pollAlerts'])->name('profile.sessions.poll');
+    Route::delete('/profile/sessions/{session}', [\App\Http\Controllers\UserSessionController::class, 'destroy'])
+        ->middleware('throttle:30,1')
+        ->name('profile.sessions.destroy');
 
     // Dynamic QR Attendance Pass
     Route::get('/attendance/my-qr', [\App\Http\Controllers\MemberQrCodeController::class, 'show'])->name('member.dynamic_qr');

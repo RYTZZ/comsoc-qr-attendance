@@ -29,12 +29,15 @@ class MemberProfileUpdateRequest extends FormRequest
                 Rule::unique(User::class)->ignore($userId),
             ],
             'bio' => ['nullable', 'string', 'max:1000'],
+            'avatar_style' => ['nullable', 'string', 'in:adventurer'],
+            'avatar_seed' => ['nullable', 'string', 'max:50'],
             'github_url' => ['nullable', 'url', 'max:255'],
             'linkedin_url' => ['nullable', 'url', 'max:255'],
-            'interests' => ['nullable', 'string', 'max:500'],
-            'is_public' => ['boolean'],
+            'interests' => ['nullable'],
+            'visibility' => ['nullable', 'string', 'in:public,members_only,private'],
+            'is_public' => ['nullable', 'boolean'],
             'skills' => ['nullable', 'array'],
-            'skills.*' => ['string', 'max:50'],
+            'skills.*' => ['string', 'max:80'],
         ];
     }
 }

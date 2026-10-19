@@ -6,9 +6,22 @@
             </a>
             <div>
                 <div class="flex items-center gap-2">
-                    <span class="px-2 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider bg-cyan-500/20 border border-cyan-500/40 text-cyan-300">
-                        Public Profile
-                    </span>
+                    @php
+                        $vis = $member->profile?->visibility ?? ($member->profile?->is_public ? 'public' : 'private');
+                    @endphp
+                    @if($vis === 'public')
+                        <span class="px-2 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider bg-cyan-500/20 border border-cyan-500/40 text-cyan-300">
+                            Public Profile
+                        </span>
+                    @elseif($vis === 'members_only')
+                        <span class="px-2 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider bg-[#560E0F]/40 border border-[#8F3033]/60 text-[#df747a]">
+                            Members Only
+                        </span>
+                    @else
+                        <span class="px-2 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider bg-slate-800 border border-slate-700 text-slate-300">
+                            Private Profile
+                        </span>
+                    @endif
                     <span class="text-xs text-slate-400">Computing Society Member</span>
                 </div>
                 <h1 class="text-2xl font-bold text-white font-brand-display tracking-tight mt-0.5">
@@ -24,9 +37,7 @@
             <div class="card bg-[#172033] border border-slate-800 rounded-2xl p-6 sm:p-8 space-y-6">
                 <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-6 pb-6 border-b border-slate-800">
                     <div class="flex items-center gap-4">
-                        <div class="w-16 h-16 rounded-2xl bg-gradient-to-br from-[#560E0F] to-slate-900 border border-[#560E0F]/50 flex items-center justify-center text-white font-black text-2xl shadow-lg">
-                            {{ strtoupper(substr($member->name, 0, 1)) }}
-                        </div>
+                        <x-user-avatar :user="$member" size="xl" class="border border-[#560E0F]/50 shadow-lg" />
 
                         <div>
                             <h2 class="text-xl font-bold text-white font-brand-display">{{ $member->name }}</h2>

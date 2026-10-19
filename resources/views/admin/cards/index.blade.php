@@ -84,7 +84,7 @@
                     <tr class="hover:bg-slate-800/30 transition">
                         <td class="py-3 px-4 font-mono font-semibold text-white">{{ $card->card_uid ?? 'CARD-' . str_pad($card->id, 5, '0', STR_PAD_LEFT) }}</td>
                         <td class="py-3 px-4 text-slate-200">{{ $cardStudent?->display_name ?? '—' }}</td>
-                        <td class="py-3 px-4 text-slate-400 font-mono">{{ $cardStudent?->student_number ?? '—' }}</td>
+                        <td class="py-3 px-4 text-slate-400 font-mono">{{ auth()->user()?->isSuperAdmin() ? ($cardStudent?->student_number ?? '—') : ($cardStudent?->user?->member_id ?? '—') }}</td>
                         <td class="py-3 px-4">
                             @if($cardStudent)
                                 <span class="text-white font-medium">{{ $cardStudent->program ?: 'BSIT' }}</span>

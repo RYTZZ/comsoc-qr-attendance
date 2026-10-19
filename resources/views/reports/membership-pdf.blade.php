@@ -46,7 +46,7 @@
             @foreach($data as $i => $row)
                 <tr>
                     <td>{{ $i + 1 }}</td>
-                    <td>{{ $row->student?->student_number ?? '—' }}</td>
+                    <td>{{ auth()->user()?->isSuperAdmin() ? ($row->student?->student_number ?? '—') : ($row->student?->member_id ?? $row->member_id ?? '—') }}</td>
                     <td>{{ $row->student?->display_name ?? '—' }}</td>
                     <td>{{ ($row->student?->program ?: 'BSIT') . ' • ' . ($row->student?->year_level ?: '—') }}</td>
                     <td>{{ $row->academicYear?->label ?? '—' }}</td>

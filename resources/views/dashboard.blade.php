@@ -1,24 +1,32 @@
 <x-app-layout>
     <x-slot name="header">
         <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-            <div>
-                <div class="flex items-center gap-2">
-                    <span class="px-2.5 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider bg-burgundy-deep text-[#df747a] border border-[#8F3033]/60">
-                        {{ $activeSeason ? $activeSeason->name : 'Active Semester' }}
+            <div class="flex items-center gap-3.5">
+                <a href="{{ route('profile.edit') }}" title="Change Adventurer Avatar" class="group relative">
+                    <x-user-avatar :user="$user" size="xl" class="border-2 border-[#8F3033]/60 shadow-xl group-hover:scale-105 transition-all group-hover:border-[#df747a]" />
+                    <span class="absolute -bottom-1 -right-1 w-5 h-5 rounded-full bg-[#560E0F] border border-[#df747a] flex items-center justify-center text-white opacity-0 group-hover:opacity-100 transition shadow">
+                        <i data-lucide="edit-3" class="w-2.5 h-2.5 text-white"></i>
                     </span>
-                    <span class="text-xs text-[#94A3B8] font-mono">
-                        {{ $student ? $student->student_number : $user->username }}
-                    </span>
-                    <span class="px-2 py-0.5 rounded text-[10px] font-semibold bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">
-                        Active Member
-                    </span>
+                </a>
+                <div>
+                    <div class="flex items-center gap-2">
+                        <span class="px-2.5 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider bg-burgundy-deep text-[#df747a] border border-[#8F3033]/60">
+                            {{ $activeSeason ? $activeSeason->name : 'Active Semester' }}
+                        </span>
+                        <span class="text-xs text-[#94A3B8] font-mono">
+                            {{ auth()->user()?->isSuperAdmin() ? ($student ? $student->student_number : $user->username) : ($user->member_id ?: $user->username) }}
+                        </span>
+                        <span class="px-2 py-0.5 rounded text-[10px] font-semibold bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">
+                            Active Member
+                        </span>
+                    </div>
+                    <h1 class="text-2xl sm:text-3xl font-extrabold text-[#F8FAFC] font-brand-display tracking-tight mt-1">
+                        Welcome back, {{ $student ? $student->first_name : $user->name }}!
+                    </h1>
+                    <p class="text-xs text-[#94A3B8] mt-0.5">
+                        {{ $student ? "{$student->program} • Year {$student->year_level} (Block {$student->block})" : 'Computing Society Member' }}
+                    </p>
                 </div>
-                <h1 class="text-2xl sm:text-3xl font-extrabold text-[#F8FAFC] font-brand-display tracking-tight mt-1">
-                    Welcome back, {{ $student ? $student->first_name : $user->name }}!
-                </h1>
-                <p class="text-xs text-[#94A3B8] mt-0.5">
-                    {{ $student ? "{$student->program} • Year {$student->year_level} (Block {$student->block})" : 'Computing Society Member' }}
-                </p>
             </div>
 
             <div class="flex flex-wrap items-center gap-2">

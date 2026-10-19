@@ -110,7 +110,7 @@
             @endphp
             <tr>
                 <td class="font-medium text-white">{{ $student?->display_name ?? 'Unknown Student' }}</td>
-                <td class="font-mono text-sm">{{ $student?->student_number ?? '—' }}</td>
+                <td class="font-mono text-sm">{{ auth()->user()?->isSuperAdmin() ? ($student?->student_number ?? '—') : ($student?->user?->member_id ?? '—') }}</td>
                 <td>
                     <div class="flex flex-col">
                         <span class="text-white text-xs font-semibold">{{ $student?->year_level ?? 'Not assigned' }}</span>

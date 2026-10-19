@@ -128,8 +128,10 @@
                             @if($user->username && $user->email && !str_ends_with($user->email, '@kiosk.local') && !str_ends_with($user->email, '@admin.local'))
                                 <div class="text-[11px] text-slate-400">{{ $user->email }}</div>
                             @endif
-                            @if($user->student_number)
+                            @if($user->student_number && auth()->user()?->isSuperAdmin())
                                 <div class="text-[10px] font-mono text-slate-400">ID: {{ $user->student_number }}</div>
+                            @elseif($user->member_id)
+                                <div class="text-[10px] font-mono text-slate-400">ID: {{ $user->member_id }}</div>
                             @endif
                         </td>
 

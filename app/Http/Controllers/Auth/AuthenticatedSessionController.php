@@ -31,6 +31,8 @@ class AuthenticatedSessionController extends Controller
 
         $user->update(['last_activity_at' => now()]);
 
+        app(\App\Services\SessionSecurityService::class)->handleLogin($user, $request);
+
         if ($user->role === 'kiosk' && $user->kiosk) {
             $user->kiosk->update(['last_activity_at' => now()]);
         }

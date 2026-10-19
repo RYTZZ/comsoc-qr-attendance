@@ -85,9 +85,7 @@
                     <div class="card p-5 {{ $msg->is_internal_note ? 'bg-amber-950/20 border border-amber-500/40' : ($isStaff ? 'bg-slate-900 border-slate-800' : 'bg-slate-950 border border-slate-800') }}">
                         <div class="flex items-center justify-between mb-3">
                             <div class="flex items-center gap-2">
-                                <div class="w-7 h-7 rounded-lg {{ $isStaff ? 'bg-rose-900 text-white' : 'bg-slate-800 text-slate-300' }} flex items-center justify-center text-xs font-bold">
-                                    {{ substr($msg->user->name, 0, 1) }}
-                                </div>
+                                <x-user-avatar :user="$msg->user" size="sm" class="rounded-lg {{ $isStaff ? 'border-rose-700/60' : 'border-slate-700' }}" />
                                 <div>
                                     <p class="text-xs font-bold text-white">
                                         {{ $msg->user->name }}
@@ -191,7 +189,7 @@
                 <div class="card bg-slate-900 border border-slate-800 p-5 space-y-3 text-xs">
                     <h3 class="font-bold text-white uppercase tracking-wider border-b border-slate-800 pb-2">Student Information</h3>
                     <p><span class="text-slate-400">Name:</span> <span class="font-bold text-white">{{ $ticket->user?->name }}</span></p>
-                    <p><span class="text-slate-400">Student #:</span> <span class="font-mono text-slate-200">{{ $ticket->user?->student?->student_number ?? 'N/A' }}</span></p>
+                    <p><span class="text-slate-400">Student #:</span> <span class="font-mono text-slate-200">{{ auth()->user()?->isSuperAdmin() ? ($ticket->user?->student?->student_number ?? 'N/A') : ($ticket->user?->member_id ?? 'N/A') }}</span></p>
                     <p><span class="text-slate-400">Program / Year:</span> <span class="text-slate-200">{{ $ticket->user?->student?->program ?? 'N/A' }} - Yr {{ $ticket->user?->student?->year_level ?? 'N/A' }}</span></p>
                     <p><span class="text-slate-400">Email:</span> <span class="text-slate-200">{{ $ticket->user?->email }}</span></p>
                 </div>

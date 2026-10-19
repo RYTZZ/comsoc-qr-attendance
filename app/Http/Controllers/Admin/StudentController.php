@@ -168,13 +168,14 @@ class StudentController extends Controller
                 'QR Status',
             ]);
 
+            $isSuperAdmin = auth()->user()?->isSuperAdmin() ?? false;
             foreach ($sorted as $student) {
                 $membership = $student->memberships->first();
                 $qrStatus = $membership?->activeQrCode ? 'Active' : ($membership ? 'Missing' : 'No Membership');
                 $membershipStatus = $membership ? ucfirst($membership->status) : 'None';
 
                 fputcsv($handle, [
-                    $student->student_number ?? 'N/A',
+                    $isSuperAdmin ? ($student->student_number ?? 'N/A') : ($student->user?->member_id ?? 'RESTRICTED'),
                     $student->last_name ?? '',
                     $student->first_name ?? '',
                     $student->middle_name ?? '',

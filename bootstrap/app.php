@@ -26,6 +26,10 @@ return Application::configure(basePath: dirname(__DIR__))
             'require_password_change' => RequirePasswordChange::class,
         ]);
 
+        $middleware->web(append: [
+            \App\Http\Middleware\EnsureSessionNotRevoked::class,
+        ]);
+
         $middleware->validateCsrfTokens(except: [
             'kiosk/*/scan',
             'kiosk/*/snack/scan',

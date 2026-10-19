@@ -156,9 +156,7 @@
                         <div class="space-y-3">
                             @forelse($opportunity->acceptedApplications as $cApp)
                             <div class="flex items-center gap-3 text-xs">
-                                <div class="w-8 h-8 rounded-full bg-cyan-900 text-cyan-300 flex items-center justify-center font-bold shrink-0">
-                                    {{ substr($cApp->user->name, 0, 1) }}
-                                </div>
+                                <x-user-avatar :user="$cApp->user" size="sm" class="rounded-xl border border-cyan-500/30" />
                                 <div>
                                     <p class="font-bold text-white">{{ $cApp->user->name }}</p>
                                     <p class="text-[11px] text-slate-400">{{ $cApp->assigned_shift ?: 'General Volunteer' }}</p>

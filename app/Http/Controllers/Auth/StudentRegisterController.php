@@ -27,8 +27,9 @@ class StudentRegisterController extends Controller
         $programs = Student::ALLOWED_PROGRAMS;
         $years = Student::ALLOWED_YEARS;
         $blocks = Student::BLOCKS;
+        $avatarPresets = \App\Services\AvatarService::getPresets();
 
-        return view('auth.signup', compact('programs', 'years', 'blocks'));
+        return view('auth.signup', compact('programs', 'years', 'blocks', 'avatarPresets'));
     }
 
     public function store(StudentRegistrationRequest $request): RedirectResponse
@@ -60,6 +61,11 @@ class StudentRegisterController extends Controller
                 $username = strtolower(explode('@', $email)[0]) . '_' . Str::random(4);
             }
 
+            $avatarSeed = !empty($validated['avatar_seed'])
+                ? \App\Services\AvatarService::sanitizeSeed($validated['avatar_seed'])
+                : \App\Services\AvatarService::DEFAULT_SEED;
+            $avatarStyle = $validated['avatar_style'] ?? 'adventurer';
+
             $user = User::create([
                 'member_id' => User::generateUniqueMemberId(),
                 'name' => $fullName,
@@ -67,6 +73,8 @@ class StudentRegisterController extends Controller
                 'email' => $email,
                 'password' => Hash::make($validated['password']),
                 'role' => 'student', // Never grant officer privileges during self-registration
+                'avatar_style' => $avatarStyle,
+                'avatar_seed' => $avatarSeed,
                 'student_id' => $student->id,
                 'student_number' => $student->student_number,
                 'is_active' => true,
@@ -128,6 +136,8 @@ class StudentRegisterController extends Controller
         event(new Registered($user));
 
         Auth::login($user);
+
+        app(\App\Services\SessionSecurityService::class)->handleLogin($user, $request);
 
         return redirect()->route('dashboard')->with('status', 'Registration successful! Welcome to COMSOC QR Attendance.');
     }

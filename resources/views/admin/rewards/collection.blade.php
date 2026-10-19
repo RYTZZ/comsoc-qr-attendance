@@ -110,7 +110,7 @@
                                     </td>
                                     <td class="py-3.5 px-4">
                                         <div class="font-bold text-white font-brand-display">{{ $item->user->name }}</div>
-                                        <div class="text-[10px] text-[#94A3B8] font-mono">{{ $item->user->student_number ?? $item->user->email }}</div>
+                                        <div class="text-[10px] text-[#94A3B8] font-mono">{{ auth()->user()?->isSuperAdmin() ? ($item->user->student_number ?? $item->user->email) : ($item->user->member_id ?? $item->user->email) }}</div>
                                     </td>
                                     <td class="py-3.5 px-4">
                                         <span class="font-semibold text-slate-200">{{ $item->item_title_snapshot }}</span>

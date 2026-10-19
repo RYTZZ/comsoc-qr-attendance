@@ -79,14 +79,12 @@
                             @forelse($students as $st)
                                 @php
                                     $isSelected = $selectedStudent && $selectedStudent->id === $st->id;
-                                    $stNumber = $st->student?->student_id ?? $st->student_number ?? $st->member_id;
+                                    $stNumber = auth()->user()?->isSuperAdmin() ? ($st->student?->student_id ?? $st->student_number ?? $st->member_id) : $st->member_id;
                                 @endphp
                                 <a href="{{ route('admin.students.exp-points.index', ['search' => $search, 'user_id' => $st->id]) }}"
                                    class="p-3 rounded-xl flex items-center justify-between transition-colors block {{ $isSelected ? 'bg-[#560E0F]/40 border border-[#560E0F]' : 'hover:bg-slate-800/50' }}">
                                     <div class="flex items-center gap-3">
-                                        <div class="w-9 h-9 rounded-lg bg-slate-800 flex items-center justify-center font-bold text-xs text-white">
-                                            {{ strtoupper(substr($st->name, 0, 2)) }}
-                                        </div>
+                                        <x-user-avatar :user="$st" size="md" class="rounded-lg border border-slate-700" />
                                         <div>
                                             <div class="text-xs font-bold text-white">{{ $st->name }}</div>
                                             <div class="text-[10px] text-slate-400 flex items-center gap-2">
@@ -123,21 +121,24 @@
                             $studentLifetimeExp = $selectedStudent->getLifetimeExp();
                             $studentPoints = $selectedStudent->getSpendableExp();
                             $studentLevel = \App\Models\Level::forXp($studentLifetimeExp);
-                            $studentIdStr = $selectedStudent->student?->student_id ?? $selectedStudent->student_number ?? $selectedStudent->member_id;
+                            $studentIdStr = auth()->user()?->isSuperAdmin() ? ($selectedStudent->student?->student_id ?? $selectedStudent->student_number ?? $selectedStudent->member_id) : $selectedStudent->member_id;
                         @endphp
 
                         <!-- Selected Student Overview Card -->
                         <div class="card bg-[#172033] border border-slate-800 p-6 rounded-2xl">
                             <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 border-b border-slate-800">
-                                <div>
-                                    <div class="flex items-center gap-2">
-                                        <span class="px-2 py-0.2 rounded-full text-[10px] font-bold bg-indigo-500/20 text-indigo-300 border border-indigo-500/30">
-                                            Level {{ $studentLevel->level ?? 1 }} • {{ $studentLevel->title ?? 'Novice' }}
-                                        </span>
-                                        <span class="text-xs text-slate-400 font-mono">{{ $selectedStudent->member_id }}</span>
+                                <div class="flex items-center gap-3.5">
+                                    <x-user-avatar :user="$selectedStudent" size="xl" class="border border-[#560E0F]/60 shadow-md" />
+                                    <div>
+                                        <div class="flex items-center gap-2">
+                                            <span class="px-2 py-0.2 rounded-full text-[10px] font-bold bg-indigo-500/20 text-indigo-300 border border-indigo-500/30">
+                                                Level {{ $studentLevel->level ?? 1 }} • {{ $studentLevel->title ?? 'Novice' }}
+                                            </span>
+                                            <span class="text-xs text-slate-400 font-mono">{{ $selectedStudent->member_id }}</span>
+                                        </div>
+                                        <h2 class="text-xl font-bold text-white font-brand-display mt-1">{{ $selectedStudent->name }}</h2>
+                                        <p class="text-xs text-slate-400">{{ $selectedStudent->email }} • Student #: {{ $studentIdStr }}</p>
                                     </div>
-                                    <h2 class="text-xl font-bold text-white font-brand-display mt-1">{{ $selectedStudent->name }}</h2>
-                                    <p class="text-xs text-slate-400">{{ $selectedStudent->email }} • Student #: {{ $studentIdStr }}</p>
                                 </div>
 
                                 <div class="flex items-center gap-4">

@@ -436,9 +436,7 @@
 
         <div class="p-4 border-t border-[#334155] bg-[#0B1120]/40 shrink-0">
             <div class="flex items-center gap-3 mb-3">
-                <div class="w-9 h-9 rounded-xl bg-[#560E0F] flex items-center justify-center text-white shrink-0 font-bold text-xs shadow-inner">
-                    {{ strtoupper(substr(Auth::user()->name, 0, 1)) }}
-                </div>
+                <x-user-avatar :user="Auth::user()" size="md" />
                 <div class="overflow-hidden">
                     <p class="text-xs font-bold text-white truncate">{{ Auth::user()->name }}</p>
                     <p class="text-[10px] text-slate-400 truncate">{{ Auth::user()->email }}</p>

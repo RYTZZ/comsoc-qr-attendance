@@ -18,12 +18,25 @@ class MemberDirectoryService
         ?string $program = null,
         ?string $yearLevel = null,
         int $perPage = 18,
-        int $page = 1
+        int $page = 1,
+        ?User $viewer = null
     ): LengthAwarePaginator {
+        $viewer = $viewer ?? auth()->user();
+        $isMember = $viewer !== null && in_array($viewer->role, ['student', 'member', 'staff', 'admin', 'super_admin', 'president', 'executive_secretary', 'event_staff']);
+
         $query = User::with(['student', 'profile', 'skills'])
-            ->where('role', 'student')
-            ->whereHas('profile', function (Builder $pq) {
-                $pq->where('is_public', true);
+            ->whereIn('role', ['student', 'member'])
+            ->whereHas('profile', function (Builder $pq) use ($isMember) {
+                $pq->where(function ($sub) use ($isMember) {
+                    $sub->where('visibility', 'public')
+                        ->orWhere(function ($pqs) {
+                            $pqs->whereNull('visibility')->where('is_public', true);
+                        });
+
+                    if ($isMember) {
+                        $sub->orWhere('visibility', 'members_only');
+                    }
+                });
             });
 
         if ($search) {
@@ -75,10 +88,10 @@ class MemberDirectoryService
         $myProjectCategories = $myProfile?->project_categories ?? [];
 
         $candidates = User::with(['student', 'profile', 'skills'])
-            ->where('role', 'student')
+            ->whereIn('role', ['student', 'member'])
             ->where('id', '!=', $user->id)
             ->whereHas('profile', function (Builder $pq) {
-                $pq->where('is_public', true)
+                $pq->whereIn('visibility', ['public', 'members_only'])
                     ->where('open_to_collaborate', true);
             })
             ->get();

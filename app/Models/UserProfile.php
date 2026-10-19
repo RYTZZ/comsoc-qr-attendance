@@ -21,6 +21,7 @@ class UserProfile extends Model
         'collaboration_preferences',
         'project_categories',
         'is_public',
+        'visibility',
         'open_to_collaborate',
     ];
 

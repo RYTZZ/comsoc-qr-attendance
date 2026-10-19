@@ -74,6 +74,9 @@ class ProfileController extends Controller
             ->get();
 
         $allSkills = Skill::orderBy('name')->get();
+        $avatarPresets = \App\Services\AvatarService::getPresets();
+        $skillCategories = \App\Services\ProfileMetadataService::getSkillCategories();
+        $interestCategories = \App\Services\ProfileMetadataService::getInterestCategories();
 
         return view('profile.edit', compact(
             'user',
@@ -87,7 +90,10 @@ class ProfileController extends Controller
             'attendanceHistory',
             'xpHistory',
             'pointHistory',
-            'allSkills'
+            'allSkills',
+            'avatarPresets',
+            'skillCategories',
+            'interestCategories'
         ));
     }
 
@@ -96,7 +102,7 @@ class ProfileController extends Controller
         $user = $request->user();
         $validated = $request->validated();
 
-        DB::transaction(function () use ($user, $validated) {
+        DB::transaction(function () use ($user, $validated, $request) {
             $user->name = $validated['name'];
             $emailChanged = $user->email !== $validated['email'];
             $user->email = $validated['email'];
@@ -107,12 +113,26 @@ class ProfileController extends Controller
                     $user->student->update(['email' => $validated['email']]);
                 }
             }
+
+            if (isset($validated['avatar_seed'])) {
+                $user->avatar_style = $validated['avatar_style'] ?? 'adventurer';
+                $user->avatar_seed = \App\Services\AvatarService::sanitizeSeed($validated['avatar_seed']);
+            }
+
             $user->save();
 
-            $interestsArray = [];
-            if (!empty($validated['interests'])) {
-                $interestsArray = array_values(array_filter(array_map('trim', explode(',', $validated['interests']))));
+            // Normalize and parse interests
+            $rawInterests = $validated['interests'] ?? null;
+            $interestsArray = \App\Services\ProfileMetadataService::normalizeList($rawInterests);
+
+            // Determine visibility & backward compatibility with is_public
+            $visibility = $validated['visibility'] ?? null;
+            if (!$visibility) {
+                $visibility = $request->has('is_public') 
+                    ? ($request->boolean('is_public') ? 'public' : 'private')
+                    : 'public';
             }
+            $isPublic = ($visibility === 'public');
 
             $profile = UserProfile::firstOrCreate(['user_id' => $user->id]);
             $profile->update([
@@ -120,21 +140,20 @@ class ProfileController extends Controller
                 'github_url' => $validated['github_url'] ?? null,
                 'linkedin_url' => $validated['linkedin_url'] ?? null,
                 'interests' => $interestsArray,
-                'is_public' => $validated['is_public'] ?? true,
+                'visibility' => $visibility,
+                'is_public' => $isPublic,
             ]);
 
             $skillIds = [];
-            if (!empty($validated['skills']) && is_array($validated['skills'])) {
-                foreach ($validated['skills'] as $skillName) {
-                    $cleanedName = trim($skillName);
-                    if ($cleanedName !== '') {
-                        $skill = Skill::firstOrCreate(['name' => $cleanedName]);
-                        $skillIds[$skill->id] = [
-                            'id' => (string) Str::uuid(),
-                            'proficiency' => 'intermediate',
-                        ];
-                    }
-                }
+            $rawSkills = $validated['skills'] ?? [];
+            $normalizedSkills = \App\Services\ProfileMetadataService::normalizeList($rawSkills);
+
+            foreach ($normalizedSkills as $skillName) {
+                $skill = Skill::firstOrCreate(['name' => $skillName]);
+                $skillIds[$skill->id] = [
+                    'id' => (string) Str::uuid(),
+                    'proficiency' => 'intermediate',
+                ];
             }
             $user->skills()->sync($skillIds);
         });

@@ -71,9 +71,7 @@
                         <x-dropdown align="right" width="56" contentClasses="py-1 bg-[#172033] border border-[#334155] shadow-2xl rounded-xl">
                             <x-slot name="trigger">
                                 <button type="button" class="inline-flex items-center gap-2 p-1.5 sm:px-3 sm:py-1.5 border border-[#334155] rounded-xl text-slate-200 bg-[#0B1120] hover:text-white hover:bg-[#1E293B] focus:outline-none focus:ring-2 focus:ring-[#8F3033] transition">
-                                    <div class="w-7 h-7 rounded-lg bg-[#560E0F] flex items-center justify-center text-white shrink-0 font-bold text-xs shadow-inner">
-                                        {{ strtoupper(substr(Auth::user()->name, 0, 1)) }}
-                                    </div>
+                                    <x-user-avatar :user="Auth::user()" size="sm" class="rounded-lg" />
                                     <div class="hidden sm:block text-left max-w-[120px] truncate">
                                         <div class="text-xs font-semibold text-white truncate leading-tight">{{ Auth::user()->name }}</div>
                                         <div class="text-[10px] text-slate-400 truncate capitalize">{{ Auth::user()->role ?? 'Member' }}</div>
@@ -91,6 +89,11 @@
                                 <x-dropdown-link :href="route('profile.edit')" class="text-slate-300 hover:text-white hover:bg-[#1E293B] flex items-center gap-2 text-xs py-2.5">
                                     <i data-lucide="user" class="w-4 h-4 text-slate-400"></i>
                                     {{ __('Profile & Settings') }}
+                                </x-dropdown-link>
+
+                                <x-dropdown-link :href="route('profile.sessions')" class="text-slate-300 hover:text-white hover:bg-[#1E293B] flex items-center gap-2 text-xs py-2.5">
+                                    <i data-lucide="shield-check" class="w-4 h-4 text-[#df747a]"></i>
+                                    {{ __('Active Sessions & Security') }}
                                 </x-dropdown-link>
 
                                 @if(Auth::user()->isAdmin() || Auth::user()->isSuperAdmin() || Auth::user()->isStaff() || Auth::user()->isTreasurer())
@@ -131,7 +134,90 @@
         </div>
 
 
+        <!-- Real-Time Security Alert Toast Container -->
+        <div x-data="securityAlertNotifier()" x-init="initNotifier()" class="fixed bottom-6 right-6 z-50 max-w-sm w-full space-y-3 pointer-events-none">
+            <template x-for="alert in alerts" :key="alert.id">
+                <div class="pointer-events-auto bg-[#172033] border border-[#8F3033] shadow-2xl rounded-2xl p-4 flex items-start gap-3.5 animate-slide-up transform transition-all duration-300">
+                    <div class="w-9 h-9 rounded-xl bg-[#560E0F] border border-[#8F3033] text-red-300 flex items-center justify-center shrink-0">
+                        <i data-lucide="shield-alert" class="w-5 h-5 text-red-400"></i>
+                    </div>
+                    <div class="flex-1 min-w-0">
+                        <div class="flex items-center justify-between gap-2">
+                            <h4 class="text-xs font-bold text-white uppercase tracking-wider font-brand-display" x-text="alert.title"></h4>
+                            <button @click="dismissAlert(alert.id)" class="text-slate-400 hover:text-white p-1 rounded transition">
+                                <i data-lucide="x" class="w-3.5 h-3.5"></i>
+                            </button>
+                        </div>
+                        <p class="text-xs text-slate-300 mt-1 leading-relaxed" x-text="alert.body"></p>
+                        <div class="mt-3 flex items-center gap-2">
+                            <a :href="alert.target_url || '{{ route('profile.sessions') }}'" 
+                               class="btn-primary text-[11px] py-1 px-2.5 bg-[#560E0F] hover:bg-[#8F3033] border-[#8F3033] flex items-center gap-1 font-semibold">
+                                <span>Review Sessions</span>
+                                <i data-lucide="arrow-right" class="w-3 h-3"></i>
+                            </a>
+                            <button @click="dismissAlert(alert.id)" class="text-[11px] text-slate-400 hover:text-slate-200 py-1 px-2">
+                                Dismiss
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </template>
+        </div>
+
         <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+        <script>
+            function securityAlertNotifier() {
+                return {
+                    alerts: [],
+                    dismissedIds: new Set(),
+                    pollInterval: null,
+
+                    initNotifier() {
+                        this.poll();
+                        this.pollInterval = setInterval(() => this.poll(), 15000); // Poll every 15s
+                    },
+
+                    async poll() {
+                        try {
+                            const res = await fetch('{{ route('profile.sessions.poll') }}', {
+                                headers: {
+                                    'Accept': 'application/json',
+                                    'X-Requested-With': 'XMLHttpRequest',
+                                }
+                            });
+                            if (res.ok) {
+                                const data = await res.json();
+                                if (data.unread_alerts) {
+                                    const newAlerts = data.unread_alerts.filter(a => !this.dismissedIds.has(a.id));
+                                    if (newAlerts.length > 0) {
+                                        this.alerts = newAlerts;
+                                        this.$nextTick(() => {
+                                            if (window.lucide) window.lucide.createIcons();
+                                        });
+                                    }
+                                }
+                            }
+                        } catch (e) {
+                            // Silent polling failure fallback
+                        }
+                    },
+
+                    dismissAlert(id) {
+                        this.dismissedIds.add(id);
+                        this.alerts = this.alerts.filter(a => a.id !== id);
+                        fetch(`/notifications/${id}/read`, {
+                            method: 'POST',
+                            headers: {
+                                'Accept': 'application/json',
+                                'Content-Type': 'application/json',
+                                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content'),
+                                'X-Requested-With': 'XMLHttpRequest',
+                            }
+                        }).catch(() => {});
+                    }
+                };
+            }
+        </script>
         @stack('scripts')
     </body>
 </html>

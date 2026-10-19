@@ -45,7 +45,8 @@ class MemberDirectoryController extends Controller
             program: $programCode,
             yearLevel: $yearLevel,
             perPage: 12,
-            page: (int) $request->input('page', 1)
+            page: (int) $request->input('page', 1),
+            viewer: $user
         );
 
         $matches = collect();
@@ -71,14 +72,33 @@ class MemberDirectoryController extends Controller
 
     public function show(Request $request, User $user): View
     {
-        if (!in_array($user->role, ['student', 'member']) || !$user->profile?->is_public) {
-            abort(404);
+        $viewer = $request->user();
+        $isOwner = $viewer && $viewer->id === $user->id;
+        $isSuperAdmin = $viewer && $viewer->isSuperAdmin();
+        $isMember = $viewer !== null && in_array($viewer->role, ['student', 'member', 'staff', 'admin', 'super_admin', 'president', 'executive_secretary', 'event_staff']);
+
+        $profile = $user->profile;
+        $visibility = $profile?->visibility ?? ($profile?->is_public ? 'public' : 'private');
+
+        // Check visibility permissions
+        if (!$isOwner && !$isSuperAdmin) {
+            if ($visibility === 'private') {
+                abort(404);
+            }
+            if ($visibility === 'members_only' && !$isMember) {
+                abort(404);
+            }
+            if (!in_array($user->role, ['student', 'member'])) {
+                abort(404);
+            }
         }
 
         $user->load(['student', 'skills', 'achievements', 'seasonStats.season']);
 
         return view('directory.show', [
             'member' => $user,
+            'viewer' => $viewer,
+            'isOwner' => $isOwner,
         ]);
     }
 

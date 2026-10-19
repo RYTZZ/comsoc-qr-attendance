@@ -115,3 +115,8 @@ To enable automated archival of incidents older than 7 days, configure a cron jo
 ```bash
 php artisan schedule:run
 ```
+
+## Attribution & Licenses
+
+- **Adventurer Avatars**: Designed by Lisa Wischofsky for [DiceBear](https://www.dicebear.com/styles/adventurer/). Licensed under CC BY 4.0.
+

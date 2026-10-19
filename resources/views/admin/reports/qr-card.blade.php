@@ -25,7 +25,7 @@
                 @forelse($data as $qr)
                     <tr class="hover:bg-slate-800/30 transition">
                         <td class="py-3 px-4 font-medium text-white">{{ $qr->membership?->student?->display_name ?? '—' }}</td>
-                        <td class="py-3 px-4 text-slate-400 font-mono">{{ $qr->membership?->student?->student_number ?? '—' }}</td>
+                        <td class="py-3 px-4 text-slate-400 font-mono">{{ auth()->user()?->isSuperAdmin() ? ($qr->membership?->student?->student_number ?? '—') : ($qr->membership?->student?->member_id ?? $qr->membership?->member_id ?? '—') }}</td>
                         <td class="py-3 px-4">
                             <span class="badge {{ $qr->status === 'active' ? 'badge-active' : 'badge-inactive' }}">
                                 {{ ucfirst($qr->status) }}

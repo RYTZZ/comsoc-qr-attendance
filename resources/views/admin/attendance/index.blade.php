@@ -29,10 +29,10 @@
                         <td class="py-3 px-4">
                             @if($rec->student)
                                 <div class="font-medium text-white">{{ $rec->student->display_name }}</div>
-                                <div class="text-[11px] text-slate-500">{{ $rec->student->student_number }}</div>
+                                <div class="text-[11px] text-slate-500 font-mono">{{ auth()->user()?->isSuperAdmin() ? $rec->student->student_number : ($rec->student->user?->member_id ?? 'RESTRICTED') }}</div>
                             @elseif($rec->membership?->student)
                                 <div class="font-medium text-white">{{ $rec->membership->student->display_name }}</div>
-                                <div class="text-[11px] text-slate-500">{{ $rec->membership->student->student_number }}</div>
+                                <div class="text-[11px] text-slate-500 font-mono">{{ auth()->user()?->isSuperAdmin() ? $rec->membership->student->student_number : ($rec->membership->student->user?->member_id ?? 'RESTRICTED') }}</div>
                             @elseif($rec->eventRegistration)
                                 <div class="font-medium text-white">{{ $rec->eventRegistration->full_name }}</div>
                                 <div class="text-[11px] text-slate-500">{{ $rec->eventRegistration->email }}</div>

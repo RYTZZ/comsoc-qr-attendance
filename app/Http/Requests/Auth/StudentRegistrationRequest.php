@@ -66,6 +66,8 @@ class StudentRegistrationRequest extends FormRequest
                 'confirmed',
             ],
             'terms' => ['accepted'],
+            'avatar_style' => ['nullable', 'string', 'in:adventurer'],
+            'avatar_seed' => ['nullable', 'string', 'max:50'],
         ];
     }
 

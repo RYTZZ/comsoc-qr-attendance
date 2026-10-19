@@ -175,9 +175,7 @@
                         <div class="space-y-3">
                             @foreach($project->activeMembers as $mem)
                             <div class="flex items-center gap-3 text-xs">
-                                <div class="w-8 h-8 rounded-full bg-[#560E0F] flex items-center justify-center font-bold text-white shrink-0">
-                                    {{ substr($mem->user->name, 0, 1) }}
-                                </div>
+                                <x-user-avatar :user="$mem->user" size="sm" class="rounded-xl border border-[#8F3033]/60" />
                                 <div>
                                     <p class="font-bold text-white">{{ $mem->user->name }}</p>
                                     <p class="text-[11px] text-slate-400">{{ $mem->role }}</p>

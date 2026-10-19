@@ -36,7 +36,7 @@ class LeaderboardService
                 $join->on('member_season_stats.user_id', '=', 'users.id')
                      ->where('member_season_stats.season_id', '=', $season->id);
             })
-            ->select('users.id', 'users.name', 'users.nickname')
+            ->select('users.id', 'users.name', 'users.nickname', 'users.avatar_style', 'users.avatar_seed')
             ->whereIn('users.role', ['member', 'student'])
             ->where('users.is_active', true)
             ->where('users.is_eligible', true)
@@ -78,7 +78,7 @@ class LeaderboardService
     {
         $sub = User::query()
             ->leftJoin('user_profiles', 'user_profiles.user_id', '=', 'users.id')
-            ->select('users.id', 'users.name', 'users.nickname')
+            ->select('users.id', 'users.name', 'users.nickname', 'users.avatar_style', 'users.avatar_seed')
             ->whereIn('users.role', ['member', 'student'])
             ->where('users.is_active', true)
             ->where('users.is_eligible', true)

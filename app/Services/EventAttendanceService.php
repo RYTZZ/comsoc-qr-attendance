@@ -84,6 +84,9 @@ class EventAttendanceService
             })
             ->exists();
 
+        $viewerIsSuperAdmin = $organizer->isSuperAdmin();
+        $idIdentifier = $viewerIsSuperAdmin ? ($member->student_number ?? $member->member_id) : $member->member_id;
+
         if ($event->requires_registration && !$isRegistered) {
             return [
                 'success' => false,
@@ -92,7 +95,7 @@ class EventAttendanceService
                 'result_type' => 'Ineligible',
                 'member' => [
                     'name' => $member->display_name,
-                    'student_number' => $member->student_number,
+                    'student_number' => $idIdentifier,
                 ],
             ];
         }
@@ -141,13 +144,13 @@ class EventAttendanceService
                 'result_type' => 'Duplicate',
                 'member' => [
                     'name' => $member->display_name,
-                    'student_number' => $member->student_number,
+                    'student_number' => $idIdentifier,
                 ],
             ];
         }
 
         // 6. Record attendance in transaction
-        return DB::transaction(function () use ($event, $session, $member, $organizer, $action, $tokenValidation) {
+        return DB::transaction(function () use ($event, $session, $member, $organizer, $action, $tokenValidation, $idIdentifier) {
             $scanTime = now()->format('H:i:s');
             $status = $session->determineStatus($scanTime);
 
@@ -198,7 +201,7 @@ class EventAttendanceService
                 'exp_awarded' => $expAwarded,
                 'member' => [
                     'name' => $member->display_name,
-                    'student_number' => $member->student_number,
+                    'student_number' => $idIdentifier,
                 ],
             ];
         });

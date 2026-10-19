@@ -1,25 +1,63 @@
 <x-guest-layout>
-    <div class="mb-4 text-sm text-gray-600">
-        {{ __('Forgot your password? No problem. Just let us know your email address and we will email you a password reset link that will allow you to choose a new one.') }}
+    <div class="p-2 sm:p-4">
+        <div class="mb-6">
+            <h2 class="font-brand-display text-xl font-bold text-white tracking-tight">Forgot your password?</h2>
+            <p class="text-xs text-[#94A3B8] mt-1.5 leading-relaxed">
+                Enter your registered email address and we'll send you a secure password reset link to create a new one.
+            </p>
+        </div>
+
+        <!-- Session Status / Feedback -->
+        <x-auth-session-status class="mb-4" :status="session('status')" />
+
+        @if($errors->any())
+        <div class="alert-error mb-4">
+            <svg class="w-4 h-4 flex-shrink-0 mt-0.5" fill="currentColor" viewBox="0 0 20 20">
+                <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clip-rule="evenodd"/>
+            </svg>
+            <span>{{ $errors->first() }}</span>
+        </div>
+        @endif
+
+        <form method="POST" action="{{ route('password.email') }}" class="space-y-4" x-data="{ submitting: false }" @submit="submitting = true">
+            @csrf
+
+            <!-- Email Address -->
+            <div>
+                <label for="email" class="label">Email Address</label>
+                <input id="email" 
+                       class="input" 
+                       type="email" 
+                       name="email" 
+                       value="{{ old('email') }}" 
+                       placeholder="e.g. member@sorsu.edu.ph"
+                       required 
+                       autofocus 
+                       autocomplete="email" />
+                <x-input-error :messages="$errors->get('email')" class="mt-2" />
+            </div>
+
+            <div class="pt-2">
+                <button type="submit" 
+                        class="btn-primary w-full justify-center py-2.5 shadow-xl disabled:opacity-50 disabled:cursor-not-allowed" 
+                        :disabled="submitting">
+                    <span x-show="!submitting">Email Password Reset Link</span>
+                    <span x-show="submitting" class="flex items-center gap-2" style="display: none;">
+                        <svg class="animate-spin -ml-1 mr-2 h-4 w-4 text-white" fill="none" viewBox="0 0 24 24">
+                            <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                            <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8H4z"></path>
+                        </svg>
+                        Sending Link...
+                    </span>
+                </button>
+            </div>
+        </form>
+
+        <div class="mt-6 pt-5 border-t border-[#334155] text-center">
+            <p class="text-xs text-[#94A3B8]">
+                Remembered your credentials?
+                <a href="{{ route('login') }}" class="text-[#df747a] hover:text-white font-semibold underline transition">Back to Sign In</a>
+            </p>
+        </div>
     </div>
-
-    <!-- Session Status -->
-    <x-auth-session-status class="mb-4" :status="session('status')" />
-
-    <form method="POST" action="{{ route('password.email') }}">
-        @csrf
-
-        <!-- Email Address -->
-        <div>
-            <x-input-label for="email" :value="__('Email')" />
-            <x-text-input id="email" class="block mt-1 w-full" type="email" name="email" :value="old('email')" required autofocus />
-            <x-input-error :messages="$errors->get('email')" class="mt-2" />
-        </div>
-
-        <div class="flex items-center justify-end mt-4">
-            <x-primary-button>
-                {{ __('Email Password Reset Link') }}
-            </x-primary-button>
-        </div>
-    </form>
 </x-guest-layout>

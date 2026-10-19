@@ -200,8 +200,8 @@ class ReportController extends Controller
             foreach ($sorted as $rec) {
                 $student = $rec->student;
                 $reg = $rec->eventRegistration;
-
-                $studentId = $student?->student_number ?? ($reg ? 'GUEST-' . substr($reg->id, 0, 8) : 'N/A');
+                $isSuperAdmin = auth()->user()?->isSuperAdmin() ?? false;
+                $studentId = $isSuperAdmin ? ($student?->student_number ?? ($reg ? 'GUEST-' . substr($reg->id, 0, 8) : 'N/A')) : ($student?->user?->member_id ?? ($reg ? 'GUEST-' . substr($reg->id, 0, 8) : 'N/A'));
                 $fullName = $student?->full_name ?? $reg?->full_name ?? 'N/A';
                 $program = $student?->program ?? $reg?->program ?? 'N/A';
                 $yearLevel = $student?->year_level ?? $reg?->year_level ?? 'N/A';
@@ -267,8 +267,8 @@ class ReportController extends Controller
             foreach ($records as $claim) {
                 $student = $claim->student;
                 $reg = $claim->eventRegistration;
-
-                $studentId = $student?->student_number ?? ($reg ? 'GUEST-' . substr($reg->id, 0, 8) : 'N/A');
+                $isSuperAdmin = auth()->user()?->isSuperAdmin() ?? false;
+                $studentId = $isSuperAdmin ? ($student?->student_number ?? ($reg ? 'GUEST-' . substr($reg->id, 0, 8) : 'N/A')) : ($student?->user?->member_id ?? ($reg ? 'GUEST-' . substr($reg->id, 0, 8) : 'N/A'));
                 $fullName = $student?->full_name ?? $reg?->full_name ?? 'N/A';
                 $program = $student?->program ?? $reg?->program ?? 'N/A';
                 $yearLevel = $student?->year_level ?? $reg?->year_level ?? 'N/A';
@@ -394,7 +394,8 @@ class ReportController extends Controller
 
             foreach ($sorted as $membership) {
                 $student = $membership->student;
-                $studentId = $student?->student_number ?? 'N/A';
+                $isSuperAdmin = auth()->user()?->isSuperAdmin() ?? false;
+                $studentId = $isSuperAdmin ? ($student?->student_number ?? 'N/A') : ($student?->user?->member_id ?? $membership->user?->member_id ?? 'RESTRICTED');
                 $fullName = $student?->full_name ?? 'N/A';
                 $program = $student?->program ?? 'N/A';
                 $yearLevel = $student?->year_level ?? 'N/A';

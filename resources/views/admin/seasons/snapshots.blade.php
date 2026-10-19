@@ -42,7 +42,7 @@
                                 {{ $snap->user->name }}
                             </td>
                             <td class="py-3 px-4 text-slate-400">
-                                {{ $snap->user->student?->student_number ?? '--' }}
+                                {{ auth()->user()?->isSuperAdmin() ? ($snap->user->student?->student_number ?? '--') : ($snap->user->member_id ?? '--') }}
                             </td>
                             <td class="py-3 px-4 font-bold text-[#dfa6a9]">
                                 {{ number_format($snap->final_xp) }} XP

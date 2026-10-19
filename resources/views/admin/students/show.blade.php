@@ -4,7 +4,7 @@
         <a href="{{ route('admin.students.index') }}" class="btn-secondary btn-sm">← Back</a>
         <div>
             <h1 class="page-title">{{ $student->full_name }}</h1>
-            <p class="text-xs text-slate-400 mt-0.5 font-mono">{{ $student->student_number }}</p>
+            <p class="text-xs text-slate-400 mt-0.5 font-mono">{{ auth()->user()?->isSuperAdmin() ? $student->student_number : ($student->user?->member_id ?? 'RESTRICTED') }}</p>
         </div>
     </div>
 </div>
@@ -37,7 +37,7 @@
             <dl class="space-y-3">
                 <div>
                     <dt class="label">Student Number</dt>
-                    <dd class="text-white font-mono">{{ $student->student_number }}</dd>
+                    <dd class="text-white font-mono">{{ auth()->user()?->isSuperAdmin() ? $student->student_number : ($student->user?->member_id ?? 'RESTRICTED') }}</dd>
                 </div>
                 <div>
                     <dt class="label">Registered Email</dt>
@@ -108,7 +108,7 @@
                     @method('PATCH')
                     <div>
                         <label class="label">Student Number</label>
-                        <input type="text" value="{{ $student->student_number }}" class="input w-full bg-slate-800/50 cursor-not-allowed font-mono text-xs" disabled>
+                        <input type="text" value="{{ auth()->user()?->isSuperAdmin() ? $student->student_number : 'RESTRICTED' }}" class="input w-full bg-slate-800/50 cursor-not-allowed font-mono text-xs" disabled>
                     </div>
                     <div>
                         <label class="label">Registered Email</label>

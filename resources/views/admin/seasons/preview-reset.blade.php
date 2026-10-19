@@ -55,7 +55,7 @@
                         </span>
                         <div>
                             <p class="font-bold text-white">{{ $stat->user->name }}</p>
-                            <p class="text-[11px] text-slate-500 font-mono">{{ $stat->user->student?->student_number ?? 'Student' }}</p>
+                            <p class="text-[11px] text-slate-500 font-mono">{{ auth()->user()?->isSuperAdmin() ? ($stat->user->student?->student_number ?? 'Student') : ($stat->user->member_id ?? 'Student') }}</p>
                         </div>
                     </div>
                     <div class="text-right font-mono">

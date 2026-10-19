@@ -110,7 +110,7 @@
                             </td>
                             <td class="px-5 py-3">
                                 <p class="font-bold text-white whitespace-nowrap">{{ $tkt->user?->name }}</p>
-                                <p class="text-[10px] text-slate-400">{{ $tkt->user?->student?->student_number ?? $tkt->user?->email }}</p>
+                                <p class="text-[10px] text-slate-400">{{ auth()->user()?->isSuperAdmin() ? ($tkt->user?->student?->student_number ?? $tkt->user?->email) : ($tkt->user?->member_id ?? $tkt->user?->email) }}</p>
                             </td>
                             <td class="px-5 py-3 text-slate-300 whitespace-nowrap">
                                 {{ $tkt->category_label }}

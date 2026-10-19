@@ -157,9 +157,7 @@
                             <div class="card bg-[#172033] border border-slate-800 rounded-2xl p-5 hover:border-[#560E0F]/50 transition-all duration-200 flex flex-col justify-between space-y-4 group">
                                 <div class="space-y-3">
                                     <div class="flex items-start justify-between gap-3">
-                                        <div class="w-12 h-12 rounded-2xl bg-gradient-to-br from-[#560E0F] to-[#172033] border border-[#560E0F]/40 flex items-center justify-center text-white font-extrabold text-base shadow-sm">
-                                            {{ strtoupper(substr($member->name, 0, 1)) }}
-                                        </div>
+                                        <x-user-avatar :user="$member" size="lg" class="border border-[#560E0F]/40 shadow-sm" />
 
                                         <div class="text-right">
                                             @if($prof && $prof->open_to_collaborate)

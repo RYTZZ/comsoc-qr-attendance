@@ -56,6 +56,8 @@ class User extends Authenticatable
         'password',
         'role',
         'officer_position',
+        'avatar_style',
+        'avatar_seed',
         'can_collect_rewards',
         'student_id',
         'created_by',
@@ -401,5 +403,37 @@ class User extends Authenticatable
         }
 
         return (int) $this->xpTransactions()->sum('amount');
+    }
+
+    public function getAvatarUrlAttribute(): string
+    {
+        return \App\Services\AvatarService::getUrl($this->avatar_seed, $this->avatar_style ?? 'adventurer');
+    }
+
+    public function getEffectiveAvatarSeedAttribute(): string
+    {
+        return $this->avatar_seed ?: \App\Services\AvatarService::DEFAULT_SEED;
+    }
+
+    /**
+     * Check if a viewer has authorization to view student IDs.
+     * STRICT SECURITY RULE: Only SUPER ADMIN is authorized.
+     */
+    public static function canViewStudentId(?User $viewer = null): bool
+    {
+        $actor = $viewer ?? auth()->user();
+        return $actor !== null && $actor->role === 'super_admin';
+    }
+
+    /**
+     * Return student number only if the viewer is authorized (super_admin).
+     */
+    public function getMaskedStudentNumber(?User $viewer = null): ?string
+    {
+        if (self::canViewStudentId($viewer)) {
+            return $this->student_number ?? $this->student?->student_number;
+        }
+
+        return null;
     }
 }

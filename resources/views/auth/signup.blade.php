@@ -44,6 +44,11 @@
              email: '{{ addslashes(old('email', '')) }}',
              password: '',
              passwordConfirmation: '',
+             avatarSeed: '{{ addslashes(old('avatar_seed', 'Felix')) }}',
+             avatarStyle: 'adventurer',
+             get avatarPreviewUrl() {
+                 return 'https://api.dicebear.com/9.x/adventurer/svg?seed=' + encodeURIComponent(this.avatarSeed);
+             },
              termsAccepted: {{ old('terms') ? 'true' : 'false' }},
              clientErrors: {},
 
@@ -421,6 +426,47 @@
                 </div>
 
                 <div class="space-y-4">
+                    <!-- Adventurer Avatar Picker -->
+                    <div class="p-4 rounded-xl bg-slate-950/70 border border-slate-800 space-y-3">
+                        <div class="flex items-center justify-between pb-2 border-b border-slate-800/80">
+                            <div>
+                                <label class="label text-xs font-bold text-white mb-0">Choose Your Adventurer Avatar</label>
+                                <p class="text-[11px] text-slate-400">Personalize your student profile across COMSOC Hub</p>
+                            </div>
+                            <div class="w-11 h-11 rounded-xl bg-[#172033] border-2 border-[#560E0F] p-0.5 shadow-md flex items-center justify-center shrink-0 overflow-hidden">
+                                <img :src="avatarPreviewUrl" :alt="avatarSeed" class="w-full h-full object-cover rounded-lg" />
+                            </div>
+                        </div>
+
+                        <input type="hidden" name="avatar_style" :value="avatarStyle">
+                        <input type="hidden" name="avatar_seed" :value="avatarSeed">
+
+                        <div class="grid grid-cols-4 sm:grid-cols-8 gap-2">
+                            @foreach($avatarPresets as $preset)
+                            <button type="button"
+                                    @click="avatarSeed = '{{ $preset['seed'] }}'"
+                                    class="group relative flex flex-col items-center p-1 rounded-lg border transition-all duration-150 focus:outline-none"
+                                    :class="avatarSeed === '{{ $preset['seed'] }}'
+                                        ? 'bg-[#560E0F]/40 border-[#df747a] ring-2 ring-[#8F3033] shadow scale-105'
+                                        : 'bg-slate-900 border-slate-800 hover:border-slate-700 hover:bg-slate-800'">
+                                <div class="w-9 h-9 rounded overflow-hidden bg-slate-950 flex items-center justify-center">
+                                    <img src="{{ $preset['url'] }}" alt="{{ $preset['name'] }}" class="w-full h-full object-cover group-hover:scale-110 transition-transform" loading="lazy" />
+                                </div>
+                                <span class="text-[8px] font-semibold mt-0.5 truncate max-w-full"
+                                      :class="avatarSeed === '{{ $preset['seed'] }}' ? 'text-white font-bold' : 'text-slate-400'">
+                                    {{ $preset['name'] }}
+                                </span>
+                                <div x-show="avatarSeed === '{{ $preset['seed'] }}'"
+                                     class="absolute -top-1 -right-1 w-3.5 h-3.5 rounded-full bg-[#560E0F] border border-[#df747a] text-white flex items-center justify-center shadow">
+                                    <svg class="w-2 h-2 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"/>
+                                    </svg>
+                                </div>
+                            </button>
+                            @endforeach
+                        </div>
+                    </div>
+
                     <div>
                         <label for="email" class="label text-xs">Email Address <span class="text-red-400">*</span></label>
                         <input type="email"

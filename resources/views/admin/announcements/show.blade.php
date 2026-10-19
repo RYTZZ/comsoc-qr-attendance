@@ -72,7 +72,7 @@
                                 {{ $rcp->user?->name }}
                             </td>
                             <td class="px-5 py-3 font-mono text-slate-300 whitespace-nowrap">
-                                {{ $rcp->user?->student?->student_number ?? 'N/A' }}
+                                {{ auth()->user()?->isSuperAdmin() ? ($rcp->user?->student?->student_number ?? 'N/A') : ($rcp->user?->member_id ?? 'N/A') }}
                             </td>
                             <td class="px-5 py-3 text-slate-300 whitespace-nowrap">
                                 {{ $rcp->user?->student?->program ?? 'N/A' }} - Yr {{ $rcp->user?->student?->year_level ?? 'N/A' }}

@@ -181,7 +181,7 @@
                                         </div>
                                         <div class="overflow-hidden">
                                             <h4 class="text-sm font-bold text-white truncate font-brand-display" x-text="lastResult.member ? lastResult.member.name : 'Unknown Member'"></h4>
-                                            <p class="text-xs text-[#94A3B8] font-mono" x-text="lastResult.member && lastResult.member.student_number ? 'Student ID: ' + lastResult.member.student_number : ''"></p>
+                                            <p class="text-xs text-[#94A3B8] font-mono" x-text="lastResult.member && lastResult.member.student_number ? 'ID: ' + lastResult.member.student_number : ''"></p>
                                         </div>
                                     </div>
 

@@ -14,9 +14,7 @@
 
         <div class="max-w-md mx-auto w-full flex items-center justify-between pb-4 border-b border-[#334155]">
             <div class="flex items-center gap-3">
-                <div class="w-10 h-10 rounded-2xl bg-burgundy-gradient border border-[#8F3033]/60 flex items-center justify-center font-extrabold text-white text-base shadow-lg shadow-[#560E0F]/30 font-brand-display">
-                    {{ strtoupper(substr($user->name, 0, 1)) }}
-                </div>
+                <x-user-avatar :user="$user" size="lg" class="shadow-lg shadow-[#560E0F]/30 border border-[#8F3033]/60" />
                 <div>
                     <h1 class="text-base font-extrabold text-white leading-tight flex items-center gap-2 font-brand-display">
                         <span>{{ $user->display_name }}</span>
@@ -30,7 +28,9 @@
                             </span>
                         @endif
                     </h1>
-                    <p class="text-xs text-[#94A3B8] font-mono">Student ID: {{ $user->student_number ?? 'N/A' }}</p>
+                    <p class="text-xs text-[#94A3B8] font-mono">
+                        {{ $user->member_id ? "Member ID: {$user->member_id}" : (auth()->user()?->isSuperAdmin() ? "Student ID: " . ($user->student_number ?? 'N/A') : "Account: {$user->email}") }}
+                    </p>
                 </div>
             </div>
 

@@ -62,9 +62,7 @@
                         <div class="card p-5 {{ $msg->is_internal_note ? 'bg-amber-950/20 border-amber-500/40' : ($isSelf ? 'bg-[#172033] border-[#334155]' : 'bg-[#0B1120] border-[#8F3033]/50') }}">
                             <div class="flex items-center justify-between mb-3">
                                 <div class="flex items-center gap-2">
-                                    <div class="w-7 h-7 rounded-lg {{ $isSelf ? 'bg-[#560E0F]' : 'bg-slate-800' }} flex items-center justify-center text-xs font-bold text-white">
-                                        {{ substr($msg->user->name, 0, 1) }}
-                                    </div>
+                                    <x-user-avatar :user="$msg->user" size="sm" class="rounded-lg {{ $isSelf ? 'border-[#8F3033]/60' : 'border-slate-700' }}" />
                                     <div>
                                         <p class="text-xs font-bold text-white font-brand-display">
                                             {{ $msg->user->name }}

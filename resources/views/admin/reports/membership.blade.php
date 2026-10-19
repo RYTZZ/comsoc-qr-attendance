@@ -64,7 +64,7 @@
                 @forelse($data as $mem)
                     <tr class="hover:bg-slate-800/30 transition">
                         <td class="py-3 px-4 font-semibold text-white">{{ $mem->student?->display_name ?? '—' }}</td>
-                        <td class="py-3 px-4 text-slate-300 font-mono">{{ $mem->student?->student_number ?? '—' }}</td>
+                        <td class="py-3 px-4 text-slate-300 font-mono">{{ auth()->user()?->isSuperAdmin() ? ($mem->student?->student_number ?? '—') : ($mem->student?->member_id ?? $mem->member_id ?? '—') }}</td>
                         <td class="py-3 px-4 text-slate-300">
                             @if($mem->student)
                                 <span class="text-white font-medium">{{ $mem->student->year_level ?? '—' }}</span>
