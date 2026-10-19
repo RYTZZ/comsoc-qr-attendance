@@ -393,6 +393,7 @@ class ProfileTest extends TestCase
             ])
             ->assertRedirect('/profile');
 
+        $this->flushSession();
         auth()->logout();
 
         $this->post('/login', [
@@ -402,7 +403,7 @@ class ProfileTest extends TestCase
 
         $user = User::where('email', 'persisted@example.com')->firstOrFail();
 
-        $viewResponse = $this->actingAs($user)->get('/profile');
+        $viewResponse = $this->get('/profile');
         $viewResponse->assertOk();
         $viewResponse->assertSee('Persisted User');
         $viewResponse->assertSee('Persisted Bio');

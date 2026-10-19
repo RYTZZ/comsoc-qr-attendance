@@ -34,10 +34,10 @@
                     <div>
                         <h2 class="text-base font-bold text-white font-brand-display flex items-center gap-2">
                             <i data-lucide="shield-check" class="w-5 h-5 text-[#df747a]"></i>
-                            <span>Recognized Devices & Active Sessions</span>
+                            <span>Single Active Device Policy & Session Security</span>
                         </h2>
                         <p class="text-xs text-[#94A3B8] mt-1">
-                            Your ComSoc Hub account supports concurrent logins across multiple devices. You can review your active sessions below and revoke any unrecognized access.
+                            ComSoc Hub enforces a strict single active session security policy: when your account signs in on a new device, it becomes the sole authorized session and all prior sessions are revoked immediately.
                         </p>
                     </div>
                     <span class="px-3 py-1 rounded-full text-xs font-semibold bg-[#560E0F]/40 text-[#df747a] border border-[#8F3033]/50 w-fit">

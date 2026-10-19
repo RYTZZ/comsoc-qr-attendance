@@ -76,7 +76,8 @@ class SessionSecurityService
     }
 
     /**
-     * Track a successful login and check if it represents a newly detected client.
+     * Track a successful login and enforce single active device session.
+     * Atomically registers new session as active and invalidates any prior sessions.
      */
     public function handleLogin(User $user, Request $request): UserSession
     {
@@ -86,37 +87,60 @@ class SessionSecurityService
         $clientInfo = self::parseUserAgent($userAgent);
         $ip = $request->ip();
 
-        // Check user's history of devices
-        $hasAnyPriorSessions = UserSession::where('user_id', $user->id)->exists();
-        $isRecognizedDevice = UserSession::where('user_id', $user->id)
-            ->where('device_signature', $clientInfo['device_signature'])
-            ->exists();
+        return DB::transaction(function () use ($user, $request, $sessionId, $sessionIdHash, $userAgent, $clientInfo, $ip) {
+            // Pessimistic lock on the user to prevent concurrent login race conditions
+            $lockedUser = User::where('id', $user->id)->lockForUpdate()->first();
 
-        // Upsert/Create the current session record
-        $userSession = UserSession::updateOrCreate(
-            ['session_id_hash' => $sessionIdHash],
-            [
-                'user_id' => $user->id,
-                'device_type' => $clientInfo['device_type'],
-                'platform' => $clientInfo['platform'],
-                'browser' => $clientInfo['browser'],
-                'device_signature' => $clientInfo['device_signature'],
-                'ip_address' => $ip,
-                'user_agent' => Str::limit($userAgent, 500, ''),
-                'first_authenticated_at' => now(),
-                'last_active_at' => now(),
-                'revoked_at' => null,
-            ]
-        );
+            $hasAnyPriorSessions = UserSession::where('user_id', $lockedUser->id)->exists();
+            $isRecognizedDevice = UserSession::where('user_id', $lockedUser->id)
+                ->where('device_signature', $clientInfo['device_signature'])
+                ->exists();
 
-        // Alert Policy:
-        // Baseline: If this is the user's very first session, record as baseline without an alert.
-        // Subsequent: If the user has prior sessions and this device signature is NOT recognized, send an alert!
-        if ($hasAnyPriorSessions && !$isRecognizedDevice) {
-            $this->createSecurityAlert($user, $userSession);
-        }
+            // 1. Invalidate all prior active UserSessions for this user
+            UserSession::where('user_id', $lockedUser->id)
+                ->whereNull('revoked_at')
+                ->where('session_id_hash', '!=', $sessionIdHash)
+                ->update(['revoked_at' => now()]);
 
-        return $userSession;
+            // 2. Delete all prior sessions for this user from Laravel's database session table
+            if (\Illuminate\Support\Facades\Schema::hasTable('sessions')) {
+                DB::table('sessions')
+                    ->where('user_id', $lockedUser->id)
+                    ->where('id', '!=', $sessionId)
+                    ->delete();
+            }
+
+            // 3. Atomically update user's authoritative active session hash
+            $lockedUser->update([
+                'active_session_hash' => $sessionIdHash,
+            ]);
+            $user->active_session_hash = $sessionIdHash;
+
+            // 4. Upsert/Create the current session record
+            $userSession = UserSession::updateOrCreate(
+                ['session_id_hash' => $sessionIdHash],
+                [
+                    'user_id' => $lockedUser->id,
+                    'device_type' => $clientInfo['device_type'],
+                    'platform' => $clientInfo['platform'],
+                    'browser' => $clientInfo['browser'],
+                    'device_signature' => $clientInfo['device_signature'],
+                    'ip_address' => $ip,
+                    'user_agent' => Str::limit($userAgent, 500, ''),
+                    'first_authenticated_at' => now(),
+                    'last_active_at' => now(),
+                    'revoked_at' => null,
+                ]
+            );
+
+            // Alert Policy:
+            // If the user has prior sessions and this device signature is NOT recognized, send an alert!
+            if ($hasAnyPriorSessions && !$isRecognizedDevice) {
+                $this->createSecurityAlert($lockedUser, $userSession);
+            }
+
+            return $userSession;
+        });
     }
 
     /**
@@ -166,6 +190,11 @@ class SessionSecurityService
         $session->update([
             'revoked_at' => now(),
         ]);
+
+        // If revoking the active session, clear user's active_session_hash
+        if ($user->active_session_hash === $session->session_id_hash) {
+            $user->update(['active_session_hash' => null]);
+        }
 
         // 2. If sessions table exists, remove the matching session
         if (\Illuminate\Support\Facades\Schema::hasTable('sessions')) {

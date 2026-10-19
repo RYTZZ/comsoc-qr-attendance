@@ -31,7 +31,8 @@ class AuthenticatedSessionController extends Controller
 
         $user->update(['last_activity_at' => now()]);
 
-        app(\App\Services\SessionSecurityService::class)->handleLogin($user, $request);
+        $userSession = app(\App\Services\SessionSecurityService::class)->handleLogin($user, $request);
+        $request->session()->put('current_session_hash', $userSession->session_id_hash);
 
         if ($user->role === 'kiosk' && $user->kiosk) {
             $user->kiosk->update(['last_activity_at' => now()]);
@@ -66,6 +67,26 @@ class AuthenticatedSessionController extends Controller
                 'name' => $user->name,
                 'role' => $user->role,
             ]);
+
+            $sessionId = $request->session()->getId();
+            $sessionIdHash = hash('sha256', $sessionId);
+            $storedSessionHash = $request->session()->get('current_session_hash');
+
+            // If the logging-out session is the user's currently registered active session, clear it.
+            // If this was an already-displaced session logging out, do NOT clear the new device's active session!
+            if ($user->active_session_hash === $sessionIdHash || ($storedSessionHash && $user->active_session_hash === $storedSessionHash)) {
+                $user->update(['active_session_hash' => null]);
+            }
+
+            // Mark this specific session revoked
+            \App\Models\UserSession::where('user_id', $user->id)
+                ->where(function ($query) use ($sessionIdHash, $storedSessionHash) {
+                    $query->where('session_id_hash', $sessionIdHash);
+                    if ($storedSessionHash) {
+                        $query->orWhere('session_id_hash', $storedSessionHash);
+                    }
+                })
+                ->update(['revoked_at' => now()]);
         }
 
         Auth::guard('web')->logout();

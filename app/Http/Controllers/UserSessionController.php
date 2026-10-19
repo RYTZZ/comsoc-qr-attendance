@@ -33,11 +33,28 @@ class UserSessionController extends Controller
     }
 
     /**
-     * Poll for recent security notifications for the authenticated user.
+     * Poll for session validity and recent security notifications for the authenticated user.
      */
     public function pollAlerts(Request $request): JsonResponse
     {
         $user = $request->user();
+        $sessionId = $request->session()->getId();
+        $sessionIdHash = hash('sha256', $sessionId);
+
+        // Verification: Is this session active and valid?
+        $isValidSession = ($user->active_session_hash === null || $user->active_session_hash === $sessionIdHash);
+        $userSession = UserSession::where('session_id_hash', $sessionIdHash)->first();
+        if ($userSession && $userSession->isRevoked()) {
+            $isValidSession = false;
+        }
+
+        if (!$isValidSession) {
+            return response()->json([
+                'valid' => false,
+                'session_replaced' => true,
+                'message' => 'Your ComSoc Hub account has been logged in on another device. For your security, this session is no longer active.',
+            ], 401);
+        }
 
         // Get unread security alerts created in the last 24 hours
         $alerts = $user->notifications()
@@ -48,6 +65,8 @@ class UserSessionController extends Controller
             ->get();
 
         return response()->json([
+            'valid' => true,
+            'session_replaced' => false,
             'unread_alerts' => $alerts,
             'unread_count' => $user->notifications()->whereNull('read_at')->count(),
         ]);

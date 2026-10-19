@@ -72,6 +72,7 @@ class User extends Authenticatable
         'activation_token',
         'must_change_password',
         'last_activity_at',
+        'active_session_hash',
     ];
 
     protected $hidden = [
@@ -79,6 +80,7 @@ class User extends Authenticatable
         'remember_token',
         'activation_otp',
         'activation_token',
+        'active_session_hash',
     ];
 
     protected function casts(): array
