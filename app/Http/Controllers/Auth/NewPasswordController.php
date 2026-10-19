@@ -46,7 +46,15 @@ class NewPasswordController extends Controller
                 $user->forceFill([
                     'password' => Hash::make($request->password),
                     'remember_token' => Str::random(60),
+                    'active_session_hash' => null,
                 ])->save();
+
+                // Revoke any existing active device sessions for this user to enforce security policy
+                \App\Models\UserSession::where('user_id', $user->id)
+                    ->whereNull('revoked_at')
+                    ->update([
+                        'revoked_at' => now(),
+                    ]);
 
                 event(new PasswordReset($user));
             }
