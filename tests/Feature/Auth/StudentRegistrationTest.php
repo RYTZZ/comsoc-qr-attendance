@@ -23,6 +23,31 @@ class StudentRegistrationTest extends TestCase
         $response->assertDontSee('<select', false);
     }
 
+    public function test_student_signup_screen_has_predictable_responsive_grids(): void
+    {
+        $response = $this->get('/signup');
+
+        $response->assertStatus(200);
+        // Step 1: explicit responsive grid structures
+        $response->assertSee('academic-name-grid', false);
+        $response->assertSee('academic-cohort-grid', false);
+        $response->assertSee('Student ID / Student Number', false);
+        $response->assertSee('name="student_id"', false);
+        $response->assertSee('name="first_name"', false);
+        $response->assertSee('name="middle_name"', false);
+        $response->assertSee('name="last_name"', false);
+        $response->assertSee("name: 'program'", false);
+        $response->assertSee("name: 'year'", false);
+        $response->assertSee("name: 'block'", false);
+
+        // Step 2: responsive avatar selector grid and security fields
+        $response->assertSee('avatar-grid-responsive', false);
+        $response->assertSee('security-passwords-grid', false);
+        $response->assertSee('Adventurer Character Avatar options', false);
+        $response->assertSee('Felix', false);
+        $response->assertSee('Silas', false);
+    }
+
     public function test_student_can_register_with_valid_details(): void
     {
         AcademicYear::create([

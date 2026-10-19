@@ -494,4 +494,50 @@
     .safe-bottom {
         padding-bottom: env(safe-area-inset-bottom, 1rem);
     }
+
+    .academic-name-grid {
+        display: grid;
+        grid-template-columns: 1fr;
+        gap: 0.625rem;
+    }
+    @media (min-width: 640px) {
+        .academic-name-grid {
+            grid-template-columns: repeat(3, minmax(0, 1fr));
+        }
+    }
+
+    .academic-cohort-grid {
+        display: grid;
+        grid-template-columns: 1fr;
+        gap: 0.625rem;
+    }
+    @media (min-width: 640px) {
+        .academic-cohort-grid {
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+        }
+    }
+
+    .avatar-grid-responsive {
+        display: grid;
+        grid-template-columns: repeat(4, minmax(0, 1fr));
+        gap: 0.25rem;
+    }
+    @media (min-width: 640px) {
+        .avatar-grid-responsive {
+            grid-template-columns: repeat(8, minmax(0, 1fr));
+            gap: 0.25rem;
+        }
+    }
+
+    .security-passwords-grid {
+        display: grid;
+        grid-template-columns: 1fr;
+        gap: 0.625rem;
+    }
+    @media (min-width: 640px) {
+        .security-passwords-grid {
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+        }
+    }
 }
+

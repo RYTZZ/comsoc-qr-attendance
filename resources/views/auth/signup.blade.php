@@ -10,6 +10,49 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Michroma&family=Sora:wght@600;700;800&family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet">
     @vite(['resources/css/app.css', 'resources/js/app.js'])
+    <style>
+        .academic-name-grid {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 0.625rem;
+        }
+        @media (min-width: 640px) {
+            .academic-name-grid {
+                grid-template-columns: repeat(3, minmax(0, 1fr));
+            }
+        }
+        .academic-cohort-grid {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 0.625rem;
+        }
+        @media (min-width: 640px) {
+            .academic-cohort-grid {
+                grid-template-columns: repeat(2, minmax(0, 1fr));
+            }
+        }
+        .avatar-grid-responsive {
+            display: grid;
+            grid-template-columns: repeat(4, minmax(0, 1fr));
+            gap: 0.25rem;
+        }
+        @media (min-width: 640px) {
+            .avatar-grid-responsive {
+                grid-template-columns: repeat(8, minmax(0, 1fr));
+                gap: 0.25rem;
+            }
+        }
+        .security-passwords-grid {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 0.625rem;
+        }
+        @media (min-width: 640px) {
+            .security-passwords-grid {
+                grid-template-columns: repeat(2, minmax(0, 1fr));
+            }
+        }
+    </style>
 </head>
 <body class="bg-[#0B1120] min-h-screen flex flex-col justify-center items-center p-2 sm:p-3 font-sans text-slate-100 relative overflow-x-hidden overflow-y-auto selection:bg-[#560E0F] selection:text-white">
 
@@ -269,11 +312,12 @@
                     <span class="text-xs font-mono text-slate-500 hidden sm:inline">1 / 2</span>
                 </div>
 
-                <div class="grid grid-cols-1 sm:grid-cols-6 gap-2 sm:gap-2.5">
-                    <div class="sm:col-span-6">
+                <div class="space-y-2.5">
+                    <!-- Student ID / Student Number (full-width) -->
+                    <div class="w-full">
                         <div class="flex items-center justify-between mb-0.5">
-                            <label for="student_id" class="label text-xs">Student ID / Student Number <span class="text-red-400">*</span></label>
-                            <span class="text-[11px] font-mono text-slate-400" :class="studentIdDigits.length > 8 ? 'text-red-400 font-bold' : ''">
+                            <label for="student_id" class="label text-xs sm:text-sm font-semibold mb-0">Student ID / Student Number <span class="text-red-400">*</span></label>
+                            <span class="text-[11px] font-mono text-slate-400 whitespace-nowrap" :class="studentIdDigits.length > 8 ? 'text-red-400 font-bold' : ''">
                                 <span x-text="studentIdDigits.length"></span>/8 digits
                             </span>
                         </div>
@@ -284,6 +328,7 @@
                                @input="clientErrors.student_id = ''"
                                maxlength="20"
                                autocomplete="off"
+                               placeholder="e.g. 21-00123"
                                aria-describedby="student-id-helper student-id-error"
                                class="input py-2 text-xs sm:text-sm @error('student_id') border-red-500 @enderror"
                                :class="clientErrors.student_id ? 'border-red-500' : ''"
@@ -298,59 +343,66 @@
                         @enderror
                     </div>
 
-                    <div class="sm:col-span-2">
-                        <label for="first_name" class="label text-xs mb-0.5">First Name <span class="text-red-400">*</span></label>
-                        <input type="text"
-                               name="first_name"
-                               id="first_name"
-                               x-model="firstName"
-                               @input="clientErrors.first_name = ''"
-                               autocomplete="given-name"
-                               class="input py-2 text-xs sm:text-sm @error('first_name') border-red-500 @enderror"
-                               :class="clientErrors.first_name ? 'border-red-500' : ''"
-                               required>
-                        <template x-if="clientErrors.first_name">
-                            <p class="text-xs text-red-400 mt-0.5 font-medium" x-text="clientErrors.first_name"></p>
-                        </template>
-                        @error('first_name')
-                            <p class="text-xs text-red-400 mt-0.5 font-medium">{{ $message }}</p>
-                        @enderror
+                    <!-- Identity fields: First Name, Middle Name, Last Name in 3-column desktop grid -->
+                    <div class="academic-name-grid">
+                        <div>
+                            <label for="first_name" class="label text-xs sm:text-sm font-semibold mb-0.5">First Name <span class="text-red-400">*</span></label>
+                            <input type="text"
+                                   name="first_name"
+                                   id="first_name"
+                                   x-model="firstName"
+                                   @input="clientErrors.first_name = ''"
+                                   autocomplete="given-name"
+                                   placeholder="First name"
+                                   class="input py-2 text-xs sm:text-sm @error('first_name') border-red-500 @enderror"
+                                   :class="clientErrors.first_name ? 'border-red-500' : ''"
+                                   required>
+                            <template x-if="clientErrors.first_name">
+                                <p class="text-xs text-red-400 mt-0.5 font-medium" x-text="clientErrors.first_name"></p>
+                            </template>
+                            @error('first_name')
+                                <p class="text-xs text-red-400 mt-0.5 font-medium">{{ $message }}</p>
+                            @enderror
+                        </div>
+
+                        <div>
+                            <label for="middle_name" class="label text-xs sm:text-sm font-semibold mb-0.5">Middle Name <span class="text-slate-500 font-normal">(Optional)</span></label>
+                            <input type="text"
+                                   name="middle_name"
+                                   id="middle_name"
+                                   x-model="middleName"
+                                   autocomplete="additional-name"
+                                   placeholder="Middle name"
+                                   class="input py-2 text-xs sm:text-sm @error('middle_name') border-red-500 @enderror">
+                            @error('middle_name')
+                                <p class="text-xs text-red-400 mt-0.5 font-medium">{{ $message }}</p>
+                            @enderror
+                        </div>
+
+                        <div>
+                            <label for="last_name" class="label text-xs sm:text-sm font-semibold mb-0.5">Last Name <span class="text-red-400">*</span></label>
+                            <input type="text"
+                                   name="last_name"
+                                   id="last_name"
+                                   x-model="lastName"
+                                   @input="clientErrors.last_name = ''"
+                                   autocomplete="family-name"
+                                   placeholder="Last name"
+                                   class="input py-2 text-xs sm:text-sm @error('last_name') border-red-500 @enderror"
+                                   :class="clientErrors.last_name ? 'border-red-500' : ''"
+                                   required>
+                            <template x-if="clientErrors.last_name">
+                                <p class="text-xs text-red-400 mt-0.5 font-medium" x-text="clientErrors.last_name"></p>
+                            </template>
+                            @error('last_name')
+                                <p class="text-xs text-red-400 mt-0.5 font-medium">{{ $message }}</p>
+                            @enderror
+                        </div>
                     </div>
 
-                    <div class="sm:col-span-2">
-                        <label for="middle_name" class="label text-xs mb-0.5">Middle Name <span class="text-slate-500 font-normal">(Optional)</span></label>
-                        <input type="text"
-                               name="middle_name"
-                               id="middle_name"
-                               x-model="middleName"
-                               autocomplete="additional-name"
-                               class="input py-2 text-xs sm:text-sm @error('middle_name') border-red-500 @enderror">
-                        @error('middle_name')
-                            <p class="text-xs text-red-400 mt-0.5 font-medium">{{ $message }}</p>
-                        @enderror
-                    </div>
-
-                    <div class="sm:col-span-2">
-                        <label for="last_name" class="label text-xs mb-0.5">Last Name <span class="text-red-400">*</span></label>
-                        <input type="text"
-                               name="last_name"
-                               id="last_name"
-                               x-model="lastName"
-                               @input="clientErrors.last_name = ''"
-                               autocomplete="family-name"
-                               class="input py-2 text-xs sm:text-sm @error('last_name') border-red-500 @enderror"
-                               :class="clientErrors.last_name ? 'border-red-500' : ''"
-                               required>
-                        <template x-if="clientErrors.last_name">
-                            <p class="text-xs text-red-400 mt-0.5 font-medium" x-text="clientErrors.last_name"></p>
-                        </template>
-                        @error('last_name')
-                            <p class="text-xs text-red-400 mt-0.5 font-medium">{{ $message }}</p>
-                        @enderror
-                    </div>
-
-                    <div class="sm:col-span-6">
-                        <label for="program" class="label text-xs mb-0.5">Academic Program <span class="text-red-400">*</span></label>
+                    <!-- Academic Program (full-width) -->
+                    <div class="w-full">
+                        <label for="program" class="label text-xs sm:text-sm font-semibold mb-0.5">Academic Program <span class="text-red-400">*</span></label>
                         <x-custom-dropdown
                             name="program"
                             id="program"
@@ -367,40 +419,43 @@
                         @enderror
                     </div>
 
-                    <div class="sm:col-span-3">
-                        <label for="year" class="label text-xs mb-0.5">Year Level <span class="text-red-400">*</span></label>
-                        <x-custom-dropdown
-                            name="year"
-                            id="year"
-                            :options="$years"
-                            :value="old('year')"
-                            placeholder="Select Year Level"
-                            required="true"
-                            buttonClass="py-2 text-xs sm:text-sm bg-[#12141c]" />
-                        <template x-if="clientErrors.year">
-                            <p class="text-xs text-red-400 mt-0.5 font-medium" x-text="clientErrors.year"></p>
-                        </template>
-                        @error('year')
-                            <p class="text-xs text-red-400 mt-0.5 font-medium">{{ $message }}</p>
-                        @enderror
-                    </div>
+                    <!-- Cohort fields: Year Level and Block / Section in 2-column desktop grid -->
+                    <div class="academic-cohort-grid">
+                        <div>
+                            <label for="year" class="label text-xs sm:text-sm font-semibold mb-0.5">Year Level <span class="text-red-400">*</span></label>
+                            <x-custom-dropdown
+                                name="year"
+                                id="year"
+                                :options="$years"
+                                :value="old('year')"
+                                placeholder="Select Year Level"
+                                required="true"
+                                buttonClass="py-2 text-xs sm:text-sm bg-[#12141c]" />
+                            <template x-if="clientErrors.year">
+                                <p class="text-xs text-red-400 mt-0.5 font-medium" x-text="clientErrors.year"></p>
+                            </template>
+                            @error('year')
+                                <p class="text-xs text-red-400 mt-0.5 font-medium">{{ $message }}</p>
+                            @enderror
+                        </div>
 
-                    <div class="sm:col-span-3">
-                        <label for="block" class="label text-xs mb-0.5">Block / Section <span class="text-red-400">*</span></label>
-                        <x-custom-dropdown
-                            name="block"
-                            id="block"
-                            :options="$blocks"
-                            :value="old('block')"
-                            placeholder="Select Block"
-                            required="true"
-                            buttonClass="py-2 text-xs sm:text-sm bg-[#12141c]" />
-                        <template x-if="clientErrors.block">
-                            <p class="text-xs text-red-400 mt-0.5 font-medium" x-text="clientErrors.block"></p>
-                        </template>
-                        @error('block')
-                            <p class="text-xs text-red-400 mt-0.5 font-medium">{{ $message }}</p>
-                        @enderror
+                        <div>
+                            <label for="block" class="label text-xs sm:text-sm font-semibold mb-0.5">Block / Section <span class="text-red-400">*</span></label>
+                            <x-custom-dropdown
+                                name="block"
+                                id="block"
+                                :options="$blocks"
+                                :value="old('block')"
+                                placeholder="Select Block"
+                                required="true"
+                                buttonClass="py-2 text-xs sm:text-sm bg-[#12141c]" />
+                            <template x-if="clientErrors.block">
+                                <p class="text-xs text-red-400 mt-0.5 font-medium" x-text="clientErrors.block"></p>
+                            </template>
+                            @error('block')
+                                <p class="text-xs text-red-400 mt-0.5 font-medium">{{ $message }}</p>
+                            @enderror
+                        </div>
                     </div>
                 </div>
 
@@ -441,8 +496,8 @@
                         <input type="hidden" name="avatar_style" :value="avatarStyle">
                         <input type="hidden" name="avatar_seed" :value="avatarSeed">
 
-                        <div class="max-h-[120px] sm:max-h-[135px] overflow-y-auto pr-1 -mr-1 scrollbar-thin">
-                            <div class="grid grid-cols-4 sm:grid-cols-8 gap-1"
+                        <div class="max-h-[130px] sm:max-h-[145px] overflow-y-auto pr-1 -mr-1 scrollbar-thin">
+                            <div class="avatar-grid-responsive grid grid-cols-4 sm:grid-cols-8 gap-1"
                                  role="radiogroup"
                                  aria-label="Adventurer Character Avatar options">
                                 @foreach($avatarPresets as $preset)
@@ -493,7 +548,7 @@
                         @enderror
                     </div>
 
-                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-2 sm:gap-2.5">
+                    <div class="security-passwords-grid grid grid-cols-1 sm:grid-cols-2 gap-2 sm:gap-2.5">
                         <div>
                             <label for="password" class="label text-xs mb-0.5">Password <span class="text-red-400">*</span></label>
                             <div class="relative">
