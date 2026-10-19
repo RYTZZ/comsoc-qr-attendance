@@ -441,29 +441,36 @@
                         <input type="hidden" name="avatar_style" :value="avatarStyle">
                         <input type="hidden" name="avatar_seed" :value="avatarSeed">
 
-                        <div class="grid grid-cols-4 sm:grid-cols-8 gap-2">
-                            @foreach($avatarPresets as $preset)
-                            <button type="button"
-                                    @click="avatarSeed = '{{ $preset['seed'] }}'"
-                                    class="group relative flex flex-col items-center p-1 rounded-lg border transition-all duration-150 focus:outline-none"
-                                    :class="avatarSeed === '{{ $preset['seed'] }}'
-                                        ? 'bg-[#560E0F]/40 border-[#df747a] ring-2 ring-[#8F3033] shadow scale-105'
-                                        : 'bg-slate-900 border-slate-800 hover:border-slate-700 hover:bg-slate-800'">
-                                <div class="w-9 h-9 rounded overflow-hidden bg-slate-950 flex items-center justify-center">
-                                    <img src="{{ $preset['url'] }}" alt="{{ $preset['name'] }}" class="w-full h-full object-cover group-hover:scale-110 transition-transform" loading="lazy" />
-                                </div>
-                                <span class="text-[8px] font-semibold mt-0.5 truncate max-w-full"
-                                      :class="avatarSeed === '{{ $preset['seed'] }}' ? 'text-white font-bold' : 'text-slate-400'">
-                                    {{ $preset['name'] }}
-                                </span>
-                                <div x-show="avatarSeed === '{{ $preset['seed'] }}'"
-                                     class="absolute -top-1 -right-1 w-3.5 h-3.5 rounded-full bg-[#560E0F] border border-[#df747a] text-white flex items-center justify-center shadow">
-                                    <svg class="w-2 h-2 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"/>
-                                    </svg>
-                                </div>
-                            </button>
-                            @endforeach
+                        <div class="max-h-[360px] overflow-y-auto pr-1 -mr-1 scrollbar-thin">
+                            <div class="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-6 lg:grid-cols-8 gap-2"
+                                 role="radiogroup"
+                                 aria-label="Adventurer Character Avatar options">
+                                @foreach($avatarPresets as $preset)
+                                <button type="button"
+                                        role="radio"
+                                        :aria-checked="avatarSeed === '{{ $preset['seed'] }}'"
+                                        aria-label="{{ $preset['name'] }}"
+                                        @click="avatarSeed = '{{ $preset['seed'] }}'"
+                                        class="group relative flex flex-col items-center justify-center p-1.5 rounded-xl border transition-all duration-150 focus:outline-none focus:ring-2 focus:ring-[#8F3033] min-h-[88px]"
+                                        :class="avatarSeed === '{{ $preset['seed'] }}'
+                                            ? 'bg-[#560E0F]/30 border-[#df747a] ring-1 ring-[#df747a]/60 shadow'
+                                            : 'bg-slate-900 border-slate-800 hover:border-slate-700 hover:bg-slate-800'">
+                                    <div class="w-10 h-10 rounded-lg overflow-hidden bg-slate-950 flex items-center justify-center border border-slate-800/80 p-0.5">
+                                        <img src="{{ $preset['url'] }}" alt="" aria-hidden="true" class="w-full h-full object-cover group-hover:scale-105 transition-transform" loading="lazy" />
+                                    </div>
+                                    <span class="text-[9px] sm:text-[10px] font-semibold mt-1 truncate max-w-full text-center"
+                                          :class="avatarSeed === '{{ $preset['seed'] }}' ? 'text-white font-bold' : 'text-slate-400 group-hover:text-slate-200'">
+                                        {{ $preset['name'] }}
+                                    </span>
+                                    <div x-show="avatarSeed === '{{ $preset['seed'] }}'"
+                                         class="absolute top-1 right-1 w-3.5 h-3.5 rounded-full bg-[#560E0F] border border-[#df747a] text-white flex items-center justify-center shadow">
+                                        <svg class="w-2 h-2 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"/>
+                                        </svg>
+                                    </div>
+                                </button>
+                                @endforeach
+                            </div>
                         </div>
                     </div>
 

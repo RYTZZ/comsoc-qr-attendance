@@ -27,16 +27,19 @@ class MemberDirectoryService
         $query = User::with(['student', 'profile', 'skills'])
             ->whereIn('role', ['student', 'member'])
             ->whereHas('profile', function (Builder $pq) use ($isMember) {
-                $pq->where(function ($sub) use ($isMember) {
-                    $sub->where('visibility', 'public')
-                        ->orWhere(function ($pqs) {
-                            $pqs->whereNull('visibility')->where('is_public', true);
-                        });
+                $pq->where('is_public', '!=', false)
+                    ->where('is_public', '!=', 0)
+                    ->where(function ($sub) use ($isMember) {
+                        $sub->where('visibility', 'public')
+                            ->orWhere(function ($legacy) {
+                                $legacy->whereNull('visibility')->where('is_public', true);
+                            });
 
-                    if ($isMember) {
-                        $sub->orWhere('visibility', 'members_only');
-                    }
-                });
+                        if ($isMember) {
+                            $sub->orWhere('visibility', 'members_only');
+                        }
+                    })
+                    ->where('visibility', '!=', 'private');
             });
 
         if ($search) {

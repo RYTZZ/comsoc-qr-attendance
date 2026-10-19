@@ -78,7 +78,16 @@ class MemberDirectoryController extends Controller
         $isMember = $viewer !== null && in_array($viewer->role, ['student', 'member', 'staff', 'admin', 'super_admin', 'president', 'executive_secretary', 'event_staff']);
 
         $profile = $user->profile;
-        $visibility = $profile?->visibility ?? ($profile?->is_public ? 'public' : 'private');
+        $visibility = 'public';
+        if ($profile) {
+            if ($profile->visibility === 'private' || $profile->visibility === 'members_only') {
+                $visibility = $profile->visibility;
+            } elseif (!$profile->is_public) {
+                $visibility = 'private';
+            } elseif ($profile->visibility) {
+                $visibility = $profile->visibility;
+            }
+        }
 
         // Check visibility permissions
         if (!$isOwner && !$isSuperAdmin) {

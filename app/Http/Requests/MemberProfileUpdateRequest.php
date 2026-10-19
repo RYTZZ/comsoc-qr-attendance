@@ -33,7 +33,14 @@ class MemberProfileUpdateRequest extends FormRequest
             'avatar_seed' => ['nullable', 'string', 'max:50'],
             'github_url' => ['nullable', 'url', 'max:255'],
             'linkedin_url' => ['nullable', 'url', 'max:255'],
-            'interests' => ['nullable'],
+            'interests' => [
+                'nullable',
+                function ($attribute, $value, $fail) {
+                    if (is_string($value) && mb_strlen($value) > 500) {
+                        $fail('The interests field must not be greater than 500 characters.');
+                    }
+                },
+            ],
             'visibility' => ['nullable', 'string', 'in:public,members_only,private'],
             'is_public' => ['nullable', 'boolean'],
             'skills' => ['nullable', 'array'],

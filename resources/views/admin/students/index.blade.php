@@ -171,7 +171,7 @@
                 $activeQr = $membership?->activeQrCode;
             @endphp
             <tr>
-                <td class="font-mono text-sm">{{ auth()->user()?->isSuperAdmin() ? $student->student_number : ($student->user?->member_id ?? 'RESTRICTED') }}</td>
+                <td class="font-mono text-sm">{{ (auth()->user()?->isSuperAdmin() || auth()->user()?->isAdmin()) ? $student->student_number : ($student->user?->member_id ?? 'RESTRICTED') }}</td>
                 <td class="font-medium text-white">{{ $student->full_name }}</td>
                 <td>
                     <div class="flex flex-col">

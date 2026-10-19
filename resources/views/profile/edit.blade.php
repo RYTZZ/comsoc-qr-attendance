@@ -103,27 +103,35 @@
                                 <input type="hidden" name="avatar_style" :value="style">
                                 <input type="hidden" name="avatar_seed" :value="selectedSeed">
 
-                                <div class="grid grid-cols-4 sm:grid-cols-8 gap-2.5">
-                                    @foreach($avatarPresets as $preset)
-                                    <button type="button"
-                                            @click="selectedSeed = '{{ $preset['seed'] }}'"
-                                            class="group relative flex flex-col items-center p-1.5 rounded-xl border transition-all duration-150 focus:outline-none"
-                                            :class="selectedSeed === '{{ $preset['seed'] }}'
-                                                ? 'bg-[#560E0F]/40 border-[#df747a] ring-2 ring-[#8F3033] shadow-lg scale-105'
-                                                : 'bg-[#172033] border-[#334155] hover:border-slate-500 hover:bg-[#1E293B]'">
-                                        <div class="w-10 h-10 rounded-lg overflow-hidden bg-[#0B1120] flex items-center justify-center">
-                                            <img src="{{ $preset['url'] }}" alt="{{ $preset['name'] }}" class="w-full h-full object-cover transition-transform group-hover:scale-110" loading="lazy" />
-                                        </div>
-                                        <span class="text-[9px] font-semibold mt-1 truncate max-w-full"
-                                              :class="selectedSeed === '{{ $preset['seed'] }}' ? 'text-white font-bold' : 'text-slate-400 group-hover:text-slate-200'">
-                                            {{ $preset['name'] }}
-                                        </span>
-                                        <div x-show="selectedSeed === '{{ $preset['seed'] }}'"
-                                             class="absolute -top-1.5 -right-1.5 w-4 h-4 rounded-full bg-[#560E0F] border border-[#df747a] text-white flex items-center justify-center shadow">
-                                            <i data-lucide="check" class="w-2.5 h-2.5 text-white stroke-[3]"></i>
-                                        </div>
-                                    </button>
-                                    @endforeach
+                                <!-- Character Grid Container -->
+                                <div class="max-h-[380px] sm:max-h-[420px] overflow-y-auto pr-1 -mr-1 scrollbar-thin">
+                                    <div class="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-6 lg:grid-cols-8 gap-2.5 sm:gap-3"
+                                         role="radiogroup"
+                                         aria-label="Adventurer Character Avatar options">
+                                        @foreach($avatarPresets as $preset)
+                                        <button type="button"
+                                                role="radio"
+                                                :aria-checked="selectedSeed === '{{ $preset['seed'] }}'"
+                                                aria-label="{{ $preset['name'] }}"
+                                                @click="selectedSeed = '{{ $preset['seed'] }}'"
+                                                class="group relative flex flex-col items-center justify-center p-2 rounded-xl border transition-all duration-150 focus:outline-none focus:ring-2 focus:ring-[#8F3033] focus:ring-offset-1 focus:ring-offset-[#0B1120] cursor-pointer min-h-[92px] sm:min-h-[100px]"
+                                                :class="selectedSeed === '{{ $preset['seed'] }}'
+                                                    ? 'bg-[#560E0F]/30 border-[#df747a] ring-1 ring-[#df747a]/60 shadow-md'
+                                                    : 'bg-[#172033] border-[#334155] hover:border-slate-500 hover:bg-[#1E293B]'">
+                                            <div class="w-11 h-11 sm:w-12 sm:h-12 rounded-xl overflow-hidden bg-[#0B1120] border border-[#334155] p-0.5 flex items-center justify-center shrink-0">
+                                                <img src="{{ $preset['url'] }}" alt="" aria-hidden="true" class="w-full h-full object-cover transition-transform group-hover:scale-105" loading="lazy" />
+                                            </div>
+                                            <span class="text-[10px] sm:text-[11px] font-semibold mt-1.5 truncate max-w-full text-center tracking-tight"
+                                                  :class="selectedSeed === '{{ $preset['seed'] }}' ? 'text-white font-bold' : 'text-slate-400 group-hover:text-slate-200'">
+                                                {{ $preset['name'] }}
+                                            </span>
+                                            <div x-show="selectedSeed === '{{ $preset['seed'] }}'"
+                                                 class="absolute top-1.5 right-1.5 w-4 h-4 rounded-full bg-[#560E0F] border border-[#df747a] text-white flex items-center justify-center shadow">
+                                                <i data-lucide="check" class="w-2.5 h-2.5 text-white stroke-[3]"></i>
+                                            </div>
+                                        </button>
+                                        @endforeach
+                                    </div>
                                 </div>
                                 <x-input-error class="mt-1" :messages="$errors->get('avatar_seed')" />
                                 <x-input-error class="mt-1" :messages="$errors->get('avatar_style')" />
