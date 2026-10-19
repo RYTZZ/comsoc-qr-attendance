@@ -38,7 +38,8 @@ class EventController extends Controller
     public function create(): View
     {
         $academicYears = AcademicYear::orderByDesc('year_start')->get();
-        return view('admin.events.create', compact('academicYears'));
+        $evaluationTemplates = \App\Models\EvaluationTemplate::where('is_active', true)->with('questions')->get();
+        return view('admin.events.create', compact('academicYears', 'evaluationTemplates'));
     }
 
     public function store(Request $request): RedirectResponse
@@ -63,6 +64,13 @@ class EventController extends Controller
 
         $event = Event::create($data);
 
+        if (!empty($data['evaluation_template_id'])) {
+            $template = \App\Models\EvaluationTemplate::find($data['evaluation_template_id']);
+            if ($template) {
+                app(\App\Services\EventEvaluationService::class)->snapshotEventTemplate($event, $template);
+            }
+        }
+
         AuditLogger::log('event.created', $event, [], $event->toArray());
 
         if ($request->filled('sessions') && is_array($request->sessions)) {
@@ -86,9 +94,10 @@ class EventController extends Controller
 
     public function configure(Event $event): View
     {
-        $event->load(['academicYear', 'attendanceSessions', 'snackSessions.inventories', 'eventRegistrations']);
+        $event->load(['academicYear', 'attendanceSessions', 'snackSessions.inventories', 'eventRegistrations', 'evaluationTemplate.questions']);
         $academicYears = AcademicYear::orderByDesc('year_start')->get();
-        return view('admin.events.configure', compact('event', 'academicYears'));
+        $evaluationTemplates = \App\Models\EvaluationTemplate::where('is_active', true)->with('questions')->get();
+        return view('admin.events.configure', compact('event', 'academicYears', 'evaluationTemplates'));
     }
 
     public function saveConfiguration(Request $request, Event $event): RedirectResponse
@@ -120,6 +129,16 @@ class EventController extends Controller
         $data['tshirt_required'] = $data['tshirt_enabled'] && $request->boolean('tshirt_required');
         $data['dietary_enabled'] = $request->boolean('dietary_enabled');
         $data['dietary_required'] = $data['dietary_enabled'] && $request->boolean('dietary_required');
+
+        // Handle template assignment & snapshot
+        if (!empty($data['evaluation_template_id'])) {
+            $template = \App\Models\EvaluationTemplate::find($data['evaluation_template_id']);
+            if ($template && ($event->evaluation_template_id !== $template->id || empty($event->evaluation_snapshot))) {
+                app(\App\Services\EventEvaluationService::class)->snapshotEventTemplate($event, $template);
+            }
+        } elseif (array_key_exists('evaluation_template_id', $data) && empty($data['evaluation_template_id'])) {
+            $data['evaluation_snapshot'] = null;
+        }
 
         $old = $event->toArray();
         $event->update($data);
@@ -360,6 +379,7 @@ class EventController extends Controller
             'participation_requirements' => ['nullable', 'string'],
             'reward_xp' => ['nullable', 'integer', 'min:0'],
             'reward_points' => ['nullable', 'integer', 'min:0'],
+            'evaluation_template_id' => ['nullable', 'uuid', 'exists:evaluation_templates,id'],
             'logo' => ['nullable', 'image', 'mimes:jpeg,png,jpg,webp', 'max:3072'],
             'sessions' => ['nullable', 'array'],
             'sessions.*.enabled' => ['nullable', 'boolean'],

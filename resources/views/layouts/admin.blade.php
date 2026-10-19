@@ -108,6 +108,19 @@
                 Attendance
             </a>
 
+            @if(auth()->user()->isAdmin() || auth()->user()->isSuperAdmin())
+            <a href="{{ route('admin.evaluation-templates.index') }}"
+               class="sidebar-link {{ request()->routeIs('admin.evaluation-templates.*') ? 'active' : '' }}">
+                <i data-lucide="file-question" class="sidebar-link-icon"></i>
+                Evaluation Templates
+            </a>
+            <a href="{{ route('admin.evaluations.results.index') }}"
+               class="sidebar-link {{ request()->routeIs('admin.evaluations.results.*') ? 'active' : '' }}">
+                <i data-lucide="bar-chart-2" class="sidebar-link-icon"></i>
+                Evaluation Results
+            </a>
+            @endif
+
             <a href="{{ route('admin.kiosks.index') }}"
                class="sidebar-link {{ request()->routeIs('admin.kiosks.*') ? 'active' : '' }}">
                 <i data-lucide="monitor" class="sidebar-link-icon"></i>

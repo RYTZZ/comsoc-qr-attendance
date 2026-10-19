@@ -193,6 +193,12 @@
                                                 <span x-text="'+' + lastResult.exp_awarded + ' EXP awarded to member!'"></span>
                                             </p>
                                         </template>
+                                        <template x-if="lastResult.code === 'evaluation_required'">
+                                            <div class="pt-2 mt-2 border-t border-[#334155] flex items-center justify-between">
+                                                <span class="text-amber-400 text-[11px] font-semibold">Evaluation Pending</span>
+                                                <span class="text-[10px] text-slate-400">Student must submit via dashboard then rescan</span>
+                                            </div>
+                                        </template>
                                     </div>
                                 </div>
                             </template>

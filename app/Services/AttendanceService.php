@@ -7,13 +7,15 @@ use App\Models\AttendanceSession;
 use App\Models\Event;
 use App\Models\Kiosk;
 use App\Models\User;
+use App\Services\EventEvaluationService;
 use Illuminate\Support\Facades\DB;
 
 class AttendanceService
 {
     public function __construct(
         private QrCodeService $qrService,
-        private RewardService $rewardService
+        private RewardService $rewardService,
+        private EventEvaluationService $evaluationService
     ) {}
 
     public function scan(string $token, Event $event, AttendanceSession $session, Kiosk $kiosk, User $staff): array
@@ -77,6 +79,34 @@ class AttendanceService
                     ->exists();
                 if (!$hasIn) {
                     return ['success' => false, 'message' => 'Cannot scan OUT without a prior IN record.', 'code' => 'no_in_record'];
+                }
+            }
+
+            // Enforce mandatory evaluation requirement for Afternoon OUT
+            if ($session->type === 'afternoon_out') {
+                $participantUser = null;
+                if ($participant['type'] === 'user' && !empty($participant['user'])) {
+                    $participantUser = $participant['user'];
+                } elseif ($participant['type'] === 'student' && !empty($participant['membership']?->student)) {
+                    $participantUser = User::where('student_id', $participant['membership']->student->id)->first();
+                }
+
+                if ($participantUser) {
+                    $evalCheck = $this->evaluationService->verifyEvaluationForTimeOut($event, $participantUser, $session);
+                    if (!$evalCheck['allowed']) {
+                        return [
+                            'success' => false,
+                            'message' => $evalCheck['message'],
+                            'code' => $evalCheck['code'],
+                        ];
+                    }
+                } elseif ($event->evaluation_template_id) {
+                    // Non-user student or unmapped account without user record
+                    return [
+                        'success' => false,
+                        'message' => 'Mandatory Event Evaluation Required: Please complete the event evaluation from your dashboard before scanning out.',
+                        'code' => 'evaluation_required',
+                    ];
                 }
             }
         }

@@ -10,6 +10,7 @@ use App\Models\User;
 use App\Services\AuditLogger;
 use App\Services\DynamicQrService;
 use App\Services\ExpLedgerService;
+use App\Services\EventEvaluationService;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
@@ -18,7 +19,8 @@ class EventAttendanceService
 {
     public function __construct(
         private DynamicQrService $dynamicQrService,
-        private ExpLedgerService $expLedgerService
+        private ExpLedgerService $expLedgerService,
+        private EventEvaluationService $evaluationService
     ) {}
 
     /**
@@ -124,6 +126,23 @@ class EventAttendanceService
                         'member' => [
                             'name' => $member->display_name,
                             'student_number' => $member->student_number,
+                        ],
+                    ];
+                }
+            }
+
+            // Enforce mandatory evaluation requirement for Afternoon OUT
+            if ($session->type === 'afternoon_out') {
+                $evalCheck = $this->evaluationService->verifyEvaluationForTimeOut($event, $member, $session);
+                if (!$evalCheck['allowed']) {
+                    return [
+                        'success' => false,
+                        'code' => $evalCheck['code'],
+                        'message' => $evalCheck['message'],
+                        'result_type' => $evalCheck['result_type'] ?? 'Ineligible',
+                        'member' => [
+                            'name' => $member->display_name,
+                            'student_number' => $idIdentifier,
                         ],
                     ];
                 }

@@ -833,6 +833,62 @@
         </div>
     </div>
 
+    <!-- Section 8: Mandatory Event Evaluation Before Afternoon Time-Out -->
+    <div class="card space-y-4" id="evaluation-config-section">
+        <div class="border-b border-slate-800 pb-3 flex items-center justify-between">
+            <div class="flex items-center gap-2">
+                <i data-lucide="file-question" class="w-4 h-4 text-[#df747a]"></i>
+                <h2 class="section-title text-base font-brand-display">8. Mandatory Event Evaluation</h2>
+            </div>
+            <span class="text-[11px] font-mono {{ $event->evaluation_template_id ? 'text-emerald-400 font-bold' : 'text-amber-400 font-bold' }}">
+                {{ $event->evaluation_template_id ? 'Enforcement Active' : 'Configuration Required' }}
+            </span>
+        </div>
+
+        <div class="p-4 rounded-xl bg-slate-950/80 border border-slate-800 space-y-3">
+            <p class="text-xs text-slate-300">
+                In ComSoc Hub, all event attendees are required to complete an event evaluation before they can successfully record their <strong>Afternoon Time-Out</strong> attendance.
+            </p>
+
+            <div>
+                <label for="evaluation_template_id" class="label">Assigned Evaluation Template <span class="text-red-400">*</span></label>
+                <select id="evaluation_template_id" name="evaluation_template_id" class="input text-xs">
+                    <option value="">-- Select Evaluation Template --</option>
+                    @foreach($evaluationTemplates as $tpl)
+                        <option value="{{ $tpl->id }}" {{ old('evaluation_template_id', $event->evaluation_template_id) === $tpl->id ? 'selected' : '' }}>
+                            {{ $tpl->title }} (v{{ $tpl->version }} • {{ $tpl->questions_count ?? $tpl->questions->count() }} questions)
+                        </option>
+                    @endforeach
+                </select>
+                <p class="text-[11px] text-slate-500 mt-1">
+                    An active template must be assigned. If unassigned or missing, afternoon time-out scans will fail closed for security.
+                </p>
+                @error('evaluation_template_id')<p class="text-red-400 text-xs mt-1">{{ $message }}</p>@enderror
+            </div>
+
+            @if($event->evaluationTemplate)
+                <div class="p-3.5 rounded-xl bg-[#0B1120] border border-slate-800 text-xs space-y-2">
+                    <div class="flex items-center justify-between">
+                        <span class="text-slate-400 font-semibold">Active Event Evaluation Status:</span>
+                        <a href="{{ route('admin.evaluation-templates.show', $event->evaluationTemplate) }}" target="_blank" class="text-[#df747a] hover:text-white font-semibold flex items-center gap-1">
+                            <span>Preview Template</span>
+                            <i data-lucide="external-link" class="w-3 h-3"></i>
+                        </a>
+                    </div>
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-2 text-[11px] font-mono text-slate-300">
+                        <div>Template: <span class="text-white font-bold">{{ $event->evaluationTemplate->title }}</span></div>
+                        <div>Snapshot Version: <span class="text-emerald-400 font-bold">v{{ $event->evaluation_snapshot['template_version'] ?? $event->evaluationTemplate->version }}</span></div>
+                    </div>
+                    @if(!empty($event->evaluation_snapshot['questions']))
+                    <p class="text-[11px] text-slate-400">
+                        Contains {{ count($event->evaluation_snapshot['questions']) }} immutable survey questions snapshotted for attendee evaluations.
+                    </p>
+                    @endif
+                </div>
+            @endif
+        </div>
+    </div>
+
     <div class="sticky bottom-4 z-20 p-4 rounded-xl bg-[#172033]/95 backdrop-blur-md border border-slate-700 shadow-2xl flex flex-wrap items-center justify-between gap-3">
         <div class="flex items-center gap-2">
             <span class="w-2.5 h-2.5 rounded-full" :class="isDirty ? 'bg-amber-400 animate-pulse' : 'bg-emerald-400'"></span>

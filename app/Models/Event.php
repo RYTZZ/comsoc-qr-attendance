@@ -60,6 +60,8 @@ class Event extends Model
         'exp_duration_rate',
         'late_penalty_percent',
         'exp_expiration_days',
+        'evaluation_template_id',
+        'evaluation_snapshot',
     ];
 
     protected $casts = [
@@ -81,11 +83,22 @@ class Event extends Model
         'max_participants' => 'integer',
         'reward_xp' => 'integer',
         'reward_points' => 'integer',
+        'evaluation_snapshot' => 'array',
     ];
 
     public function academicYear(): BelongsTo
     {
         return $this->belongsTo(AcademicYear::class);
+    }
+
+    public function evaluationTemplate(): BelongsTo
+    {
+        return $this->belongsTo(EvaluationTemplate::class, 'evaluation_template_id');
+    }
+
+    public function evaluations(): HasMany
+    {
+        return $this->hasMany(EventEvaluation::class);
     }
 
     public function createdBy(): BelongsTo

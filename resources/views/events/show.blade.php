@@ -201,9 +201,17 @@
                                             <span>You are Registered!</span>
                                         </div>
                                         <p class="text-[11px] text-slate-400">Your Dynamic Attendance QR Pass is active and authorized for this event.</p>
-                                        <a href="{{ route('tickets.show', $registration) }}" class="btn-primary w-full text-xs text-center py-2 block">
-                                            Open Event Dynamic QR Pass
-                                        </a>
+                                        <div class="space-y-2 pt-1">
+                                            @if($event->evaluation_template_id || !empty($event->evaluation_snapshot))
+                                                <a href="{{ route('events.evaluation.show', $event) }}" class="px-3 py-2 rounded-xl bg-amber-500/20 hover:bg-amber-500/30 border border-amber-500/40 text-amber-300 text-xs font-bold transition flex items-center justify-center gap-1.5 w-full">
+                                                    <i data-lucide="file-text" class="w-3.5 h-3.5"></i>
+                                                    <span>Complete Mandatory Evaluation</span>
+                                                </a>
+                                            @endif
+                                            <a href="{{ route('tickets.show', $registration) }}" class="btn-primary w-full text-xs text-center py-2 block">
+                                                Open Event Dynamic QR Pass
+                                            </a>
+                                        </div>
                                     </div>
                                 @elseif($registration->status === 'pending')
                                     <div class="bg-amber-500/10 border border-amber-500/30 rounded-xl p-4 text-center space-y-2">

@@ -60,6 +60,7 @@ class MemberDashboardController extends Controller
         // Section B: Upcoming events with registration & capacity data
         $upcomingEvents = Event::where('event_date', '>=', today())
             ->where('is_published', true)
+            ->with(['attendanceSessions', 'evaluationTemplate'])
             ->withCount('eventRegistrations')
             ->orderBy('event_date')
             ->take(4)
@@ -67,6 +68,10 @@ class MemberDashboardController extends Controller
 
         $myEventRegistrationIds = EventRegistration::where('user_id', $user->id)
             ->pluck('status', 'event_id')
+            ->all();
+
+        $myEvaluations = \App\Models\EventEvaluation::where('user_id', $user->id)
+            ->pluck('submitted_at', 'event_id')
             ->all();
 
         // Section C: EXP and Recent Activity
@@ -166,6 +171,7 @@ class MemberDashboardController extends Controller
             'levelProgress',
             'upcomingEvents',
             'myEventRegistrationIds',
+            'myEvaluations',
             'recentAttendance',
             'verifiedAttendanceCount',
             'activeMissions',

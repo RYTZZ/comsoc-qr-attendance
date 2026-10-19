@@ -85,6 +85,8 @@ Route::middleware(['auth', 'verified', 'require_password_change'])->group(functi
     Route::get('/events', [\App\Http\Controllers\MemberEventController::class, 'index'])->name('events.index');
     Route::get('/events/{event}', [\App\Http\Controllers\MemberEventController::class, 'show'])->name('events.show');
     Route::post('/events/{event}/join', [\App\Http\Controllers\MemberEventController::class, 'register'])->name('events.join');
+    Route::get('/events/{event}/evaluation', [\App\Http\Controllers\MemberEvaluationController::class, 'show'])->name('events.evaluation.show');
+    Route::post('/events/{event}/evaluation', [\App\Http\Controllers\MemberEvaluationController::class, 'store'])->name('events.evaluation.store');
 
     Route::get('/tickets', [\App\Http\Controllers\MemberTicketController::class, 'index'])->name('tickets.index');
     Route::get('/tickets/{ticket}', [\App\Http\Controllers\MemberTicketController::class, 'show'])->name('tickets.show');
@@ -261,6 +263,15 @@ Route::middleware(['auth', 'verified', 'require_password_change'])->group(functi
             Route::post('events/{event}/archive', [EventController::class, 'archive'])->name('events.archive');
             Route::post('events/{event}/sessions', [EventController::class, 'storeSession'])->name('events.sessions.store');
             Route::post('events/{event}/snack-sessions', [EventController::class, 'storeSnackSession'])->name('events.snack-sessions.store');
+
+            // Evaluation Templates Management
+            Route::resource('evaluation-templates', \App\Http\Controllers\Admin\EvaluationTemplateController::class);
+            Route::post('evaluation-templates/{evaluation_template}/toggle-active', [\App\Http\Controllers\Admin\EvaluationTemplateController::class, 'toggleActive'])
+                ->name('evaluation-templates.toggle-active');
+
+            // Evaluation Results & Analytics
+            Route::get('evaluations/results', [\App\Http\Controllers\Admin\EventEvaluationReportController::class, 'index'])->name('evaluations.results.index');
+            Route::get('evaluations/results/{evaluation}', [\App\Http\Controllers\Admin\EventEvaluationReportController::class, 'show'])->name('evaluations.results.show');
         });
 
         Route::resource('students', StudentController::class)->only(['index', 'show', 'update']);

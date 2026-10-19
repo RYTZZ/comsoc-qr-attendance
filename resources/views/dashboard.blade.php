@@ -241,7 +241,11 @@
                             @endphp
                             <div class="p-4 rounded-xl bg-[#0B1120]/70 border border-[#334155] hover:border-[#8F3033]/60 transition flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
                                 <div>
-                                    <div class="flex items-center gap-2 mb-1">
+                                    @php
+                                        $evalCompleted = isset($myEvaluations[$evt->id]);
+                                        $hasEvaluationConfig = $evt->evaluation_template_id || !empty($evt->evaluation_snapshot);
+                                    @endphp
+                                    <div class="flex items-center gap-2 mb-1 flex-wrap">
                                         <span class="px-2 py-0.5 rounded text-[10px] font-bold bg-burgundy-deep text-[#df747a] border border-[#8F3033]/40">
                                             {{ $evt->event_type ?: 'Activity' }}
                                         </span>
@@ -252,6 +256,19 @@
                                         <span class="px-2 py-0.5 rounded text-[10px] font-bold bg-emerald-500/20 text-emerald-400 border border-emerald-500/30">
                                             Registered ({{ ucfirst($regStatus) }})
                                         </span>
+                                        @if($hasEvaluationConfig)
+                                            @if($evalCompleted)
+                                            <span class="px-2 py-0.5 rounded text-[10px] font-bold bg-teal-500/20 text-teal-300 border border-teal-500/30 flex items-center gap-1">
+                                                <i data-lucide="check" class="w-3 h-3 text-teal-400"></i>
+                                                <span>Evaluation Completed</span>
+                                            </span>
+                                            @else
+                                            <span class="px-2 py-0.5 rounded text-[10px] font-bold bg-amber-500/20 text-amber-300 border border-amber-500/30 flex items-center gap-1">
+                                                <i data-lucide="file-text" class="w-3 h-3 text-amber-400"></i>
+                                                <span>Evaluation Required for Time-Out</span>
+                                            </span>
+                                            @endif
+                                        @endif
                                         @elseif($isFull)
                                         <span class="px-2 py-0.5 rounded text-[10px] font-bold bg-rose-500/20 text-rose-300 border border-rose-500/30">
                                             Capacity Filled
@@ -266,7 +283,19 @@
                                         @endif
                                     </p>
                                 </div>
-                                <div class="shrink-0 flex items-center gap-2">
+                                <div class="shrink-0 flex items-center gap-2 flex-wrap">
+                                    @if($isRegistered && $hasEvaluationConfig)
+                                        @if(!$evalCompleted)
+                                        <a href="{{ route('events.evaluation.show', $evt) }}" class="px-3 py-1.5 rounded-xl bg-amber-500/20 hover:bg-amber-500/30 border border-amber-500/40 text-amber-300 text-xs font-bold transition flex items-center gap-1">
+                                            <i data-lucide="edit-3" class="w-3 h-3"></i>
+                                            <span>Complete Evaluation</span>
+                                        </a>
+                                        @else
+                                        <a href="{{ route('events.evaluation.show', $evt) }}" class="px-2.5 py-1.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs font-semibold transition">
+                                            View Survey
+                                        </a>
+                                        @endif
+                                    @endif
                                     <a href="{{ route('events.show', $evt) }}" class="btn-primary text-xs py-1.5 px-3">
                                         {{ $isRegistered ? 'View Pass / Ticket' : 'View Details' }}
                                     </a>
