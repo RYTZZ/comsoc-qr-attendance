@@ -159,22 +159,18 @@
                         @enderror
                     </div>
 
-                    <!-- Remember Me & Account Assistance -->
-                    <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 pt-1 text-xs sm:text-sm">
-                        <label class="flex items-center gap-2 text-[#94A3B8] cursor-pointer select-none">
+                    <!-- Remember Me Checkbox -->
+                    <div class="flex items-center pt-1">
+                        <label class="inline-flex items-center gap-2 text-xs sm:text-sm text-[#94A3B8] hover:text-slate-300 cursor-pointer select-none transition-colors">
                             <input type="checkbox"
                                    name="remember"
-                                   class="w-4 h-4 rounded bg-[#0B1120] border-[#334155] text-[#560E0F] focus:ring-[#8F3033]">
+                                   class="w-4 h-4 rounded bg-[#0B1120] border-[#334155] text-[#560E0F] focus:ring-[#8F3033] transition">
                             <span>Remember me</span>
                         </label>
-
-                        <a href="{{ route('account.assistance') }}" class="text-[#df747a] hover:text-white transition-colors font-medium">
-                            Having trouble accessing your account? <span class="underline font-semibold">Get Help</span>
-                        </a>
                     </div>
 
                     <!-- Submit Button -->
-                    <div class="pt-3">
+                    <div class="pt-2">
                         <button type="submit"
                                 class="btn-primary w-full justify-center py-3 shadow-xl font-semibold tracking-wide flex items-center gap-2">
                             <span>Log In</span>
@@ -182,6 +178,19 @@
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"/>
                             </svg>
                         </button>
+                    </div>
+
+                    <!-- Account Assistance Help CTA -->
+                    <div class="pt-2 text-center">
+                        <p class="text-xs text-[#94A3B8]">
+                            Having trouble accessing your account?
+                            <a href="{{ route('account.assistance') }}" class="text-[#df747a] hover:text-white font-semibold underline transition-colors ml-1 inline-flex items-center gap-1">
+                                <span>Get Help</span>
+                                <svg class="w-3.5 h-3.5 inline-block opacity-80" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
+                                </svg>
+                            </a>
+                        </p>
                     </div>
                 </form>
 
