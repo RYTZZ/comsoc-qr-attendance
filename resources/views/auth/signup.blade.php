@@ -60,9 +60,9 @@
     <x-public-auth-bg />
 
     <!-- ======================================================== -->
-    <!-- LEFT BRANDING PANEL (Approx. 41% width on desktop)      -->
+    <!-- LEFT BRANDING PANEL (Approx. 41.6% width on desktop)     -->
     <!-- ======================================================== -->
-    <aside class="w-full md:w-[41%] flex flex-col items-center justify-center p-8 sm:p-12 lg:p-16 border-b md:border-b-0 md:border-r border-[#334155] select-none bg-[#0B1120]/70 backdrop-blur-sm relative z-10">
+    <aside class="auth-branding-aside w-full md:w-5/12 flex flex-col items-center justify-center p-8 sm:p-12 lg:p-16 border-b md:border-b-0 md:border-r border-[#334155] select-none bg-[#0B1120]/70 backdrop-blur-sm relative z-10 shrink-0">
         <div class="w-full max-w-sm mx-auto flex flex-col items-center text-center">
             
             <!-- 1. The official COMSOC Logo (static, preserving aspect ratio, no container box) -->
@@ -99,9 +99,9 @@
     </aside>
 
     <!-- ======================================================== -->
-    <!-- RIGHT AUTHENTICATION PANEL (Approx. 59% width on desktop)-->
+    <!-- RIGHT AUTHENTICATION PANEL (Approx. 58.3% width on desktop)-->
     <!-- ======================================================== -->
-    <main class="w-full md:w-[59%] flex-1 flex flex-col justify-start sm:justify-center items-center p-4 sm:p-8 lg:p-12 relative z-10 overflow-y-auto"
+    <main class="auth-content-main w-full md:w-7/12 flex-1 flex flex-col justify-start sm:justify-center items-center p-4 sm:p-8 lg:p-12 relative z-10 overflow-y-auto"
           x-data="{
               step: {{ $errors->hasAny(['password', 'password_confirmation', 'terms']) ? 3 : ($errors->hasAny(['username', 'avatar_seed', 'avatar_style']) ? 2 : 1) }},
               submitting: false,

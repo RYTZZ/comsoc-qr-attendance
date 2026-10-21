@@ -17,9 +17,9 @@
     <x-public-auth-bg />
 
     <!-- ======================================================== -->
-    <!-- LEFT BRANDING PANEL (Approx. 41% width on desktop)      -->
+    <!-- LEFT BRANDING PANEL (Approx. 41.6% width on desktop)     -->
     <!-- ======================================================== -->
-    <aside class="w-full md:w-[41%] flex flex-col items-center justify-center p-8 sm:p-12 lg:p-16 border-b md:border-b-0 md:border-r border-[#334155] select-none bg-[#0B1120]/70 backdrop-blur-sm relative z-10">
+    <aside class="auth-branding-aside w-full md:w-5/12 flex flex-col items-center justify-center p-8 sm:p-12 lg:p-16 border-b md:border-b-0 md:border-r border-[#334155] select-none bg-[#0B1120]/70 backdrop-blur-sm relative z-10 shrink-0">
         <div class="w-full max-w-sm mx-auto flex flex-col items-center text-center">
             
             <!-- 1. The official COMSOC Logo (static, preserving aspect ratio, no container box) -->
@@ -56,9 +56,9 @@
     </aside>
 
     <!-- ======================================================== -->
-    <!-- RIGHT AUTHENTICATION PANEL (Approx. 59% width on desktop)-->
+    <!-- RIGHT AUTHENTICATION PANEL (Approx. 58.3% width on desktop)-->
     <!-- ======================================================== -->
-    <main class="w-full md:w-[59%] flex-1 flex flex-col justify-center items-center p-6 sm:p-10 lg:p-16 relative z-10 overflow-y-auto">
+    <main class="auth-content-main w-full md:w-7/12 flex-1 flex flex-col justify-center items-center p-6 sm:p-10 lg:p-16 relative z-10 overflow-y-auto">
         <div class="w-full max-w-md mx-auto my-auto py-4 sm:py-8">
 
             <div class="card shadow-2xl border border-[#334155] bg-[#172033]/95 backdrop-blur-md p-6 sm:p-8">

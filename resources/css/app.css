@@ -539,5 +539,29 @@
             grid-template-columns: repeat(2, minmax(0, 1fr));
         }
     }
+
+    /* Auth Layout Panels (Desktop 2-column ~41% / ~59% split, Mobile stacked 100%) */
+    .auth-branding-aside {
+        width: 100%;
+        min-width: 0;
+        box-sizing: border-box;
+    }
+    .auth-content-main {
+        width: 100%;
+        min-width: 0;
+        box-sizing: border-box;
+    }
+    @media (min-width: 768px) {
+        .auth-branding-aside {
+            width: 41.666667% !important;
+            max-width: 41.666667% !important;
+            flex: 0 0 41.666667% !important;
+        }
+        .auth-content-main {
+            width: 58.333333% !important;
+            max-width: 58.333333% !important;
+            flex: 1 1 58.333333% !important;
+        }
+    }
 }
 
