@@ -39,7 +39,7 @@
     </header>
 
     <!-- Main Container -->
-    <main class="flex-1 flex flex-col justify-center items-center px-4 sm:px-6 lg:px-8 py-10 sm:py-16 relative z-10">
+    <main class="flex-1 flex flex-col justify-center items-center px-4 sm:px-6 lg:px-8 py-8 sm:py-12 relative z-10">
         <div class="w-full max-w-2xl mx-auto">
 
             <div class="card shadow-2xl border border-[#334155] bg-[#172033]/95 backdrop-blur-md p-6 sm:p-10 rounded-2xl">
