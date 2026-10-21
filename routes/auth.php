@@ -4,9 +4,7 @@ use App\Http\Controllers\Auth\AuthenticatedSessionController;
 use App\Http\Controllers\Auth\ConfirmablePasswordController;
 use App\Http\Controllers\Auth\EmailVerificationNotificationController;
 use App\Http\Controllers\Auth\EmailVerificationPromptController;
-use App\Http\Controllers\Auth\NewPasswordController;
 use App\Http\Controllers\Auth\PasswordController;
-use App\Http\Controllers\Auth\PasswordResetLinkController;
 use App\Http\Controllers\Auth\RegisteredUserController;
 use App\Http\Controllers\Auth\VerifyEmailController;
 use Illuminate\Support\Facades\Route;
@@ -28,19 +26,27 @@ Route::middleware('guest')->group(function () {
 
     Route::post('login', [AuthenticatedSessionController::class, 'store']);
 
-    Route::get('forgot-password', [PasswordResetLinkController::class, 'create'])
-        ->name('password.request');
+    // Account Assistance (Official COMSOC Communication Channels)
+    Route::get('account-assistance', function () {
+        return view('auth.account-assistance');
+    })->name('account.assistance');
 
-    Route::post('forgot-password', [PasswordResetLinkController::class, 'store'])
-        ->middleware('throttle:6,1')
-        ->name('password.email');
+    // Permanent 301 redirects for obsolete password recovery endpoints
+    Route::get('forgot-password', function () {
+        return redirect()->route('account.assistance', [], 301);
+    })->name('password.request');
 
-    Route::get('reset-password/{token}', [NewPasswordController::class, 'create'])
-        ->name('password.reset');
+    Route::post('forgot-password', function () {
+        return redirect()->route('account.assistance', [], 301);
+    })->name('password.email');
 
-    Route::post('reset-password', [NewPasswordController::class, 'store'])
-        ->middleware('throttle:6,1')
-        ->name('password.store');
+    Route::get('reset-password/{token}', function () {
+        return redirect()->route('account.assistance', [], 301);
+    })->name('password.reset');
+
+    Route::post('reset-password', function () {
+        return redirect()->route('account.assistance', [], 301);
+    })->name('password.store');
 });
 
 Route::middleware('auth')->group(function () {

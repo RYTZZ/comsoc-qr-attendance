@@ -2,7 +2,6 @@
 
 namespace App\Models;
 
-use Illuminate\Auth\Notifications\ResetPassword as ResetPasswordNotification;
 use Illuminate\Database\Eloquent\Concerns\HasUuids;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -213,40 +212,7 @@ class User extends Authenticatable
         return $this->hasMany(Notification::class);
     }
 
-    /**
-     * Send the password reset notification synchronously, bypassing the queue.
-     *
-     * Production runs on Render's free tier, which does not run a persistent
-     * queue worker. Queued notifications are never processed, so reset emails
-     * were silently dropped. Sending synchronously guarantees delivery as long
-     * as the mail transport is reachable.
-     */
-    public function sendPasswordResetNotification($token): void
-    {
-        $notification = new ResetPasswordNotification($token);
 
-        try {
-            // Send via the mailer directly, not through the queue, so no worker is needed.
-            $this->notifyNow($notification);
-        } catch (\Symfony\Component\Mailer\Exception\TransportExceptionInterface $e) {
-            throw $e;
-        } catch (\Symfony\Component\Mime\Exception\ExceptionInterface $e) {
-            throw $e;
-        } catch (\Throwable $e) {
-            // If the failure originates in the mailer or stream transport layer, wrap as TransportException
-            if (
-                str_contains(get_class($e), 'Mail') ||
-                str_contains(get_class($e), 'Transport') ||
-                str_contains($e->getFile(), 'Mailer') ||
-                str_contains($e->getFile(), 'Mail') ||
-                str_contains($e->getMessage(), 'Connection') ||
-                str_contains($e->getMessage(), 'SMTP')
-            ) {
-                throw new \Symfony\Component\Mailer\Exception\TransportException($e->getMessage(), (int) $e->getCode(), $e);
-            }
-            throw $e;
-        }
-    }
 
     public function assignedEvents(): \Illuminate\Database\Eloquent\Relations\BelongsToMany
     {

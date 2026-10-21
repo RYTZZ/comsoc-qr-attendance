@@ -38,9 +38,9 @@ class PrivacyNoticeTest extends TestCase
         $response->assertSee('Data Protection Officer');
     }
 
-    public function test_forgot_password_page_contains_privacy_link(): void
+    public function test_account_assistance_page_contains_privacy_link(): void
     {
-        $response = $this->get('/forgot-password');
+        $response = $this->get('/account-assistance');
 
         $response->assertStatus(200);
         $response->assertSee(route('privacy'));

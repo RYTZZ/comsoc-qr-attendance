@@ -159,20 +159,18 @@
                         @enderror
                     </div>
 
-                    <!-- Remember Me & Forgot Password -->
-                    <div class="flex items-center justify-between pt-1">
-                        <label class="flex items-center gap-2 text-sm text-[#94A3B8] cursor-pointer select-none">
+                    <!-- Remember Me & Account Assistance -->
+                    <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 pt-1 text-xs sm:text-sm">
+                        <label class="flex items-center gap-2 text-[#94A3B8] cursor-pointer select-none">
                             <input type="checkbox"
                                    name="remember"
                                    class="w-4 h-4 rounded bg-[#0B1120] border-[#334155] text-[#560E0F] focus:ring-[#8F3033]">
                             <span>Remember me</span>
                         </label>
 
-                        @if(Route::has('password.request'))
-                        <a href="{{ route('password.request') }}" class="text-sm text-[#df747a] hover:text-white transition-colors">
-                            Forgot password?
+                        <a href="{{ route('account.assistance') }}" class="text-[#df747a] hover:text-white transition-colors font-medium">
+                            Having trouble accessing your account? <span class="underline font-semibold">Get Help</span>
                         </a>
-                        @endif
                     </div>
 
                     <!-- Submit Button -->
