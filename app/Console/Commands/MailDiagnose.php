@@ -23,8 +23,29 @@ class MailDiagnose extends Command
         $this->line('Environment : ' . app()->environment());
         $this->line('Mailer      : ' . $ctx['mailer']);
 
+        if ($ctx['mailer'] === 'gmail-api') {
+            $this->line('Transport   : Gmail REST API (HTTPS Port 443)');
+            $this->line('OAuth2 Keys : ' . ($ctx['gmail_api_configured'] ? 'ALL 3 CONFIGURED' : 'MISSING (Check GOOGLE_CLIENT_ID, GOOGLE_CLIENT_SECRET, GOOGLE_REFRESH_TOKEN)'));
+
+            if (! $ctx['gmail_api_configured']) {
+                $this->error('[FAIL] Gmail API credentials incomplete.');
+                return self::FAILURE;
+            }
+
+            try {
+                $transport = app('mail.manager')->mailer('gmail-api')->getSymfonyTransport();
+                $this->info('[ OK ] gmail-api transport initialized');
+            } catch (Throwable $e) {
+                $this->error('[FAIL] gmail-api transport: ' . $e->getMessage());
+                return self::FAILURE;
+            }
+
+            $this->info('Gmail REST API transport is ready to send via HTTPS.');
+            return self::SUCCESS;
+        }
+
         if ($ctx['mailer'] !== 'smtp') {
-            $this->error('Default mailer is not "smtp"; real delivery is not configured.');
+            $this->error('Default mailer is neither "smtp" nor "gmail-api"; real delivery is not configured.');
 
             return self::FAILURE;
         }

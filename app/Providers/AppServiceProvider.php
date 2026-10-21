@@ -26,6 +26,14 @@ class AppServiceProvider extends ServiceProvider
             URL::forceScheme('https');
         }
 
+        \Illuminate\Support\Facades\Mail::extend('gmail-api', function (array $config = []) {
+            return new \App\Mail\Transport\GmailApiTransport(
+                (string) ($config['client_id'] ?? env('GOOGLE_CLIENT_ID', '')),
+                (string) ($config['client_secret'] ?? env('GOOGLE_CLIENT_SECRET', '')),
+                (string) ($config['refresh_token'] ?? env('GOOGLE_REFRESH_TOKEN', ''))
+            );
+        });
+
         ResetPassword::createUrlUsing(function ($notifiable, string $token) {
             $configuredUrl = config('app.url', 'https://comsochub.tech');
 

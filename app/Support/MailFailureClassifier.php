@@ -89,6 +89,7 @@ class MailFailureClassifier
     {
         $mailer = (string) config('mail.default');
         $smtp = (array) config('mail.mailers.smtp', []);
+        $gmailApi = (array) config('mail.mailers.gmail-api', []);
 
         return [
             'mailer' => $mailer,
@@ -98,6 +99,7 @@ class MailFailureClassifier
             'mail_encryption' => $smtp['encryption'] ?? null,
             'username_configured' => ! empty($smtp['username']),
             'password_configured' => ! empty($smtp['password']),
+            'gmail_api_configured' => (! empty($gmailApi['client_id']) && ! empty($gmailApi['client_secret']) && ! empty($gmailApi['refresh_token'])),
             'from_configured' => ! empty(config('mail.from.address')),
         ];
     }

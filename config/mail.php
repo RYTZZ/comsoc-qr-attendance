@@ -50,6 +50,13 @@ return [
             'local_domain' => env('MAIL_EHLO_DOMAIN', parse_url((string) env('APP_URL', 'http://localhost'), PHP_URL_HOST)),
         ],
 
+        'gmail-api' => [
+            'transport' => 'gmail-api',
+            'client_id' => env('GOOGLE_CLIENT_ID'),
+            'client_secret' => env('GOOGLE_CLIENT_SECRET'),
+            'refresh_token' => env('GOOGLE_REFRESH_TOKEN'),
+        ],
+
         'ses' => [
             'transport' => 'ses',
         ],
