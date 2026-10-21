@@ -25,29 +25,32 @@
     </div>
     @endif
 
-    <form method="POST" action="{{ route('password.email') }}" class="space-y-3.5" x-data="{ submitting: false }" @submit="submitting = true">
+    <form method="POST" action="{{ route('password.email') }}" class="space-y-5" x-data="{ submitting: false }" @submit="submitting = true">
         @csrf
 
         <!-- Email Address -->
         <div>
-            <label for="email" class="label text-xs">Email Address</label>
+            <label for="email" class="label">Email Address <span class="text-rose-400">*</span></label>
             <input id="email" 
                    class="input" 
                    type="email" 
                    name="email" 
                    value="{{ old('email') }}" 
-                   placeholder="e.g. member@sorsu.edu.ph"
+                   placeholder="Enter your email address"
                    required 
                    autofocus 
                    autocomplete="email" />
-            <x-input-error :messages="$errors->get('email')" class="mt-1 text-xs" />
+            <x-input-error :messages="$errors->get('email')" class="mt-2 text-xs" />
         </div>
 
-        <div class="pt-1">
+        <div class="pt-4 sm:pt-6">
             <button type="submit" 
-                    class="btn-primary w-full justify-center py-2.5 shadow-xl disabled:opacity-50 disabled:cursor-not-allowed text-xs sm:text-sm" 
+                    class="btn-primary w-full justify-center py-3 shadow-xl disabled:opacity-50 disabled:cursor-not-allowed text-xs sm:text-sm font-semibold tracking-wide" 
                     :disabled="submitting">
-                <span x-show="!submitting">Email Password Reset Link</span>
+                <span x-show="!submitting" class="flex items-center gap-2">
+                    <i data-lucide="mail" class="w-4 h-4"></i>
+                    <span>Email Password Reset Link</span>
+                </span>
                 <span x-show="submitting" class="flex items-center gap-2" style="display: none;">
                     <svg class="animate-spin -ml-1 mr-2 h-4 w-4 text-white" fill="none" viewBox="0 0 24 24">
                         <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
@@ -59,10 +62,11 @@
         </div>
     </form>
 
-    <div class="mt-4 pt-3.5 border-t border-[#334155] text-center">
+    <div class="mt-6 pt-5 border-t border-[#334155] text-center flex flex-col sm:flex-row items-center justify-between gap-2">
         <p class="text-xs text-[#94A3B8]">
             Remembered your credentials?
             <a href="{{ route('login') }}" class="text-[#df747a] hover:text-white font-semibold underline transition">Back to Sign In</a>
         </p>
+        <a href="{{ route('privacy') }}" class="text-[11px] text-slate-500 hover:text-slate-300 underline transition">Privacy Notice</a>
     </div>
 </x-guest-layout>

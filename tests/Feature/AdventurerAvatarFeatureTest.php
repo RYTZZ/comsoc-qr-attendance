@@ -80,10 +80,6 @@ class AdventurerAvatarFeatureTest extends TestCase
 
     public function test_student_registration_allows_selecting_adventurer_avatar(): void
     {
-        $response = $this->get('/signup');
-        $response->assertOk();
-        $response->assertSee('Choose Your Adventurer Avatar');
-
         $payload = [
             'student_id' => '2026-9999',
             'first_name' => 'Geralt',
@@ -93,21 +89,24 @@ class AdventurerAvatarFeatureTest extends TestCase
             'program' => 'Bachelor of Science in Information Technology',
             'year' => '1st',
             'block' => '1',
+            'username' => 'geralt_rivia',
+            'avatar_seed' => 'Jasper',
             'password' => 'Password123!',
             'password_confirmation' => 'Password123!',
             'terms' => '1',
-            'avatar_style' => 'adventurer',
-            'avatar_seed' => 'Jasper',
         ];
 
         $postResponse = $this->post('/signup', $payload);
         $postResponse->assertSessionHasNoErrors();
+        $postResponse->assertRedirect('/dashboard');
 
         $user = User::where('email', 'geralt.rivia@sorsu.edu.ph')->first();
         $this->assertNotNull($user);
+        $this->assertEquals('geralt_rivia', $user->username);
         $this->assertEquals('Jasper', $user->avatar_seed);
         $this->assertEquals('adventurer', $user->avatar_style);
         $this->assertEquals('https://api.dicebear.com/9.x/adventurer/svg?seed=Jasper', $user->avatar_url);
+        $this->assertNotNull($user->adventurer_setup_at);
     }
 
     public function test_different_users_can_have_independent_avatars(): void

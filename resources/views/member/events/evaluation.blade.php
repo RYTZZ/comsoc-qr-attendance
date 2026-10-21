@@ -192,14 +192,14 @@
                                        name="answers[{{ $q['id'] }}]"
                                        value="{{ old('answers.' . $q['id']) }}"
                                        maxlength="255"
-                                       placeholder="Your response..."
+                                       placeholder="Enter your response"
                                        {{ $q['is_required'] ? 'required' : '' }}
                                        class="w-full bg-[#0B1120] border border-[#334155] focus:border-[#df747a] focus:ring-1 focus:ring-[#df747a] rounded-xl px-3.5 py-2.5 text-xs sm:text-sm text-white placeholder-slate-500 outline-none transition">
                             @elseif($q['question_type'] === 'long_text')
                                 <textarea name="answers[{{ $q['id'] }}]"
                                           rows="3"
                                           maxlength="2000"
-                                          placeholder="Share your thoughts or recommendations..."
+                                          placeholder="Enter your thoughts or recommendations"
                                           {{ $q['is_required'] ? 'required' : '' }}
                                           class="w-full bg-[#0B1120] border border-[#334155] focus:border-[#df747a] focus:ring-1 focus:ring-[#df747a] rounded-xl px-3.5 py-2.5 text-xs sm:text-sm text-white placeholder-slate-500 outline-none transition resize-none">{{ old('answers.' . $q['id']) }}</textarea>
                             @endif

@@ -108,7 +108,7 @@
                         @if($isOwner)
                         <form method="POST" action="{{ route('projects.milestones.store', $project) }}" class="pt-3 border-t border-[#334155] flex flex-col sm:flex-row gap-2">
                             @csrf
-                            <input type="text" name="title" required placeholder="Add new milestone..."
+                            <input type="text" name="title" required placeholder="Enter milestone title"
                                    class="bg-[#0B1120] border border-[#334155] rounded-xl px-3 py-1.5 text-xs text-white flex-1">
                             <input type="date" name="due_date" class="bg-[#0B1120] border border-[#334155] rounded-xl px-3 py-1.5 text-xs text-white">
                             <button type="submit" class="btn-primary text-xs py-1.5 px-4 whitespace-nowrap">Add</button>
@@ -202,19 +202,19 @@
                             @csrf
                             <div>
                                 <label class="block text-[11px] text-slate-400 mb-1">Role You Wish to Take *</label>
-                                <input type="text" name="preferred_role" required placeholder="e.g. Frontend Developer, QA Engineer"
+                                <input type="text" name="preferred_role" required placeholder="Enter preferred role"
                                        class="w-full bg-[#0B1120] border border-[#334155] rounded-xl px-3 py-2 text-xs text-white">
                             </div>
 
                             <div>
                                 <label class="block text-[11px] text-slate-400 mb-1">Motivation & Contribution *</label>
-                                <textarea name="motivation" rows="3" required placeholder="Why do you want to work on this project?"
+                                <textarea name="motivation" rows="3" required placeholder="Enter motivation and contribution statement"
                                           class="w-full bg-[#0B1120] border border-[#334155] rounded-xl p-3 text-xs text-white"></textarea>
                             </div>
 
                             <div>
                                 <label class="block text-[11px] text-slate-400 mb-1">Relevant Skills</label>
-                                <input type="text" name="skills_summary" placeholder="e.g. Vue, REST APIs, Git"
+                                <input type="text" name="skills_summary" placeholder="Enter relevant technical skills"
                                        class="w-full bg-[#0B1120] border border-[#334155] rounded-xl px-3 py-2 text-xs text-white">
                             </div>
 

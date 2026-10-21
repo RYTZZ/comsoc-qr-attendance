@@ -103,12 +103,12 @@
             </div>
             <div>
                 <label class="block text-xs font-medium text-slate-300 mb-1">Raffle Title</label>
-                <input type="text" name="title" required placeholder="e.g. Mid-Year Tech Summit Grand Raffle" class="form-input w-full">
+                <input type="text" name="title" required placeholder="Enter raffle title" class="form-input w-full">
             </div>
             <div class="grid grid-cols-2 gap-4">
                 <div>
                     <label class="block text-xs font-medium text-slate-300 mb-1">Prize Name</label>
-                    <input type="text" name="prize_name" required placeholder="e.g. Raspberry Pi 4 / Swag Kit" class="form-input w-full">
+                    <input type="text" name="prize_name" required placeholder="Enter prize name" class="form-input w-full">
                 </div>
                 <div>
                     <label class="block text-xs font-medium text-slate-300 mb-1">Link to Reward Catalog (Optional)</label>

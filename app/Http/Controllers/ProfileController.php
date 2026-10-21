@@ -119,6 +119,10 @@ class ProfileController extends Controller
                 $user->avatar_seed = \App\Services\AvatarService::sanitizeSeed($validated['avatar_seed']);
             }
 
+            if (isset($validated['username']) && trim($validated['username']) !== '') {
+                $user->username = strtolower(trim($validated['username']));
+            }
+
             $user->save();
 
             // Normalize and parse interests

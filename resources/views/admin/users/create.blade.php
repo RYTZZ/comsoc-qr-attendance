@@ -37,7 +37,7 @@
             <div>
                 <label for="admin_name" class="label">Full Name <span class="text-red-400">*</span></label>
                 <input id="admin_name" name="name" type="text" value="{{ old('name') }}"
-                       placeholder="e.g. Maria Santos"
+                       placeholder="Enter full name"
                        class="input w-full" :required="accountType === 'admin'" />
                 @error('name')<p class="text-red-400 text-xs mt-1">{{ $message }}</p>@enderror
             </div>
@@ -46,7 +46,7 @@
                 <div>
                     <label for="admin_email" class="label">Email Address <span class="text-red-400">*</span></label>
                     <input id="admin_email" name="email" type="email" value="{{ old('email') }}"
-                           placeholder="officer@domain.com"
+                           placeholder="Enter email address"
                            class="input w-full" :required="accountType === 'admin'" />
                     @error('email')<p class="text-red-400 text-xs mt-1">{{ $message }}</p>@enderror
                 </div>
@@ -54,7 +54,7 @@
                 <div>
                     <label for="admin_student_number" class="label">Student Number / Employee ID (Optional)</label>
                     <input id="admin_student_number" name="student_number" type="text" value="{{ old('student_number') }}"
-                           placeholder="e.g. 2024-00123"
+                           placeholder="Enter student ID or employee ID"
                            class="input w-full" />
                     @error('student_number')<p class="text-red-400 text-xs mt-1">{{ $message }}</p>@enderror
                 </div>
@@ -70,7 +70,7 @@
                                        id="officer_position"
                                        :options="$positionOpts"
                                        :value="old('officer_position')"
-                                       placeholder="Select Position" />
+                                       placeholder="Select organizational position" />
                     <p class="text-[11px] text-slate-500 mt-1">E.g., Treasurer, Auditor, Event Organizer, PIO.</p>
                     @error('officer_position')<p class="text-red-400 text-xs mt-1">{{ $message }}</p>@enderror
                 </div>
@@ -90,7 +90,7 @@
                                            'admin' => 'Admin (Legacy)',
                                        ]"
                                        :value="old('role', 'staff')"
-                                       placeholder="Select System Role" />
+                                       placeholder="Select system role" />
                     <p class="text-[11px] text-slate-500 mt-1">Controls application access according to least-privilege.</p>
                     @error('role')<p class="text-red-400 text-xs mt-1">{{ $message }}</p>@enderror
                 </div>

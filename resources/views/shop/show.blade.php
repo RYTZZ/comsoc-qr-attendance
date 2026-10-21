@@ -174,7 +174,7 @@
                                                 <label class="block text-xs font-medium text-slate-300 mb-1">
                                                     Special Notes or Size (Optional)
                                                 </label>
-                                                <input type="text" name="notes" placeholder="e.g. Size M, Preferred pickup time, or color"
+                                                <input type="text" name="notes" placeholder="Enter notes or preferences"
                                                        class="input-dark text-xs w-full">
                                             </div>
 

@@ -23,6 +23,11 @@ use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\PublicRegistrationController;
 use Illuminate\Support\Facades\Route;
 
+Route::get('/privacy', function () {
+    return view('privacy');
+})->name('privacy');
+Route::get('/privacy-notice', fn() => redirect()->route('privacy'));
+
 Route::get('/', fn() => redirect()->route('login'));
 
 Route::get('/dashboard', function () {
@@ -63,6 +68,18 @@ Route::get('/register-non-student', function () {
 
 Route::get('/kiosk/health', [AttendanceKioskController::class, 'healthCheck'])->name('kiosk.health');
 Route::get('/kiosk', fn() => redirect()->route('login')->withErrors(['email' => 'No kiosk terminal is assigned to your account. Please contact the administrator.']))->name('kiosk.hub');
+
+Route::middleware(['auth'])->group(function () {
+    Route::get('/onboarding/adventurer', [\App\Http\Controllers\Onboarding\AdventurerSetupController::class, 'show'])->name('onboarding.adventurer');
+    Route::post('/onboarding/adventurer', [\App\Http\Controllers\Onboarding\AdventurerSetupController::class, 'update'])->name('onboarding.adventurer.update');
+    Route::get('/onboarding/adventurer/check-username', [\App\Http\Controllers\Onboarding\AdventurerSetupController::class, 'checkUsername'])
+        ->middleware('throttle:30,1')
+        ->name('onboarding.adventurer.check');
+});
+
+Route::get('/api/check-username', [\App\Http\Controllers\Onboarding\AdventurerSetupController::class, 'checkUsername'])
+    ->middleware('throttle:60,1')
+    ->name('api.check-username');
 
 require __DIR__ . '/auth.php';
 

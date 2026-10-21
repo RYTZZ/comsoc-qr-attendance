@@ -58,7 +58,7 @@
                                 <label class="block text-xs font-semibold text-slate-300 mb-1">
                                     Achievement Title <span class="text-rose-400">*</span>
                                 </label>
-                                <input type="text" name="title" required
+                                <input type="text" name="title" required placeholder="Enter achievement title"
                                        class="input-dark text-xs w-full">
                             </div>
 
@@ -77,7 +77,7 @@
                                         name="category"
                                         :options="$catOpts"
                                         selected="Milestone"
-                                        placeholder="Category"
+                                        placeholder="Select category"
                                     />
                                 </div>
 
@@ -85,7 +85,7 @@
                                     <label class="block text-xs font-semibold text-slate-300 mb-1">
                                         Lucide Icon Name
                                     </label>
-                                    <input type="text" name="icon" value="award"
+                                    <input type="text" name="icon" value="award" placeholder="Enter Lucide icon name"
                                            class="input-dark text-xs w-full font-mono">
                                 </div>
                             </div>
@@ -105,7 +105,7 @@
                                         name="criteria_type"
                                         :options="$critOpts"
                                         selected="event_attendance"
-                                        placeholder="Trigger Condition"
+                                        placeholder="Select trigger condition"
                                     />
                                 </div>
 
@@ -113,7 +113,7 @@
                                     <label class="block text-xs font-semibold text-slate-300 mb-1">
                                         Threshold Required <span class="text-rose-400">*</span>
                                     </label>
-                                    <input type="number" name="criteria_threshold" min="1" value="5" required
+                                    <input type="number" name="criteria_threshold" min="1" value="5" required placeholder="Enter threshold required"
                                            class="input-dark text-xs w-full font-mono">
                                 </div>
                             </div>
@@ -123,7 +123,7 @@
                                     <label class="block text-xs font-semibold text-slate-300 mb-1">
                                         XP Bonus Reward <span class="text-rose-400">*</span>
                                     </label>
-                                    <input type="number" name="xp_bonus" min="0" value="100" required
+                                    <input type="number" name="xp_bonus" min="0" value="100" required placeholder="Enter EXP bonus reward"
                                            class="input-dark text-xs w-full font-mono">
                                 </div>
 
@@ -131,7 +131,7 @@
                                     <label class="block text-xs font-semibold text-slate-300 mb-1">
                                         Points Bonus Reward <span class="text-rose-400">*</span>
                                     </label>
-                                    <input type="number" name="points_bonus" min="0" value="50" required
+                                    <input type="number" name="points_bonus" min="0" value="50" required placeholder="Enter points bonus reward"
                                            class="input-dark text-xs w-full font-mono">
                                 </div>
                             </div>
@@ -141,7 +141,7 @@
                                     Description & Unlock Guidance
                                 </label>
                                 <textarea name="description" rows="2"
-                                          placeholder="e.g. Attended 5 official Computing Society workshops or tech seminars."
+                                          placeholder="Enter achievement description and unlock guidance"
                                           class="input-dark text-xs w-full"></textarea>
                             </div>
 

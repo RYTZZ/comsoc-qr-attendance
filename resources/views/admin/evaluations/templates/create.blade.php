@@ -32,13 +32,13 @@
         <div class="space-y-4">
             <div>
                 <label for="title" class="label">Template Title <span class="text-red-400">*</span></label>
-                <input id="title" name="title" type="text" value="{{ old('title') }}" required placeholder="e.g. Standard General Assembly Feedback Survey" class="input" />
+                <input id="title" name="title" type="text" value="{{ old('title') }}" required placeholder="Enter template title" class="input" />
                 @error('title')<p class="text-red-400 text-xs mt-1">{{ $message }}</p>@enderror
             </div>
 
             <div>
                 <label for="description" class="label">Description / Instructions</label>
-                <textarea id="description" name="description" rows="2" placeholder="Instructions shown to students when completing the evaluation." class="input resize-none">{{ old('description') }}</textarea>
+                <textarea id="description" name="description" rows="2" placeholder="Enter instructions shown to students when completing the evaluation" class="input resize-none">{{ old('description') }}</textarea>
                 @error('description')<p class="text-red-400 text-xs mt-1">{{ $message }}</p>@enderror
             </div>
         </div>
@@ -78,7 +78,7 @@
                     <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
                         <div class="sm:col-span-2">
                             <label class="label text-xs">Question Prompt <span class="text-red-400">*</span></label>
-                            <input type="text" :name="'questions[' + index + '][question_text]'" x-model="q.question_text" required placeholder="e.g. How would you rate the keynote speaker's presentation?" class="input text-xs" />
+                            <input type="text" :name="'questions[' + index + '][question_text]'" x-model="q.question_text" required placeholder="Enter question text" class="input text-xs" />
                         </div>
                         <div>
                             <label class="label text-xs">Question Format <span class="text-red-400">*</span></label>
@@ -95,7 +95,7 @@
                     <!-- Single Choice / Multiple Choice Options -->
                     <div x-show="q.question_type === 'single_choice' || q.question_type === 'multiple_choice'" class="space-y-1.5 pt-2 border-t border-slate-800/60">
                         <label class="label text-xs">Answer Options (Enter each choice on a new line) <span class="text-red-400">*</span></label>
-                        <textarea :name="'questions[' + index + '][options]'" x-model="q.options" rows="3" placeholder="Option 1&#10;Option 2&#10;Option 3" class="input text-xs resize-none font-mono"></textarea>
+                        <textarea :name="'questions[' + index + '][options]'" x-model="q.options" rows="3" placeholder="Enter one option per line" class="input text-xs resize-none font-mono"></textarea>
                     </div>
 
                     <!-- Rating Scale Bounds -->
@@ -110,11 +110,11 @@
                         </div>
                         <div>
                             <label class="label text-[11px]">Min Label</label>
-                            <input type="text" :name="'questions[' + index + '][rating_min_label]'" x-model="q.rating_min_label" placeholder="Poor" class="input text-xs" />
+                            <input type="text" :name="'questions[' + index + '][rating_min_label]'" x-model="q.rating_min_label" placeholder="Enter minimum label" class="input text-xs" />
                         </div>
                         <div>
                             <label class="label text-[11px]">Max Label</label>
-                            <input type="text" :name="'questions[' + index + '][rating_max_label]'" x-model="q.rating_max_label" placeholder="Excellent" class="input text-xs" />
+                            <input type="text" :name="'questions[' + index + '][rating_max_label]'" x-model="q.rating_max_label" placeholder="Enter maximum label" class="input text-xs" />
                         </div>
                     </div>
                 </div>

@@ -81,7 +81,7 @@
                                     <label class="block text-xs font-semibold text-slate-300 mb-1">
                                         Location / City
                                     </label>
-                                    <input type="text" name="location" placeholder="e.g. Sorsogon / Manila"
+                                    <input type="text" name="location" placeholder="Enter location"
                                            class="input-dark text-xs w-full">
                                 </div>
 
@@ -89,7 +89,7 @@
                                     <label class="block text-xs font-semibold text-slate-300 mb-1">
                                         Compensation / Stipend
                                     </label>
-                                    <input type="text" name="compensation" placeholder="e.g. Paid Stipend / Allowance"
+                                    <input type="text" name="compensation" placeholder="Enter compensation details"
                                            class="input-dark text-xs w-full">
                                 </div>
                             </div>
@@ -106,7 +106,7 @@
                                 <label class="block text-xs font-semibold text-slate-300 mb-1">
                                     External Application URL <span class="text-rose-400">*</span>
                                 </label>
-                                <input type="url" name="application_url" required placeholder="https://careers.company.com/apply/..."
+                                <input type="url" name="application_url" required placeholder="Enter application URL"
                                        class="input-dark text-xs w-full">
                             </div>
 
@@ -115,7 +115,7 @@
                                     <label class="block text-xs font-semibold text-slate-300 mb-1">
                                         Original Source URL
                                     </label>
-                                    <input type="url" name="source_url" placeholder="https://linkedin.com/jobs/..."
+                                    <input type="url" name="source_url" placeholder="Enter source URL"
                                            class="input-dark text-xs w-full">
                                 </div>
 
@@ -132,7 +132,7 @@
                                 <label class="block text-xs font-semibold text-slate-300 mb-1">
                                     Required Skills (Comma separated)
                                 </label>
-                                <input type="text" name="required_skills" placeholder="e.g. React, Node.js, Git, SQL"
+                                <input type="text" name="required_skills" placeholder="Enter required skills (comma-separated)"
                                        class="input-dark text-xs w-full">
                             </div>
 
@@ -141,7 +141,7 @@
                                     Description & Requirements <span class="text-rose-400">*</span>
                                 </label>
                                 <textarea name="description" rows="4" required
-                                          placeholder="Detailed job summary, responsibilities, and qualification guidelines..."
+                                          placeholder="Enter job summary, responsibilities, and qualification guidelines"
                                           class="input-dark text-xs w-full"></textarea>
                             </div>
 

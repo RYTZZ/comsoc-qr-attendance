@@ -11,7 +11,6 @@
 </head>
 <body class="bg-[#0B1120] text-slate-100 min-h-screen flex flex-col font-sans antialiased selection:bg-[#560E0F] selection:text-white relative overflow-x-hidden">
     <x-toast-stack />
-    <x-page-loader />
     <x-public-auth-bg />
 
     <div class="relative overflow-hidden flex-1 flex flex-col items-center justify-center p-4 py-10 z-10">

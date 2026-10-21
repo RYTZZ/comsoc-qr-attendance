@@ -8,6 +8,8 @@
                 <div class="flex items-center gap-2">
                     @php
                         $vis = $member->profile?->visibility ?? ($member->profile?->is_public ? 'public' : 'private');
+                        $isPrivileged = auth()->id() === $member->id || auth()->user()?->isAdmin() || auth()->user()?->isSuperAdmin();
+                        $publicIdentity = $member->username ? '@' . $member->username : $member->public_name;
                     @endphp
                     @if($vis === 'public')
                         <span class="px-2 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider bg-cyan-500/20 border border-cyan-500/40 text-cyan-300">
@@ -25,8 +27,14 @@
                     <span class="text-xs text-slate-400">Computing Society Member</span>
                 </div>
                 <h1 class="text-2xl font-bold text-white font-brand-display tracking-tight mt-0.5">
-                    {{ $member->name }}
+                    {{ $publicIdentity }}
                 </h1>
+                @if($isPrivileged)
+                    <p class="text-xs text-slate-400 mt-0.5 flex items-center gap-1.5">
+                        <span class="text-slate-300 font-semibold">{{ $member->name }}</span>
+                        <span class="text-[10px] px-1.5 py-0.5 rounded bg-slate-800 border border-slate-700 text-slate-400 font-mono">Official Record</span>
+                    </p>
+                @endif
             </div>
         </div>
     </x-slot>
@@ -40,9 +48,17 @@
                         <x-user-avatar :user="$member" size="xl" class="border border-[#560E0F]/50 shadow-lg" />
 
                         <div>
-                            <h2 class="text-xl font-bold text-white font-brand-display">{{ $member->name }}</h2>
+                            <h2 class="text-xl font-bold text-white font-brand-display">{{ $publicIdentity }}</h2>
+                            @if($isPrivileged)
+                                <p class="text-xs text-slate-400 font-medium mt-0.5 flex items-center gap-1.5">
+                                    <span>Official Record: {{ $member->name }}</span>
+                                    @if($isPrivileged && $member->student)
+                                        <span class="font-mono text-[11px] text-amber-400">({{ $member->student->student_number }})</span>
+                                    @endif
+                                </p>
+                            @endif
                             <p class="text-xs text-slate-400 mt-0.5">
-                                {{ $member->student ? "{$member->student->program} • {$member->student->year_level} (Block {$member->student->block})" : 'COMSOC Member' }}
+                                {{ $member->student ? "{$member->student->program} • {$member->student->year_level}" . ($isPrivileged ? " (Block {$member->student->block})" : "") : 'COMSOC Member' }}
                             </p>
                             @if($member->profile?->open_to_collaborate)
                                 <div class="mt-2 inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-emerald-500/20 text-emerald-300 border border-emerald-500/30">

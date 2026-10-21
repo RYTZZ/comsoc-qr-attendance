@@ -169,7 +169,7 @@
 
             <div class="space-y-1">
                 <label class="text-xs font-semibold text-slate-300">Title *</label>
-                <input type="text" name="title" required value="{{ old('title') }}" placeholder="Announcement Headline" class="input-dark w-full text-xs">
+                <input type="text" name="title" required value="{{ old('title') }}" placeholder="Enter announcement title" class="input-dark w-full text-xs">
             </div>
 
             <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
@@ -216,14 +216,14 @@
                             <span x-show="audienceType === 'year_level'">Year Levels (e.g. 1st Year, 2nd Year or 1, 2)</span>
                             <span x-show="audienceType === 'role'">Roles (e.g. student, officer)</span>
                         </label>
-                        <input type="text" name="target_audience_values" placeholder="e.g. BSIT, BSCS" class="input-dark w-full text-xs">
+                        <input type="text" name="target_audience_values" placeholder="Enter target audience values (comma-separated)" class="input-dark w-full text-xs">
                     </div>
                 </div>
             </div>
 
             <div class="space-y-1">
                 <label class="text-xs font-semibold text-slate-300">Bulletin Content *</label>
-                <textarea name="body" rows="4" required class="input-dark w-full text-xs" placeholder="Full text of announcement..."></textarea>
+                <textarea name="body" rows="4" required class="input-dark w-full text-xs" placeholder="Enter announcement content"></textarea>
             </div>
 
             <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
@@ -239,7 +239,7 @@
 
                 <div class="space-y-1">
                     <label class="text-xs font-semibold text-slate-300">Related Destination URL (Optional)</label>
-                    <input type="url" name="target_url" placeholder="https://..." class="input-dark w-full text-xs">
+                    <input type="url" name="target_url" placeholder="Enter destination URL" class="input-dark w-full text-xs">
                 </div>
             </div>
 

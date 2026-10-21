@@ -111,6 +111,11 @@ class Reward extends Model
         return true;
     }
 
+    public function getNameAttribute(): string
+    {
+        return $this->title ?? '';
+    }
+
     public function isArchived(): bool
     {
         return $this->status === 'archived' || $this->is_archived;

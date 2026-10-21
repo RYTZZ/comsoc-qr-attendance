@@ -78,7 +78,7 @@
                             Bio / Intro Summary
                         </label>
                         <textarea name="bio" rows="3"
-                                  placeholder="Brief introduction about yourself, career aspirations, or background..."
+                                  placeholder="Enter your biography or introduction"
                                   class="input-dark text-xs w-full">{{ old('bio', $profile->bio) }}</textarea>
                     </div>
 
@@ -88,7 +88,7 @@
                                 GitHub Profile URL
                             </label>
                             <input type="url" name="github_url" value="{{ old('github_url', $profile->github_url) }}"
-                                   placeholder="https://github.com/username"
+                                   placeholder="Enter your GitHub profile URL"
                                    class="input-dark text-xs w-full">
                         </div>
 
@@ -97,7 +97,7 @@
                                 LinkedIn Profile URL
                             </label>
                             <input type="url" name="linkedin_url" value="{{ old('linkedin_url', $profile->linkedin_url) }}"
-                                   placeholder="https://linkedin.com/in/username"
+                                   placeholder="Enter your LinkedIn profile URL"
                                    class="input-dark text-xs w-full">
                         </div>
                     </div>
@@ -131,7 +131,7 @@
                         </label>
                         <input type="text" name="tech_stack"
                                value="{{ old('tech_stack', is_array($profile->tech_stack) ? implode(', ', $profile->tech_stack) : '') }}"
-                               placeholder="e.g. Laravel, React, Tailwind CSS, PostgreSQL, Python"
+                               placeholder="Enter technologies and tools (comma-separated)"
                                class="input-dark text-xs w-full">
                     </div>
                 </div>
@@ -165,7 +165,7 @@
                             </label>
                             <input type="text" name="interests"
                                    value="{{ old('interests', is_array($profile->interests) ? implode(', ', $profile->interests) : '') }}"
-                                   placeholder="e.g. Open Source, Cloud Architecture, Competitive Programming"
+                                   placeholder="Enter areas of interest (comma-separated)"
                                    class="input-dark text-xs w-full">
                         </div>
 
@@ -175,7 +175,7 @@
                             </label>
                             <input type="text" name="collaboration_preferences"
                                    value="{{ old('collaboration_preferences', is_array($profile->collaboration_preferences) ? implode(', ', $profile->collaboration_preferences) : '') }}"
-                                   placeholder="e.g. Remote Pairing, Weekend Hackathons, Async Reviews"
+                                   placeholder="Enter collaboration styles (comma-separated)"
                                    class="input-dark text-xs w-full">
                         </div>
                     </div>

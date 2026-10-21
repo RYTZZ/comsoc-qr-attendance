@@ -20,6 +20,7 @@ class MemberProfileUpdateRequest extends FormRequest
 
         return [
             'name' => ['required', 'string', 'max:255'],
+            'username' => ['nullable', 'string', new \App\Rules\UsernameRule($userId)],
             'email' => [
                 'required',
                 'string',

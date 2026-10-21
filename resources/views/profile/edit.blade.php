@@ -137,16 +137,35 @@
                                 <x-input-error class="mt-1" :messages="$errors->get('avatar_style')" />
                             </div>
 
-                            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                            <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
                                 <div>
-                                    <label for="name" class="label text-xs text-[#94A3B8]">Display Name</label>
-                                    <input type="text" name="name" id="name" value="{{ old('name', $user->name) }}" class="input text-xs" required>
+                                    <label for="username" class="label text-xs text-[#94A3B8]">
+                                        Username (Public Persona) <span class="text-rose-400">*</span>
+                                    </label>
+                                    <div class="relative">
+                                        <span class="absolute inset-y-0 left-0 pl-2.5 flex items-center pointer-events-none text-slate-500 font-bold text-xs">@</span>
+                                        <input type="text"
+                                               name="username"
+                                               id="username"
+                                               value="{{ old('username', $user->username) }}"
+                                               placeholder="Enter your username"
+                                               maxlength="20"
+                                               class="input text-xs pl-7"
+                                               required>
+                                    </div>
+                                    <p class="text-[10px] text-slate-500 mt-1">Letters, numbers, and underscores (3–20 chars).</p>
+                                    <x-input-error class="mt-1" :messages="$errors->get('username')" />
+                                </div>
+
+                                <div>
+                                    <label for="name" class="label text-xs text-[#94A3B8]">Official Name</label>
+                                    <input type="text" name="name" id="name" value="{{ old('name', $user->name) }}" class="input text-xs" placeholder="Enter your full name" required>
                                     <x-input-error class="mt-1" :messages="$errors->get('name')" />
                                 </div>
 
                                 <div>
                                     <label for="email" class="label text-xs text-[#94A3B8]">Email Address</label>
-                                    <input type="email" name="email" id="email" value="{{ old('email', $user->email) }}" class="input text-xs" required>
+                                    <input type="email" name="email" id="email" value="{{ old('email', $user->email) }}" class="input text-xs" placeholder="Enter your email address" required>
                                     <x-input-error class="mt-1" :messages="$errors->get('email')" />
                                 </div>
                             </div>
@@ -282,12 +301,12 @@
                                                 <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
                                                     <div class="relative">
                                                         <i data-lucide="search" class="w-4 h-4 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2"></i>
-                                                        <input type="text" x-model="search" placeholder="Search predefined skills..." 
+                                                        <input type="text" x-model="search" placeholder="Enter search term for skills" 
                                                                class="input text-xs pl-9 w-full bg-[#0B1120] border-[#334155] focus:border-[#8F3033]">
                                                     </div>
                                                     <div class="flex gap-2">
                                                         <input type="text" x-model="customInput" @keydown.enter.prevent="addCustomSkill()" 
-                                                               placeholder="Add custom skill (e.g. Solidity)" 
+                                                               placeholder="Enter custom skill name" 
                                                                class="input text-xs w-full bg-[#0B1120] border-[#334155] focus:border-[#8F3033]">
                                                         <button type="button" @click="addCustomSkill()" 
                                                                 class="px-3 py-1.5 rounded-xl text-xs font-semibold bg-[#560E0F] hover:bg-[#8F3033] text-white border border-[#8F3033] transition shrink-0">
@@ -477,12 +496,12 @@
                                                 <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
                                                     <div class="relative">
                                                         <i data-lucide="search" class="w-4 h-4 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2"></i>
-                                                        <input type="text" x-model="search" placeholder="Search predefined topics..." 
+                                                        <input type="text" x-model="search" placeholder="Enter search term for topics" 
                                                                class="input text-xs pl-9 w-full bg-[#0B1120] border-[#334155] focus:border-[#8F3033]">
                                                     </div>
                                                     <div class="flex gap-2">
                                                         <input type="text" x-model="customInput" @keydown.enter.prevent="addCustomInterest()" 
-                                                               placeholder="Add custom topic (e.g. Bio-Informatics)" 
+                                                               placeholder="Enter custom topic name" 
                                                                class="input text-xs w-full bg-[#0B1120] border-[#334155] focus:border-[#8F3033]">
                                                         <button type="button" @click="addCustomInterest()" 
                                                                 class="px-3 py-1.5 rounded-xl text-xs font-semibold bg-[#560E0F] hover:bg-[#8F3033] text-white border border-[#8F3033] transition shrink-0">

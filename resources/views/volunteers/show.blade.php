@@ -188,19 +188,19 @@
                             @csrf
                             <div>
                                 <label class="block text-[11px] text-slate-400 mb-1">Motivation Statement *</label>
-                                <textarea name="motivation_statement" rows="3" required placeholder="Why would you like to volunteer for this activity?"
+                                <textarea name="motivation_statement" rows="3" required placeholder="Enter your reasons for volunteering"
                                           class="w-full bg-[#0B1120] border border-[#334155] rounded-xl p-3 text-xs text-white"></textarea>
                             </div>
 
                             <div>
                                 <label class="block text-[11px] text-slate-400 mb-1">Relevant Skills or Prior Experience</label>
-                                <input type="text" name="relevant_skills" placeholder="e.g. Photography, Customer service, AV equipment"
+                                <input type="text" name="relevant_skills" placeholder="Enter relevant skills or previous experience"
                                        class="w-full bg-[#0B1120] border border-[#334155] rounded-xl px-3 py-2 text-xs text-white">
                             </div>
 
                             <div>
                                 <label class="block text-[11px] text-slate-400 mb-1">Preferred Shift / Availability</label>
-                                <input type="text" name="assigned_shift" placeholder="e.g. Morning (8:00 AM - 12:00 PM)"
+                                <input type="text" name="assigned_shift" placeholder="Enter your preferred shift or availability"
                                        class="w-full bg-[#0B1120] border border-[#334155] rounded-xl px-3 py-2 text-xs text-white">
                             </div>
 

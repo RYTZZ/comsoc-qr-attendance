@@ -121,7 +121,7 @@
                                 <div class="w-12 h-12 mx-auto mb-2 flex items-center justify-center">
                                     <x-user-avatar :user="$second" size="lg" class="border-2 border-slate-400 shadow-md" />
                                 </div>
-                                <h3 class="text-sm font-bold text-white truncate font-brand-display">{{ $second->nickname ?: $second->name }}</h3>
+                                <h3 class="text-sm font-bold text-white truncate font-brand-display">{{ $second->username ? '@' . $second->username : ($second->nickname ?: $second->name) }}</h3>
                                 <p class="text-xs font-mono font-bold text-slate-300 mt-1 tabular-nums">
                                     {{ number_format($tab === 'semester' ? $second->semester_exp : $second->lifetime_exp) }} EXP
                                     <span class="sr-only">{{ number_format($tab === 'semester' ? $second->semester_exp : $second->lifetime_exp) }} XP</span>
@@ -141,7 +141,7 @@
                                 <div class="w-14 h-14 mx-auto mb-2 flex items-center justify-center">
                                     <x-user-avatar :user="$first" size="lg" class="w-14 h-14 border-2 border-amber-400 shadow-lg" />
                                 </div>
-                                <h3 class="text-base font-extrabold text-white truncate font-brand-display">{{ $first->nickname ?: $first->name }}</h3>
+                                <h3 class="text-base font-extrabold text-white truncate font-brand-display">{{ $first->username ? '@' . $first->username : ($first->nickname ?: $first->name) }}</h3>
                                 <p class="text-sm font-mono font-black text-amber-300 mt-1 tabular-nums">
                                     {{ number_format($tab === 'semester' ? $first->semester_exp : $first->lifetime_exp) }} EXP
                                     <span class="sr-only">{{ number_format($tab === 'semester' ? $first->semester_exp : $first->lifetime_exp) }} XP</span>
@@ -161,7 +161,7 @@
                                 <div class="w-12 h-12 mx-auto mb-2 flex items-center justify-center">
                                     <x-user-avatar :user="$third" size="lg" class="border-2 border-amber-600 shadow-md" />
                                 </div>
-                                <h3 class="text-sm font-bold text-white truncate font-brand-display">{{ $third->nickname ?: $third->name }}</h3>
+                                <h3 class="text-sm font-bold text-white truncate font-brand-display">{{ $third->username ? '@' . $third->username : ($third->nickname ?: $third->name) }}</h3>
                                 <p class="text-xs font-mono font-bold text-amber-300 mt-1 tabular-nums">
                                     {{ number_format($tab === 'semester' ? $third->semester_exp : $third->lifetime_exp) }} EXP
                                     <span class="sr-only">{{ number_format($tab === 'semester' ? $third->semester_exp : $third->lifetime_exp) }} XP</span>
@@ -216,7 +216,7 @@
                                         <td class="py-3 px-4">
                                             <div class="flex items-center gap-2.5">
                                                 <x-user-avatar :user="$row" size="xs" class="w-7 h-7 rounded-lg border border-[#8F3033]/60 shadow-sm" />
-                                                <span class="font-bold text-white font-brand-display">{{ $row->nickname ?: $row->name }}</span>
+                                                <span class="font-bold text-white font-brand-display">{{ $row->username ? '@' . $row->username : ($row->nickname ?: $row->name) }}</span>
                                                 @if($isMe)
                                                     <span class="px-1.5 py-0.5 rounded text-[9px] font-bold bg-[#560E0F] text-white border border-[#8F3033]">YOU</span>
                                                 @endif

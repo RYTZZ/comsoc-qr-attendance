@@ -16,7 +16,7 @@
         </div>
         @endif
 
-        <form method="POST" action="{{ route('password.store') }}" class="space-y-4" x-data="{ submitting: false, showPassword: false, showConfirm: false }" @submit="submitting = true">
+        <form method="POST" action="{{ route('password.store') }}" class="space-y-5" x-data="{ submitting: false, showPassword: false, showConfirm: false }" @submit="submitting = true">
             @csrf
 
             <!-- Password Reset Token -->
@@ -24,7 +24,7 @@
 
             <!-- Email Address -->
             <div>
-                <label for="email" class="label">Email Address</label>
+                <label for="email" class="label">Email Address <span class="text-rose-400">*</span></label>
                 <input id="email" 
                        class="input" 
                        type="email" 
@@ -33,12 +33,12 @@
                        required 
                        autofocus 
                        autocomplete="username" />
-                <x-input-error :messages="$errors->get('email')" class="mt-2" />
+                <x-input-error :messages="$errors->get('email')" class="mt-2 text-xs" />
             </div>
 
             <!-- Password -->
             <div>
-                <label for="password" class="label">New Password</label>
+                <label for="password" class="label">New Password <span class="text-rose-400">*</span></label>
                 <div class="relative">
                     <input :type="showPassword ? 'text' : 'password'" 
                            id="password" 
@@ -59,12 +59,12 @@
                         </svg>
                     </button>
                 </div>
-                <x-input-error :messages="$errors->get('password')" class="mt-2" />
+                <x-input-error :messages="$errors->get('password')" class="mt-2 text-xs" />
             </div>
 
             <!-- Confirm Password -->
             <div>
-                <label for="password_confirmation" class="label">Confirm New Password</label>
+                <label for="password_confirmation" class="label">Confirm New Password <span class="text-rose-400">*</span></label>
                 <div class="relative">
                     <input :type="showConfirm ? 'text' : 'password'" 
                            id="password_confirmation" 
@@ -85,12 +85,12 @@
                         </svg>
                     </button>
                 </div>
-                <x-input-error :messages="$errors->get('password_confirmation')" class="mt-2" />
+                <x-input-error :messages="$errors->get('password_confirmation')" class="mt-2 text-xs" />
             </div>
 
-            <div class="pt-2">
+            <div class="pt-5 sm:pt-6">
                 <button type="submit" 
-                        class="btn-primary w-full justify-center py-2.5 shadow-xl disabled:opacity-50 disabled:cursor-not-allowed" 
+                        class="btn-primary w-full justify-center py-3 shadow-xl disabled:opacity-50 disabled:cursor-not-allowed font-semibold tracking-wide" 
                         :disabled="submitting">
                     <span x-show="!submitting">Reset Password</span>
                     <span x-show="submitting" class="flex items-center gap-2" style="display: none;">
@@ -104,11 +104,12 @@
             </div>
         </form>
 
-        <div class="mt-6 pt-5 border-t border-[#334155] text-center">
+        <div class="mt-6 pt-5 border-t border-[#334155] text-center flex flex-col sm:flex-row items-center justify-between gap-2">
             <p class="text-xs text-[#94A3B8]">
                 Already know your password?
                 <a href="{{ route('login') }}" class="text-[#df747a] hover:text-white font-semibold underline transition">Back to Sign In</a>
             </p>
+            <a href="{{ route('privacy') }}" class="text-[11px] text-slate-500 hover:text-slate-300 underline transition">Privacy Notice</a>
         </div>
     </div>
 </x-guest-layout>

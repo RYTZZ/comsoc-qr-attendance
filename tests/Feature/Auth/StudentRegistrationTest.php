@@ -28,7 +28,13 @@ class StudentRegistrationTest extends TestCase
         $response = $this->get('/signup');
 
         $response->assertStatus(200);
-        // Step 1: explicit responsive grid structures
+        // Step order: Step 1, Step 2, Step 3
+        $response->assertSee('STEP 1 OF 3', false);
+        $response->assertSee('STEP 2 OF 3', false);
+        $response->assertSee('STEP 3 OF 3', false);
+
+        // Step 1: Student Information & Academic Grids
+        $response->assertSee('Student Information', false);
         $response->assertSee('academic-name-grid', false);
         $response->assertSee('academic-cohort-grid', false);
         $response->assertSee('Student ID / Student Number', false);
@@ -36,16 +42,26 @@ class StudentRegistrationTest extends TestCase
         $response->assertSee('name="first_name"', false);
         $response->assertSee('name="middle_name"', false);
         $response->assertSee('name="last_name"', false);
+        $response->assertSee('name="email"', false);
         $response->assertSee("name: 'program'", false);
         $response->assertSee("name: 'year'", false);
         $response->assertSee("name: 'block'", false);
 
-        // Step 2: responsive avatar selector grid and security fields
+        // Step 2: Avatar & Username
+        $response->assertSee('Avatar & Username', false);
+        $response->assertSee('Choose Your Adventurer Avatar', false);
         $response->assertSee('avatar-grid-responsive', false);
+        $response->assertSee('name="username"', false);
+        $response->assertSee('Enter your username', false);
+        $response->assertDontSee('e.g., rytzzdev', false);
+        $response->assertSee('name="avatar_seed"', false);
+
+        // Step 3: Account Security
+        $response->assertSee('Account Security', false);
         $response->assertSee('security-passwords-grid', false);
-        $response->assertSee('Adventurer Character Avatar options', false);
-        $response->assertSee('Felix', false);
-        $response->assertSee('Silas', false);
+        $response->assertSee('name="password"', false);
+        $response->assertSee('name="password_confirmation"', false);
+        $response->assertSee('Create Account', false);
     }
 
     public function test_student_can_register_with_valid_details(): void
@@ -66,6 +82,8 @@ class StudentRegistrationTest extends TestCase
             'program' => 'Bachelor of Science in Information Technology',
             'year' => '3rd',
             'block' => '2',
+            'username' => 'juandelacruz',
+            'avatar_seed' => 'Felix',
             'password' => 'SecurePass123',
             'password_confirmation' => 'SecurePass123',
             'terms' => '1',
@@ -87,6 +105,9 @@ class StudentRegistrationTest extends TestCase
 
         $this->assertDatabaseHas('users', [
             'email' => 'juan.delacruz@sorsu.edu.ph',
+            'username' => 'juandelacruz',
+            'avatar_seed' => 'Felix',
+            'avatar_style' => 'adventurer',
             'role' => 'student',
             'is_active' => true,
         ]);
@@ -94,6 +115,7 @@ class StudentRegistrationTest extends TestCase
         $user = User::where('email', 'juan.delacruz@sorsu.edu.ph')->first();
         $this->assertNotNull($user->student_id);
         $this->assertNotNull($user->profile);
+        $this->assertNotNull($user->adventurer_setup_at);
     }
 
     public function test_duplicate_student_id_is_rejected(): void
@@ -218,6 +240,8 @@ class StudentRegistrationTest extends TestCase
             'program' => 'Bachelor of Science in Information Technology',
             'year' => '1st',
             'block' => '1',
+            'username' => 'zerolead',
+            'avatar_seed' => 'Felix',
             'password' => 'SecurePass123',
             'password_confirmation' => 'SecurePass123',
             'terms' => '1',
@@ -226,6 +250,59 @@ class StudentRegistrationTest extends TestCase
         $response->assertRedirect('/dashboard');
         $this->assertDatabaseHas('students', [
             'student_number' => '0024-0001',
+        ]);
+        $this->assertDatabaseHas('users', [
+            'username' => 'zerolead',
+            'avatar_seed' => 'Felix',
+        ]);
+    }
+
+    public function test_registration_requires_username_and_avatar(): void
+    {
+        $response = $this->from('/signup')->post('/signup', [
+            'student_id' => '21-00777',
+            'first_name' => 'No',
+            'last_name' => 'Avatar',
+            'email' => 'no.avatar@sorsu.edu.ph',
+            'program' => 'Bachelor of Science in Information Technology',
+            'year' => '1st',
+            'block' => '1',
+            'password' => 'SecurePass123',
+            'password_confirmation' => 'SecurePass123',
+            'terms' => '1',
+        ]);
+
+        $response->assertRedirect('/signup');
+        $response->assertSessionHasErrors(['username', 'avatar_seed']);
+    }
+
+    public function test_registration_rejects_reserved_and_invalid_usernames(): void
+    {
+        $response = $this->from('/signup')->post('/signup', [
+            'student_id' => '21-00888',
+            'first_name' => 'Admin',
+            'last_name' => 'Imposter',
+            'email' => 'imposter@sorsu.edu.ph',
+            'program' => 'Bachelor of Science in Information Technology',
+            'year' => '1st',
+            'block' => '1',
+            'username' => 'admin',
+            'avatar_seed' => 'Felix',
+            'password' => 'SecurePass123',
+            'password_confirmation' => 'SecurePass123',
+            'terms' => '1',
+        ]);
+
+        $response->assertRedirect('/signup');
+        $response->assertSessionHasErrors(['username']);
+    }
+
+    public function test_guest_can_check_username_availability_endpoint(): void
+    {
+        $response = $this->getJson('/signup/check-username?username=brand_new_student');
+        $response->assertOk();
+        $response->assertJson([
+            'available' => true,
         ]);
     }
 }

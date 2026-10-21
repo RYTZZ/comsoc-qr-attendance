@@ -119,7 +119,7 @@
                                 <div class="relative flex-1">
                                     <input type="text"
                                            x-model="manualTokenInput"
-                                           placeholder="e.g. 7K9-MP4"
+                                           placeholder="Enter pass code"
                                            maxlength="10"
                                            class="w-full bg-[#0B1120] border border-[#334155] focus:border-[#df747a] focus:ring-1 focus:ring-[#df747a] rounded-xl px-3 py-2 text-xs font-mono font-bold tracking-wider text-white placeholder-[#64748B] uppercase uppercase-input outline-none transition"
                                            :disabled="processing">

@@ -250,7 +250,7 @@
                                             <label class="block text-xs font-semibold text-slate-300 mb-1">
                                                 Specific Note / Context
                                             </label>
-                                            <input type="text" name="custom_reason" x-model="customReason" placeholder="e.g. Winner 1st place in Mobile Dev Category"
+                                            <input type="text" name="custom_reason" x-model="customReason" placeholder="Enter adjustment reason or note"
                                                    class="input-dark text-xs w-full">
                                         </div>
                                     </div>

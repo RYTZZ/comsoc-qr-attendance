@@ -16,16 +16,16 @@
     <body class="font-sans text-[#F8FAFC] antialiased bg-[#0B1120] min-h-screen relative overflow-x-hidden selection:bg-[#560E0F] selection:text-white">
         <x-public-auth-bg />
 
-        <div class="min-h-screen flex flex-col justify-center items-center p-3 py-4 sm:py-6 relative z-10 overflow-y-auto">
-            <div class="mb-2 sm:mb-3">
-                <a href="/">
-                    <div class="w-12 h-12 sm:w-14 sm:h-14 rounded-2xl bg-[#172033]/90 border border-[#334155] p-2 shadow-xl enter-logo backdrop-blur-sm flex items-center justify-center">
+        <div class="min-h-screen flex flex-col justify-start sm:justify-center items-center px-4 py-8 sm:py-12 relative z-10 overflow-y-auto">
+            <div class="mb-4 sm:mb-6">
+                <a href="/" aria-label="COMSOC Home">
+                    <div class="w-14 h-14 sm:w-16 sm:h-16 rounded-2xl bg-[#172033]/90 border border-[#334155] p-2.5 shadow-xl enter-logo backdrop-blur-sm flex items-center justify-center hover:border-[#8F3033] transition">
                         <x-application-logo class="w-full h-full" />
                     </div>
                 </a>
             </div>
 
-            <div class="w-full sm:max-w-md lg:max-w-lg card shadow-2xl border border-[#334155] bg-[#172033]/95 backdrop-blur-md enter-card">
+            <div class="w-full sm:max-w-md lg:max-w-lg card shadow-2xl border border-[#334155] bg-[#172033]/95 backdrop-blur-md enter-card p-6 sm:p-8 my-auto sm:my-0">
                 {{ $slot }}
             </div>
 

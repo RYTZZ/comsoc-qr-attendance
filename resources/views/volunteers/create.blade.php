@@ -22,7 +22,7 @@
 
                     <div>
                         <label class="block text-xs font-bold text-slate-300 uppercase tracking-wider mb-2">Opportunity Title *</label>
-                        <input type="text" name="title" value="{{ old('title') }}" required placeholder="e.g. Annual IT Symposium Registration Desk Officer"
+                        <input type="text" name="title" value="{{ old('title') }}" required placeholder="Enter opportunity title"
                                class="w-full bg-[#0B1120] border border-[#334155] rounded-xl px-4 py-2.5 text-xs text-white focus:ring-2 focus:ring-[#8F3033]">
                         @error('title') <p class="text-xs text-rose-400 mt-1">{{ $message }}</p> @enderror
                     </div>
@@ -50,14 +50,14 @@
 
                     <div>
                         <label class="block text-xs font-bold text-slate-300 uppercase tracking-wider mb-2">General Description *</label>
-                        <textarea name="description" rows="3" required placeholder="Overview of the activity and significance to the organization..."
+                        <textarea name="description" rows="3" required placeholder="Enter general overview and significance of the activity"
                                   class="w-full bg-[#0B1120] border border-[#334155] rounded-xl p-3 text-xs text-white">{{ old('description') }}</textarea>
                         @error('description') <p class="text-xs text-rose-400 mt-1">{{ $message }}</p> @enderror
                     </div>
 
                     <div>
                         <label class="block text-xs font-bold text-slate-300 uppercase tracking-wider mb-2">Key Responsibilities & Tasks *</label>
-                        <textarea name="responsibilities" rows="4" required placeholder="List duties: e.g. manage check-in kiosks, verify student tickets, usher VIP speakers..."
+                        <textarea name="responsibilities" rows="4" required placeholder="Enter specific duties and volunteer tasks"
                                   class="w-full bg-[#0B1120] border border-[#334155] rounded-xl p-3 text-xs text-white">{{ old('responsibilities') }}</textarea>
                         @error('responsibilities') <p class="text-xs text-rose-400 mt-1">{{ $message }}</p> @enderror
                     </div>
@@ -74,7 +74,7 @@
 
                         <div>
                             <label class="block text-xs font-bold text-slate-300 uppercase tracking-wider mb-2">Location Details</label>
-                            <input type="text" name="location_details" value="{{ old('location_details') }}" placeholder="e.g. Bulan Campus Auditorium"
+                            <input type="text" name="location_details" value="{{ old('location_details') }}" placeholder="Enter location details"
                                    class="w-full bg-[#0B1120] border border-[#334155] rounded-xl px-4 py-2 text-xs text-white">
                         </div>
                     </div>

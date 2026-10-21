@@ -40,11 +40,40 @@ class PasswordResetLinkController extends Controller
             'email' => ['required', 'email'],
         ]);
 
+        $normalizedEmail = strtolower(trim((string) $request->email));
+
+        // Account lookup: Check if user exists by primary email or preferred_email
+        $user = \App\Models\User::where('email', $normalizedEmail)
+            ->orWhere('preferred_email', $normalizedEmail)
+            ->first();
+
+        // If the user was found by preferred email, use their primary account email
+        // so Laravel's PasswordBroker token repository (which is keyed on primary email)
+        // correctly persists and validates the reset token.
+        $targetEmail = $user ? $user->email : $normalizedEmail;
+
         $correlationId = (string) Str::uuid();
+
+        $mailer = (string) config('mail.default');
+
+        if (app()->environment('production') && in_array($mailer, ['log', 'array', 'null'], true)) {
+            Log::critical('Password reset — MAIL_MISCONFIGURED: mailer cannot deliver in production', [
+                'correlation_id' => $correlationId,
+                'subsystem'      => 'mail_config',
+                'mailer'         => $mailer,
+                'ip'             => $request->ip(),
+            ]);
+
+            return back()->withInput($request->only('email'))
+                ->withErrors([
+                    'error' => 'Password reset email is temporarily unavailable. '
+                             . 'Please contact an administrator. (Ref: ' . $correlationId . ')',
+                ]);
+        }
 
         try {
             $status = Password::sendResetLink(
-                $request->only('email')
+                ['email' => $targetEmail]
             );
         } catch (\Illuminate\Database\QueryException $e) {
             Log::error('Password reset — TOKEN_STORAGE failure', [
@@ -101,8 +130,18 @@ class PasswordResetLinkController extends Controller
                 ->withErrors(['email' => __($status)]);
         }
 
-        // For both RESET_LINK_SENT and USER_NOT_FOUND, always show the success
-        // message to prevent account enumeration.
-        return back()->with('status', __(Password::RESET_LINK_SENT));
+        // Dispatch means the mailer accepted the message; it does not confirm inbox delivery.
+        Log::info('Password reset — notification dispatched', [
+            'correlation_id' => $correlationId,
+            'mailer'         => $mailer,
+            'account_found'  => $status === Password::RESET_LINK_SENT,
+        ]);
+
+        // Identical neutral response for RESET_LINK_SENT and USER_NOT_FOUND to prevent enumeration.
+        return back()->with(
+            'status',
+            'If an account exists for that email address, a password reset link has been sent. '
+            . 'It may take a few minutes to arrive; please also check your spam folder.'
+        );
     }
 }

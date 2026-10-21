@@ -159,6 +159,13 @@ class MemberDashboardController extends Controller
             ->where('is_active', true)
             ->count() + CollaborationProject::where('owner_id', $user->id)->whereIn('status', ['recruiting', 'in_progress'])->count();
 
+        // Additional data for structured dashboard tabs
+        $recentRedemptions = $user->redemptions()->with('reward')->latest()->take(6)->get();
+        $userProfile = $user->profile ?: $user->profile()->create(['user_id' => $user->id]);
+        $notificationPrefs = $user->notificationPreferences ?: $user->notificationPreferences()->create(['user_id' => $user->id]);
+        $userSkills = $user->skills()->take(8)->get();
+        $myMissionSubmissions = \App\Models\MissionSubmission::where('user_id', $user->id)->with('mission')->latest()->take(6)->get();
+
         return view('dashboard', compact(
             'user',
             'student',
@@ -178,6 +185,11 @@ class MemberDashboardController extends Controller
             'recentXp',
             'recentPoints',
             'featuredRewards',
+            'recentRedemptions',
+            'userProfile',
+            'notificationPrefs',
+            'userSkills',
+            'myMissionSubmissions',
             'userAchievementsCount',
             'totalAchievements',
             'recentAchievements',

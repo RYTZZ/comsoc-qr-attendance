@@ -59,6 +59,7 @@ class User extends Authenticatable
         'officer_position',
         'avatar_style',
         'avatar_seed',
+        'adventurer_setup_at',
         'can_collect_rewards',
         'student_id',
         'created_by',
@@ -98,6 +99,7 @@ class User extends Authenticatable
             'can_collect_rewards' => 'boolean',
             'must_change_password' => 'boolean',
             'last_activity_at' => 'datetime',
+            'adventurer_setup_at' => 'datetime',
         ];
     }
 
@@ -288,7 +290,17 @@ class User extends Authenticatable
 
     public function getDisplayNameAttribute(): string
     {
-        return $this->nickname ?: $this->name;
+        return $this->username ?: ($this->nickname ?: $this->name);
+    }
+
+    public function getPublicNameAttribute(): string
+    {
+        return $this->username ?: ($this->nickname ?: $this->name);
+    }
+
+    public function hasCompletedAdventurerSetup(): bool
+    {
+        return $this->adventurer_setup_at !== null || (!empty($this->username) && !empty($this->avatar_seed));
     }
 
     public function isSuperAdmin(): bool

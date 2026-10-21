@@ -53,7 +53,7 @@
                                     <i data-lucide="search" class="w-3.5 h-3.5"></i>
                                 </span>
                                 <input type="text" name="search" value="{{ $search }}"
-                                       placeholder="Search members..."
+                                       placeholder="Enter member search"
                                        class="input-dark pl-9 pr-3 py-1.5 text-xs w-full">
                             </div>
 
@@ -69,7 +69,7 @@
                                     name="program"
                                     :options="$programOptions"
                                     :selected="$selectedProgram"
-                                    placeholder="Program"
+                                    placeholder="Select your program"
                                     onchange="this.closest('form').submit()"
                                 />
                             </div>
@@ -85,7 +85,7 @@
                                     name="year_level"
                                     :options="$yearOptions"
                                     :selected="$selectedYearLevel"
-                                    placeholder="Year Level"
+                                    placeholder="Select your year level"
                                     onchange="this.closest('form').submit()"
                                 />
                             </div>
@@ -101,7 +101,7 @@
                                     name="skill_id"
                                     :options="$skillOptions"
                                     :selected="$selectedSkill"
-                                    placeholder="Skill Filter"
+                                    placeholder="Select a skill"
                                     onchange="this.closest('form').submit()"
                                 />
                             </div>
@@ -170,7 +170,7 @@
 
                                     <div>
                                         <h3 class="text-sm font-bold text-white group-hover:text-rose-300 transition-colors line-clamp-1">
-                                            {{ $member->name }}
+                                            {{ $member->username ? '@' . $member->username : $member->public_name }}
                                         </h3>
                                         <span class="text-[11px] text-slate-400 block font-mono">
                                             {{ $stud ? "{$stud->program} • {$stud->year_level}" : 'Computing Society' }}
@@ -274,11 +274,9 @@
                                     <div class="space-y-3">
                                         <div class="flex items-start justify-between gap-3">
                                             <div class="flex items-center gap-3">
-                                                <div class="w-11 h-11 rounded-2xl bg-slate-800 border border-slate-700 flex items-center justify-center text-white font-bold text-sm">
-                                                    {{ strtoupper(substr($cand->name, 0, 1)) }}
-                                                </div>
+                                                <x-user-avatar :user="$cand" size="md" class="border border-amber-500/40 shadow-sm" />
                                                 <div>
-                                                    <h3 class="text-sm font-bold text-white">{{ $cand->name }}</h3>
+                                                    <h3 class="text-sm font-bold text-white">{{ $cand->username ? '@' . $cand->username : $cand->public_name }}</h3>
                                                     <span class="text-[10px] text-slate-400 font-mono">
                                                         {{ $cand->student?->program ?? 'Computing Society' }}
                                                     </span>

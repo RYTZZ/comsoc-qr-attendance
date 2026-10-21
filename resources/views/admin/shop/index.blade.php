@@ -238,7 +238,7 @@
                                                             Rejection Reason (Visible to Member) <span class="text-rose-400">*</span>
                                                         </label>
                                                         <textarea name="rejection_reason" rows="3" required
-                                                                  placeholder="e.g. Size out of stock, duplicate order request, or pickup unavailable"
+                                                                  placeholder="Enter rejection reason for member"
                                                                   class="input-dark text-xs w-full"></textarea>
                                                     </div>
 
@@ -346,7 +346,7 @@
                                         <label class="block text-xs font-semibold text-slate-300 mb-1">
                                             Inventory Stock (Physical / Merch / Kit)
                                         </label>
-                                        <input type="number" name="stock" min="0" placeholder="e.g. 25 (blank = unlimited)"
+                                        <input type="number" name="stock" min="0" placeholder="Enter stock quantity (leave blank for unlimited)"
                                                class="input-dark text-xs w-full font-mono">
                                     </div>
 
@@ -354,7 +354,7 @@
                                         <label class="block text-xs font-semibold text-slate-300 mb-1">
                                             Per-Member Limit (Optional)
                                         </label>
-                                        <input type="number" name="redemption_limit_per_member" min="1" placeholder="e.g. 1 per student"
+                                        <input type="number" name="redemption_limit_per_member" min="1" placeholder="Enter redemption limit per student"
                                                class="input-dark text-xs w-full font-mono">
                                     </div>
                                 </div>
@@ -381,7 +381,7 @@
                                     <label class="block text-xs font-semibold text-slate-300 mb-1">
                                         Description
                                     </label>
-                                    <textarea name="description" rows="3" placeholder="Describe the item, sizing, inclusions, or bundle details..."
+                                    <textarea name="description" rows="3" placeholder="Enter item description and inclusions"
                                               class="input-dark text-xs w-full"></textarea>
                                 </div>
 
@@ -389,7 +389,7 @@
                                     <label class="block text-xs font-semibold text-slate-300 mb-1">
                                         Eligibility Instructions / Restrictions
                                     </label>
-                                    <input type="text" name="eligibility_notes" placeholder="e.g. For official computing society members only"
+                                    <input type="text" name="eligibility_notes" placeholder="Enter eligibility instructions or restrictions"
                                            class="input-dark text-xs w-full">
                                 </div>
 
@@ -398,7 +398,7 @@
                                         Fulfillment / Pickup Instructions
                                     </label>
                                     <textarea name="fulfillment_instructions" rows="2"
-                                              placeholder="e.g. Claim at COMSOC Officer desk in the ICT building during office hours."
+                                              placeholder="Enter fulfillment and pickup instructions"
                                               class="input-dark text-xs w-full"></textarea>
                                 </div>
 

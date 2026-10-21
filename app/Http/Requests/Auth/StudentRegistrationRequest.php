@@ -66,8 +66,17 @@ class StudentRegistrationRequest extends FormRequest
                 'confirmed',
             ],
             'terms' => ['accepted'],
+            'username' => [
+                'required',
+                'string',
+                new \App\Rules\UsernameRule(),
+            ],
+            'avatar_seed' => [
+                'required',
+                'string',
+                'in:' . implode(',', array_keys(\App\Services\AvatarService::PRESET_SEEDS)),
+            ],
             'avatar_style' => ['nullable', 'string', 'in:adventurer'],
-            'avatar_seed' => ['nullable', 'string', 'max:50'],
         ];
     }
 
@@ -90,6 +99,9 @@ class StudentRegistrationRequest extends FormRequest
             'password.required' => 'Password is required.',
             'password.confirmed' => 'Password confirmation does not match.',
             'terms.accepted' => 'You must accept the terms and privacy notice to continue.',
+            'username.required' => 'Please enter a username.',
+            'avatar_seed.required' => 'Please select an adventurer avatar.',
+            'avatar_seed.in' => 'The selected avatar is not part of the official adventurer collection.',
         ];
     }
 }

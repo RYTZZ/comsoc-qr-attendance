@@ -33,7 +33,7 @@
 
                     <div>
                         <label class="block text-xs font-bold text-slate-300 uppercase tracking-wider mb-2">Subject Summary *</label>
-                        <input type="text" name="subject" value="{{ old('subject') }}" required placeholder="Brief description of the problem (e.g. Scanned in morning session but missing from ledger)"
+                        <input type="text" name="subject" value="{{ old('subject') }}" required placeholder="Enter a brief summary of the issue"
                                class="w-full bg-[#0B1120] border border-[#334155] rounded-xl px-4 py-2.5 text-xs text-white focus:ring-2 focus:ring-[#8F3033]">
                         @error('subject') <p class="text-xs text-rose-400 mt-1">{{ $message }}</p> @enderror
                     </div>
@@ -89,7 +89,7 @@
 
                     <div>
                         <label class="block text-xs font-bold text-slate-300 uppercase tracking-wider mb-2">Detailed Description *</label>
-                        <textarea name="description" rows="5" required placeholder="Please provide specific details: time, location or kiosk terminal, photo pass code, error message, or explanation."
+                        <textarea name="description" rows="5" required placeholder="Enter description of the issue with relevant details"
                                   class="w-full bg-[#0B1120] border border-[#334155] rounded-xl p-4 text-xs text-white focus:ring-2 focus:ring-[#8F3033]">{{ old('description') }}</textarea>
                         @error('description') <p class="text-xs text-rose-400 mt-1">{{ $message }}</p> @enderror
                     </div>

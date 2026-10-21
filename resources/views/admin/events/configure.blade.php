@@ -774,14 +774,14 @@
         <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div>
                 <label for="reward_xp" class="label">EXP Earned</label>
-                <input id="reward_xp" name="reward_xp" type="number" min="0" value="{{ old('reward_xp', $event->reward_xp ?? 50) }}" class="input font-mono" placeholder="e.g. 50" />
+                <input id="reward_xp" name="reward_xp" type="number" min="0" value="{{ old('reward_xp', $event->reward_xp ?? 50) }}" class="input font-mono" placeholder="Enter EXP amount" />
                 <p class="text-[11px] text-slate-500 mt-1">Amount of EXP credited to qualifying attendees.</p>
                 @error('reward_xp')<p class="text-red-400 text-xs mt-1">{{ $message }}</p>@enderror
             </div>
 
             <div>
                 <label for="reward_points" class="label">Points Earned</label>
-                <input id="reward_points" name="reward_points" type="number" min="0" value="{{ old('reward_points', $event->reward_points ?? 10) }}" class="input font-mono" placeholder="e.g. 10" />
+                <input id="reward_points" name="reward_points" type="number" min="0" value="{{ old('reward_points', $event->reward_points ?? 10) }}" class="input font-mono" placeholder="Enter points amount" />
                 <p class="text-[11px] text-slate-500 mt-1">Amount of points awarded for the season standings.</p>
                 @error('reward_points')<p class="text-red-400 text-xs mt-1">{{ $message }}</p>@enderror
             </div>

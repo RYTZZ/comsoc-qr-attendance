@@ -15,39 +15,58 @@
     </head>
     <body class="h-full bg-[#0B1120] text-[#F8FAFC] font-sans antialiased"
           x-data="{
-              sidebarCollapsed: localStorage.getItem('comsoc_sidebar_collapsed') === 'true',
-              mobileDrawerOpen: false,
-              toggleSidebar() {
-                  this.sidebarCollapsed = !this.sidebarCollapsed;
-                  localStorage.setItem('comsoc_sidebar_collapsed', this.sidebarCollapsed);
-                  this.$nextTick(() => { if (window.lucideIcons) window.createIcons({ icons: window.lucideIcons }); });
+              drawerOpen: false,
+              openDrawer() {
+                  this.drawerOpen = true;
+                  this.$nextTick(() => {
+                      if (window.lucideIcons) window.createIcons({ icons: window.lucideIcons });
+                      const closeBtn = document.getElementById('drawer-close-button');
+                      if (closeBtn) closeBtn.focus();
+                  });
+              },
+              closeDrawer() {
+                  this.drawerOpen = false;
+              },
+              toggleDrawer() {
+                  if (this.drawerOpen) {
+                      this.closeDrawer();
+                  } else {
+                      this.openDrawer();
+                  }
               }
-          }">
-        <div class="min-h-screen bg-[#0B1120] flex">
+          }"
+          x-effect="document.body.classList.toggle('overflow-hidden', drawerOpen)"
+          @keydown.escape.window="closeDrawer()">
+        <div class="min-h-screen bg-[#0B1120] flex flex-col">
             @include('layouts.navigation')
 
-            <div class="flex-1 flex flex-col min-w-0 transition-all duration-300 ease-in-out"
-                 :class="sidebarCollapsed ? 'lg:pl-20' : 'lg:pl-64'">
+            <div class="flex-1 flex flex-col min-w-0 w-full transition-all duration-300 ease-in-out">
 
                 <header class="sticky top-0 z-20 bg-[#172033]/95 backdrop-blur-md border-b border-[#334155] px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between shadow-md">
                     <div class="flex items-center gap-3">
+                        <!-- Recognizable Hamburger Toggle Button for both desktop and mobile -->
                         <button type="button"
-                                @click="mobileDrawerOpen = true"
-                                class="lg:hidden inline-flex items-center justify-center p-2 rounded-xl text-slate-300 hover:text-white hover:bg-[#1E293B] focus:outline-none focus:ring-2 focus:ring-[#8F3033] transition"
-                                aria-label="Open navigation drawer">
+                                @click="toggleDrawer()"
+                                class="inline-flex items-center justify-center p-2 rounded-xl text-slate-300 hover:text-white hover:bg-[#1E293B] focus:outline-none focus:ring-2 focus:ring-[#8F3033] transition"
+                                :aria-expanded="drawerOpen.toString()"
+                                aria-controls="navigation-drawer"
+                                aria-label="Toggle navigation menu">
                             <i data-lucide="menu" class="w-5 h-5"></i>
                         </button>
 
-                        <div class="lg:hidden flex items-center gap-2">
-                            <a href="{{ route('dashboard') }}" class="flex items-center gap-2">
-                                <div class="w-8 h-8 rounded-lg bg-[#0B1120] border border-[#334155] p-1 flex items-center justify-center shrink-0">
+                        <div class="flex items-center gap-2.5">
+                            <a href="{{ route('dashboard') }}" class="flex items-center gap-2.5 group">
+                                <div class="w-8 h-8 rounded-xl bg-[#0B1120] border border-[#334155] p-1 flex items-center justify-center shrink-0 shadow-sm group-hover:border-[#8F3033] transition">
                                     <img src="{{ asset('images/COMSOC.png') }}" alt="Computing Society Logo" class="w-full h-full object-contain">
                                 </div>
-                                <span class="font-extrabold text-[#F8FAFC] text-sm font-brand-display tracking-tight">COMSOC</span>
+                                <div class="flex flex-col">
+                                    <span class="font-extrabold text-[#F8FAFC] text-sm font-brand-display tracking-tight leading-tight">COMSOC HUB</span>
+                                    <span class="text-[9.5px] text-[#df747a] font-semibold tracking-wider uppercase leading-none hidden sm:inline">QR Attendance & EXP</span>
+                                </div>
                             </a>
                         </div>
 
-                        <div class="hidden lg:flex items-center gap-2 text-xs text-slate-400">
+                        <div class="hidden xl:flex items-center gap-2 text-xs text-slate-400 ms-4 ps-4 border-l border-[#334155]">
                             <span class="inline-block w-2 h-2 rounded-full bg-emerald-400"></span>
                             <span class="font-medium text-[#94A3B8]">Computing Society of Sorsogon State University – Bulan Campus</span>
                         </div>
@@ -102,6 +121,11 @@
                                     {{ __('Officer Dashboard') }}
                                 </x-dropdown-link>
                                 @endif
+
+                                <x-dropdown-link :href="route('privacy')" class="text-slate-300 hover:text-white hover:bg-[#1E293B] flex items-center gap-2 text-xs py-2.5">
+                                    <i data-lucide="file-text" class="w-4 h-4 text-slate-400"></i>
+                                    {{ __('Privacy Notice') }}
+                                </x-dropdown-link>
 
                                 <div class="border-t border-[#334155] my-1"></div>
 

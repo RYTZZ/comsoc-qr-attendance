@@ -19,6 +19,10 @@ Route::middleware('guest')->group(function () {
         ->middleware('throttle:10,1')
         ->name('signup.store');
 
+    Route::get('signup/check-username', [\App\Http\Controllers\Onboarding\AdventurerSetupController::class, 'checkUsername'])
+        ->middleware('throttle:60,1')
+        ->name('signup.check-username');
+
     Route::get('login', [AuthenticatedSessionController::class, 'create'])
         ->name('login');
 

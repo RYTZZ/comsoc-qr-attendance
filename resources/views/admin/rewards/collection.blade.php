@@ -34,7 +34,7 @@
                         @csrf
                         <input type="text"
                                name="claim_code"
-                               placeholder="e.g. CMS-A1B2-C3D4"
+                               placeholder="Enter member claim code"
                                required
                                class="flex-1 bg-[#0B1120] border-2 border-[#334155] focus:border-[#8F3033] rounded-2xl px-4 py-3 text-sm text-white font-mono uppercase tracking-widest placeholder:normal-case placeholder:tracking-normal placeholder:text-[#94A3B8] focus:outline-none focus:ring-2 focus:ring-[#8F3033]/40">
                         <button type="submit" class="btn-primary shrink-0 rounded-2xl py-3 px-6 shadow-xl">
@@ -163,7 +163,7 @@
                                                     </p>
                                                     <div>
                                                         <label class="block text-xs font-semibold text-slate-300 mb-1">Reason for Cancellation</label>
-                                                        <input type="text" name="reason" placeholder="e.g. Member requested size change or stock defect" required class="w-full bg-[#0B1120] border border-[#334155] rounded-xl px-3 py-2 text-xs text-white focus:outline-none focus:border-[#8F3033]">
+                                                        <input type="text" name="reason" placeholder="Enter reason for cancellation" required class="w-full bg-[#0B1120] border border-[#334155] rounded-xl px-3 py-2 text-xs text-white focus:outline-none focus:border-[#8F3033]">
                                                     </div>
                                                     <div class="flex items-center justify-end gap-2 pt-2">
                                                         <button type="button" @click="$dispatch('close')" class="btn-secondary btn-sm">Cancel</button>

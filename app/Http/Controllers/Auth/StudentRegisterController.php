@@ -55,15 +55,9 @@ class StudentRegisterController extends Controller
             ]);
 
             $fullName = trim("{$student->first_name} {$student->last_name}");
-            $username = strtolower(preg_replace('/[^a-zA-Z0-9]/', '', $validated['student_id']));
+            $username = strtolower(trim($validated['username']));
 
-            if (empty($username) || User::where('username', $username)->exists()) {
-                $username = strtolower(explode('@', $email)[0]) . '_' . Str::random(4);
-            }
-
-            $avatarSeed = !empty($validated['avatar_seed'])
-                ? \App\Services\AvatarService::sanitizeSeed($validated['avatar_seed'])
-                : \App\Services\AvatarService::DEFAULT_SEED;
+            $avatarSeed = \App\Services\AvatarService::sanitizeSeed($validated['avatar_seed']);
             $avatarStyle = $validated['avatar_style'] ?? 'adventurer';
 
             $user = User::create([
@@ -75,6 +69,7 @@ class StudentRegisterController extends Controller
                 'role' => 'student', // Never grant officer privileges during self-registration
                 'avatar_style' => $avatarStyle,
                 'avatar_seed' => $avatarSeed,
+                'adventurer_setup_at' => now(),
                 'student_id' => $student->id,
                 'student_number' => $student->student_number,
                 'is_active' => true,
@@ -139,6 +134,8 @@ class StudentRegisterController extends Controller
 
         app(\App\Services\SessionSecurityService::class)->handleLogin($user, $request);
 
-        return redirect()->route('dashboard')->with('status', 'Registration successful! Welcome to COMSOC QR Attendance.');
+        return redirect()->route('dashboard')
+            ->with('status', 'Registration successful! Welcome to the COMSOC HUB community.')
+            ->with('success', 'Registration successful! Welcome to the COMSOC HUB community.');
     }
 }

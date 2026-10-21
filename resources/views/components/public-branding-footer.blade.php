@@ -5,7 +5,8 @@
     <p class="text-[11px] text-[#cc7478] font-medium tracking-normal">
         Innovating Today for a Better Community.
     </p>
-    <p class="text-[10px] text-slate-600 tracking-normal">
-        A.Y. 2026–2027 <span class="text-slate-700">•</span> Computing Society of SorSU – Bulan Campus
+    <p class="text-[10px] text-slate-500 tracking-normal pt-1">
+        A.Y. 2026–2027 <span class="text-slate-700">•</span> Computing Society of SorSU – Bulan Campus <span class="text-slate-700">•</span>
+        <a href="{{ route('privacy') }}" class="text-[#df747a] hover:text-white underline transition">Privacy Notice</a>
     </p>
 </div>

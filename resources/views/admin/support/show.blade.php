@@ -220,13 +220,13 @@
                 @csrf
                 <div>
                     <label class="block text-xs text-slate-400 mb-1">Resolution Code *</label>
-                    <input type="text" name="resolution_code" required placeholder="e.g. ATTENDANCE_CONFIRMED, EXP_ADJUSTED, QR_REISSUED, REJECTED"
+                    <input type="text" name="resolution_code" required placeholder="Enter resolution code"
                            class="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-xs text-white">
                 </div>
 
                 <div>
                     <label class="block text-xs text-slate-400 mb-1">Resolution Summary for Student *</label>
-                    <textarea name="resolution_summary" rows="4" required placeholder="Describe how the issue was resolved or the outcome of the investigation..."
+                    <textarea name="resolution_summary" rows="4" required placeholder="Enter resolution summary for student"
                               class="w-full bg-slate-950 border border-slate-800 rounded-xl p-3 text-xs text-white"></textarea>
                 </div>
 

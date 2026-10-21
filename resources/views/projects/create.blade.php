@@ -22,7 +22,7 @@
 
                     <div>
                         <label class="block text-xs font-bold text-slate-300 uppercase tracking-wider mb-2">Project Title *</label>
-                        <input type="text" name="title" value="{{ old('title') }}" required placeholder="e.g. Sorsogon State University Student Portal Mobile App"
+                        <input type="text" name="title" value="{{ old('title') }}" required placeholder="Enter project title"
                                class="w-full bg-[#0B1120] border border-[#334155] rounded-xl px-4 py-2.5 text-xs text-white focus:ring-2 focus:ring-[#8F3033]">
                         @error('title') <p class="text-xs text-rose-400 mt-1">{{ $message }}</p> @enderror
                     </div>
@@ -49,14 +49,14 @@
 
                     <div>
                         <label class="block text-xs font-bold text-slate-300 uppercase tracking-wider mb-2">Problem Statement / Idea Pitch *</label>
-                        <textarea name="problem_statement" rows="3" required placeholder="What campus or community challenge does this project solve?"
+                        <textarea name="problem_statement" rows="3" required placeholder="Enter problem statement or project pitch"
                                   class="w-full bg-[#0B1120] border border-[#334155] rounded-xl p-3 text-xs text-white">{{ old('problem_statement') }}</textarea>
                         @error('problem_statement') <p class="text-xs text-rose-400 mt-1">{{ $message }}</p> @enderror
                     </div>
 
                     <div>
                         <label class="block text-xs font-bold text-slate-300 uppercase tracking-wider mb-2">Full Project Description & Scope *</label>
-                        <textarea name="description" rows="5" required placeholder="Describe technical scope, planned stack, goals, and architectural outline..."
+                        <textarea name="description" rows="5" required placeholder="Enter project scope and technical description"
                                   class="w-full bg-[#0B1120] border border-[#334155] rounded-xl p-3 text-xs text-white">{{ old('description') }}</textarea>
                         @error('description') <p class="text-xs text-rose-400 mt-1">{{ $message }}</p> @enderror
                     </div>
@@ -78,13 +78,13 @@
                     <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
                         <div>
                             <label class="block text-xs font-bold text-slate-300 uppercase tracking-wider mb-2">Skills Needed (Comma-separated)</label>
-                            <input type="text" name="skills_needed" value="{{ old('skills_needed') }}" placeholder="e.g. Laravel, React, Tailwind, Figma"
+                            <input type="text" name="skills_needed" value="{{ old('skills_needed') }}" placeholder="Enter skills needed (comma-separated)"
                                    class="w-full bg-[#0B1120] border border-[#334155] rounded-xl px-4 py-2 text-xs text-white">
                         </div>
 
                         <div>
                             <label class="block text-xs font-bold text-slate-300 uppercase tracking-wider mb-2">Preferred Roles (Comma-separated)</label>
-                            <input type="text" name="preferred_roles" value="{{ old('preferred_roles') }}" placeholder="e.g. Backend Dev, Frontend Dev, UI/UX"
+                            <input type="text" name="preferred_roles" value="{{ old('preferred_roles') }}" placeholder="Enter preferred roles (comma-separated)"
                                    class="w-full bg-[#0B1120] border border-[#334155] rounded-xl px-4 py-2 text-xs text-white">
                         </div>
                     </div>
@@ -92,13 +92,13 @@
                     <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
                         <div>
                             <label class="block text-xs font-bold text-slate-300 uppercase tracking-wider mb-2">Repository URL (Optional)</label>
-                            <input type="url" name="repository_url" value="{{ old('repository_url') }}" placeholder="https://github.com/..."
+                            <input type="url" name="repository_url" value="{{ old('repository_url') }}" placeholder="Enter repository URL"
                                    class="w-full bg-[#0B1120] border border-[#334155] rounded-xl px-4 py-2 text-xs text-white">
                         </div>
 
                         <div>
                             <label class="block text-xs font-bold text-slate-300 uppercase tracking-wider mb-2">Demo Link (Optional)</label>
-                            <input type="url" name="demo_url" value="{{ old('demo_url') }}" placeholder="https://..."
+                            <input type="url" name="demo_url" value="{{ old('demo_url') }}" placeholder="Enter demo or live preview URL"
                                    class="w-full bg-[#0B1120] border border-[#334155] rounded-xl px-4 py-2 text-xs text-white">
                         </div>
                     </div>
