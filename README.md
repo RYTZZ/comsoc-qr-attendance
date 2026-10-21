@@ -96,17 +96,32 @@ php artisan serve
 
 Access the application in your browser at `http://localhost:8000`.
 
-## Deployment (Render)
+## Production Environment & Deployment
 
-This repository includes a `render.yaml` blueprint for automatic deployment on [Render](https://render.com).
+The official production application is hosted at [https://comsochub.tech](https://comsochub.tech).
 
-1. Push your repository to GitHub or GitLab.
-2. In Render, select **New > Blueprint** and connect your repository.
-3. Render will provision:
-   - A PHP web service running Laravel
-   - A managed PostgreSQL instance
-4. Set `APP_KEY` in Render environment settings (generate with `php artisan key:generate --show`).
-5. Migrations will run automatically during deployment via the build script.
+### Production Deployment Steps
+
+1. **Pull Latest Changes**: Ensure the production branch is updated.
+   ```bash
+   git pull origin main
+   ```
+2. **Install & Optimize Dependencies**:
+   ```bash
+   composer install --no-dev --optimize-autoloader
+   npm ci
+   npm run build
+   ```
+3. **Database Migrations**: Run database migrations safely:
+   ```bash
+   php artisan migrate --force
+   ```
+4. **Cache Configuration & Routes**:
+   ```bash
+   php artisan config:cache
+   php artisan route:cache
+   php artisan view:cache
+   ```
 
 ## Incident Archival Cron
 
