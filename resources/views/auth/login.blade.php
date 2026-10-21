@@ -9,6 +9,14 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Manrope:wght@600;700;800;900&family=Space+Grotesk:wght@600;700&display=swap" rel="stylesheet">
+    <style>
+        /* Critical auth layout: independent of the compiled Vite bundle. */
+        .auth-branding-aside, .auth-content-main { width: 100%; min-width: 0; box-sizing: border-box; }
+        @media (min-width: 768px) {
+            .auth-branding-aside { width: 41.666667%; max-width: 41.666667%; flex: 0 0 41.666667%; }
+            .auth-content-main { width: 58.333333%; max-width: 58.333333%; flex: 1 1 58.333333%; }
+        }
+    </style>
     @vite(['resources/css/app.css', 'resources/js/app.js'])
 </head>
 <body class="min-h-screen bg-[#0B1120] text-[#F8FAFC] font-sans antialiased selection:bg-[#560E0F] selection:text-white flex flex-col md:flex-row relative overflow-x-hidden">

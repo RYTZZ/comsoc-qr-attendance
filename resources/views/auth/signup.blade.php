@@ -11,6 +11,12 @@
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Manrope:wght@600;700;800;900&family=Space+Grotesk:wght@600;700&display=swap" rel="stylesheet">
     @vite(['resources/css/app.css', 'resources/js/app.js'])
     <style>
+        /* Critical auth layout: independent of the compiled Vite bundle. */
+        .auth-branding-aside, .auth-content-main { width: 100%; min-width: 0; box-sizing: border-box; }
+        @media (min-width: 768px) {
+            .auth-branding-aside { width: 41.666667%; max-width: 41.666667%; flex: 0 0 41.666667%; }
+            .auth-content-main { width: 58.333333%; max-width: 58.333333%; flex: 1 1 58.333333%; }
+        }
         .academic-name-grid {
             display: grid;
             grid-template-columns: 1fr;
