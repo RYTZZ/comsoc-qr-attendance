@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Auth;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use App\Support\MailFailureClassifier;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Password;
 use Illuminate\Support\Str;
@@ -93,12 +94,19 @@ class PasswordResetLinkController extends Controller
                              . 'Please try again shortly. (Ref: ' . $correlationId . ')',
                 ]);
         } catch (\Symfony\Component\Mailer\Exception\TransportExceptionInterface|\Symfony\Component\Mime\Exception\ExceptionInterface $e) {
+            $diagnosis = MailFailureClassifier::classify($e);
+
             Log::error('Password reset — MAIL_TRANSPORT failure', [
-                'correlation_id' => $correlationId,
-                'subsystem'      => 'mail_transport',
-                'exception'      => get_class($e),
-                'message'        => $e->getMessage(),
-                'ip'             => $request->ip(),
+                'correlation_id'  => $correlationId,
+                'request_id'      => $request->header('X-Request-ID'),
+                'subsystem'       => 'mail_transport',
+                'operation'       => 'password_reset_notification',
+                'failed_stage'    => $diagnosis['stage'],
+                'exception'       => get_class($e),
+                'exception_chain' => $diagnosis['exception_chain'],
+                'detail'          => $diagnosis['detail'],
+                'transport'       => MailFailureClassifier::transportContext(),
+                'ip'              => $request->ip(),
             ]);
 
             return back()->withInput($request->only('email'))
