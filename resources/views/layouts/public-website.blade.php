@@ -24,6 +24,11 @@
 </head>
 <body class="h-full bg-[#0B1120] text-[#F8FAFC] font-sans antialiased selection:bg-[#560E0F] selection:text-white flex flex-col min-h-screen relative overflow-x-hidden" x-data="{ mobileMenuOpen: false }">
 
+    <!-- Accessibility Skip to Main Content Link -->
+    <a href="#main-content" class="sr-only focus:not-sr-only focus:fixed focus:top-3 focus:left-3 focus:z-50 focus:px-4 focus:py-2 focus:bg-[#560E0F] focus:text-white focus:rounded-xl focus:shadow-xl focus:outline-none focus:ring-2 focus:ring-[#df747a] text-xs font-semibold">
+        Skip to main content
+    </a>
+
     <!-- Ambient Grid & Glow Background -->
     <x-public-auth-bg />
 
@@ -108,10 +113,12 @@
                         </a>
                     @endauth
 
-                    <button @click="mobileMenuOpen = !mobileMenuOpen"
+                    <button @click="mobileMenuOpen = !mobileMenuOpen; $nextTick(() => { if (window.createIcons && window.lucideIcons) window.createIcons({ icons: window.lucideIcons }); })"
                             type="button"
                             class="p-2 rounded-xl text-slate-300 hover:text-white hover:bg-[#172033] focus:outline-none focus:ring-2 focus:ring-[#df747a]"
-                            aria-label="Toggle Navigation Menu">
+                            aria-label="Toggle Navigation Menu"
+                            :aria-expanded="mobileMenuOpen.toString()"
+                            aria-controls="mobile-nav-menu">
                         <i x-show="!mobileMenuOpen" data-lucide="menu" class="w-6 h-6"></i>
                         <i x-show="mobileMenuOpen" data-lucide="x" class="w-6 h-6" style="display: none;"></i>
                     </button>
@@ -121,7 +128,8 @@
         </div>
 
         <!-- Mobile Dropdown Navigation Menu -->
-        <div x-show="mobileMenuOpen"
+        <div id="mobile-nav-menu"
+             x-show="mobileMenuOpen"
              x-transition:enter="transition ease-out duration-200"
              x-transition:enter-start="opacity-0 -translate-y-2"
              x-transition:enter-end="opacity-100 translate-y-0"
@@ -173,7 +181,7 @@
     </header>
 
     <!-- Main Content Slot -->
-    <main class="flex-1 relative z-10">
+    <main id="main-content" class="flex-1 relative z-10 focus:outline-none" tabindex="-1">
         {{ $slot }}
     </main>
 

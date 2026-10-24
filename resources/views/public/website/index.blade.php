@@ -2,7 +2,7 @@
 
     <!-- Hero Section -->
     @if($settings['section_hero_visible'] ?? true)
-    <section class="relative overflow-hidden pt-12 pb-20 sm:pt-20 sm:pb-32 border-b border-[#334155]/60">
+    <section id="hero" class="relative overflow-hidden pt-12 pb-20 sm:pt-20 sm:pb-32 border-b border-[#334155]/60 scroll-mt-20">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
             <div class="grid grid-cols-1 lg:grid-cols-12 gap-12 items-center">
 
@@ -85,7 +85,7 @@
 
     <!-- Section 2: Who We Are -->
     @if($settings['section_about_visible'] ?? true)
-    <section class="py-16 sm:py-24 border-b border-[#334155]/60 bg-[#0B1120]/40">
+    <section id="about" class="py-16 sm:py-24 border-b border-[#334155]/60 bg-[#0B1120]/40 scroll-mt-20">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div class="max-w-3xl mx-auto text-center space-y-4 mb-14">
                 <span class="text-xs font-bold text-[#df747a] tracking-widest uppercase font-brand-accent">Who We Are</span>
@@ -143,7 +143,7 @@
 
     <!-- Section 3: Pillars of Excellence -->
     @if($settings['section_pillars_visible'] ?? true)
-    <section class="py-16 sm:py-24 border-b border-[#334155]/60">
+    <section id="pillars" class="py-16 sm:py-24 border-b border-[#334155]/60 scroll-mt-20">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div class="max-w-3xl mx-auto text-center space-y-4 mb-14">
                 <span class="text-xs font-bold text-[#df747a] tracking-widest uppercase font-brand-accent">Core Foundations</span>
@@ -174,7 +174,7 @@
 
     <!-- Section 4: Leadership Showcase -->
     @if($settings['section_officers_visible'] ?? true)
-    <section class="py-16 sm:py-24 border-b border-[#334155]/60 bg-[#0B1120]/40">
+    <section id="officers" class="py-16 sm:py-24 border-b border-[#334155]/60 bg-[#0B1120]/40 scroll-mt-20">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div class="flex flex-col md:flex-row md:items-end justify-between gap-6 mb-12">
                 <div>
@@ -226,7 +226,7 @@
 
     <!-- Section 5: Activities & Events Showcase -->
     @if($settings['section_activities_visible'] ?? true)
-    <section class="py-16 sm:py-24 border-b border-[#334155]/60">
+    <section id="activities" class="py-16 sm:py-24 border-b border-[#334155]/60 scroll-mt-20">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div class="flex flex-col md:flex-row md:items-end justify-between gap-6 mb-12">
                 <div>
@@ -301,7 +301,7 @@
 
     <!-- Section 6: Achievements & Milestones -->
     @if($settings['section_achievements_visible'] ?? true)
-    <section class="py-16 sm:py-24 border-b border-[#334155]/60 bg-[#0B1120]/40">
+    <section id="achievements" class="py-16 sm:py-24 border-b border-[#334155]/60 bg-[#0B1120]/40 scroll-mt-20">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div class="flex flex-col md:flex-row md:items-end justify-between gap-6 mb-12">
                 <div>
@@ -351,7 +351,7 @@
 
     <!-- Section 7: Gallery Preview -->
     @if($settings['section_gallery_visible'] ?? true)
-    <section class="py-16 sm:py-24 border-b border-[#334155]/60">
+    <section id="gallery" class="py-16 sm:py-24 border-b border-[#334155]/60 scroll-mt-20">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div class="flex flex-col md:flex-row md:items-end justify-between gap-6 mb-12">
                 <div>
@@ -374,17 +374,58 @@
                     Approved gallery photos will be showcased here.
                 </div>
             @else
-                <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+                <div class="grid grid-cols-2 md:grid-cols-4 gap-4" x-data="{ hpLightboxOpen: false, hpImage: '', hpCaption: '' }">
                     @foreach($gallery as $item)
                     <div class="card bg-[#172033] border border-[#334155] rounded-xl overflow-hidden group aspect-video relative">
-                        <img src="{{ asset('storage/' . $item->image_path) }}" alt="{{ $item->alt_text }}" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" loading="lazy">
-                        @if($item->caption)
+                        <button type="button"
+                                @click="hpLightboxOpen = true; hpImage = '{{ asset('storage/' . $item->image_path) }}'; hpCaption = '{{ addslashes($item->caption ?? '') }}'"
+                                class="w-full h-full text-left relative block focus:outline-none focus-visible:ring-2 focus-visible:ring-[#df747a]"
+                                aria-label="View photo preview">
+                            <img src="{{ asset('storage/' . $item->image_path) }}" alt="{{ $item->alt_text }}" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" loading="lazy">
                             <div class="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity p-3 flex items-end">
-                                <span class="text-[11px] text-white leading-tight">{{ $item->caption }}</span>
+                                @if($item->caption)
+                                    <span class="text-[11px] text-white leading-tight line-clamp-2">{{ $item->caption }}</span>
+                                @else
+                                    <span class="text-[11px] text-slate-300">View photo</span>
+                                @endif
                             </div>
-                        @endif
+                        </button>
                     </div>
                     @endforeach
+
+                    <!-- Home Lightbox Modal -->
+                    <div x-show="hpLightboxOpen"
+                         x-transition:enter="transition ease-out duration-200"
+                         x-transition:enter-start="opacity-0"
+                         x-transition:enter-end="opacity-100"
+                         x-transition:leave="transition ease-in duration-150"
+                         x-transition:leave-start="opacity-100"
+                         x-transition:leave-end="opacity-0"
+                         @keydown.escape.window="hpLightboxOpen = false"
+                         class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/90 backdrop-blur-md"
+                         style="display: none;"
+                         role="dialog"
+                         aria-modal="true"
+                         aria-label="Gallery Preview">
+                        <div class="relative max-w-4xl w-full bg-[#172033] border border-[#334155] rounded-2xl overflow-hidden shadow-2xl"
+                             @click.away="hpLightboxOpen = false">
+                            <div class="flex items-center justify-between p-4 border-b border-[#334155]/80 bg-[#0B1120]">
+                                <span class="text-sm font-bold text-white">COMSOC Gallery Moment</span>
+                                <button type="button"
+                                        @click="hpLightboxOpen = false"
+                                        class="p-1.5 rounded-lg text-slate-400 hover:text-white hover:bg-[#172033] focus:outline-none focus:ring-2 focus:ring-[#df747a]"
+                                        aria-label="Close dialog">
+                                    <i data-lucide="x" class="w-5 h-5"></i>
+                                </button>
+                            </div>
+                            <div class="max-h-[75vh] flex items-center justify-center bg-black">
+                                <img :src="hpImage" alt="Gallery preview" class="max-h-[70vh] w-auto max-w-full object-contain">
+                            </div>
+                            <div x-show="hpCaption" class="p-4 bg-[#0B1120] border-t border-[#334155]/80">
+                                <p class="text-xs text-slate-300" x-text="hpCaption"></p>
+                            </div>
+                        </div>
+                    </div>
                 </div>
             @endif
         </div>
@@ -393,7 +434,7 @@
 
     <!-- Section 8: Partners & Collaborations -->
     @if($settings['section_partners_visible'] ?? true)
-    <section class="py-16 sm:py-24 border-b border-[#334155]/60 bg-[#0B1120]/40">
+    <section id="partners" class="py-16 sm:py-24 border-b border-[#334155]/60 bg-[#0B1120]/40 scroll-mt-20">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div class="max-w-3xl mx-auto text-center space-y-4 mb-12">
                 <span class="text-xs font-bold text-[#df747a] tracking-widest uppercase font-brand-accent">Ecosystem & Alliances</span>
@@ -429,7 +470,7 @@
 
     <!-- Section 9: Discover COMSOC Hub -->
     @if($settings['section_hub_cta_visible'] ?? true)
-    <section class="py-16 sm:py-24 border-b border-[#334155]/60 relative overflow-hidden">
+    <section id="hub-portal" class="py-16 sm:py-24 border-b border-[#334155]/60 relative overflow-hidden scroll-mt-20">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
             <div class="card bg-gradient-to-br from-[#172033] via-[#0B1120] to-[#560E0F]/40 border border-[#334155] p-8 sm:p-14 rounded-3xl shadow-2xl">
                 <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 items-center">
@@ -472,7 +513,7 @@
 
     <!-- Section 10: Frequently Asked Questions -->
     @if($settings['section_faq_visible'] ?? true)
-    <section class="py-16 sm:py-24 border-b border-[#334155]/60 bg-[#0B1120]/40">
+    <section id="faqs" class="py-16 sm:py-24 border-b border-[#334155]/60 bg-[#0B1120]/40 scroll-mt-20">
         <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
             <div class="text-center space-y-4 mb-12">
                 <span class="text-xs font-bold text-[#df747a] tracking-widest uppercase font-brand-accent">Inquiries</span>
@@ -485,32 +526,60 @@
             </div>
 
             @if($faqs->isEmpty())
-                <div class="space-y-4">
-                    <div class="card bg-[#172033] border border-[#334155] p-6 rounded-2xl">
-                        <h3 class="text-base font-bold text-white font-brand-display mb-2">What is COMSOC?</h3>
-                        <p class="text-xs sm:text-sm text-slate-300 leading-relaxed">
+                <div class="space-y-4" x-data="{ activeFaq: null }">
+                    <div class="card bg-[#172033] border border-[#334155] rounded-2xl overflow-hidden transition-colors">
+                        <button type="button"
+                                @click="activeFaq = (activeFaq === 1 ? null : 1)"
+                                class="w-full p-6 text-left flex items-center justify-between gap-4 focus:outline-none focus-visible:ring-2 focus-visible:ring-[#df747a]"
+                                :aria-expanded="activeFaq === 1">
+                            <span class="text-base font-bold text-white font-brand-display">What is COMSOC?</span>
+                            <i data-lucide="chevron-down" class="w-4 h-4 text-[#df747a] shrink-0 transition-transform duration-200" :class="{ 'rotate-180': activeFaq === 1 }"></i>
+                        </button>
+                        <div x-show="activeFaq === 1" x-collapse class="px-6 pb-6 text-xs sm:text-sm text-slate-300 leading-relaxed border-t border-[#334155]/60 pt-4">
                             The Computing Society (COMSOC) is the official recognized student organization representing all computing and technology discipline students at Sorsogon State University – Bulan Campus.
-                        </p>
+                        </div>
                     </div>
-                    <div class="card bg-[#172033] border border-[#334155] p-6 rounded-2xl">
-                        <h3 class="text-base font-bold text-white font-brand-display mb-2">Who can register for COMSOC Hub?</h3>
-                        <p class="text-xs sm:text-sm text-slate-300 leading-relaxed">
+
+                    <div class="card bg-[#172033] border border-[#334155] rounded-2xl overflow-hidden transition-colors">
+                        <button type="button"
+                                @click="activeFaq = (activeFaq === 2 ? null : 2)"
+                                class="w-full p-6 text-left flex items-center justify-between gap-4 focus:outline-none focus-visible:ring-2 focus-visible:ring-[#df747a]"
+                                :aria-expanded="activeFaq === 2">
+                            <span class="text-base font-bold text-white font-brand-display">Who can register for COMSOC Hub?</span>
+                            <i data-lucide="chevron-down" class="w-4 h-4 text-[#df747a] shrink-0 transition-transform duration-200" :class="{ 'rotate-180': activeFaq === 2 }"></i>
+                        </button>
+                        <div x-show="activeFaq === 2" x-collapse class="px-6 pb-6 text-xs sm:text-sm text-slate-300 leading-relaxed border-t border-[#334155]/60 pt-4">
                             All currently enrolled computing students at SorSU Bulan Campus whose student numbers exist in the masterlist are eligible to complete registration and create an account.
-                        </p>
+                        </div>
                     </div>
-                    <div class="card bg-[#172033] border border-[#334155] p-6 rounded-2xl">
-                        <h3 class="text-base font-bold text-white font-brand-display mb-2">How does QR attendance work?</h3>
-                        <p class="text-xs sm:text-sm text-slate-300 leading-relaxed">
+
+                    <div class="card bg-[#172033] border border-[#334155] rounded-2xl overflow-hidden transition-colors">
+                        <button type="button"
+                                @click="activeFaq = (activeFaq === 3 ? null : 3)"
+                                class="w-full p-6 text-left flex items-center justify-between gap-4 focus:outline-none focus-visible:ring-2 focus-visible:ring-[#df747a]"
+                                :aria-expanded="activeFaq === 3">
+                            <span class="text-base font-bold text-white font-brand-display">How does QR attendance work?</span>
+                            <i data-lucide="chevron-down" class="w-4 h-4 text-[#df747a] shrink-0 transition-transform duration-200" :class="{ 'rotate-180': activeFaq === 3 }"></i>
+                        </button>
+                        <div x-show="activeFaq === 3" x-collapse class="px-6 pb-6 text-xs sm:text-sm text-slate-300 leading-relaxed border-t border-[#334155]/60 pt-4">
                             Members receive a personal QR code within their dashboard or membership card. During events, scanning terminals record time-in and time-out sessions, which populate verified attendance sheets.
-                        </p>
+                        </div>
                     </div>
                 </div>
             @else
-                <div class="space-y-4">
-                    @foreach($faqs as $faq)
-                    <div class="card bg-[#172033] border border-[#334155] p-6 rounded-2xl">
-                        <h3 class="text-base font-bold text-white font-brand-display mb-2">{{ $faq->question }}</h3>
-                        <p class="text-xs sm:text-sm text-slate-300 leading-relaxed">{{ $faq->answer }}</p>
+                <div class="space-y-4" x-data="{ activeFaq: null }">
+                    @foreach($faqs as $idx => $faq)
+                    <div class="card bg-[#172033] border border-[#334155] rounded-2xl overflow-hidden transition-colors">
+                        <button type="button"
+                                @click="activeFaq = (activeFaq === {{ $idx }} ? null : {{ $idx }})"
+                                class="w-full p-6 text-left flex items-center justify-between gap-4 focus:outline-none focus-visible:ring-2 focus-visible:ring-[#df747a]"
+                                :aria-expanded="activeFaq === {{ $idx }}">
+                            <span class="text-base font-bold text-white font-brand-display">{{ $faq->question }}</span>
+                            <i data-lucide="chevron-down" class="w-4 h-4 text-[#df747a] shrink-0 transition-transform duration-200" :class="{ 'rotate-180': activeFaq === {{ $idx }} }"></i>
+                        </button>
+                        <div x-show="activeFaq === {{ $idx }}" x-collapse class="px-6 pb-6 text-xs sm:text-sm text-slate-300 leading-relaxed border-t border-[#334155]/60 pt-4">
+                            {{ $faq->answer }}
+                        </div>
                     </div>
                     @endforeach
                 </div>
