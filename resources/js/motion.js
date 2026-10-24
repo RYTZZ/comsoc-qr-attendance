@@ -51,16 +51,15 @@ function initHeroSequence() {
 function initScrollReveals() {
     if (!('IntersectionObserver' in window)) {
         // Fallback: reveal all immediately if IntersectionObserver unsupported
-        document.querySelectorAll('[data-reveal], [data-reveal-group]').forEach(el => {
+        document.querySelectorAll('[data-reveal], [data-reveal-group], [data-reveal-item]').forEach(el => {
             el.classList.add('is-revealed');
         });
         return;
     }
 
-    // Elements inside or near initial viewport on page load should reveal immediately
     const viewportHeight = window.innerHeight || document.documentElement.clientHeight;
 
-    // Observer for individual elements
+    // Observer for individual elements (Section headings, descriptions, eyebrow badges)
     const elementObserver = new IntersectionObserver((entries, observer) => {
         entries.forEach(entry => {
             if (entry.isIntersecting) {
@@ -70,53 +69,57 @@ function initScrollReveals() {
         });
     }, {
         root: null,
-        rootMargin: '0px 0px -60px 0px',
+        rootMargin: '0px 0px -40px 0px',
         threshold: 0.15
     });
 
     document.querySelectorAll('[data-reveal]').forEach(el => {
-        // If element is already in initial viewport on page load, reveal after brief delay
         const rect = el.getBoundingClientRect();
-        if (rect.top < viewportHeight && rect.bottom > 0) {
+        // If element is already in the upper viewport on initial load, reveal promptly
+        if (rect.top < viewportHeight * 0.75 && rect.bottom > 0) {
             setTimeout(() => {
                 el.classList.add('is-revealed');
-            }, 100);
+            }, 80);
         } else {
             elementObserver.observe(el);
         }
     });
 
-    // Observer for staggered content groups (pillars, officers, activities, gallery, partners)
+    // Observer for staggered content groups (Executive Board, Pillars, Activities, Achievements, Gallery, Partners)
     const groupObserver = new IntersectionObserver((entries, observer) => {
         entries.forEach(entry => {
             if (entry.isIntersecting) {
                 const group = entry.target;
                 const items = group.querySelectorAll('[data-reveal-item]');
+
+                // Sequence officers/items one by one with a precise 120ms cadence
                 items.forEach((item, index) => {
-                    const delay = Math.min(index * 120, 600); // 120ms stagger between neighboring items
+                    const delay = Math.min(index * 120, 1800); // 120ms interval per item
                     setTimeout(() => {
                         item.classList.add('is-revealed');
                     }, delay);
                 });
+
                 group.classList.add('is-revealed');
                 observer.unobserve(group);
             }
         });
     }, {
         root: null,
-        rootMargin: '0px 0px -50px 0px',
-        threshold: 0.12
+        rootMargin: '0px 0px -30px 0px',
+        threshold: 0.1
     });
 
     document.querySelectorAll('[data-reveal-group]').forEach(group => {
         const rect = group.getBoundingClientRect();
-        if (rect.top < viewportHeight && rect.bottom > 0) {
+        // If group is already in view upon loading
+        if (rect.top < viewportHeight * 0.75 && rect.bottom > 0) {
             const items = group.querySelectorAll('[data-reveal-item]');
             items.forEach((item, index) => {
-                const delay = Math.min(index * 120, 600);
+                const delay = Math.min(index * 120, 1800);
                 setTimeout(() => {
                     item.classList.add('is-revealed');
-                }, delay + 100);
+                }, delay + 150);
             });
             group.classList.add('is-revealed');
         } else {
@@ -129,7 +132,6 @@ function initScrollReveals() {
  * Optional decorative parallax: subtle, non-intrusive, throttled via requestAnimationFrame
  */
 function initSubtleParallax() {
-    // Only apply on non-touch devices with fine pointers
     if (!window.matchMedia('(pointer: fine)').matches) return;
 
     const bgGrid = document.querySelector('.auth-bg-grid');
@@ -142,7 +144,6 @@ function initSubtleParallax() {
         lastScrollY = window.scrollY;
         if (!ticking) {
             window.requestAnimationFrame(() => {
-                // Noticeable vertical translation (max 28px shift across the scroll)
                 const translateY = Math.min(lastScrollY * 0.06, 28);
                 bgGrid.style.transform = `translate3d(0, ${translateY}px, 0)`;
                 ticking = false;
