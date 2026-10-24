@@ -1,7 +1,7 @@
 <x-public-website-layout :settings="$settings" :title="'Partners & Collaborations'">
 
     <!-- Editorial Header -->
-    <section class="py-16 sm:py-24 border-b border-[#334155]/40 bg-gradient-to-b from-[#0B1120] to-[#172033]/40">
+    <section class="py-16 sm:py-24 relative overflow-hidden bg-gradient-to-b from-[#0B1120] to-[#172033]/30">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div class="max-w-3xl space-y-4">
                 <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-[#560E0F]/20 border border-[#df747a]/30 text-[#df747a] text-xs font-mono font-semibold uppercase tracking-wider">
@@ -19,12 +19,12 @@
     </section>
 
     <!-- Partners Grid -->
-    <section class="py-16 sm:py-24 border-b border-[#334155]/40">
+    <section class="py-16 sm:py-24">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
 
             @if($partners->isEmpty())
                 <div class="py-16 text-center max-w-md mx-auto space-y-4">
-                    <div class="w-12 h-12 rounded-2xl bg-[#172033]/80 border border-[#334155]/60 flex items-center justify-center mx-auto text-slate-400">
+                    <div class="w-12 h-12 rounded-2xl bg-[#172033]/40 border border-[#334155]/30 flex items-center justify-center mx-auto text-slate-400">
                         <i data-lucide="users" class="w-6 h-6"></i>
                     </div>
                     <div class="space-y-1">
@@ -37,7 +37,7 @@
             @else
                 <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
                     @foreach($partners as $partner)
-                    <article class="flex flex-col justify-between border-b border-[#334155]/50 pb-8 hover:border-[#df747a]/50 transition-colors">
+                    <article class="flex flex-col justify-between rounded-2xl bg-[#172033]/30 border border-[#334155]/30 p-6 hover:border-[#df747a]/50 transition-colors">
                         <div class="space-y-4">
                             <!-- Natural Logo Showcase (No boxes around boxes) -->
                             <div class="h-20 flex items-center">
@@ -67,7 +67,7 @@
                         </div>
 
                         @if($partner->website_url)
-                        <div class="pt-6 mt-6 border-t border-[#334155]/30">
+                        <div class="pt-5 mt-5 border-t border-[#334155]/20">
                             <a href="{{ $partner->website_url }}" target="_blank" rel="noopener noreferrer" class="inline-flex items-center gap-1.5 text-xs font-semibold text-[#df747a] hover:text-white transition font-mono">
                                 <span>Official Web Address</span>
                                 <i data-lucide="external-link" class="w-3.5 h-3.5"></i>

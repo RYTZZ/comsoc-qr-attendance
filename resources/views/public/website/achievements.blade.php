@@ -1,7 +1,7 @@
 <x-public-website-layout :settings="$settings" :title="'Achievements & Milestones'">
 
     <!-- Editorial Header -->
-    <section class="py-16 sm:py-24 border-b border-[#334155]/40 bg-gradient-to-b from-[#0B1120] to-[#172033]/40">
+    <section class="py-16 sm:py-24 relative overflow-hidden bg-gradient-to-b from-[#0B1120] to-[#172033]/30">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div class="max-w-3xl space-y-4">
                 <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-[#560E0F]/20 border border-[#df747a]/30 text-[#df747a] text-xs font-mono font-semibold uppercase tracking-wider">
@@ -19,12 +19,12 @@
     </section>
 
     <!-- Achievements Grid / Timeline -->
-    <section class="py-12 sm:py-20 border-b border-[#334155]/40">
+    <section class="py-12 sm:py-20">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
 
             @if($achievements->isEmpty())
                 <div class="py-16 text-center max-w-md mx-auto space-y-4">
-                    <div class="w-12 h-12 rounded-2xl bg-[#172033]/80 border border-[#334155]/60 flex items-center justify-center mx-auto text-slate-400">
+                    <div class="w-12 h-12 rounded-2xl bg-[#172033]/40 border border-[#334155]/30 flex items-center justify-center mx-auto text-slate-400">
                         <i data-lucide="trophy" class="w-6 h-6"></i>
                     </div>
                     <div class="space-y-1">
@@ -37,16 +37,16 @@
             @else
                 <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
                     @foreach($achievements as $ach)
-                    <article class="flex flex-col justify-between border-b border-[#334155]/50 pb-8 hover:border-[#df747a]/50 transition-colors">
+                    <article class="flex flex-col justify-between rounded-2xl bg-[#172033]/30 border border-[#334155]/30 p-6 hover:border-[#df747a]/50 transition-colors">
                         <div class="space-y-4">
                             @if($ach->image_path)
-                                <div class="rounded-xl overflow-hidden aspect-video border border-[#334155]/50 bg-[#0B1120]">
+                                <div class="rounded-xl overflow-hidden aspect-video border border-[#334155]/40 bg-[#0B1120]">
                                     <img src="{{ asset('storage/' . $ach->image_path) }}" alt="{{ $ach->title }}" class="w-full h-full object-cover">
                                 </div>
                             @endif
 
                             <div class="flex items-center justify-between text-xs">
-                                <span class="px-2.5 py-0.5 rounded-full text-[10px] font-mono font-bold bg-[#172033] text-[#df747a] border border-[#334155]/60">
+                                <span class="px-2.5 py-0.5 rounded-full text-[10px] font-mono font-bold bg-[#172033] text-[#df747a] border border-[#334155]/40">
                                     {{ $ach->date_or_year ?? 'Verified Milestone' }}
                                 </span>
                                 <div class="w-7 h-7 rounded-full bg-[#560E0F]/20 text-[#df747a] flex items-center justify-center">
@@ -63,7 +63,7 @@
                             </p>
                         </div>
 
-                        <div class="pt-6 mt-6 border-t border-[#334155]/30 space-y-2">
+                        <div class="pt-5 mt-5 border-t border-[#334155]/20 space-y-2">
                             @if($ach->award_details)
                                 <div class="text-xs text-amber-300 flex items-center gap-1.5 font-medium">
                                     <i data-lucide="trophy" class="w-3.5 h-3.5 text-amber-400 shrink-0"></i>
@@ -81,7 +81,7 @@
                     @endforeach
                 </div>
 
-                <div class="pt-8 border-t border-[#334155]/40 mt-12">
+                <div class="pt-8 mt-8">
                     {{ $achievements->links() }}
                 </div>
             @endif

@@ -2,7 +2,7 @@
 
     <!-- Hero Section: Editorial & Asymmetric, Clean Logo & Typography -->
     @if($settings['section_hero_visible'] ?? true)
-    <section id="hero" class="relative overflow-hidden pt-12 pb-20 sm:pt-20 sm:pb-32 border-b border-[#334155]/40 scroll-mt-20">
+    <section id="hero" class="relative overflow-hidden pt-12 pb-20 sm:pt-20 sm:pb-32 scroll-mt-20">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
             <div class="grid grid-cols-1 lg:grid-cols-12 gap-12 lg:gap-8 items-center">
 
@@ -23,7 +23,7 @@
 
                     <div class="flex flex-wrap items-center justify-center lg:justify-start gap-4 pt-2">
                         <a href="{{ route('public.about') }}"
-                           class="btn-secondary text-sm sm:text-base py-3 px-6 rounded-xl flex items-center gap-2 border-[#334155] hover:border-[#df747a] transition-all">
+                           class="btn-secondary text-sm sm:text-base py-3 px-6 rounded-xl flex items-center gap-2 border-[#334155]/60 hover:border-[#df747a] transition-all">
                             <span>Discover COMSOC</span>
                             <i data-lucide="arrow-down" class="w-4 h-4 text-[#df747a]"></i>
                         </a>
@@ -36,7 +36,7 @@
                     </div>
 
                     <!-- Highlight Metrics & Impact Indicators -->
-                    <div class="pt-8 grid grid-cols-3 gap-6 border-t border-[#334155]/40 max-w-lg mx-auto lg:mx-0 text-left">
+                    <div class="pt-8 grid grid-cols-3 gap-6 max-w-lg mx-auto lg:mx-0 text-left">
                         <div>
                             <span class="block text-2xl sm:text-3xl font-black font-brand-display text-white">5</span>
                             <span class="text-xs text-slate-400">Foundational Pillars</span>
@@ -55,7 +55,7 @@
                 <!-- Right Column: Authentic Visual Presentation (5 cols) -->
                 <div class="lg:col-span-5 relative flex items-center justify-center">
                     @if(!empty($settings['hero_image']))
-                        <div class="relative w-full max-w-lg rounded-2xl overflow-hidden shadow-2xl border border-[#334155]/60">
+                        <div class="relative w-full max-w-lg rounded-2xl overflow-hidden shadow-2xl border border-[#334155]/40">
                             <img src="{{ asset('storage/' . $settings['hero_image']) }}" alt="COMSOC Leadership and Community" class="w-full h-80 sm:h-[420px] object-cover">
                             <div class="absolute inset-0 bg-gradient-to-t from-[#0B1120] via-transparent to-transparent opacity-60"></div>
                         </div>
@@ -71,10 +71,10 @@
                                     Official Student Organization • College of Information and Communications Technology
                                 </p>
                                 <div class="pt-3 flex flex-wrap items-center justify-center gap-2">
-                                    <span class="px-2.5 py-1 rounded-md text-xs font-mono text-slate-300 bg-[#172033] border border-[#334155]/60">BSIT</span>
-                                    <span class="px-2.5 py-1 rounded-md text-xs font-mono text-slate-300 bg-[#172033] border border-[#334155]/60">BSIS</span>
-                                    <span class="px-2.5 py-1 rounded-md text-xs font-mono text-slate-300 bg-[#172033] border border-[#334155]/60">BSCS</span>
-                                    <span class="px-2.5 py-1 rounded-md text-xs font-mono text-slate-300 bg-[#172033] border border-[#334155]/60">BTVTEd</span>
+                                    <span class="px-2.5 py-1 rounded-md text-xs font-mono text-slate-300 bg-[#172033]/60 border border-[#334155]/40">BSIT</span>
+                                    <span class="px-2.5 py-1 rounded-md text-xs font-mono text-slate-300 bg-[#172033]/60 border border-[#334155]/40">BSIS</span>
+                                    <span class="px-2.5 py-1 rounded-md text-xs font-mono text-slate-300 bg-[#172033]/60 border border-[#334155]/40">BSCS</span>
+                                    <span class="px-2.5 py-1 rounded-md text-xs font-mono text-slate-300 bg-[#172033]/60 border border-[#334155]/40">BTVTEd</span>
                                 </div>
                             </div>
                         </div>
@@ -88,7 +88,7 @@
 
     <!-- Section 2: Who We Are / Editorial Introduction -->
     @if($settings['section_about_visible'] ?? true)
-    <section id="about" class="py-16 sm:py-24 border-b border-[#334155]/40 scroll-mt-20">
+    <section id="about" class="py-16 sm:py-24 bg-[#172033]/20 scroll-mt-20">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div class="grid grid-cols-1 lg:grid-cols-12 gap-12 items-start">
                 <div class="lg:col-span-5 space-y-4">
@@ -96,7 +96,7 @@
                     <h2 class="text-3xl sm:text-4xl font-extrabold text-white font-brand-display tracking-tight leading-tight">
                         The Pulse of Computing at SorSU Bulan
                     </h2>
-                    <p class="text-sm sm:text-base text-slate-300 leading-relaxed">
+                    <p class="text-sm sm:text-base text-slate-300 leading-relaxed font-normal">
                         {{ $settings['org_intro'] ?? 'The official student organization representing computing and information technology students at Sorsogon State University – Bulan Campus.' }}
                     </p>
                     <div class="pt-2">
@@ -108,24 +108,28 @@
                 </div>
 
                 <div class="lg:col-span-7 grid grid-cols-1 sm:grid-cols-2 gap-8">
-                    <!-- Mission Statement -->
-                    <div class="space-y-3 p-6 rounded-2xl bg-[#172033]/60 border border-[#334155]/40">
+                    <!-- Mission Statement (Subtle contrast without harsh outline) -->
+                    <div class="space-y-3 p-6 rounded-2xl bg-[#172033]/40 border border-[#334155]/30">
                         <div class="flex items-center gap-3">
-                            <i data-lucide="target" class="w-5 h-5 text-[#df747a]"></i>
+                            <div class="w-8 h-8 rounded-lg bg-[#560E0F]/20 text-[#df747a] flex items-center justify-center">
+                                <i data-lucide="target" class="w-4 h-4"></i>
+                            </div>
                             <h3 class="text-lg font-bold text-white font-brand-display">Our Mission</h3>
                         </div>
-                        <p class="text-xs sm:text-sm text-slate-300 leading-relaxed">
+                        <p class="text-xs sm:text-sm text-slate-300 leading-relaxed font-normal">
                             {{ $settings['org_mission'] }}
                         </p>
                     </div>
 
-                    <!-- Vision Statement -->
-                    <div class="space-y-3 p-6 rounded-2xl bg-[#172033]/60 border border-[#334155]/40">
+                    <!-- Vision Statement (Subtle contrast without harsh outline) -->
+                    <div class="space-y-3 p-6 rounded-2xl bg-[#172033]/40 border border-[#334155]/30">
                         <div class="flex items-center gap-3">
-                            <i data-lucide="eye" class="w-5 h-5 text-blue-400"></i>
+                            <div class="w-8 h-8 rounded-lg bg-blue-500/10 text-blue-400 flex items-center justify-center">
+                                <i data-lucide="eye" class="w-4 h-4"></i>
+                            </div>
                             <h3 class="text-lg font-bold text-white font-brand-display">Our Vision</h3>
                         </div>
-                        <p class="text-xs sm:text-sm text-slate-300 leading-relaxed">
+                        <p class="text-xs sm:text-sm text-slate-300 leading-relaxed font-normal">
                             {{ $settings['org_vision'] }}
                         </p>
                     </div>
@@ -137,7 +141,7 @@
 
     <!-- Section 3: The Five Organizational Pillars -->
     @if($settings['section_pillars_visible'] ?? true)
-    <section id="pillars" class="py-16 sm:py-24 border-b border-[#334155]/40 scroll-mt-20">
+    <section id="pillars" class="py-16 sm:py-24 scroll-mt-20">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div class="flex flex-col md:flex-row md:items-end justify-between gap-6 mb-12">
                 <div>
@@ -153,9 +157,9 @@
 
             <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-6">
                 @foreach($settings['pillars'] ?? [] as $pillar)
-                <div class="p-6 rounded-2xl bg-[#172033]/60 border border-[#334155]/40 hover:border-[#df747a]/60 transition-all flex flex-col justify-between group">
+                <div class="p-6 rounded-2xl bg-[#172033]/40 border border-[#334155]/30 hover:border-[#df747a]/50 transition-all flex flex-col justify-between group">
                     <div class="space-y-4">
-                        <div class="w-10 h-10 rounded-xl bg-[#0B1120] border border-[#334155]/60 group-hover:border-[#df747a] flex items-center justify-center text-[#df747a] transition-colors">
+                        <div class="w-10 h-10 rounded-xl bg-[#0B1120] border border-[#334155]/50 group-hover:border-[#df747a] flex items-center justify-center text-[#df747a] transition-colors">
                             <i data-lucide="{{ $pillar['icon'] ?? 'check' }}" class="w-5 h-5"></i>
                         </div>
                         <h3 class="text-base font-bold text-white font-brand-display">{{ $pillar['title'] }}</h3>
@@ -170,7 +174,7 @@
 
     <!-- Section 4: Activities & Events Showcase -->
     @if($settings['section_activities_visible'] ?? true)
-    <section id="activities" class="py-16 sm:py-24 border-b border-[#334155]/40 scroll-mt-20">
+    <section id="activities" class="py-16 sm:py-24 bg-[#172033]/15 scroll-mt-20">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div class="flex flex-col md:flex-row md:items-end justify-between gap-6 mb-12">
                 <div>
@@ -182,25 +186,25 @@
                         Workshops, tech assemblies, hackathons, and organizational seminars.
                     </p>
                 </div>
-                <a href="{{ route('public.activities') }}" class="btn-secondary text-xs sm:text-sm py-2 px-4 rounded-xl flex items-center gap-1.5 self-start md:self-auto">
+                <a href="{{ route('public.activities') }}" class="btn-secondary text-xs sm:text-sm py-2 px-4 rounded-xl flex items-center gap-1.5 self-start md:self-auto border-[#334155]/60 hover:border-[#df747a]">
                     <span>Explore All Activities</span>
                     <i data-lucide="arrow-right" class="w-4 h-4"></i>
                 </a>
             </div>
 
             @if($activities->isEmpty())
-                <div class="p-8 text-center rounded-2xl bg-[#172033]/40 border border-[#334155]/40 text-slate-400 text-sm">
+                <div class="p-8 text-center rounded-2xl bg-[#172033]/40 border border-[#334155]/30 text-slate-400 text-sm">
                     No public activities are currently featured. Check back soon for upcoming announcements!
                 </div>
             @else
                 <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                     @foreach($activities as $event)
-                    <div class="rounded-2xl bg-[#172033]/70 border border-[#334155]/50 overflow-hidden hover:border-[#df747a]/60 transition-all flex flex-col justify-between group">
+                    <div class="rounded-2xl bg-[#172033]/40 border border-[#334155]/30 overflow-hidden hover:border-[#df747a]/50 transition-all flex flex-col justify-between group">
                         <div>
                             @if($event->logo_path)
                                 <img src="{{ asset('storage/' . $event->logo_path) }}" alt="{{ $event->name }}" class="w-full h-44 object-cover">
                             @else
-                                <div class="w-full h-44 bg-gradient-to-r from-[#0B1120] to-[#172033] flex items-center justify-center border-b border-[#334155]/40">
+                                <div class="w-full h-44 bg-gradient-to-r from-[#0B1120] to-[#172033] flex items-center justify-center">
                                     <i data-lucide="calendar" class="w-10 h-10 text-slate-600"></i>
                                 </div>
                             @endif
@@ -225,7 +229,7 @@
                             </div>
                         </div>
 
-                        <div class="p-6 pt-0 border-t border-[#334155]/40 mt-4 flex items-center justify-between">
+                        <div class="p-6 pt-0 mt-4 flex items-center justify-between">
                             <span class="text-[11px] text-slate-400 flex items-center gap-1 truncate max-w-[160px]">
                                 <i data-lucide="map-pin" class="w-3 h-3 text-[#df747a]"></i>
                                 <span>{{ $event->effective_venue }}</span>
@@ -245,42 +249,50 @@
 
     <!-- Section 5: Achievements & Milestones -->
     @if($settings['section_achievements_visible'] ?? true)
-    <section id="achievements" class="py-16 sm:py-24 border-b border-[#334155]/40 scroll-mt-20">
+    <section id="achievements" class="py-16 sm:py-24 scroll-mt-20">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div class="flex flex-col md:flex-row md:items-end justify-between gap-6 mb-12">
                 <div>
-                    <span class="text-xs font-bold text-[#df747a] tracking-widest uppercase font-brand-accent">Organizational Honors</span>
+                    <span class="text-xs font-bold text-[#df747a] tracking-widest uppercase font-brand-accent">Proven Track Record</span>
                     <h2 class="text-2xl sm:text-4xl font-extrabold text-white font-brand-display tracking-tight mt-1">
-                        Achievements & Milestones
+                        Recent Honors & Milestones
                     </h2>
                     <p class="text-sm text-slate-300 mt-2">
-                        Competitive awards, completed development milestones, and student honors.
+                        Competitive programming awards, hackathon triumphs, and academic honors.
                     </p>
                 </div>
-                <a href="{{ route('public.achievements') }}" class="btn-secondary text-xs sm:text-sm py-2 px-4 rounded-xl flex items-center gap-1.5 self-start md:self-auto">
-                    <span>View All Milestones</span>
+                <a href="{{ route('public.achievements') }}" class="btn-secondary text-xs sm:text-sm py-2 px-4 rounded-xl flex items-center gap-1.5 self-start md:self-auto border-[#334155]/60 hover:border-[#df747a]">
+                    <span>View All Honors</span>
                     <i data-lucide="arrow-right" class="w-4 h-4"></i>
                 </a>
             </div>
 
             @if($achievements->isEmpty())
-                <div class="p-8 text-center rounded-2xl bg-[#172033]/40 border border-[#334155]/40 text-slate-400 text-sm">
-                    Verified achievements and milestones will be updated by organization administrators.
+                <div class="p-8 text-center rounded-2xl bg-[#172033]/40 border border-[#334155]/30 text-slate-400 text-sm">
+                    Verified milestone records will appear here once published by administrators.
                 </div>
             @else
                 <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                     @foreach($achievements as $ach)
-                    <div class="p-6 rounded-2xl bg-[#172033]/60 border border-[#334155]/40 hover:border-[#df747a]/60 transition-all flex flex-col justify-between">
-                        <div class="space-y-3">
+                    <div class="rounded-2xl bg-[#172033]/40 border border-[#334155]/30 p-6 flex flex-col justify-between hover:border-[#df747a]/50 transition-all">
+                        <div class="space-y-4">
+                            @if($ach->image_path)
+                                <div class="rounded-xl overflow-hidden aspect-video border border-[#334155]/40 mb-2">
+                                    <img src="{{ asset('storage/' . $ach->image_path) }}" alt="{{ $ach->title }}" class="w-full h-full object-cover">
+                                </div>
+                            @endif
+
                             <div class="flex items-center justify-between text-xs text-[#df747a]">
-                                <span class="font-mono font-bold">{{ $ach->date_or_year ?? 'Milestone' }}</span>
-                                <i data-lucide="award" class="w-5 h-5"></i>
+                                <span class="font-mono font-bold">{{ $ach->date_or_year ?? 'Verified' }}</span>
+                                <i data-lucide="award" class="w-4 h-4"></i>
                             </div>
-                            <h3 class="text-base font-bold text-white font-brand-display">{{ $ach->title }}</h3>
-                            <p class="text-xs text-slate-300 leading-relaxed">{{ $ach->description }}</p>
+
+                            <h3 class="text-lg font-bold text-white font-brand-display">{{ $ach->title }}</h3>
+                            <p class="text-xs text-slate-300 line-clamp-3 leading-relaxed">{{ $ach->description }}</p>
                         </div>
+
                         @if($ach->award_details)
-                            <div class="mt-4 pt-3 border-t border-[#334155]/40 text-[11px] text-amber-300 flex items-center gap-1.5">
+                            <div class="pt-4 mt-4 border-t border-[#334155]/30 text-xs text-amber-300 flex items-center gap-1.5 font-medium">
                                 <i data-lucide="trophy" class="w-3.5 h-3.5 text-amber-400"></i>
                                 <span>{{ $ach->award_details }}</span>
                             </div>
@@ -295,33 +307,33 @@
 
     <!-- Section 6: Leadership Preview -->
     @if($settings['section_officers_visible'] ?? true)
-    <section id="officers" class="py-16 sm:py-24 border-b border-[#334155]/40 scroll-mt-20">
+    <section id="officers" class="py-16 sm:py-24 bg-[#172033]/20 scroll-mt-20">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div class="flex flex-col md:flex-row md:items-end justify-between gap-6 mb-12">
                 <div>
-                    <span class="text-xs font-bold text-[#df747a] tracking-widest uppercase font-brand-accent">Leadership</span>
+                    <span class="text-xs font-bold text-[#df747a] tracking-widest uppercase font-brand-accent">Executive Board</span>
                     <h2 class="text-2xl sm:text-4xl font-extrabold text-white font-brand-display tracking-tight mt-1">
                         Meet the Leadership Team
                     </h2>
                     <p class="text-sm text-slate-300 mt-2">
-                        Serving the student body across BSIT, BSIS, BSCS, and BTVTEd programs.
+                        Student leaders representing technology disciplines and organizing semester programs.
                     </p>
                 </div>
-                <a href="{{ route('public.officers') }}" class="btn-secondary text-xs sm:text-sm py-2 px-4 rounded-xl flex items-center gap-1.5 self-start md:self-auto">
-                    <span>View All Officers</span>
+                <a href="{{ route('public.officers') }}" class="btn-secondary text-xs sm:text-sm py-2 px-4 rounded-xl flex items-center gap-1.5 self-start md:self-auto border-[#334155]/60 hover:border-[#df747a]">
+                    <span>Full Officers Directory</span>
                     <i data-lucide="arrow-right" class="w-4 h-4"></i>
                 </a>
             </div>
 
             @if($officers->isEmpty())
-                <div class="p-8 text-center rounded-2xl bg-[#172033]/40 border border-[#334155]/40 text-slate-400 text-sm">
-                    Officer profiles will be published shortly by the administrator.
+                <div class="p-8 text-center rounded-2xl bg-[#172033]/40 border border-[#334155]/30 text-slate-400 text-sm">
+                    Current officer roster will be published shortly.
                 </div>
             @else
-                <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-6">
+                <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-6">
                     @foreach($officers as $officer)
-                    <div class="p-5 rounded-2xl bg-[#172033]/60 border border-[#334155]/40 flex flex-col items-center text-center group hover:border-[#df747a]/60 transition-all">
-                        <div class="w-20 h-20 sm:w-24 sm:h-24 rounded-full overflow-hidden bg-[#0B1120] border border-[#334155] mb-3">
+                    <div class="flex flex-col items-center text-center space-y-3 group">
+                        <div class="w-20 h-20 sm:w-24 sm:h-24 rounded-full overflow-hidden bg-[#0B1120] border-2 border-[#334155]/60 group-hover:border-[#df747a] transition-all">
                             @if($officer->portrait_path)
                                 <img src="{{ asset('storage/' . $officer->portrait_path) }}" alt="{{ $officer->name }}" class="w-full h-full object-cover">
                             @else
@@ -330,13 +342,13 @@
                                 </div>
                             @endif
                         </div>
-                        <h3 class="text-sm sm:text-base font-bold text-white font-brand-display leading-tight">{{ $officer->name }}</h3>
-                        <p class="text-xs font-semibold text-[#df747a] mt-1">{{ $officer->position }}</p>
-                        @if($officer->program)
-                            <span class="inline-block mt-2 px-2 py-0.5 rounded text-[10px] font-mono bg-[#0B1120] text-slate-300 border border-[#334155]/60">
-                                {{ $officer->program }}
-                            </span>
-                        @endif
+                        <div>
+                            <h4 class="text-sm font-bold text-white font-brand-display leading-tight group-hover:text-[#df747a] transition-colors">{{ $officer->name }}</h4>
+                            <p class="text-[11px] text-[#df747a] font-medium mt-0.5">{{ $officer->position }}</p>
+                            @if($officer->program)
+                                <span class="inline-block mt-1 text-[10px] text-slate-400 font-mono">{{ $officer->program }}</span>
+                            @endif
+                        </div>
                     </div>
                     @endforeach
                 </div>
@@ -345,111 +357,111 @@
     </section>
     @endif
 
-    <!-- Section 7: Gallery Preview -->
+    <!-- Section 7: Organization Gallery Preview (With Accessible Lightbox) -->
     @if($settings['section_gallery_visible'] ?? true)
-    <section id="gallery" class="py-16 sm:py-24 border-b border-[#334155]/40 scroll-mt-20">
+    <section id="gallery" class="py-16 sm:py-24 scroll-mt-20" x-data="{ lightboxOpen: false, activeImage: '', activeTitle: '', activeCaption: '' }">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div class="flex flex-col md:flex-row md:items-end justify-between gap-6 mb-12">
                 <div>
-                    <span class="text-xs font-bold text-[#df747a] tracking-widest uppercase font-brand-accent">Visual Archive</span>
+                    <span class="text-xs font-bold text-[#df747a] tracking-widest uppercase font-brand-accent">Visual Memories</span>
                     <h2 class="text-2xl sm:text-4xl font-extrabold text-white font-brand-display tracking-tight mt-1">
-                        Moments & Memories
+                        Moments in Action
                     </h2>
                     <p class="text-sm text-slate-300 mt-2">
-                        Highlights captured across bootcamps, community days, and student assemblies.
+                        Snapshots from student assemblies, hackathons, and community outreach.
                     </p>
                 </div>
-                <a href="{{ route('public.gallery') }}" class="btn-secondary text-xs sm:text-sm py-2 px-4 rounded-xl flex items-center gap-1.5 self-start md:self-auto">
-                    <span>View Full Gallery</span>
+                <a href="{{ route('public.gallery') }}" class="btn-secondary text-xs sm:text-sm py-2 px-4 rounded-xl flex items-center gap-1.5 self-start md:self-auto border-[#334155]/60 hover:border-[#df747a]">
+                    <span>View Entire Gallery</span>
                     <i data-lucide="arrow-right" class="w-4 h-4"></i>
                 </a>
             </div>
 
             @if($gallery->isEmpty())
-                <div class="p-8 text-center rounded-2xl bg-[#172033]/40 border border-[#334155]/40 text-slate-400 text-sm">
-                    Approved gallery photos will be showcased here.
+                <div class="p-8 text-center rounded-2xl bg-[#172033]/40 border border-[#334155]/30 text-slate-400 text-sm">
+                    Visual records from recent events will be uploaded here.
                 </div>
             @else
-                <div class="grid grid-cols-2 md:grid-cols-4 gap-4" x-data="{ hpLightboxOpen: false, hpImage: '', hpCaption: '' }">
-                    @foreach($gallery as $item)
-                    <div class="rounded-xl overflow-hidden group aspect-video relative border border-[#334155]/50 hover:border-[#df747a] transition-colors">
-                        <button type="button"
-                                @click="hpLightboxOpen = true; hpImage = '{{ asset('storage/' . $item->image_path) }}'; hpCaption = '{{ addslashes($item->caption ?? '') }}'"
-                                class="w-full h-full text-left relative block focus:outline-none focus-visible:ring-2 focus-visible:ring-[#df747a]"
-                                aria-label="View photo preview">
-                            <img src="{{ asset('storage/' . $item->image_path) }}" alt="{{ $item->alt_text }}" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" loading="lazy">
-                            <div class="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity p-3 flex items-end">
-                                @if($item->caption)
-                                    <span class="text-[11px] text-white leading-tight line-clamp-2">{{ $item->caption }}</span>
-                                @else
-                                    <span class="text-[11px] text-slate-300">View photo</span>
-                                @endif
-                            </div>
-                        </button>
-                    </div>
-                    @endforeach
-
-                    <!-- Home Lightbox Modal -->
-                    <div x-show="hpLightboxOpen"
-                         x-transition:enter="transition ease-out duration-200"
-                         x-transition:enter-start="opacity-0"
-                         x-transition:enter-end="opacity-100"
-                         x-transition:leave="transition ease-in duration-150"
-                         x-transition:leave-start="opacity-100"
-                         x-transition:leave-end="opacity-0"
-                         @keydown.escape.window="hpLightboxOpen = false"
-                         class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/90 backdrop-blur-md"
-                         style="display: none;"
-                         role="dialog"
-                         aria-modal="true"
-                         aria-label="Gallery Preview">
-                        <div class="relative max-w-4xl w-full bg-[#172033] border border-[#334155] rounded-2xl overflow-hidden shadow-2xl"
-                             @click.away="hpLightboxOpen = false">
-                            <div class="flex items-center justify-between p-4 border-b border-[#334155]/80 bg-[#0B1120]">
-                                <span class="text-sm font-bold text-white">COMSOC Gallery Moment</span>
-                                <button type="button"
-                                        @click="hpLightboxOpen = false"
-                                        class="p-1.5 rounded-lg text-slate-400 hover:text-white hover:bg-[#172033] focus:outline-none focus:ring-2 focus:ring-[#df747a]"
-                                        aria-label="Close dialog">
-                                    <i data-lucide="x" class="w-5 h-5"></i>
-                                </button>
-                            </div>
-                            <div class="max-h-[75vh] flex items-center justify-center bg-black">
-                                <img :src="hpImage" alt="Gallery preview" class="max-h-[70vh] w-auto max-w-full object-contain">
-                            </div>
-                            <div x-show="hpCaption" class="p-4 bg-[#0B1120] border-t border-[#334155]/80">
-                                <p class="text-xs text-slate-300" x-text="hpCaption"></p>
-                            </div>
+                <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+                    @foreach($gallery as $photo)
+                    <button type="button"
+                            @click="lightboxOpen = true; activeImage = '{{ asset('storage/' . $photo->image_path) }}'; activeTitle = '{{ addslashes($photo->title ?? '') }}'; activeCaption = '{{ addslashes($photo->caption ?? '') }}'"
+                            class="aspect-[4/3] rounded-xl overflow-hidden bg-[#0B1120] relative group cursor-pointer focus:outline-none focus-visible:ring-2 focus-visible:ring-[#df747a] text-left block w-full border border-[#334155]/30"
+                            aria-label="View photo: {{ $photo->title ?: 'Gallery photo' }}">
+                        <img src="{{ asset('storage/' . $photo->image_path) }}" alt="{{ $photo->alt_text }}" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" loading="lazy">
+                        <div class="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center p-3 text-center">
+                            <span class="text-xs text-white font-semibold font-brand-display truncate">{{ $photo->title ?: 'View Image' }}</span>
                         </div>
-                    </div>
+                    </button>
+                    @endforeach
                 </div>
             @endif
+        </div>
+
+        <!-- Accessible Lightbox Modal Dialog -->
+        <div x-show="lightboxOpen"
+             x-transition:enter="transition ease-out duration-200"
+             x-transition:enter-start="opacity-0"
+             x-transition:enter-end="opacity-100"
+             x-transition:leave="transition ease-in duration-150"
+             x-transition:leave-start="opacity-100"
+             x-transition:leave-end="opacity-0"
+             @keydown.escape.window="lightboxOpen = false"
+             class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/90 backdrop-blur-md"
+             style="display: none;"
+             role="dialog"
+             aria-modal="true"
+             aria-label="Image Preview Lightbox">
+            <div class="relative max-w-4xl w-full bg-[#0B1120] border border-[#334155] rounded-2xl overflow-hidden shadow-2xl"
+                 @click.away="lightboxOpen = false">
+                <div class="flex items-center justify-between p-4 border-b border-[#334155]/80 bg-[#172033]/60">
+                    <h3 class="text-sm font-bold text-white truncate pr-4 font-brand-display" x-text="activeTitle || 'Photo Preview'"></h3>
+                    <button type="button"
+                            @click="lightboxOpen = false"
+                            class="p-1.5 rounded-lg text-slate-400 hover:text-white hover:bg-[#172033] focus:outline-none focus:ring-2 focus:ring-[#df747a]"
+                            aria-label="Close dialog">
+                        <i data-lucide="x" class="w-5 h-5"></i>
+                    </button>
+                </div>
+                <div class="max-h-[75vh] overflow-hidden flex items-center justify-center bg-black">
+                    <img :src="activeImage" :alt="activeTitle || 'Gallery preview'" class="max-h-[70vh] w-auto max-w-full object-contain">
+                </div>
+                <div x-show="activeCaption" class="p-4 bg-[#0B1120] border-t border-[#334155]/80">
+                    <p class="text-xs text-slate-300 leading-relaxed" x-text="activeCaption"></p>
+                </div>
+            </div>
         </div>
     </section>
     @endif
 
-    <!-- Section 8: Partners & Collaborations -->
+    <!-- Section 8: Verified Partners -->
     @if($settings['section_partners_visible'] ?? true)
-    <section id="partners" class="py-16 sm:py-24 border-b border-[#334155]/40 scroll-mt-20">
+    <section id="partners" class="py-16 sm:py-24 bg-[#172033]/15 scroll-mt-20">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div class="max-w-3xl mx-auto text-center space-y-3 mb-12">
-                <span class="text-xs font-bold text-[#df747a] tracking-widest uppercase font-brand-accent">Ecosystem & Alliances</span>
-                <h2 class="text-2xl sm:text-4xl font-extrabold text-white font-brand-display tracking-tight">
-                    Partners & Collaborators
-                </h2>
-                <p class="text-sm text-slate-300">
-                    Connecting students with campus organizations, academic communities, and technology partners.
-                </p>
+            <div class="flex flex-col md:flex-row md:items-end justify-between gap-6 mb-12">
+                <div>
+                    <span class="text-xs font-bold text-[#df747a] tracking-widest uppercase font-brand-accent">Collaborations</span>
+                    <h2 class="text-2xl sm:text-4xl font-extrabold text-white font-brand-display tracking-tight mt-1">
+                        Our Community & Industry Partners
+                    </h2>
+                    <p class="text-sm text-slate-300 mt-2">
+                        Alliances that enrich student learning, events, and industry preparation.
+                    </p>
+                </div>
+                <a href="{{ route('public.partners') }}" class="btn-secondary text-xs sm:text-sm py-2 px-4 rounded-xl flex items-center gap-1.5 self-start md:self-auto border-[#334155]/60 hover:border-[#df747a]">
+                    <span>View All Partners</span>
+                    <i data-lucide="arrow-right" class="w-4 h-4"></i>
+                </a>
             </div>
 
             @if($partners->isEmpty())
-                <div class="p-8 text-center rounded-2xl bg-[#172033]/40 border border-[#334155]/40 text-slate-400 text-sm max-w-xl mx-auto">
-                    Confirmed partner collaborations will be published upon approval.
+                <div class="p-8 text-center rounded-2xl bg-[#172033]/40 border border-[#334155]/30 text-slate-400 text-sm">
+                    Partner collaborations will be published upon approval.
                 </div>
             @else
                 <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-6 items-center">
                     @foreach($partners as $partner)
-                    <div class="p-4 rounded-xl bg-[#172033]/50 border border-[#334155]/40 flex flex-col items-center justify-center text-center hover:border-[#df747a]/60 transition-all min-h-[110px]">
+                    <div class="p-4 rounded-xl bg-[#172033]/30 border border-[#334155]/30 flex flex-col items-center justify-center text-center hover:border-[#df747a]/50 transition-all min-h-[110px]">
                         @if($partner->logo_path)
                             <img src="{{ asset('storage/' . $partner->logo_path) }}" alt="{{ $partner->name }}" class="h-10 object-contain max-w-[100px] mb-2 filter brightness-90 hover:brightness-100 transition">
                         @else
@@ -466,9 +478,9 @@
 
     <!-- Section 9: Discover COMSOC Hub (Student Portal Entry) -->
     @if($settings['section_hub_cta_visible'] ?? true)
-    <section id="hub-portal" class="py-16 sm:py-24 border-b border-[#334155]/40 scroll-mt-20">
+    <section id="hub-portal" class="py-16 sm:py-24 scroll-mt-20">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 items-center p-8 sm:p-12 rounded-3xl bg-gradient-to-r from-[#172033] to-[#0B1120] border border-[#334155]/60">
+            <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 items-center p-8 sm:p-12 rounded-3xl bg-gradient-to-r from-[#172033]/80 to-[#0B1120] border border-[#334155]/40 shadow-xl">
                 <div class="lg:col-span-8 space-y-4">
                     <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-[#560E0F]/40 text-[#df747a] border border-[#560E0F]/60 text-xs font-semibold">
                         <i data-lucide="layers" class="w-3.5 h-3.5"></i>
@@ -477,7 +489,7 @@
                     <h2 class="text-2xl sm:text-4xl font-extrabold text-white font-brand-display tracking-tight">
                         {{ $settings['hub_headline'] ?? 'Your COMSOC Experience Starts Here.' }}
                     </h2>
-                    <p class="text-sm sm:text-base text-slate-300 leading-relaxed max-w-2xl">
+                    <p class="text-sm sm:text-base text-slate-300 leading-relaxed max-w-2xl font-normal">
                         {{ $settings['hub_description'] ?? 'Access your student profile, participate in activities, track verified QR attendance, earn EXP, and unlock rewards through COMSOC Hub.' }}
                     </p>
                     <div class="pt-2 flex flex-wrap items-center gap-3">
@@ -485,13 +497,13 @@
                             <span>Access COMSOC Hub</span>
                             <i data-lucide="arrow-right" class="w-4 h-4"></i>
                         </a>
-                        <a href="{{ route('signup') }}" class="btn-secondary text-sm py-2.5 px-5 rounded-xl flex items-center gap-2">
+                        <a href="{{ route('signup') }}" class="btn-secondary text-sm py-2.5 px-5 rounded-xl flex items-center gap-2 border-[#334155]/60 hover:border-[#df747a]">
                             <span>Register Student Account</span>
                         </a>
                     </div>
                 </div>
 
-                <div class="lg:col-span-4 p-5 rounded-2xl bg-[#0B1120]/70 border border-[#334155]/50 space-y-3 text-xs text-slate-300">
+                <div class="lg:col-span-4 p-5 rounded-2xl bg-[#0B1120]/70 border border-[#334155]/40 space-y-3 text-xs text-slate-300">
                     <h4 class="font-bold text-white text-sm flex items-center gap-2">
                         <i data-lucide="shield-check" class="w-4 h-4 text-emerald-400"></i>
                         <span>Official Verification</span>
@@ -506,7 +518,7 @@
 
     <!-- Section 10: Frequently Asked Questions -->
     @if($settings['section_faq_visible'] ?? true)
-    <section id="faqs" class="py-16 sm:py-24 border-b border-[#334155]/40 scroll-mt-20">
+    <section id="faqs" class="py-16 sm:py-24 bg-[#172033]/20 scroll-mt-20">
         <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
             <div class="text-center space-y-3 mb-12">
                 <span class="text-xs font-bold text-[#df747a] tracking-widest uppercase font-brand-accent">Inquiries</span>
@@ -520,7 +532,7 @@
 
             @if($faqs->isEmpty())
                 <div class="space-y-4" x-data="{ activeFaq: null }">
-                    <div class="p-6 rounded-2xl bg-[#172033]/60 border border-[#334155]/40 transition-colors">
+                    <div class="p-6 rounded-2xl bg-[#172033]/40 border border-[#334155]/30 transition-colors">
                         <button type="button"
                                 @click="activeFaq = (activeFaq === 1 ? null : 1)"
                                 class="w-full text-left flex items-center justify-between gap-4 focus:outline-none focus-visible:ring-2 focus-visible:ring-[#df747a]"
@@ -528,12 +540,12 @@
                             <span class="text-base font-bold text-white font-brand-display">What is COMSOC?</span>
                             <i data-lucide="chevron-down" class="w-4 h-4 text-[#df747a] shrink-0 transition-transform duration-200" :class="{ 'rotate-180': activeFaq === 1 }"></i>
                         </button>
-                        <div x-show="activeFaq === 1" x-collapse class="text-xs sm:text-sm text-slate-300 leading-relaxed border-t border-[#334155]/40 pt-4 mt-4">
+                        <div x-show="activeFaq === 1" x-collapse class="text-xs sm:text-sm text-slate-300 leading-relaxed border-t border-[#334155]/30 pt-4 mt-4">
                             The Computing Society (COMSOC) is the official recognized student organization representing all computing and technology discipline students at Sorsogon State University – Bulan Campus.
                         </div>
                     </div>
 
-                    <div class="p-6 rounded-2xl bg-[#172033]/60 border border-[#334155]/40 transition-colors">
+                    <div class="p-6 rounded-2xl bg-[#172033]/40 border border-[#334155]/30 transition-colors">
                         <button type="button"
                                 @click="activeFaq = (activeFaq === 2 ? null : 2)"
                                 class="w-full text-left flex items-center justify-between gap-4 focus:outline-none focus-visible:ring-2 focus-visible:ring-[#df747a]"
@@ -541,12 +553,12 @@
                             <span class="text-base font-bold text-white font-brand-display">Who can register for COMSOC Hub?</span>
                             <i data-lucide="chevron-down" class="w-4 h-4 text-[#df747a] shrink-0 transition-transform duration-200" :class="{ 'rotate-180': activeFaq === 2 }"></i>
                         </button>
-                        <div x-show="activeFaq === 2" x-collapse class="text-xs sm:text-sm text-slate-300 leading-relaxed border-t border-[#334155]/40 pt-4 mt-4">
+                        <div x-show="activeFaq === 2" x-collapse class="text-xs sm:text-sm text-slate-300 leading-relaxed border-t border-[#334155]/30 pt-4 mt-4">
                             All currently enrolled computing students at SorSU Bulan Campus whose student numbers exist in the masterlist are eligible to complete registration and create an account.
                         </div>
                     </div>
 
-                    <div class="p-6 rounded-2xl bg-[#172033]/60 border border-[#334155]/40 transition-colors">
+                    <div class="p-6 rounded-2xl bg-[#172033]/40 border border-[#334155]/30 transition-colors">
                         <button type="button"
                                 @click="activeFaq = (activeFaq === 3 ? null : 3)"
                                 class="w-full text-left flex items-center justify-between gap-4 focus:outline-none focus-visible:ring-2 focus-visible:ring-[#df747a]"
@@ -554,7 +566,7 @@
                             <span class="text-base font-bold text-white font-brand-display">How does QR attendance work?</span>
                             <i data-lucide="chevron-down" class="w-4 h-4 text-[#df747a] shrink-0 transition-transform duration-200" :class="{ 'rotate-180': activeFaq === 3 }"></i>
                         </button>
-                        <div x-show="activeFaq === 3" x-collapse class="text-xs sm:text-sm text-slate-300 leading-relaxed border-t border-[#334155]/40 pt-4 mt-4">
+                        <div x-show="activeFaq === 3" x-collapse class="text-xs sm:text-sm text-slate-300 leading-relaxed border-t border-[#334155]/30 pt-4 mt-4">
                             Members receive a personal QR code within their dashboard. During events, scanning terminals record time-in and time-out sessions, which populate verified attendance sheets.
                         </div>
                     </div>
@@ -562,7 +574,7 @@
             @else
                 <div class="space-y-4" x-data="{ activeFaq: null }">
                     @foreach($faqs as $idx => $faq)
-                    <div class="p-6 rounded-2xl bg-[#172033]/60 border border-[#334155]/40 transition-colors">
+                    <div class="p-6 rounded-2xl bg-[#172033]/40 border border-[#334155]/30 transition-colors">
                         <button type="button"
                                 @click="activeFaq = (activeFaq === {{ $idx }} ? null : {{ $idx }})"
                                 class="w-full text-left flex items-center justify-between gap-4 focus:outline-none focus-visible:ring-2 focus-visible:ring-[#df747a]"
@@ -570,7 +582,7 @@
                             <span class="text-base font-bold text-white font-brand-display">{{ $faq->question }}</span>
                             <i data-lucide="chevron-down" class="w-4 h-4 text-[#df747a] shrink-0 transition-transform duration-200" :class="{ 'rotate-180': activeFaq === {{ $idx }} }"></i>
                         </button>
-                        <div x-show="activeFaq === {{ $idx }}" x-collapse class="text-xs sm:text-sm text-slate-300 leading-relaxed border-t border-[#334155]/40 pt-4 mt-4">
+                        <div x-show="activeFaq === {{ $idx }}" x-collapse class="text-xs sm:text-sm text-slate-300 leading-relaxed border-t border-[#334155]/30 pt-4 mt-4">
                             {{ $faq->answer }}
                         </div>
                     </div>
@@ -591,7 +603,7 @@
                 {{ $settings['final_cta_description'] ?? 'Whether you are writing your first line of code or an aspiring developer preparing for industry, COMSOC welcomes you.' }}
             </p>
             <div class="pt-4 flex flex-wrap items-center justify-center gap-4">
-                <a href="{{ route('public.about') }}" class="btn-secondary text-sm sm:text-base py-3 px-6 rounded-xl flex items-center gap-2">
+                <a href="{{ route('public.about') }}" class="btn-secondary text-sm sm:text-base py-3 px-6 rounded-xl flex items-center gap-2 border-[#334155]/60 hover:border-[#df747a]">
                     <i data-lucide="info" class="w-4 h-4"></i>
                     <span>Discover COMSOC</span>
                 </a>

@@ -1,7 +1,7 @@
 <x-public-website-layout :settings="$settings" :title="$event->name">
 
     <!-- Editorial Event Header -->
-    <section class="py-16 sm:py-24 border-b border-[#334155]/40 bg-gradient-to-b from-[#0B1120] to-[#172033]/40">
+    <section class="py-16 sm:py-24 relative overflow-hidden bg-gradient-to-b from-[#0B1120] to-[#172033]/30">
         <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
             <div class="space-y-6">
                 <div>
@@ -16,7 +16,7 @@
                         {{ $event->status_label }}
                     </span>
                     @if($event->event_type)
-                        <span class="px-3 py-1 rounded-full text-xs font-mono bg-[#172033]/80 text-slate-300 border border-[#334155]/50">
+                        <span class="px-3 py-1 rounded-full text-xs font-mono bg-[#172033]/80 text-slate-300 border border-[#334155]/40">
                             {{ $event->event_type }}
                         </span>
                     @endif
@@ -48,7 +48,7 @@
     </section>
 
     <!-- Main Detail & Sidebar -->
-    <section class="py-12 sm:py-20 border-b border-[#334155]/40">
+    <section class="py-12 sm:py-20">
         <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
             <div class="grid grid-cols-1 lg:grid-cols-12 gap-12">
 
@@ -57,7 +57,7 @@
 
                     <!-- Cover Image if present -->
                     @if($event->logo_path)
-                    <div class="rounded-2xl overflow-hidden border border-[#334155]/60 shadow-2xl bg-[#0B1120]">
+                    <div class="rounded-2xl overflow-hidden border border-[#334155]/40 shadow-2xl bg-[#0B1120]">
                         <img src="{{ asset('storage/' . $event->logo_path) }}" alt="{{ $event->name }}" class="w-full max-h-[480px] object-cover">
                     </div>
                     @endif
@@ -72,7 +72,7 @@
 
                     <!-- Guidelines -->
                     @if(!empty($event->participation_requirements))
-                    <div class="p-6 rounded-2xl bg-[#172033]/40 border-l-4 border-l-[#df747a] border-y border-r border-[#334155]/40 space-y-2">
+                    <div class="p-6 rounded-2xl bg-[#172033]/30 border-l-4 border-l-[#df747a] border-y border-r border-[#334155]/30 space-y-2">
                         <h3 class="text-sm font-bold text-white flex items-center gap-2 uppercase tracking-wider font-mono">
                             <i data-lucide="info" class="w-4 h-4 text-[#df747a]"></i>
                             <span>Participation Guidelines</span>
@@ -83,8 +83,8 @@
 
                     <!-- Associated Gallery Highlights -->
                     @if($gallery->isNotEmpty())
-                    <div class="space-y-6 pt-6 border-t border-[#334155]/40">
-                        <div class="flex items-center justify-between">
+                    <div class="space-y-6 pt-6">
+                        <div class="flex items-center justify-between pb-3 border-b border-[#334155]/30">
                             <h3 class="text-xl font-bold text-white font-brand-display">Documented Moments</h3>
                             <a href="{{ route('public.gallery') }}" class="text-xs text-[#df747a] hover:text-white transition font-mono flex items-center gap-1">
                                 <span>Browse Visual Archive</span>
@@ -93,7 +93,7 @@
                         </div>
                         <div class="grid grid-cols-2 sm:grid-cols-3 gap-4">
                             @foreach($gallery as $photo)
-                            <div class="rounded-xl overflow-hidden border border-[#334155]/50 aspect-video bg-[#0B1120] group">
+                            <div class="rounded-xl overflow-hidden border border-[#334155]/40 aspect-video bg-[#0B1120] group">
                                 <img src="{{ asset('storage/' . $photo->image_path) }}" alt="{{ $photo->alt_text }}" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300">
                             </div>
                             @endforeach
@@ -107,7 +107,7 @@
                 <div class="lg:col-span-4 space-y-8">
 
                     <!-- Metadata Overview -->
-                    <div class="border-t-2 border-[#df747a] bg-[#172033]/50 p-6 rounded-b-2xl border-x border-b border-[#334155]/40 space-y-6">
+                    <div class="bg-[#172033]/40 p-6 rounded-2xl border border-[#334155]/30 space-y-6">
                         <h3 class="text-xs font-mono font-bold text-slate-400 uppercase tracking-widest">
                             Event Logistics
                         </h3>
@@ -134,8 +134,8 @@
                         </div>
 
                         <!-- Hub Action Box -->
-                        <div class="pt-6 border-t border-[#334155]/40 space-y-3">
-                            <p class="text-xs text-slate-400 leading-relaxed">
+                        <div class="pt-6 border-t border-[#334155]/30 space-y-3">
+                            <p class="text-xs text-slate-400 leading-relaxed font-normal">
                                 Students enrolled in computing programs can log into COMSOC Hub to access their unique QR code and view attendance history.
                             </p>
                             <a href="{{ route('login') }}" class="w-full inline-flex items-center justify-center gap-2 px-5 py-3 rounded-xl bg-[#560E0F] hover:bg-[#6c1214] text-white text-xs font-semibold shadow-lg shadow-[#560E0F]/30 transition-all">
@@ -146,7 +146,7 @@
                     </div>
 
                     <!-- Helpful Notice -->
-                    <div class="p-6 rounded-2xl bg-[#0B1120] border border-[#334155]/40 space-y-2">
+                    <div class="p-6 rounded-2xl bg-[#0B1120] border border-[#334155]/30 space-y-2">
                         <span class="text-[10px] font-mono uppercase tracking-wider text-slate-500">Public Inquiries</span>
                         <p class="text-xs text-slate-400 leading-relaxed">
                             Questions regarding collaboration or event participation may be directed to our official organizational channels.

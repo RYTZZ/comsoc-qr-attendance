@@ -1,7 +1,7 @@
 <x-public-website-layout :settings="$settings" :title="'Approved Gallery'">
 
     <!-- Editorial Header -->
-    <section class="py-16 sm:py-24 border-b border-[#334155]/40 bg-gradient-to-b from-[#0B1120] to-[#172033]/40">
+    <section class="py-16 sm:py-24 relative overflow-hidden bg-gradient-to-b from-[#0B1120] to-[#172033]/30">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div class="max-w-3xl space-y-4">
                 <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-[#560E0F]/20 border border-[#df747a]/30 text-[#df747a] text-xs font-mono font-semibold uppercase tracking-wider">
@@ -19,12 +19,12 @@
     </section>
 
     <!-- Gallery Grid with Lightbox -->
-    <section class="py-12 sm:py-20 border-b border-[#334155]/40" x-data="{ lightboxOpen: false, activeImage: '', activeTitle: '', activeCaption: '' }">
+    <section class="py-12 sm:py-20" x-data="{ lightboxOpen: false, activeImage: '', activeTitle: '', activeCaption: '' }">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
 
             @if($gallery->isEmpty())
                 <div class="py-16 text-center max-w-md mx-auto space-y-4">
-                    <div class="w-12 h-12 rounded-2xl bg-[#172033]/80 border border-[#334155]/60 flex items-center justify-center mx-auto text-slate-400">
+                    <div class="w-12 h-12 rounded-2xl bg-[#172033]/40 border border-[#334155]/40 flex items-center justify-center mx-auto text-slate-400">
                         <i data-lucide="image-off" class="w-6 h-6"></i>
                     </div>
                     <div class="space-y-1">
@@ -37,20 +37,20 @@
             @else
                 <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
                     @foreach($gallery as $photo)
-                    <article class="group flex flex-col justify-between border-b border-[#334155]/40 pb-6 hover:border-[#df747a]/50 transition-colors">
+                    <article class="group flex flex-col justify-between rounded-2xl bg-[#172033]/30 border border-[#334155]/30 p-4 hover:border-[#df747a]/50 transition-colors">
                         <button type="button"
                                 @click="lightboxOpen = true; activeImage = '{{ asset('storage/' . $photo->image_path) }}'; activeTitle = '{{ addslashes($photo->title ?? '') }}'; activeCaption = '{{ addslashes($photo->caption ?? '') }}'"
-                                class="aspect-[4/3] rounded-xl relative overflow-hidden bg-[#0B1120] text-left block w-full focus:outline-none focus-visible:ring-2 focus-visible:ring-[#df747a] group cursor-pointer border border-[#334155]/50 group-hover:border-[#df747a]/50 transition-all"
+                                class="aspect-[4/3] rounded-xl relative overflow-hidden bg-[#0B1120] text-left block w-full focus:outline-none focus-visible:ring-2 focus-visible:ring-[#df747a] group cursor-pointer border border-[#334155]/40 group-hover:border-[#df747a]/50 transition-all"
                                 aria-label="View photo: {{ $photo->title ?: 'Gallery photo' }}">
                             <img src="{{ asset('storage/' . $photo->image_path) }}" alt="{{ $photo->alt_text }}" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" loading="lazy">
                             <div class="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
-                                <span class="p-2.5 rounded-full bg-[#0B1120]/90 text-white border border-[#334155] shadow-lg">
+                                <span class="p-2.5 rounded-full bg-[#0B1120]/90 text-white border border-[#334155]/60 shadow-lg">
                                     <i data-lucide="maximize-2" class="w-4 h-4 text-[#df747a]"></i>
                                 </span>
                             </div>
                         </button>
 
-                        <div class="pt-4 space-y-1.5">
+                        <div class="pt-3 space-y-1">
                             @if($photo->title)
                                 <h2 class="text-sm font-bold text-white font-brand-display group-hover:text-[#df747a] transition-colors truncate">
                                     {{ $photo->title }}
@@ -72,7 +72,7 @@
                     @endforeach
                 </div>
 
-                <div class="pt-8 border-t border-[#334155]/40 mt-12">
+                <div class="pt-8 mt-8">
                     {{ $gallery->links() }}
                 </div>
             @endif
