@@ -48,6 +48,8 @@ class Event extends Model
         'max_participants',
         'allow_non_students',
         'is_published',
+        'is_public',
+        'public_slug',
         'status',
         'attendance_enabled',
         'snack_distribution_enabled',
@@ -78,6 +80,7 @@ class Event extends Model
         'dietary_required' => 'boolean',
         'allow_non_students' => 'boolean',
         'is_published' => 'boolean',
+        'is_public' => 'boolean',
         'attendance_enabled' => 'boolean',
         'snack_distribution_enabled' => 'boolean',
         'max_participants' => 'integer',
@@ -359,5 +362,17 @@ class Event extends Model
     public function isEnded(): bool
     {
         return ($this->ends_at && now()->gt($this->ends_at)) || $this->status === 'completed';
+    }
+
+    public function getResolvedSlugAttribute(): string
+    {
+        return $this->public_slug ?: \Illuminate\Support\Str::slug($this->name);
+    }
+
+    public function scopePublicShowcase($query)
+    {
+        return $query->where('is_published', true)
+            ->where('is_public', true)
+            ->whereNotIn('status', ['draft', 'archived']);
     }
 }

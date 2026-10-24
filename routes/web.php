@@ -19,8 +19,10 @@ use App\Http\Controllers\Admin\StudentController;
 use App\Http\Controllers\Admin\UserController;
 use App\Http\Controllers\Kiosk\AttendanceKioskController;
 use App\Http\Controllers\Kiosk\SnackKioskController;
+use App\Http\Controllers\Admin\WebsiteManagementController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\PublicRegistrationController;
+use App\Http\Controllers\PublicWebsiteController;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/privacy', function () {
@@ -28,7 +30,14 @@ Route::get('/privacy', function () {
 })->name('privacy');
 Route::get('/privacy-notice', fn() => redirect()->route('privacy'));
 
-Route::get('/', fn() => redirect()->route('login'));
+Route::get('/', [PublicWebsiteController::class, 'index'])->name('public.home');
+Route::get('/about', [PublicWebsiteController::class, 'about'])->name('public.about');
+Route::get('/officers', [PublicWebsiteController::class, 'officers'])->name('public.officers');
+Route::get('/activities', [PublicWebsiteController::class, 'activities'])->name('public.activities');
+Route::get('/activities/{slug}', [PublicWebsiteController::class, 'activityDetails'])->name('public.activities.detail');
+Route::get('/achievements', [PublicWebsiteController::class, 'achievements'])->name('public.achievements');
+Route::get('/gallery', [PublicWebsiteController::class, 'gallery'])->name('public.gallery');
+Route::get('/partners', [PublicWebsiteController::class, 'partners'])->name('public.partners');
 
 Route::get('/dashboard', function () {
     $user = auth()->user();
@@ -287,6 +296,42 @@ Route::middleware(['auth', 'verified', 'require_password_change'])->group(functi
 
             Route::get('audit-logs', [AuditLogController::class, 'index'])->name('audit-logs.index');
             Route::get('audit-logs/{auditLog}', [AuditLogController::class, 'show'])->name('audit-logs.show');
+
+            // Website Management
+            Route::prefix('website')->name('website.')->group(function () {
+                Route::get('/', [WebsiteManagementController::class, 'settings'])->name('settings');
+                Route::post('/', [WebsiteManagementController::class, 'updateSettings'])->name('settings.update');
+
+                Route::get('/profile', [WebsiteManagementController::class, 'profile'])->name('profile');
+                Route::post('/profile', [WebsiteManagementController::class, 'updateProfile'])->name('profile.update');
+
+                Route::get('/officers', [WebsiteManagementController::class, 'officers'])->name('officers');
+                Route::post('/officers', [WebsiteManagementController::class, 'storeOfficer'])->name('officers.store');
+                Route::put('/officers/{officer}', [WebsiteManagementController::class, 'updateOfficer'])->name('officers.update');
+                Route::delete('/officers/{officer}', [WebsiteManagementController::class, 'destroyOfficer'])->name('officers.destroy');
+
+                Route::get('/activities', [WebsiteManagementController::class, 'activities'])->name('activities');
+                Route::post('/activities/{event}/toggle', [WebsiteManagementController::class, 'toggleEventPublic'])->name('activities.toggle');
+
+                Route::get('/achievements', [WebsiteManagementController::class, 'achievements'])->name('achievements');
+                Route::post('/achievements', [WebsiteManagementController::class, 'storeAchievement'])->name('achievements.store');
+                Route::put('/achievements/{achievement}', [WebsiteManagementController::class, 'updateAchievement'])->name('achievements.update');
+                Route::delete('/achievements/{achievement}', [WebsiteManagementController::class, 'destroyAchievement'])->name('achievements.destroy');
+
+                Route::get('/gallery', [WebsiteManagementController::class, 'gallery'])->name('gallery');
+                Route::post('/gallery', [WebsiteManagementController::class, 'storeGalleryItem'])->name('gallery.store');
+                Route::delete('/gallery/{item}', [WebsiteManagementController::class, 'destroyGalleryItem'])->name('gallery.destroy');
+
+                Route::get('/partners', [WebsiteManagementController::class, 'partners'])->name('partners');
+                Route::post('/partners', [WebsiteManagementController::class, 'storePartner'])->name('partners.store');
+                Route::put('/partners/{partner}', [WebsiteManagementController::class, 'updatePartner'])->name('partners.update');
+                Route::delete('/partners/{partner}', [WebsiteManagementController::class, 'destroyPartner'])->name('partners.destroy');
+
+                Route::get('/faqs', [WebsiteManagementController::class, 'faqs'])->name('faqs');
+                Route::post('/faqs', [WebsiteManagementController::class, 'storeFaq'])->name('faqs.store');
+                Route::put('/faqs/{faq}', [WebsiteManagementController::class, 'updateFaq'])->name('faqs.update');
+                Route::delete('/faqs/{faq}', [WebsiteManagementController::class, 'destroyFaq'])->name('faqs.destroy');
+            });
         });
 
         // Event Management & Approval Workflow

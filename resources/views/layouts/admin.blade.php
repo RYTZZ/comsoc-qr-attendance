@@ -259,6 +259,12 @@
                 <i data-lucide="shield" class="sidebar-link-icon"></i>
                 Officer & Staff Accounts
             </a>
+
+            <a href="{{ route('admin.website.settings') }}"
+               class="sidebar-link {{ request()->routeIs('admin.website.*') ? 'active' : '' }}">
+                <i data-lucide="globe" class="sidebar-link-icon"></i>
+                Public Website
+            </a>
             @endif
         </nav>
 
