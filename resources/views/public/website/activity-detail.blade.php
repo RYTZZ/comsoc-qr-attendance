@@ -1,120 +1,158 @@
 <x-public-website-layout :settings="$settings" :title="$event->name">
 
-    <section class="py-12 sm:py-20 border-b border-[#334155]/60 bg-[#0B1120]">
-        <div class="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div class="space-y-4">
-                <a href="{{ route('public.activities') }}" class="inline-flex items-center gap-1.5 text-xs font-semibold text-[#df747a] hover:text-white transition">
-                    <i data-lucide="arrow-left" class="w-4 h-4"></i>
-                    <span>Back to Activities</span>
-                </a>
+    <!-- Editorial Event Header -->
+    <section class="py-16 sm:py-24 border-b border-[#334155]/40 bg-gradient-to-b from-[#0B1120] to-[#172033]/40">
+        <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="space-y-6">
+                <div>
+                    <a href="{{ route('public.activities') }}" class="inline-flex items-center gap-2 text-xs font-mono font-semibold text-[#df747a] hover:text-white transition">
+                        <i data-lucide="arrow-left" class="w-4 h-4"></i>
+                        <span>Return to Activities Directory</span>
+                    </a>
+                </div>
 
-                <div class="flex flex-wrap items-center gap-2 pt-2">
-                    <span class="px-2.5 py-1 rounded text-xs font-semibold border {{ $event->status_badge_class }}">
+                <div class="flex flex-wrap items-center gap-3">
+                    <span class="px-3 py-1 rounded-full text-xs font-mono font-bold uppercase tracking-wider backdrop-blur-md {{ $event->status_badge_class }}">
                         {{ $event->status_label }}
                     </span>
                     @if($event->event_type)
-                        <span class="px-2.5 py-1 rounded text-xs font-mono bg-[#172033] text-slate-300 border border-[#334155]">
+                        <span class="px-3 py-1 rounded-full text-xs font-mono bg-[#172033]/80 text-slate-300 border border-[#334155]/50">
                             {{ $event->event_type }}
                         </span>
                     @endif
                 </div>
 
-                <h1 class="text-2xl sm:text-4xl lg:text-5xl font-black text-white font-brand-display tracking-tight leading-tight">
+                <h1 class="text-3xl sm:text-5xl lg:text-6xl font-black text-white font-brand-display tracking-tight leading-tight max-w-4xl">
                     {{ $event->name }}
                 </h1>
 
+                <!-- Key metadata strip -->
                 <div class="flex flex-wrap items-center gap-6 text-xs text-slate-300 pt-2 font-mono">
                     <div class="flex items-center gap-2">
                         <i data-lucide="calendar" class="w-4 h-4 text-[#df747a]"></i>
-                        <span>{{ $event->event_date ? $event->event_date->format('F d, Y') : 'Date TBA' }}</span>
+                        <span class="text-white">{{ $event->event_date ? $event->event_date->format('F d, Y') : 'Date TBA' }}</span>
                     </div>
                     @if($event->starts_at)
                     <div class="flex items-center gap-2">
                         <i data-lucide="clock" class="w-4 h-4 text-[#df747a]"></i>
-                        <span>{{ $event->starts_at->format('h:i A') }} @if($event->ends_at) — {{ $event->ends_at->format('h:i A') }} @endif</span>
+                        <span class="text-white">{{ $event->starts_at->format('h:i A') }} @if($event->ends_at) — {{ $event->ends_at->format('h:i A') }} @endif</span>
                     </div>
                     @endif
                     <div class="flex items-center gap-2">
                         <i data-lucide="map-pin" class="w-4 h-4 text-[#df747a]"></i>
-                        <span>{{ $event->effective_venue }}</span>
+                        <span class="text-white">{{ $event->effective_venue }}</span>
                     </div>
                 </div>
             </div>
         </div>
     </section>
 
-    <section class="py-12 sm:py-20 border-b border-[#334155]/60">
-        <div class="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div class="grid grid-cols-1 lg:grid-cols-12 gap-10">
+    <!-- Main Detail & Sidebar -->
+    <section class="py-12 sm:py-20 border-b border-[#334155]/40">
+        <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="grid grid-cols-1 lg:grid-cols-12 gap-12">
 
-                <!-- Main Details -->
-                <div class="lg:col-span-8 space-y-8">
+                <!-- Left Column: Core Narrative & Media -->
+                <div class="lg:col-span-8 space-y-12">
+
+                    <!-- Cover Image if present -->
                     @if($event->logo_path)
-                    <div class="rounded-2xl overflow-hidden border border-[#334155] shadow-2xl">
-                        <img src="{{ asset('storage/' . $event->logo_path) }}" alt="{{ $event->name }}" class="w-full max-h-[420px] object-cover">
+                    <div class="rounded-2xl overflow-hidden border border-[#334155]/60 shadow-2xl bg-[#0B1120]">
+                        <img src="{{ asset('storage/' . $event->logo_path) }}" alt="{{ $event->name }}" class="w-full max-h-[480px] object-cover">
                     </div>
                     @endif
 
-                    <div class="card bg-[#172033] border border-[#334155] p-6 sm:p-8 rounded-2xl space-y-4">
-                        <h2 class="text-xl font-bold text-white font-brand-display">About This Activity</h2>
-                        <div class="text-sm text-slate-300 leading-relaxed whitespace-pre-line">
-                            {{ $event->description ?: 'No detailed public description has been posted yet.' }}
+                    <!-- Description / Narrative -->
+                    <div class="space-y-4">
+                        <h2 class="text-2xl font-bold text-white font-brand-display">Program Overview</h2>
+                        <div class="text-base text-slate-300 leading-relaxed space-y-4 whitespace-pre-line font-normal">
+                            {{ $event->description ?: 'No detailed public program overview has been released yet. Registered students may monitor session announcements via COMSOC Hub.' }}
                         </div>
                     </div>
 
+                    <!-- Guidelines -->
                     @if(!empty($event->participation_requirements))
-                    <div class="card bg-[#172033] border border-[#334155] p-6 rounded-2xl space-y-2">
-                        <h3 class="text-sm font-bold text-white flex items-center gap-2">
-                            <i data-lucide="alert-circle" class="w-4 h-4 text-[#df747a]"></i>
+                    <div class="p-6 rounded-2xl bg-[#172033]/40 border-l-4 border-l-[#df747a] border-y border-r border-[#334155]/40 space-y-2">
+                        <h3 class="text-sm font-bold text-white flex items-center gap-2 uppercase tracking-wider font-mono">
+                            <i data-lucide="info" class="w-4 h-4 text-[#df747a]"></i>
                             <span>Participation Guidelines</span>
                         </h3>
                         <p class="text-xs text-slate-300 leading-relaxed">{{ $event->participation_requirements }}</p>
                     </div>
                     @endif
 
-                    <!-- Associated Photos -->
+                    <!-- Associated Gallery Highlights -->
                     @if($gallery->isNotEmpty())
-                    <div class="space-y-4 pt-4">
-                        <h3 class="text-lg font-bold text-white font-brand-display">Activity Highlights</h3>
-                        <div class="grid grid-cols-2 sm:grid-cols-3 gap-3">
+                    <div class="space-y-6 pt-6 border-t border-[#334155]/40">
+                        <div class="flex items-center justify-between">
+                            <h3 class="text-xl font-bold text-white font-brand-display">Documented Moments</h3>
+                            <a href="{{ route('public.gallery') }}" class="text-xs text-[#df747a] hover:text-white transition font-mono flex items-center gap-1">
+                                <span>Browse Visual Archive</span>
+                                <i data-lucide="arrow-right" class="w-3.5 h-3.5"></i>
+                            </a>
+                        </div>
+                        <div class="grid grid-cols-2 sm:grid-cols-3 gap-4">
                             @foreach($gallery as $photo)
-                            <div class="rounded-xl overflow-hidden border border-[#334155] aspect-video">
-                                <img src="{{ asset('storage/' . $photo->image_path) }}" alt="{{ $photo->alt_text }}" class="w-full h-full object-cover">
+                            <div class="rounded-xl overflow-hidden border border-[#334155]/50 aspect-video bg-[#0B1120] group">
+                                <img src="{{ asset('storage/' . $photo->image_path) }}" alt="{{ $photo->alt_text }}" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300">
                             </div>
                             @endforeach
                         </div>
                     </div>
                     @endif
+
                 </div>
 
-                <!-- Sidebar Metadata -->
-                <div class="lg:col-span-4 space-y-6">
-                    <div class="card bg-[#172033] border border-[#334155] p-6 rounded-2xl space-y-4">
-                        <h3 class="text-sm font-bold text-white uppercase tracking-wider font-brand-accent">Activity Summary</h3>
-                        <div class="space-y-3 text-xs text-slate-300">
-                            <div>
-                                <span class="block text-slate-500 font-mono text-[10px] uppercase">Organizer</span>
-                                <span class="font-semibold text-white">{{ $event->organizer ?: 'Computing Society (COMSOC)' }}</span>
+                <!-- Right Column: Verification & Operations Sidebar -->
+                <div class="lg:col-span-4 space-y-8">
+
+                    <!-- Metadata Overview -->
+                    <div class="border-t-2 border-[#df747a] bg-[#172033]/50 p-6 rounded-b-2xl border-x border-b border-[#334155]/40 space-y-6">
+                        <h3 class="text-xs font-mono font-bold text-slate-400 uppercase tracking-widest">
+                            Event Logistics
+                        </h3>
+
+                        <div class="space-y-4 text-xs">
+                            <div class="space-y-1">
+                                <span class="text-slate-500 font-mono text-[10px] uppercase">Host Organization</span>
+                                <div class="font-semibold text-white">{{ $event->organizer ?: 'Computing Society (COMSOC)' }}</div>
                             </div>
-                            <div>
-                                <span class="block text-slate-500 font-mono text-[10px] uppercase">Location</span>
-                                <span class="font-semibold text-white">{{ $event->effective_venue }}</span>
+
+                            <div class="space-y-1">
+                                <span class="text-slate-500 font-mono text-[10px] uppercase">Venue & Campus</span>
+                                <div class="font-semibold text-white">{{ $event->effective_venue }}</div>
+                                <div class="text-[11px] text-slate-400">Sorsogon State University – Bulan Campus</div>
                             </div>
-                            <div>
-                                <span class="block text-slate-500 font-mono text-[10px] uppercase">Attendance Tracking</span>
-                                <span class="font-semibold text-emerald-400">QR Code Verified</span>
+
+                            <div class="space-y-1">
+                                <span class="text-slate-500 font-mono text-[10px] uppercase">Attendance Validation</span>
+                                <div class="font-semibold text-emerald-400 flex items-center gap-1.5">
+                                    <i data-lucide="qr-code" class="w-4 h-4"></i>
+                                    <span>QR Attendance Check-in Active</span>
+                                </div>
                             </div>
                         </div>
 
-                        <!-- Hub Login Action -->
-                        <div class="pt-4 border-t border-[#334155]">
-                            <p class="text-[11px] text-slate-400 mb-3">Enrolled computing students can view this event and record eligible attendance on COMSOC Hub.</p>
-                            <a href="{{ route('login') }}" class="btn-primary w-full text-center py-2.5 text-xs flex items-center justify-center gap-2">
-                                <i data-lucide="log-in" class="w-4 h-4"></i>
+                        <!-- Hub Action Box -->
+                        <div class="pt-6 border-t border-[#334155]/40 space-y-3">
+                            <p class="text-xs text-slate-400 leading-relaxed">
+                                Students enrolled in computing programs can log into COMSOC Hub to access their unique QR code and view attendance history.
+                            </p>
+                            <a href="{{ route('login') }}" class="w-full inline-flex items-center justify-center gap-2 px-5 py-3 rounded-xl bg-[#560E0F] hover:bg-[#6c1214] text-white text-xs font-semibold shadow-lg shadow-[#560E0F]/30 transition-all">
                                 <span>Access COMSOC Hub</span>
+                                <i data-lucide="arrow-right" class="w-4 h-4"></i>
                             </a>
                         </div>
                     </div>
+
+                    <!-- Helpful Notice -->
+                    <div class="p-6 rounded-2xl bg-[#0B1120] border border-[#334155]/40 space-y-2">
+                        <span class="text-[10px] font-mono uppercase tracking-wider text-slate-500">Public Inquiries</span>
+                        <p class="text-xs text-slate-400 leading-relaxed">
+                            Questions regarding collaboration or event participation may be directed to our official organizational channels.
+                        </p>
+                    </div>
+
                 </div>
 
             </div>
