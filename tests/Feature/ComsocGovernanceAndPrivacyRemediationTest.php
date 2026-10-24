@@ -29,6 +29,21 @@ class ComsocGovernanceAndPrivacyRemediationTest extends TestCase
         Level::create(['level' => 5, 'min_xp' => 500, 'title' => 'Expert']);
     }
 
+    private function sigDataUrl(): string
+    {
+        $im = imagecreatetruecolor(200, 80);
+        imagealphablending($im, false);
+        imagesavealpha($im, true);
+        imagefill($im, 0, 0, imagecolorallocatealpha($im, 0, 0, 0, 127));
+        imagesetthickness($im, 3);
+        imageline($im, 10, 10, 180, 70, imagecolorallocate($im, 0, 0, 0));
+        ob_start();
+        imagepng($im);
+        $png = ob_get_clean();
+
+        return 'data:image/png;base64,' . base64_encode($png);
+    }
+
     public function test_student_self_registration_with_institutional_email_assigns_permanent_member_id(): void
     {
         $response = $this->post(route('signup.store'), [
@@ -45,6 +60,8 @@ class ComsocGovernanceAndPrivacyRemediationTest extends TestCase
             'password' => 'SecurePass123!',
             'password_confirmation' => 'SecurePass123!',
             'terms' => '1',
+            'signature' => $this->sigDataUrl(),
+            'signature_consent' => '1',
         ]);
 
         $response->assertRedirect(route('dashboard'));
@@ -76,6 +93,8 @@ class ComsocGovernanceAndPrivacyRemediationTest extends TestCase
             'password' => 'SecurePass123!',
             'password_confirmation' => 'SecurePass123!',
             'terms' => '1',
+            'signature' => $this->sigDataUrl(),
+            'signature_consent' => '1',
         ]);
 
         $user = User::where('email', 'attacker@sorsu.edu.ph')->first();

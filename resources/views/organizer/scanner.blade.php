@@ -42,6 +42,7 @@
                     <p class="text-xs text-[#94A3B8]">You are not currently assigned to any active events. Contact a COMSOC Admin for assignment.</p>
                 </div>
             @else
+                <x-attendance-sheet-export :event="$selectedEvent" />
                 <div class="flex items-center gap-2 overflow-x-auto pb-2 scrollbar-none">
                     @foreach($selectedEvent->attendanceSessions as $sess)
                         <a href="{{ route('organizer.scanner', ['event_id' => $selectedEvent->id, 'session_id' => $sess->id]) }}"

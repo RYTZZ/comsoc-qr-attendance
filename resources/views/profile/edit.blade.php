@@ -703,6 +703,52 @@
 
                 <div class="space-y-6">
 
+                    <!-- Digital Signature Status Card -->
+                    <div id="profile-signature-status-card" class="card bg-[#172033] border border-[#334155] shadow-xl p-5">
+                        <div class="flex items-center justify-between mb-3 border-b border-[#334155] pb-2">
+                            <span class="text-xs font-semibold text-white uppercase tracking-wider">Digital Signature</span>
+                            <i data-lucide="pen-tool" class="w-4 h-4 text-[#df747a]"></i>
+                        </div>
+                        <div class="space-y-3">
+                            <div class="flex items-center justify-between">
+                                <span class="text-xs text-slate-400">Current Status:</span>
+                                @if(($signatureStatus['state'] ?? 'required') === 'registered')
+                                    <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold bg-emerald-950/60 text-emerald-300 border border-emerald-500/40">
+                                        <span class="w-1.5 h-1.5 rounded-full bg-emerald-400"></span>
+                                        {{ $signatureStatus['label'] }}
+                                    </span>
+                                @elseif(($signatureStatus['state'] ?? 'required') === 'unavailable')
+                                    <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold bg-rose-950/60 text-rose-300 border border-rose-500/40">
+                                        <span class="w-1.5 h-1.5 rounded-full bg-rose-400"></span>
+                                        {{ $signatureStatus['label'] }}
+                                    </span>
+                                @else
+                                    <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold bg-amber-950/60 text-amber-300 border border-amber-500/40">
+                                        <span class="w-1.5 h-1.5 rounded-full bg-amber-400 animate-pulse"></span>
+                                        {{ $signatureStatus['label'] }}
+                                    </span>
+                                @endif
+                            </div>
+
+                            <p class="text-[11px] text-[#94A3B8] leading-relaxed">
+                                @if(($signatureStatus['state'] ?? 'required') === 'registered')
+                                    Your handwritten signature is encrypted and registered for official attendance sheets (Version {{ $signatureStatus['version'] ?? 1 }}).
+                                @elseif(($signatureStatus['state'] ?? 'required') === 'unavailable')
+                                    Your registered signature is temporarily unavailable. Please open My Signature to review or register a new signature.
+                                @else
+                                    A registered handwritten signature is required for official organization attendance sheets.
+                                @endif
+                            </p>
+
+                            <div class="pt-2">
+                                <a href="{{ route('signature.show') }}" class="w-full btn-secondary text-xs flex items-center justify-center gap-2 py-2">
+                                    <i data-lucide="pen-tool" class="w-3.5 h-3.5 text-[#df747a]"></i>
+                                    <span>{{ ($signatureStatus['state'] ?? 'required') === 'registered' ? 'Manage My Signature' : 'Register Signature Now' }}</span>
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+
                     <div class="card bg-[#172033] border border-[#334155] shadow-xl p-5">
                         <div class="flex items-center justify-between mb-3 border-b border-[#334155] pb-2">
                             <span class="text-xs font-semibold text-white uppercase tracking-wider">XP Transaction Log</span>

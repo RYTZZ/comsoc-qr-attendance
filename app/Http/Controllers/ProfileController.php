@@ -77,11 +77,13 @@ class ProfileController extends Controller
         $avatarPresets = \App\Services\AvatarService::getPresets();
         $skillCategories = \App\Services\ProfileMetadataService::getSkillCategories();
         $interestCategories = \App\Services\ProfileMetadataService::getInterestCategories();
+        $signatureStatus = app(\App\Services\SignatureVaultService::class)->signatureStatus($user);
 
         return view('profile.edit', compact(
             'user',
             'profile',
             'student',
+            'signatureStatus',
             'activeSeason',
             'seasonXp',
             'seasonPoints',

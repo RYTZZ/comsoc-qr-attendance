@@ -118,6 +118,16 @@ class StudentRegisterController extends Controller
                 );
             }
 
+            $vault = app(\App\Services\SignatureVaultService::class);
+            $vault->store($user, $validated['signature'], false);
+
+            AuditLogger::log('signature.registered', $user, [], ['source' => 'signup_wizard']);
+            AuditLogger::log('signature.consent_acknowledged', $user, [], [
+                'consent_version' => config('signatures.consent_version', 'v1'),
+                'acknowledged_at' => now()->toIso8601String(),
+                'source' => 'signup_wizard',
+            ]);
+
             AuditLogger::log('student.registered', $user, [], [
                 'student_id' => $student->id,
                 'student_number' => $student->student_number,

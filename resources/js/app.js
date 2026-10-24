@@ -3,11 +3,14 @@ import './bootstrap';
 import Alpine from 'alpinejs';
 import { Html5Qrcode } from 'html5-qrcode';
 import { createIcons, icons } from 'lucide';
+import SignaturePad from 'signature_pad';
+import signatureRegistration from './signature';
 
 window.Alpine = Alpine;
 window.Html5Qrcode = Html5Qrcode;
 window.createIcons = createIcons;
 window.lucideIcons = icons;
+window.SignaturePad = SignaturePad;
 
 document.addEventListener('DOMContentLoaded', () => {
     createIcons({ icons });
@@ -20,6 +23,8 @@ document.addEventListener('alpine:initialized', () => {
 window.refreshIcons = () => {
     createIcons({ icons });
 };
+
+Alpine.data('signatureRegistration', signatureRegistration);
 
 Alpine.data('customDropdown', (config) => ({
     name: config.name,

@@ -93,6 +93,24 @@ Route::middleware(['auth', 'verified', 'require_password_change'])->group(functi
         ->middleware('throttle:30,1')
         ->name('profile.sessions.destroy');
 
+    // Student signature (own account only; no ids accepted from the client)
+    Route::prefix('signature')->name('signature.')->group(function () {
+        Route::get('/', [\App\Http\Controllers\MemberSignatureController::class, 'show'])->name('show');
+        Route::get('/status', [\App\Http\Controllers\MemberSignatureController::class, 'status'])->name('status');
+        Route::get('/preview', [\App\Http\Controllers\MemberSignatureController::class, 'preview'])
+            ->middleware('throttle:30,1')->name('preview');
+        Route::post('/', [\App\Http\Controllers\MemberSignatureController::class, 'store'])
+            ->middleware('throttle:10,1')->name('store');
+        Route::put('/', [\App\Http\Controllers\MemberSignatureController::class, 'replace'])
+            ->middleware('throttle:10,1')->name('replace');
+    });
+
+    // Official attendance sheet export (authorized per event via the export-attendance-sheet gate)
+    Route::get('/attendance-sheets/{event}/check', [\App\Http\Controllers\AttendanceSheetController::class, 'check'])
+        ->middleware('throttle:30,1')->name('attendance-sheet.check');
+    Route::get('/attendance-sheets/{event}/download', [\App\Http\Controllers\AttendanceSheetController::class, 'download'])
+        ->middleware('throttle:10,1')->name('attendance-sheet.download');
+
     // Dynamic QR Attendance Pass
     Route::get('/attendance/my-qr', [\App\Http\Controllers\MemberQrCodeController::class, 'show'])->name('member.dynamic_qr');
     Route::post('/attendance/my-qr/refresh', [\App\Http\Controllers\MemberQrCodeController::class, 'refresh'])

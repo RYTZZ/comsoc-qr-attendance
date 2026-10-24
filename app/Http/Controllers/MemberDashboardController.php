@@ -161,14 +161,17 @@ class MemberDashboardController extends Controller
 
         // Additional data for structured dashboard tabs
         $recentRedemptions = $user->redemptions()->with('reward')->latest()->take(6)->get();
-        $userProfile = $user->profile ?: $user->profile()->create(['user_id' => $user->id]);
-        $notificationPrefs = $user->notificationPreferences ?: $user->notificationPreferences()->create(['user_id' => $user->id]);
+        $userProfile = $user->profile ?: $user->profile()->firstOrCreate(['user_id' => $user->id]);
+        $notificationPrefs = $user->notificationPreferences ?: $user->notificationPreferences()->firstOrCreate(['user_id' => $user->id]);
         $userSkills = $user->skills()->take(8)->get();
         $myMissionSubmissions = \App\Models\MissionSubmission::where('user_id', $user->id)->with('mission')->latest()->take(6)->get();
+
+        $signatureStatus = app(\App\Services\SignatureVaultService::class)->signatureStatus($user);
 
         return view('dashboard', compact(
             'user',
             'student',
+            'signatureStatus',
             'activeSeason',
             'seasonStat',
             'spendableExp',

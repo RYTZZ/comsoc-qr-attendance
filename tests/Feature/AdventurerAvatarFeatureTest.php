@@ -94,6 +94,19 @@ class AdventurerAvatarFeatureTest extends TestCase
             'password' => 'Password123!',
             'password_confirmation' => 'Password123!',
             'terms' => '1',
+            'signature' => (function () {
+                $im = imagecreatetruecolor(200, 80);
+                imagealphablending($im, false);
+                imagesavealpha($im, true);
+                imagefill($im, 0, 0, imagecolorallocatealpha($im, 0, 0, 0, 127));
+                imagesetthickness($im, 3);
+                imageline($im, 10, 10, 180, 70, imagecolorallocate($im, 0, 0, 0));
+                ob_start();
+                imagepng($im);
+                $png = ob_get_clean();
+                return 'data:image/png;base64,' . base64_encode($png);
+            })(),
+            'signature_consent' => '1',
         ];
 
         $postResponse = $this->post('/signup', $payload);

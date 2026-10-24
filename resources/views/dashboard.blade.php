@@ -19,6 +19,12 @@
                         <span class="px-2 py-0.5 rounded text-[10px] font-semibold bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">
                             Active Member
                         </span>
+                        <a href="{{ route('signature.show') }}"
+                           id="dashboard-signature-status-badge"
+                           class="px-2 py-0.5 rounded text-[10px] font-semibold border flex items-center gap-1 transition {{ ($signatureStatus['state'] ?? '') === 'registered' ? 'bg-emerald-950/40 border-emerald-500/30 text-emerald-300 hover:border-emerald-400' : (($signatureStatus['state'] ?? '') === 'unavailable' ? 'bg-rose-950/40 border-rose-500/30 text-rose-300 hover:border-rose-400' : 'bg-amber-950/40 border-amber-500/30 text-amber-300 hover:border-amber-400') }}">
+                            <span class="w-1.5 h-1.5 rounded-full {{ ($signatureStatus['state'] ?? '') === 'registered' ? 'bg-emerald-400' : (($signatureStatus['state'] ?? '') === 'unavailable' ? 'bg-rose-400' : 'bg-amber-400 animate-pulse') }}"></span>
+                            <span>{{ $signatureStatus['label'] ?? 'Signature Status' }}</span>
+                        </a>
                     </div>
                     <h1 class="text-2xl sm:text-3xl font-extrabold text-[#F8FAFC] font-brand-display tracking-tight mt-1 flex flex-wrap items-center gap-2">
                         <span>Welcome back, {{ $student ? $student->first_name : $user->name }}!</span>
@@ -76,6 +82,43 @@
                     </div>
                     <a href="{{ route('onboarding.adventurer') }}" class="btn-primary text-xs px-4 py-2 shrink-0 flex items-center gap-1.5 shadow">
                         <span>Choose Adventurer</span>
+                        <i data-lucide="arrow-right" class="w-3.5 h-3.5"></i>
+                    </a>
+                </div>
+            @endif
+
+            @if(($signatureStatus['state'] ?? '') === 'required')
+                <div class="bg-amber-950/40 border border-amber-500/40 rounded-2xl p-4 sm:p-5 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 shadow-lg">
+                    <div class="flex items-center gap-3.5">
+                        <div class="w-10 h-10 rounded-xl bg-amber-500/20 border border-amber-500/40 flex items-center justify-center text-amber-300 shrink-0">
+                            <i data-lucide="file-pen" class="w-5 h-5 text-amber-400"></i>
+                        </div>
+                        <div>
+                            <h3 class="text-sm font-bold text-white font-brand-display flex items-center gap-2">
+                                <span>Signature Registration Required</span>
+                                <span class="px-2 py-0.2 rounded-full text-[10px] bg-amber-500/20 text-amber-300 border border-amber-500/30">Action Needed</span>
+                            </h3>
+                            <p class="text-xs text-[#94A3B8]">You have not yet registered an electronic signature. Register your handwritten signature to ensure your official attendance records and certificates can be issued seamlessly.</p>
+                        </div>
+                    </div>
+                    <a href="{{ route('signature.show') }}" class="btn-primary text-xs px-4 py-2 shrink-0 flex items-center gap-1.5 shadow bg-amber-600 hover:bg-amber-500 border-amber-500 text-white">
+                        <span>Register Signature</span>
+                        <i data-lucide="arrow-right" class="w-3.5 h-3.5"></i>
+                    </a>
+                </div>
+            @elseif(($signatureStatus['state'] ?? '') === 'unavailable')
+                <div class="bg-rose-950/40 border border-rose-500/40 rounded-2xl p-4 sm:p-5 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 shadow-lg">
+                    <div class="flex items-center gap-3.5">
+                        <div class="w-10 h-10 rounded-xl bg-rose-500/20 border border-rose-500/40 flex items-center justify-center text-rose-300 shrink-0">
+                            <i data-lucide="alert-triangle" class="w-5 h-5 text-rose-400"></i>
+                        </div>
+                        <div>
+                            <h3 class="text-sm font-bold text-white font-brand-display">Signature Unavailable</h3>
+                            <p class="text-xs text-[#94A3B8]">Your stored signature record is temporarily unretrievable. Please visit My Signature to register a replacement signature.</p>
+                        </div>
+                    </div>
+                    <a href="{{ route('signature.show') }}" class="btn-secondary text-xs px-4 py-2 shrink-0 flex items-center gap-1.5 shadow text-rose-200 border-rose-500/40 hover:bg-rose-900/30">
+                        <span>Update Signature</span>
                         <i data-lucide="arrow-right" class="w-3.5 h-3.5"></i>
                     </a>
                 </div>

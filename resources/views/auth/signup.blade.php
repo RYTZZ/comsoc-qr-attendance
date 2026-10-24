@@ -109,7 +109,7 @@
     <!-- ======================================================== -->
     <main class="auth-content-main w-full md:w-7/12 flex-1 flex flex-col justify-start sm:justify-center items-center p-4 sm:p-8 lg:p-12 relative z-10 overflow-y-auto"
           x-data="{
-              step: {{ $errors->hasAny(['password', 'password_confirmation', 'terms']) ? 3 : ($errors->hasAny(['username', 'avatar_seed', 'avatar_style']) ? 2 : 1) }},
+              step: {{ $errors->hasAny(['signature', 'signature_consent']) ? 4 : ($errors->hasAny(['password', 'password_confirmation', 'terms']) ? 3 : ($errors->hasAny(['username', 'avatar_seed', 'avatar_style']) ? 2 : 1)) }},
               submitting: false,
               showPass: false,
               showConfirm: false,
@@ -179,6 +179,101 @@
               },
               termsAccepted: {{ old('terms') ? 'true' : 'false' }},
               clientErrors: {},
+
+              // Step 4 Signature Pad State
+              signaturePad: null,
+              signatureData: '{{ addslashes(old('signature', '')) }}',
+              signatureConsent: {{ old('signature_consent') ? 'true' : 'false' }},
+              signaturePreview: null,
+              showSignaturePreview: false,
+              signatureRegisteredSuccess: false,
+              _sigResizeListener: null,
+
+              initSignaturePad() {
+                  const canvas = this.$refs.signatureCanvas;
+                  if (!canvas) return;
+
+                  if (typeof SignaturePad === 'undefined' && window.SignaturePad) {
+                      window.SignaturePad = window.SignaturePad;
+                  }
+
+                  if (!this.signaturePad) {
+                      const PadConstructor = window.SignaturePad || (window.default && window.default.SignaturePad) || null;
+                      if (!PadConstructor) {
+                          // Dynamic import fallback or global check
+                          return;
+                      }
+
+                      this.signaturePad = new PadConstructor(canvas, {
+                          penColor: '#000000',
+                          backgroundColor: 'rgba(0,0,0,0)',
+                          minWidth: 0.8,
+                          maxWidth: 2.4,
+                      });
+
+                      this.signaturePad.addEventListener('endStroke', () => {
+                          this.syncSignature();
+                      });
+
+                      if (!this._sigResizeListener) {
+                          this._sigResizeListener = () => this.resizeCanvas();
+                          window.addEventListener('resize', this._sigResizeListener);
+                          window.addEventListener('orientationchange', this._sigResizeListener);
+                      }
+                  }
+
+                  this.resizeCanvas();
+
+                  if (this.signatureData && this.signaturePad.isEmpty()) {
+                      try {
+                          this.signaturePad.fromDataURL(this.signatureData);
+                      } catch (e) {}
+                  }
+              },
+
+              resizeCanvas() {
+                  const canvas = this.$refs.signatureCanvas;
+                  if (!canvas || !canvas.offsetWidth || !this.signaturePad) return;
+                  const saved = this.signaturePad.toData();
+                  const ratio = Math.max(window.devicePixelRatio || 1, 1);
+                  canvas.width = canvas.offsetWidth * ratio;
+                  canvas.height = canvas.offsetHeight * ratio;
+                  canvas.getContext('2d').scale(ratio, ratio);
+                  this.signaturePad.clear();
+                  if (saved.length) {
+                      this.signaturePad.fromData(saved);
+                  }
+              },
+
+              syncSignature() {
+                  if (!this.signaturePad || this.signaturePad.isEmpty()) {
+                      this.signatureData = '';
+                      this.signaturePreview = null;
+                      return;
+                  }
+                  const src = this.$refs.signatureCanvas;
+                  const maxW = 1000;
+                  const scale = Math.min(1, maxW / src.width);
+                  const out = document.createElement('canvas');
+                  out.width = Math.max(1, Math.round(src.width * scale));
+                  out.height = Math.max(1, Math.round(src.height * scale));
+                  out.getContext('2d').drawImage(src, 0, 0, out.width, out.height);
+                  this.signatureData = out.toDataURL('image/png');
+                  this.signaturePreview = this.signatureData;
+                  if (this.clientErrors.signature) {
+                      this.clientErrors.signature = '';
+                  }
+              },
+
+              clearSignature() {
+                  if (this.signaturePad) {
+                      this.signaturePad.clear();
+                  }
+                  this.signatureData = '';
+                  this.signaturePreview = null;
+                  this.showSignaturePreview = false;
+                  this.clientErrors.signature = '';
+              },
 
               get studentIdDigits() {
                   return (this.studentId || '').replace(/\D/g, '');
@@ -349,6 +444,35 @@
                   return valid;
               },
 
+              goToStep4() {
+                  if (this.validateStep3()) {
+                      this.step = 4;
+                      window.scrollTo({ top: 0, behavior: 'smooth' });
+                      this.$nextTick(() => {
+                          this.initSignaturePad();
+                      });
+                  }
+              },
+
+              validateStep4() {
+                  this.clientErrors = {};
+                  let valid = true;
+
+                  this.syncSignature();
+
+                  if (!this.signatureData || (this.signaturePad && this.signaturePad.isEmpty())) {
+                      this.clientErrors.signature = 'Your handwritten signature is required to complete registration.';
+                      valid = false;
+                  }
+
+                  if (!this.signatureConsent) {
+                      this.clientErrors.signature_consent = 'You must acknowledge the signature consent statement.';
+                      valid = false;
+                  }
+
+                  return valid;
+              },
+
               submitForm(e) {
                   if (!this.validateStep1()) {
                       e.preventDefault();
@@ -363,6 +487,11 @@
                   if (!this.validateStep3()) {
                       e.preventDefault();
                       this.step = 3;
+                      return;
+                  }
+                  if (!this.validateStep4()) {
+                      e.preventDefault();
+                      this.step = 4;
                       return;
                   }
                   this.submitting = true;
@@ -389,7 +518,7 @@
 
                 <!-- Registration Progress Navigation -->
                 <nav aria-label="Registration Progress" class="mb-4">
-                    <ol class="grid grid-cols-3 gap-1.5 sm:gap-3">
+                    <ol class="grid grid-cols-2 sm:grid-cols-4 gap-1.5 sm:gap-2">
                         <li class="flex items-center gap-1.5 sm:gap-2 p-2 sm:p-2.5 rounded-xl border transition"
                             :class="step === 1 ? 'bg-[#560E0F]/20 border-[#560E0F] text-white' : 'bg-slate-900/40 border-slate-800 text-slate-400'">
                             <span class="w-5 h-5 sm:w-6 sm:h-6 rounded-lg flex items-center justify-center font-bold text-xs shrink-0"
@@ -404,8 +533,8 @@
                                 </template>
                             </span>
                             <div class="min-w-0">
-                                <p class="text-[8px] sm:text-[10px] font-mono uppercase tracking-wider text-slate-400 truncate">STEP 1 OF 3</p>
-                                <p class="text-xs sm:text-sm font-semibold truncate" :class="step === 1 ? 'text-white' : 'text-slate-300'">Student Information</p>
+                                <p class="text-[8px] sm:text-[9px] font-mono uppercase tracking-wider text-slate-400 truncate">STEP 1 OF 4</p>
+                                <p class="text-xs sm:text-xs font-semibold truncate" :class="step === 1 ? 'text-white' : 'text-slate-300'">Student Info</p>
                             </div>
                         </li>
 
@@ -423,20 +552,39 @@
                                 </template>
                             </span>
                             <div class="min-w-0">
-                                <p class="text-[8px] sm:text-[10px] font-mono uppercase tracking-wider text-slate-400 truncate">STEP 2 OF 3</p>
-                                <p class="text-xs sm:text-sm font-semibold truncate" :class="step === 2 ? 'text-white' : 'text-slate-300'">Avatar & Username</p>
+                                <p class="text-[8px] sm:text-[9px] font-mono uppercase tracking-wider text-slate-400 truncate">STEP 2 OF 4</p>
+                                <p class="text-xs sm:text-xs font-semibold truncate" :class="step === 2 ? 'text-white' : 'text-slate-300'">Avatar & Username</p>
                             </div>
                         </li>
 
                         <li class="flex items-center gap-1.5 sm:gap-2 p-2 sm:p-2.5 rounded-xl border transition"
                             :class="step === 3 ? 'bg-[#560E0F]/20 border-[#560E0F] text-white' : 'bg-slate-900/40 border-slate-800 text-slate-400'">
                             <span class="w-5 h-5 sm:w-6 sm:h-6 rounded-lg flex items-center justify-center font-bold text-xs shrink-0"
-                                  :class="step === 3 ? 'bg-[#560E0F] text-white' : 'bg-slate-800 text-slate-400'">
-                                3
+                                  :class="step === 3 ? 'bg-[#560E0F] text-white' : (step > 3 ? 'bg-emerald-500/20 text-emerald-400 border border-emerald-500/40' : 'bg-slate-800 text-slate-400')">
+                                <template x-if="step > 3">
+                                    <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"/>
+                                    </svg>
+                                </template>
+                                <template x-if="step <= 3">
+                                    <span>3</span>
+                                </template>
                             </span>
                             <div class="min-w-0">
-                                <p class="text-[8px] sm:text-[10px] font-mono uppercase tracking-wider text-slate-400 truncate">STEP 3 OF 3</p>
-                                <p class="text-xs sm:text-sm font-semibold truncate" :class="step === 3 ? 'text-white' : 'text-slate-300'">Account Security</p>
+                                <p class="text-[8px] sm:text-[9px] font-mono uppercase tracking-wider text-slate-400 truncate">STEP 3 OF 4</p>
+                                <p class="text-xs sm:text-xs font-semibold truncate" :class="step === 3 ? 'text-white' : 'text-slate-300'">Account Security</p>
+                            </div>
+                        </li>
+
+                        <li class="flex items-center gap-1.5 sm:gap-2 p-2 sm:p-2.5 rounded-xl border transition"
+                            :class="step === 4 ? 'bg-[#560E0F]/20 border-[#560E0F] text-white' : 'bg-slate-900/40 border-slate-800 text-slate-400'">
+                            <span class="w-5 h-5 sm:w-6 sm:h-6 rounded-lg flex items-center justify-center font-bold text-xs shrink-0"
+                                  :class="step === 4 ? 'bg-[#560E0F] text-white' : 'bg-slate-800 text-slate-400'">
+                                4
+                            </span>
+                            <div class="min-w-0">
+                                <p class="text-[8px] sm:text-[9px] font-mono uppercase tracking-wider text-slate-400 truncate">STEP 4 OF 4</p>
+                                <p class="text-xs sm:text-xs font-semibold truncate" :class="step === 4 ? 'text-white' : 'text-slate-300'">Register Signature</p>
                             </div>
                         </li>
                     </ol>
@@ -804,10 +952,10 @@
                     <div x-show="step === 3" x-cloak x-transition:enter="transition ease-out duration-200" class="space-y-4">
                         <div class="border-b border-slate-800 pb-2 flex items-center justify-between">
                             <div>
-                                <h3 class="font-brand-display text-sm sm:text-base font-bold text-white tracking-wide">STEP 3 OF 3 — Account Security</h3>
+                                <h3 class="font-brand-display text-sm sm:text-base font-bold text-white tracking-wide">STEP 3 OF 4 — Account Security</h3>
                                 <p class="text-xs text-[#94A3B8]">Configure your password and review privacy policies</p>
                             </div>
-                            <span class="text-xs font-mono text-slate-500 hidden sm:inline">3 / 3</span>
+                            <span class="text-xs font-mono text-slate-500 hidden sm:inline">3 / 4</span>
                         </div>
 
                         <!-- Passwords Grid with Visibility Toggles -->
@@ -954,10 +1102,157 @@
                             @enderror
                         </div>
 
-                        <!-- Step 3 Actions: Back and Create Account -->
+                        <!-- Step 3 Actions: Back and Continue to Step 4 -->
                         <div class="pt-5 sm:pt-6 flex flex-col-reverse sm:flex-row items-center justify-between gap-3">
                             <button type="button"
                                     @click="goToStep2()"
+                                    class="btn-secondary w-full sm:w-auto min-w-[110px] justify-center py-2.5 sm:py-3 text-xs sm:text-sm flex items-center gap-1.5 font-semibold">
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"/>
+                                </svg>
+                                <span>Back</span>
+                            </button>
+
+                            <button type="button"
+                                    @click="goToStep4()"
+                                    class="btn-primary w-full sm:w-auto min-w-[160px] justify-center py-2.5 sm:py-3 font-semibold text-xs sm:text-sm tracking-wide shadow-xl flex items-center gap-2">
+                                <span>Next: Register Signature</span>
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"/>
+                                </svg>
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- ============================================== -->
+                    <!-- STEP 4: Register Your Signature                -->
+                    <!-- ============================================== -->
+                    <div x-show="step === 4" x-cloak x-transition:enter="transition ease-out duration-200" class="space-y-4">
+                        <div class="border-b border-slate-800 pb-2 flex items-center justify-between">
+                            <div>
+                                <h3 class="font-brand-display text-sm sm:text-base font-bold text-white tracking-wide">STEP 4 OF 4 — Register Your Signature</h3>
+                                <p class="text-xs text-[#94A3B8]">Provide your handwritten signature to be securely encrypted and reused for official attendance sheets</p>
+                            </div>
+                            <span class="text-xs font-mono text-slate-500 hidden sm:inline">4 / 4</span>
+                        </div>
+
+                        <!-- Signature Canvas Card -->
+                        <div class="p-4 rounded-xl bg-slate-950/70 border border-slate-800 space-y-3">
+                            <div class="flex items-center justify-between">
+                                <label for="signature-canvas" class="text-xs font-semibold text-slate-300 flex items-center gap-1.5">
+                                    <svg class="w-4 h-4 text-[#df747a]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
+                                    </svg>
+                                    <span>Draw Your Handwritten Signature <span class="text-rose-400">*</span></span>
+                                    <span class="text-[11px] font-normal text-slate-400 hidden sm:inline">(mouse, touchscreen, or stylus)</span>
+                                </label>
+
+                                <div class="flex items-center gap-2">
+                                    <button type="button"
+                                            @click="clearSignature()"
+                                            :disabled="submitting"
+                                            class="btn-secondary text-[11px] py-1 px-2.5 flex items-center gap-1 font-medium">
+                                        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                                        </svg>
+                                        <span>Clear & Redraw</span>
+                                    </button>
+                                </div>
+                            </div>
+
+                            <!-- Canvas Container -->
+                            <div class="relative rounded-xl bg-white border-2 border-dashed border-slate-700 overflow-hidden shadow-inner"
+                                 :class="clientErrors.signature ? 'border-rose-500' : ''">
+                                <canvas id="signature-canvas"
+                                        x-ref="signatureCanvas"
+                                        role="img"
+                                        aria-label="Signature drawing area"
+                                        class="w-full block cursor-crosshair"
+                                        style="height: 180px; touch-action: none; background: #ffffff;"></canvas>
+
+                                <div class="absolute bottom-2 right-3 pointer-events-none select-none text-[10px] text-slate-400 font-mono opacity-60">
+                                    Sign above this line
+                                </div>
+                            </div>
+
+                            <div class="flex items-center justify-between text-[11px] text-slate-400">
+                                <span>Please sign neatly within the white drawing area.</span>
+                                <button type="button"
+                                        x-show="signatureData"
+                                        @click="showSignaturePreview = !showSignaturePreview"
+                                        class="text-[#df747a] hover:text-white underline font-semibold transition">
+                                    <span x-text="showSignaturePreview ? 'Hide Preview' : 'Show Preview'"></span>
+                                </button>
+                            </div>
+
+                            <!-- Signature Preview Section -->
+                            <div x-show="showSignaturePreview && signaturePreview" x-cloak class="p-3 rounded-lg bg-slate-900 border border-slate-800 space-y-1">
+                                <p class="text-[11px] font-semibold text-slate-300">Signature Preview (Decrypted In-Memory Only):</p>
+                                <div class="inline-block p-2 rounded-lg bg-white">
+                                    <img :src="signaturePreview" alt="Decrypted Signature Preview" class="max-h-20 object-contain">
+                                </div>
+                            </div>
+
+                            <!-- Validation Feedback for Signature Canvas -->
+                            <template x-if="clientErrors.signature">
+                                <p class="text-xs text-rose-400 mt-1 font-medium" x-text="clientErrors.signature"></p>
+                            </template>
+                            @error('signature')
+                                <p class="text-xs text-rose-400 mt-1 font-medium">{{ $message }}</p>
+                            @enderror
+                        </div>
+
+                        <!-- Signature Consent Statement -->
+                        <div class="p-3.5 rounded-xl bg-slate-950/80 border border-slate-800 text-[11px] text-slate-300 space-y-2">
+                            <div class="flex items-center gap-1.5 text-white font-semibold">
+                                <svg class="w-4 h-4 text-emerald-400 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
+                                </svg>
+                                <span>Official Signature Authorization &amp; Consent</span>
+                            </div>
+
+                            <p class="text-[10.5px] text-slate-300 leading-relaxed italic border-l-2 border-[#560E0F] pl-3 py-0.5">
+                                "I confirm that this is my handwritten signature and authorize COMSOC Hub to securely store and reuse it for generating official Computing Society attendance sheets and related organizational records. I understand that I may update my registered signature, subject to the system's version history and record-retention policies."
+                            </p>
+
+                            <label class="flex items-start gap-2.5 text-xs text-slate-300 cursor-pointer pt-1">
+                                <input type="checkbox"
+                                       name="signature_consent"
+                                       id="signature_consent"
+                                       value="1"
+                                       x-model="signatureConsent"
+                                       @change="clientErrors.signature_consent = ''"
+                                       required
+                                       class="w-4 h-4 mt-0.5 rounded bg-slate-900 border-slate-700 text-[#560E0F] focus:ring-[#560E0F]">
+                                <span class="font-medium text-slate-200">
+                                    I have read, understood, and explicitly agree to the signature authorization and consent terms above. <span class="text-rose-400">*</span>
+                                </span>
+                            </label>
+
+                            <template x-if="clientErrors.signature_consent">
+                                <p class="text-xs text-rose-400 mt-1 font-medium" x-text="clientErrors.signature_consent"></p>
+                            </template>
+                            @error('signature_consent')
+                                <p class="text-xs text-rose-400 mt-1 font-medium">{{ $message }}</p>
+                            @enderror
+                        </div>
+
+                        <!-- Success status indicator when signature is valid and confirmed -->
+                        <div x-show="signatureData && signatureConsent" x-cloak class="p-3 rounded-xl bg-emerald-950/40 border border-emerald-500/30 text-emerald-300 text-xs flex items-center gap-2">
+                            <svg class="w-4 h-4 text-emerald-400 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7" />
+                            </svg>
+                            <span>Your signature is drawn and consent is acknowledged. It will be securely encrypted upon submission.</span>
+                        </div>
+
+                        <!-- Hidden Signature Form Field -->
+                        <input type="hidden" name="signature" :value="signatureData">
+
+                        <!-- Step 4 Actions: Back to Step 3 and Final Account Creation -->
+                        <div class="pt-5 sm:pt-6 flex flex-col-reverse sm:flex-row items-center justify-between gap-3">
+                            <button type="button"
+                                    @click="step = 3; window.scrollTo({ top: 0, behavior: 'smooth' });"
+                                    :disabled="submitting"
                                     class="btn-secondary w-full sm:w-auto min-w-[110px] justify-center py-2.5 sm:py-3 text-xs sm:text-sm flex items-center gap-1.5 font-semibold">
                                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"/>
@@ -974,7 +1269,7 @@
                                         <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
                                         <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8H4z"></path>
                                     </svg>
-                                    <span>Creating account...</span>
+                                    <span>Creating account & encrypting signature...</span>
                                 </span>
                             </button>
                         </div>

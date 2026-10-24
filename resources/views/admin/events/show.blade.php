@@ -13,7 +13,10 @@
     </div>
 </div>
 
+<x-attendance-sheet-export :event="$event" />
+
 <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+
     <div class="lg:col-span-2 space-y-6">
         <div class="card">
             <h2 class="section-title">Attendance Sessions</h2>

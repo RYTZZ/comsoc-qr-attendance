@@ -249,6 +249,11 @@ class User extends Authenticatable
         return $this->hasMany(ProjectMember::class);
     }
 
+    public function studentSignature(): \Illuminate\Database\Eloquent\Relations\HasOne
+    {
+        return $this->hasOne(StudentSignature::class)->where('status', StudentSignature::STATUS_ACTIVE);
+    }
+
     public function volunteerApplications(): HasMany
     {
         return $this->hasMany(VolunteerApplication::class);

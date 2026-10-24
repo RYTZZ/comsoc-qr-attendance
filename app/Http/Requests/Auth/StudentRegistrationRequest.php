@@ -77,6 +77,21 @@ class StudentRegistrationRequest extends FormRequest
                 'in:' . implode(',', array_keys(\App\Services\AvatarService::PRESET_SEEDS)),
             ],
             'avatar_style' => ['nullable', 'string', 'in:adventurer'],
+            'signature' => [
+                'required',
+                'string',
+                'max:' . config('signatures.max_payload_chars', 400000),
+                function ($attribute, $value, $fail) {
+                    try {
+                        app(\App\Services\SignatureVaultService::class)->normalize($value);
+                    } catch (\InvalidArgumentException $e) {
+                        $fail($e->getMessage());
+                    } catch (\Throwable $e) {
+                        $fail('The signature is invalid.');
+                    }
+                },
+            ],
+            'signature_consent' => ['accepted'],
         ];
     }
 
@@ -102,6 +117,8 @@ class StudentRegistrationRequest extends FormRequest
             'username.required' => 'Please enter a username.',
             'avatar_seed.required' => 'Please select an adventurer avatar.',
             'avatar_seed.in' => 'The selected avatar is not part of the official adventurer collection.',
+            'signature.required' => 'Your handwritten signature is required to complete registration.',
+            'signature_consent.accepted' => 'You must acknowledge the signature consent statement.',
         ];
     }
 }

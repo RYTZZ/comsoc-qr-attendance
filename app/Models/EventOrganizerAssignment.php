@@ -11,6 +11,8 @@ class EventOrganizerAssignment extends Pivot
 {
     use HasFactory, HasUuids;
 
+    protected $table = 'event_organizer_assignments';
+
     protected $fillable = [
         'event_id',
         'user_id',

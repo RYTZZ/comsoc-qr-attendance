@@ -66,6 +66,13 @@
                     <i data-lucide="qr-code" class="w-4 h-4 shrink-0 {{ request()->routeIs('member.dynamic_qr') ? 'text-white' : 'text-[#94A3B8]' }}"></i>
                     <span>{{ __('Dynamic Attendance QR') }}</span>
                 </a>
+
+                <a href="{{ route('signature.show') }}"
+                   class="flex items-center gap-3 px-3 py-2.5 rounded-xl text-xs font-semibold transition {{ request()->routeIs('signature.*') ? 'bg-burgundy-gradient text-white shadow-md' : 'text-[#94A3B8] hover:text-white hover:bg-[#1E293B]' }}">
+                    <i data-lucide="pen-tool" class="w-4 h-4 shrink-0 {{ request()->routeIs('signature.*') ? 'text-white' : 'text-[#94A3B8]' }}"></i>
+                    <span>{{ __('My Signature') }}</span>
+                </a>
+
             </div>
         </div>
 
