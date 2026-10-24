@@ -59,7 +59,12 @@ class PublicWebsiteController extends Controller
     public function about(): View
     {
         $settings = WebsiteSettingsService::all();
-        return view('public.website.about', compact('settings'));
+        $president = OrgOfficer::public()
+            ->where('position', 'like', '%President%')
+            ->where('position', 'not like', '%Vice%')
+            ->first();
+
+        return view('public.website.about', compact('settings', 'president'));
     }
 
     /**

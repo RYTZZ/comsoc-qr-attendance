@@ -24,6 +24,21 @@ class WebsiteSettingsService
         'org_mission' => 'To cultivate a vibrant, inclusive environment for computing students through technical innovation, hands-on collaboration, and academic excellence that serves both the campus and the wider community.',
         'org_vision' => 'To be a premier student-led computing society recognized for producing skilled, ethical, and community-driven technology leaders and innovators in the Bicol region.',
 
+        // President's Message
+        'president_message_visible' => true,
+        'president_message_eyebrow' => 'A Message From The President',
+        'president_message_headline' => 'A Computing Society That Does More',
+        'president_message_quote' => 'COMSOC is more than an organization that conducts events; it is a shared space where computing students turn curiosity into competence, build lasting connections, and ship meaningful projects.',
+        'president_message_paragraphs' => [
+            'As computing and technology students at Sorsogon State University – Bulan Campus, we share a rare opportunity: the tools to create, innovate, and solve real community challenges are directly at our fingertips. Yet technical education only reaches its true potential when complemented by hands-on creation and collaborative action.',
+            'Our commitment is grounded in our five organizational pillars—Skills, Creation, Connection, Experience, and Community. Whether through peer-led code laboratories, collaborative projects, tech meetups, or community digital transformation, COMSOC exists to empower students to learn, build, and lead with purpose.',
+            'We value initiative, accountability, and real outcomes over formalities. To every computing scholar—whether you are debugging your very first algorithm or deploying full-stack systems—you have a place here. Let us collaborate, innovate, and build a Computing Society that leaves a lasting impact on our campus and beyond.',
+        ],
+        'president_name' => 'John Mark M. Esperida',
+        'president_title' => 'President, Computing Society',
+        'president_term' => 'Academic Year 2025–2026',
+        'president_portrait' => null,
+
         // Hero Section
         'hero_headline' => 'Building Skills. Creating Opportunities. Connecting Communities.',
         'hero_description' => 'COMSOC brings computing students together to develop their skills, turn ideas into meaningful projects, build connections, and create experiences that strengthen our campus community.',

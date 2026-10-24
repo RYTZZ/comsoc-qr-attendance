@@ -56,6 +56,127 @@
         </div>
     </section>
 
+    <!-- President's Message: Editorial Leadership Section -->
+    @if($settings['president_message_visible'] ?? true)
+    @php
+        $presName = $president?->name ?? ($settings['president_name'] ?? 'John Mark M. Esperida');
+        $presTitle = $president?->position ?? ($settings['president_title'] ?? 'President, Computing Society');
+        $presProgram = $president?->program ?? 'BS Information Technology';
+        $presTerm = $settings['president_term'] ?? 'Academic Year 2025–2026';
+        $presPortrait = !empty($settings['president_portrait'])
+            ? asset('storage/' . $settings['president_portrait'])
+            : ($president?->portrait_path ? asset('storage/' . $president->portrait_path) : null);
+        $presParagraphs = $settings['president_message_paragraphs'] ?? [];
+        if (!is_array($presParagraphs)) {
+            $presParagraphs = array_values(array_filter(array_map('trim', preg_split("/\r\n|\n|\r/", (string)$presParagraphs))));
+        }
+    @endphp
+    <section id="presidents-message" class="py-16 sm:py-24 bg-gradient-to-b from-[#0B1120] via-[#172033]/35 to-[#0B1120] relative">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="grid grid-cols-1 lg:grid-cols-12 gap-12 lg:gap-16 items-start">
+
+                <!-- Left Column: President Identity & Portrait -->
+                <div class="lg:col-span-4 space-y-6" data-reveal>
+                    <div class="space-y-4">
+                        <div class="relative w-44 h-44 sm:w-52 sm:h-52 rounded-2xl overflow-hidden bg-[#0B1120] border-2 border-[#334155]/60 shadow-xl">
+                            @if($presPortrait)
+                                <img src="{{ $presPortrait }}" alt="{{ $presName }}" class="w-full h-full object-cover">
+                            @else
+                                <div class="w-full h-full flex flex-col items-center justify-center text-slate-400 bg-gradient-to-br from-[#172033] to-[#0B1120] p-4 text-center">
+                                    <div class="w-14 h-14 rounded-xl bg-[#560E0F]/30 text-[#df747a] flex items-center justify-center mb-2">
+                                        <i data-lucide="user-check" class="w-7 h-7"></i>
+                                    </div>
+                                    <span class="text-xs font-mono uppercase tracking-wider text-slate-400">Executive Office</span>
+                                </div>
+                            @endif
+                        </div>
+
+                        <div class="space-y-1.5 pt-1">
+                            <span class="inline-block px-2.5 py-0.5 rounded text-[11px] font-mono font-semibold tracking-wider uppercase bg-[#560E0F]/30 text-[#df747a] border border-[#560E0F]/50">
+                                {{ $presTerm }}
+                            </span>
+                            <h3 class="text-xl sm:text-2xl font-bold text-white font-brand-display tracking-tight leading-tight">
+                                {{ $presName }}
+                            </h3>
+                            <p class="text-xs sm:text-sm font-semibold text-[#df747a]">
+                                {{ $presTitle }}
+                            </p>
+                            <p class="text-xs text-slate-400">
+                                Computing Society Organization
+                            </p>
+                            <p class="text-xs text-slate-500 font-mono">
+                                Sorsogon State University – Bulan Campus
+                            </p>
+                        </div>
+                    </div>
+
+                    <div class="p-4 rounded-xl bg-[#172033]/50 border border-[#334155]/40 text-xs text-slate-300 space-y-1.5">
+                        <div class="flex items-center gap-2 text-white font-semibold">
+                            <i data-lucide="shield-check" class="w-4 h-4 text-[#df747a]"></i>
+                            <span>Leadership Direction</span>
+                        </div>
+                        <p class="text-slate-400 leading-relaxed">
+                            Guided by the five pillars: Skills, Creation, Connection, Experience, and Community.
+                        </p>
+                    </div>
+                </div>
+
+                <!-- Right Column: President's Message -->
+                <div class="lg:col-span-8 space-y-6" data-reveal-group>
+                    <!-- Eyebrow & Headline -->
+                    <div data-reveal-item class="space-y-2">
+                        <span class="text-xs font-bold text-[#df747a] tracking-widest uppercase font-brand-accent">
+                            {{ $settings['president_message_eyebrow'] ?? 'A Message From The President' }}
+                        </span>
+                        <h2 class="text-2xl sm:text-4xl font-extrabold text-white font-brand-display tracking-tight leading-tight">
+                            {{ $settings['president_message_headline'] ?? 'A Computing Society That Does More' }}
+                        </h2>
+                    </div>
+
+                    <!-- Opening Statement / Anchor Quote -->
+                    @if(!empty($settings['president_message_quote']))
+                    <div data-reveal-item class="pl-4 sm:pl-5 border-l-2 border-[#560E0F]">
+                        <p class="text-base sm:text-lg text-white font-medium italic leading-relaxed">
+                            “{{ $settings['president_message_quote'] }}”
+                        </p>
+                    </div>
+                    @endif
+
+                    <!-- Message Paragraphs in Restrained Sequence -->
+                    <div class="space-y-4 text-sm sm:text-base text-slate-300 leading-relaxed font-normal">
+                        @foreach($presParagraphs as $paragraph)
+                            <p data-reveal-item>
+                                {{ $paragraph }}
+                            </p>
+                        @endforeach
+                    </div>
+
+                    <!-- Signature Area -->
+                    <div data-reveal-item class="pt-6 border-t border-[#334155]/40 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                        <div>
+                            <div class="font-serif italic text-lg sm:text-xl text-white tracking-wide">
+                                {{ $presName }}
+                            </div>
+                            <p class="text-xs text-[#df747a] font-semibold mt-0.5">
+                                {{ $presTitle }}
+                            </p>
+                            <p class="text-[11px] text-slate-400 font-mono">
+                                Sorsogon State University – Bulan Campus
+                            </p>
+                        </div>
+
+                        <div class="flex items-center gap-2 text-xs font-mono text-slate-400">
+                            <i data-lucide="award" class="w-4 h-4 text-amber-400"></i>
+                            <span>{{ $presTerm }}</span>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </section>
+    @endif
+
     <!-- Mission & Vision Dual Focus (Open, subtle contrast without harsh bright outlines) -->
     <section class="py-16 sm:py-24 bg-[#172033]/20">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">

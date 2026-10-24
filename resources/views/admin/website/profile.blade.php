@@ -32,7 +32,7 @@
             <a href="{{ route('admin.website.faqs') }}" class="px-3 py-1.5 rounded-lg text-slate-300 hover:bg-slate-800">FAQs</a>
         </div>
 
-        <form method="POST" action="{{ route('admin.website.profile.update') }}" class="space-y-8">
+        <form method="POST" action="{{ route('admin.website.profile.update') }}" enctype="multipart/form-data" class="space-y-8">
             @csrf
 
             <!-- Intro, Background, Mission, Vision -->
@@ -63,6 +63,75 @@
                             <label class="text-xs font-semibold text-slate-300">Official Vision</label>
                             <textarea name="org_vision" rows="4" required class="form-input w-full text-sm">{{ old('org_vision', $settings['org_vision']) }}</textarea>
                         </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- President's Message Section -->
+            <div class="card bg-slate-900 border border-slate-800 p-6 rounded-2xl space-y-4">
+                <div class="flex items-center justify-between pb-2 border-b border-slate-800">
+                    <h3 class="text-base font-bold text-white flex items-center gap-2">
+                        <i data-lucide="message-square-quote" class="w-4 h-4 text-[#df747a]"></i>
+                        <span>President’s Message (About Page)</span>
+                    </h3>
+                    <label class="inline-flex items-center gap-2 cursor-pointer">
+                        <input type="checkbox" name="president_message_visible" value="1" {{ ($settings['president_message_visible'] ?? true) ? 'checked' : '' }} class="form-checkbox rounded text-[#560E0F]">
+                        <span class="text-xs text-slate-300 font-medium">Display on About Page</span>
+                    </label>
+                </div>
+
+                <div class="space-y-4">
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                        <div class="space-y-1.5">
+                            <label class="text-xs font-semibold text-slate-300">Eyebrow Label</label>
+                            <input type="text" name="president_message_eyebrow" value="{{ old('president_message_eyebrow', $settings['president_message_eyebrow'] ?? 'A Message From The President') }}" class="form-input w-full text-xs">
+                        </div>
+                        <div class="space-y-1.5 md:col-span-2">
+                            <label class="text-xs font-semibold text-slate-300">Headline</label>
+                            <input type="text" name="president_message_headline" value="{{ old('president_message_headline', $settings['president_message_headline'] ?? 'A Computing Society That Does More') }}" class="form-input w-full text-xs">
+                        </div>
+                    </div>
+
+                    <div class="space-y-1.5">
+                        <label class="text-xs font-semibold text-slate-300">Opening Quote / Key Statement</label>
+                        <textarea name="president_message_quote" rows="2" class="form-input w-full text-xs">{{ old('president_message_quote', $settings['president_message_quote'] ?? '') }}</textarea>
+                    </div>
+
+                    <div class="space-y-1.5">
+                        <label class="text-xs font-semibold text-slate-300">Message Body (Paragraphs separated by new lines)</label>
+                        @php
+                            $existingParagraphs = is_array($settings['president_message_paragraphs'] ?? null)
+                                ? implode("\n\n", $settings['president_message_paragraphs'])
+                                : ($settings['president_message_paragraphs'] ?? '');
+                        @endphp
+                        <textarea name="president_message_body" rows="6" class="form-input w-full text-xs font-sans leading-relaxed">{{ old('president_message_body', $existingParagraphs) }}</textarea>
+                    </div>
+
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-4 pt-2">
+                        <div class="space-y-1.5">
+                            <label class="text-xs font-semibold text-slate-300">President Name (Fallback if no officer linked)</label>
+                            <input type="text" name="president_name" value="{{ old('president_name', $settings['president_name'] ?? 'John Mark M. Esperida') }}" class="form-input w-full text-xs">
+                        </div>
+                        <div class="space-y-1.5">
+                            <label class="text-xs font-semibold text-slate-300">Official Title</label>
+                            <input type="text" name="president_title" value="{{ old('president_title', $settings['president_title'] ?? 'President, Computing Society') }}" class="form-input w-full text-xs">
+                        </div>
+                        <div class="space-y-1.5">
+                            <label class="text-xs font-semibold text-slate-300">Term / Academic Year</label>
+                            <input type="text" name="president_term" value="{{ old('president_term', $settings['president_term'] ?? 'Academic Year 2025–2026') }}" class="form-input w-full text-xs">
+                        </div>
+                    </div>
+
+                    <div class="space-y-1.5 pt-2">
+                        <label class="text-xs font-semibold text-slate-300">President Portrait (Optional Override Image)</label>
+                        @if(!empty($settings['president_portrait']))
+                            <div class="flex items-center gap-3 mb-2">
+                                <img src="{{ asset('storage/' . $settings['president_portrait']) }}" alt="President Portrait" class="w-12 h-12 rounded-full object-cover border border-slate-700">
+                                <span class="text-xs text-slate-400">Current override image uploaded.</span>
+                            </div>
+                        @endif
+                        <input type="file" name="president_portrait" accept="image/*" class="form-input w-full text-xs">
+                        <p class="text-[11px] text-slate-400">Note: If an active President is published in the Officers directory with a portrait, it is automatically displayed. This upload serves as an override.</p>
                     </div>
                 </div>
             </div>

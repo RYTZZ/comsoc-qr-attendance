@@ -126,19 +126,44 @@ class WebsiteManagementController extends Controller
             'pillars.*.title' => ['required', 'string', 'max:100'],
             'pillars.*.description' => ['required', 'string', 'max:500'],
             'pillars.*.icon' => ['required', 'string', 'max:50'],
+            'president_message_visible' => ['nullable', 'boolean'],
+            'president_message_eyebrow' => ['nullable', 'string', 'max:100'],
+            'president_message_headline' => ['nullable', 'string', 'max:255'],
+            'president_message_quote' => ['nullable', 'string', 'max:1000'],
+            'president_message_body' => ['nullable', 'string', 'max:5000'],
+            'president_name' => ['nullable', 'string', 'max:255'],
+            'president_title' => ['nullable', 'string', 'max:255'],
+            'president_term' => ['nullable', 'string', 'max:100'],
+            'president_portrait' => ['nullable', 'image', 'mimes:jpeg,png,jpg,webp', 'max:3072'],
         ]);
 
-        WebsiteSettingsService::setMany([
+        $paragraphs = array_values(array_filter(array_map('trim', preg_split("/\r\n|\n|\r/", $validated['president_message_body'] ?? ''))));
+
+        $updates = [
             'org_intro' => $validated['org_intro'],
             'org_background' => $validated['org_background'],
             'org_mission' => $validated['org_mission'],
             'org_vision' => $validated['org_vision'],
             'pillars' => $validated['pillars'],
-        ]);
+            'president_message_visible' => $request->boolean('president_message_visible', true),
+            'president_message_eyebrow' => $validated['president_message_eyebrow'] ?? 'A Message From The President',
+            'president_message_headline' => $validated['president_message_headline'] ?? 'A Computing Society That Does More',
+            'president_message_quote' => $validated['president_message_quote'] ?? '',
+            'president_message_paragraphs' => !empty($paragraphs) ? $paragraphs : (WebsiteSettingsService::DEFAULTS['president_message_paragraphs'] ?? []),
+            'president_name' => $validated['president_name'] ?? 'John Mark M. Esperida',
+            'president_title' => $validated['president_title'] ?? 'President, Computing Society',
+            'president_term' => $validated['president_term'] ?? 'Academic Year 2025–2026',
+        ];
 
-        AuditLogger::log('website.profile_updated');
+        if ($request->hasFile('president_portrait')) {
+            $updates['president_portrait'] = $request->file('president_portrait')->store('website', 'public');
+        }
 
-        return back()->with('success', 'Organization profile & pillars updated successfully.');
+        WebsiteSettingsService::setMany($updates);
+
+        AuditLogger::log('website.profile_updated', null, [], $updates);
+
+        return back()->with('success', 'Organization profile, pillars, and President’s Message updated successfully.');
     }
 
     // ==========================================

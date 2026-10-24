@@ -64,12 +64,55 @@ class PublicWebsiteAndPlatformIntegrationTest extends TestCase
 
     public function test_all_public_navigation_routes_resolve_correctly_without_authentication(): void
     {
-        $this->get(route('public.about'))->assertOk()->assertSee('Organization Background');
+        $aboutRes = $this->get(route('public.about'));
+        $aboutRes->assertOk();
+        $aboutRes->assertSee('Organization Background');
+        $aboutRes->assertSee('A Message From The President');
+        $aboutRes->assertSee('A Computing Society That Does More');
         $this->get(route('public.officers'))->assertOk()->assertSee('Organization Leadership');
         $this->get(route('public.activities'))->assertOk()->assertSee('COMSOC Activities');
         $this->get(route('public.achievements'))->assertOk()->assertSee('Verified Achievements');
         $this->get(route('public.gallery'))->assertOk()->assertSee('Approved Organization Gallery');
         $this->get(route('public.partners'))->assertOk()->assertSee('Partners');
+    }
+
+    public function test_president_message_renders_and_can_be_updated_by_admin(): void
+    {
+        // 1. Check default President's Message on About page
+        $this->get(route('public.about'))
+            ->assertOk()
+            ->assertSee('A Message From The President')
+            ->assertSee('A Computing Society That Does More')
+            ->assertSee('John Mark M. Esperida');
+
+        // 2. Super admin updates President's Message via Profile management
+        $updatePayload = [
+            'org_intro' => 'Updated introduction for testing.',
+            'org_background' => 'Updated background narrative for testing.',
+            'org_mission' => 'Updated mission statement.',
+            'org_vision' => 'Updated vision statement.',
+            'pillars' => WebsiteSettingsService::DEFAULTS['pillars'],
+            'president_message_visible' => '1',
+            'president_message_eyebrow' => 'Official Leadership Address',
+            'president_message_headline' => 'Building Tomorrow’s Technologists Today',
+            'president_message_quote' => 'Every line of code and every project brings us closer to a thriving community.',
+            'president_message_body' => "First paragraph of leadership statement.\n\nSecond paragraph of leadership statement.",
+            'president_name' => 'John Mark M. Esperida',
+            'president_title' => 'President, Computing Society',
+            'president_term' => 'Academic Year 2025–2026',
+        ];
+
+        $postRes = $this->actingAs($this->superAdmin)->post(route('admin.website.profile.update'), $updatePayload);
+        $postRes->assertRedirect();
+        $postRes->assertSessionHas('success');
+
+        // 3. Verify public About page reflects updated message immediately
+        $publicAbout = $this->get(route('public.about'));
+        $publicAbout->assertOk();
+        $publicAbout->assertSee('Official Leadership Address');
+        $publicAbout->assertSee('Building Tomorrow’s Technologists Today');
+        $publicAbout->assertSee('Every line of code and every project brings us closer to a thriving community.');
+        $publicAbout->assertSee('First paragraph of leadership statement.');
     }
 
     public function test_public_pages_render_controlled_empty_states_when_database_is_empty(): void
