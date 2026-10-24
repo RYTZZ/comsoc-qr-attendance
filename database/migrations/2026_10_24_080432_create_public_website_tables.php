@@ -22,6 +22,7 @@ return new class extends Migration
         });
 
         // 2. Organization Officers for Public Leadership
+        Schema::dropIfExists('org_officers');
         Schema::create('org_officers', function (Blueprint $table) {
             $table->uuid('id')->primary();
             $table->foreignUuid('user_id')->nullable()->constrained('users')->nullOnDelete();
@@ -41,6 +42,7 @@ return new class extends Migration
         });
 
         // 3. Organization Achievements & Milestones
+        Schema::dropIfExists('org_achievements');
         Schema::create('org_achievements', function (Blueprint $table) {
             $table->uuid('id')->primary();
             $table->string('title', 255);
@@ -57,6 +59,7 @@ return new class extends Migration
         });
 
         // 4. Approved Public Gallery
+        Schema::dropIfExists('org_gallery_items');
         Schema::create('org_gallery_items', function (Blueprint $table) {
             $table->uuid('id')->primary();
             $table->foreignUuid('event_id')->nullable()->constrained('events')->nullOnDelete();
@@ -72,6 +75,7 @@ return new class extends Migration
         });
 
         // 5. Approved Partners & Collaborations
+        Schema::dropIfExists('org_partners');
         Schema::create('org_partners', function (Blueprint $table) {
             $table->uuid('id')->primary();
             $table->string('name', 255);
@@ -87,6 +91,7 @@ return new class extends Migration
         });
 
         // 6. Organization FAQs
+        Schema::dropIfExists('org_faqs');
         Schema::create('org_faqs', function (Blueprint $table) {
             $table->uuid('id')->primary();
             $table->string('question', 500);
