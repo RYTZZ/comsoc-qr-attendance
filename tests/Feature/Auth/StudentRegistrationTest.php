@@ -56,9 +56,11 @@ class StudentRegistrationTest extends TestCase
         $response->assertSee('STEP 2 OF 4', false);
         $response->assertSee('STEP 3 OF 4', false);
         $response->assertSee('STEP 4 OF 4', false);
+        $response->assertDontSee('OF 3', false);
+        $response->assertDontSee('/ 3', false);
 
         // Step 1: Student Information & Academic Grids
-        $response->assertSee('Student Info', false);
+        $response->assertSee('Student Information', false);
         $response->assertSee('academic-name-grid', false);
         $response->assertSee('academic-cohort-grid', false);
         $response->assertSee('Student ID / Student Number', false);

@@ -14,6 +14,7 @@
                  label: @js($status['label']),
                  version: @js($status['version']),
                  url: @js(route('signature.store')),
+                 resetUrl: @js(route('signature.reset')),
                  previewUrl: @js(route('signature.preview')),
              })">
 
@@ -33,11 +34,18 @@
                 <template x-if="registered && !replacing">
                     <div>
                         <p class="text-xs text-[#94A3B8] mb-2">Your current signature (visible only to you):</p>
-                        <div class="rounded-xl bg-white p-3 inline-block">
+                        <div class="rounded-xl bg-white p-3 inline-block shadow-sm">
                             <img :src="previewUrl" alt="Preview of your saved signature" class="max-h-32">
                         </div>
-                        <div class="mt-4">
-                            <button type="button" id="signature-replace-btn" class="btn-secondary text-xs" @click="startReplace()">Replace signature</button>
+                        <div class="mt-4 flex flex-wrap items-center gap-2.5">
+                            <button type="button" id="signature-replace-btn" class="btn-primary text-xs flex items-center gap-1.5" @click="startReplace()" :disabled="busy">
+                                <i data-lucide="pen-tool" class="w-3.5 h-3.5"></i>
+                                <span>Replace Signature</span>
+                            </button>
+                            <button type="button" id="signature-reset-btn" class="btn-secondary text-xs text-rose-300 border-rose-500/30 hover:border-rose-400 hover:bg-rose-950/30 flex items-center gap-1.5" @click="reset()" :disabled="busy">
+                                <i data-lucide="rotate-ccw" class="w-3.5 h-3.5 text-rose-400"></i>
+                                <span>Reset Signature</span>
+                            </button>
                         </div>
                     </div>
                 </template>

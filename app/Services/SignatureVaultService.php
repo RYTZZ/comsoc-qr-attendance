@@ -129,7 +129,31 @@ class SignatureVaultService
         });
     }
 
-    /** Decrypt to PNG bytes. Returns null (and logs no payload) if the record is corrupt/unreadable. */
+    /**
+     * Deactivates the currently active signature for $user without deleting it.
+     * Preserves version history with STATUS_SUPERSEDED and replaced_at timestamp.
+     */
+    public function reset(User $user): ?StudentSignature
+    {
+        return DB::transaction(function () use ($user) {
+            $active = StudentSignature::where('user_id', $user->id)
+                ->where('status', StudentSignature::STATUS_ACTIVE)
+                ->lockForUpdate()
+                ->first();
+
+            if (!$active) {
+                return null;
+            }
+
+            $active->update([
+                'status' => StudentSignature::STATUS_SUPERSEDED,
+                'replaced_at' => now(),
+            ]);
+
+            return $active;
+        });
+    }
+
     public function decrypt(StudentSignature $signature): ?string
     {
         try {
@@ -205,6 +229,18 @@ class SignatureVaultService
         } catch (DecryptException) {
             return null;
         }
+    }
+
+    /** The active signature model for a user, or null if none active. */
+    public function activeRecord(?User $user): ?StudentSignature
+    {
+        if (!$user) {
+            return null;
+        }
+
+        return StudentSignature::where('user_id', $user->id)
+            ->where('status', StudentSignature::STATUS_ACTIVE)
+            ->first();
     }
 
     /** Active signatures keyed by user id. */

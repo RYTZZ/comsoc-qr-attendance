@@ -652,4 +652,236 @@ class StudentSignatureAndAttendanceSheetTest extends TestCase
         $this->assertSame(1, substr_count($html, '<td class="sig"><img src="data:image/png;base64,'));
         $this->assertSame(1, substr_count($html, '<td class="sig"></td>'));
     }
+
+    public function test_student_can_reset_active_signature(): void
+    {
+        $user = $this->member('Reset', 'Tester');
+        $this->register($user);
+
+        $this->assertDatabaseHas('student_signatures', [
+            'user_id' => $user->id,
+            'version' => 1,
+            'status' => 'active',
+        ]);
+
+        $res = $this->actingAs($user)->deleteJson(route('signature.reset'));
+        $res->assertOk()
+            ->assertJson([
+                'registered' => false,
+                'state' => 'required',
+                'label' => 'Signature Required',
+                'version' => null,
+            ]);
+
+        // Old signature is preserved and marked superseded (never deleted)
+        $this->assertDatabaseHas('student_signatures', [
+            'user_id' => $user->id,
+            'version' => 1,
+            'status' => 'superseded',
+        ]);
+
+        $sig = StudentSignature::where('user_id', $user->id)->first();
+        $this->assertNotNull($sig->replaced_at);
+
+        // Audit log created for signature.reset
+        $this->assertDatabaseHas('audit_logs', [
+            'user_id' => $user->id,
+            'action' => 'signature.reset',
+        ]);
+    }
+
+    public function test_student_can_register_new_signature_after_reset(): void
+    {
+        $user = $this->member('Cycle', 'Tester');
+        $this->register($user);
+
+        // Reset
+        $this->actingAs($user)->deleteJson(route('signature.reset'))->assertOk();
+
+        // Register new signature
+        $newSigData = $this->sigDataUrl(320, 110, [50, 100, 150]);
+        $res = $this->actingAs($user)->postJson(route('signature.store'), [
+            'signature' => $newSigData,
+            'consent' => true,
+        ]);
+
+        $res->assertCreated()
+            ->assertJson([
+                'registered' => true,
+                'state' => 'registered',
+                'version' => 2,
+            ]);
+
+        // Both versions preserved
+        $this->assertSame(2, StudentSignature::where('user_id', $user->id)->count());
+
+        $this->assertDatabaseHas('student_signatures', [
+            'user_id' => $user->id,
+            'version' => 1,
+            'status' => 'superseded',
+        ]);
+
+        $this->assertDatabaseHas('student_signatures', [
+            'user_id' => $user->id,
+            'version' => 2,
+            'status' => 'active',
+        ]);
+    }
+
+    public function test_reset_returns_404_when_no_active_signature_exists(): void
+    {
+        $user = $this->member('NoSig', 'User');
+
+        $res = $this->actingAs($user)->deleteJson(route('signature.reset'));
+        $res->assertNotFound()
+            ->assertJson([
+                'registered' => false,
+                'state' => 'required',
+            ]);
+    }
+
+    public function test_guest_cannot_reset_signature(): void
+    {
+        $res = $this->deleteJson(route('signature.reset'));
+        $res->assertUnauthorized();
+    }
+
+    public function test_user_cannot_reset_another_users_signature(): void
+    {
+        $victim = $this->member('Victim', 'User');
+        $attacker = $this->member('Attacker', 'User');
+
+        $this->register($victim);
+
+        // Attempting to send someone else's user_id in the request payload has zero effect,
+        // because the controller derives ownership exclusively from auth()->user().
+        $res = $this->actingAs($attacker)->deleteJson(route('signature.reset'), [
+            'user_id' => $victim->id,
+            'target_user_id' => $victim->id,
+        ]);
+
+        // Attacker has no active signature of their own, so they get 404
+        $res->assertNotFound();
+
+        // Victim's signature remains active and untouched
+        $this->assertDatabaseHas('student_signatures', [
+            'user_id' => $victim->id,
+            'version' => 1,
+            'status' => 'active',
+        ]);
+    }
+
+    public function test_consecutive_or_repeated_reset_requests_are_handled_safely(): void
+    {
+        $user = $this->member('Repeat', 'Resetter');
+        $this->register($user);
+
+        // First reset succeeds
+        $res1 = $this->actingAs($user)->deleteJson(route('signature.reset'));
+        $res1->assertOk();
+
+        // Immediate second reset returns 404 safely without corrupting history
+        $res2 = $this->actingAs($user)->deleteJson(route('signature.reset'));
+        $res2->assertNotFound();
+
+        $this->assertSame(1, StudentSignature::where('user_id', $user->id)->count());
+        $this->assertDatabaseHas('student_signatures', [
+            'user_id' => $user->id,
+            'version' => 1,
+            'status' => 'superseded',
+        ]);
+    }
+
+    public function test_resetting_signature_causes_student_to_appear_in_missing_signatures_check(): void
+    {
+        $admin = User::factory()->create(['role' => 'super_admin', 'is_active' => true]);
+        $event = $this->event($admin);
+        $student = $this->member('Reset', 'Attendee');
+
+        $this->register($student);
+        $this->attend($event, $student);
+
+        // Check readiness: student is registered
+        $check1 = $this->actingAs($admin)->getJson(route('attendance-sheet.check', $event));
+        $check1->assertOk()
+            ->assertJson([
+                'attendee_count' => 1,
+                'registered_count' => 1,
+                'missing_count' => 0,
+            ]);
+
+        // Student resets signature
+        $this->actingAs($student)->deleteJson(route('signature.reset'))->assertOk();
+
+        // Check readiness: student attendance is preserved, but signature is now missing
+        $check2 = $this->actingAs($admin)->getJson(route('attendance-sheet.check', $event));
+        $check2->assertOk()
+            ->assertJson([
+                'attendee_count' => 1,
+                'registered_count' => 0,
+                'missing_count' => 1,
+            ]);
+
+        // Attendance record itself was NOT altered
+        $this->assertDatabaseHas('attendance_records', [
+            'event_id' => $event->id,
+            'user_id' => $student->id,
+            'status' => 'present',
+        ]);
+    }
+
+    public function test_archived_issued_pdfs_remain_intact_and_unaffected_by_signature_reset(): void
+    {
+        $admin = User::factory()->create(['role' => 'super_admin', 'is_active' => true]);
+        $event = $this->event($admin);
+        $student = $this->member('Archive', 'TestStudent');
+
+        $this->register($student);
+        $this->attend($event, $student);
+
+        // Issue initial attendance sheet PDF
+        $sheets = app(AttendanceSheetService::class);
+        [$issuance, $pdf, $missing] = $sheets->issue($event, $admin, 'Initial official issuance');
+        $this->assertNotNull($issuance);
+        $this->assertNotNull($issuance->storage_path);
+        $this->assertTrue(Storage::disk('local')->exists($issuance->storage_path));
+
+        $originalEncryptedBytes = Storage::disk('local')->get($issuance->storage_path);
+        $originalHash = $issuance->pdf_sha256;
+
+        // Student resets their signature
+        $this->actingAs($student)->deleteJson(route('signature.reset'))->assertOk();
+
+        // Student's active signature is gone
+        $vault = app(SignatureVaultService::class);
+        $this->assertNull($vault->activeRecord($student));
+
+        // The archived PDF file and issuance record remain completely identical and unaltered
+        $issuance->refresh();
+        $this->assertSame($originalHash, $issuance->pdf_sha256);
+        $this->assertSame($originalEncryptedBytes, Storage::disk('local')->get($issuance->storage_path));
+        $this->assertSame($pdf, $sheets->readArchive($issuance));
+    }
+
+    public function test_dashboard_renders_signature_status_section_correctly(): void
+    {
+        $student = $this->member('Dash', 'Tester');
+
+        // Initially required
+        $res1 = $this->actingAs($student)->get(route('dashboard'));
+        $res1->assertOk();
+        $res1->assertSee('id="dashboard-signature-status-section"', false);
+        $res1->assertSee('dashboard-register-signature-btn');
+
+        // Register signature
+        $this->register($student);
+
+        // Now registered
+        $res2 = $this->actingAs($student)->get(route('dashboard'));
+        $res2->assertOk();
+        $res2->assertSee('id="dashboard-signature-status-section"', false);
+        $res2->assertSee('dashboard-view-signature-btn');
+        $res2->assertSee('dashboard-reset-signature-btn');
+        $res2->assertSee('dashboard-register-new-signature-btn');
+    }
 }

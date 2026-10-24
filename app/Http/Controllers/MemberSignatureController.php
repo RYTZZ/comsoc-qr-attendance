@@ -83,6 +83,41 @@ class MemberSignatureController extends Controller
         return $this->persist($request, true);
     }
 
+    /**
+     * Resets/deactivates the student's active signature.
+     * Enforces ownership strictly from the authenticated user.
+     * Preserves signature record history under STATUS_SUPERSEDED.
+     */
+    public function reset(Request $request): JsonResponse
+    {
+        $user = $request->user();
+        abort_if(!$user || $user->isKiosk(), 403);
+
+        $active = $this->activeFor($request);
+        if (!$active) {
+            return response()->json([
+                'message' => 'No active signature is currently registered.',
+            ] + $this->statusPayload(null, $user), 404);
+        }
+
+        Gate::authorize('reset', $active);
+
+        $resetSig = $this->vault->reset($user);
+
+        if ($resetSig) {
+            AuditLogger::log('signature.reset', $resetSig, [
+                'status' => StudentSignature::STATUS_ACTIVE,
+            ], [
+                'status' => StudentSignature::STATUS_SUPERSEDED,
+                'version' => $resetSig->version,
+            ], 'Student requested signature reset from dashboard');
+        }
+
+        return response()->json([
+            'message' => 'Signature deactivated successfully. You can now register a new signature.',
+        ] + $this->statusPayload(null, $user), 200);
+    }
+
     private function persist(StoreSignatureRequest $request, bool $replace): JsonResponse
     {
         $user = $request->user();

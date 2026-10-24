@@ -12,4 +12,11 @@ class StudentSignaturePolicy
     {
         return $user->id === $signature->user_id;
     }
+
+    /** Only the owner may reset their own signature. */
+    public function reset(User $user, StudentSignature $signature): bool
+    {
+        return $user->id === $signature->user_id;
+    }
 }
+

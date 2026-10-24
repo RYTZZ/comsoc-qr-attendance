@@ -92,6 +92,60 @@ export default (config) => ({
         this.previewUrl = config.previewUrl + '?t=' + Date.now();
     },
 
+    async reset() {
+        this.error = '';
+        this.success = '';
+
+        const confirmed = window.appConfirm
+            ? await window.appConfirm({
+                title: 'Reset Active Signature?',
+                message: 'Resetting will deactivate your currently registered signature. A new handwritten signature must be registered before your signature can be used for future official attendance sheet exports. Your previous signature history remains securely archived.',
+                confirmText: 'Reset Signature',
+                cancelText: 'Keep Current Signature',
+                type: 'danger',
+            })
+            : window.confirm('Resetting will deactivate your current signature. You will need to register a new signature for future attendance sheets. Continue?');
+
+        if (!confirmed) {
+            return;
+        }
+
+        this.busy = true;
+        try {
+            const resetUrl = config.resetUrl || config.url;
+            const res = await window.axios.delete(resetUrl);
+            this.registered = false;
+            this.state = res.data.state || 'required';
+            this.label = res.data.label || 'Signature Required';
+            this.version = res.data.version || null;
+            this.replacing = false;
+            this.previewUrl = null;
+            this.consent = false;
+            this.success = res.data.message || 'Signature reset successfully. You may now draw a new signature.';
+
+            if (this.pad) {
+                this.pad.clear();
+            }
+            this.$nextTick(() => {
+                this.resizeCanvas();
+                window.dispatchEvent(new CustomEvent('signature-status-updated', {
+                    detail: {
+                        registered: false,
+                        state: this.state,
+                        label: this.label,
+                        version: this.version,
+                    }
+                }));
+            });
+        } catch (e) {
+            const d = e.response && e.response.data;
+            this.error = (d && (d.message || (d.errors && Object.values(d.errors)[0][0])))
+                || 'The signature could not be reset. Please try again.';
+        } finally {
+            this.busy = false;
+        }
+    },
+
     async save() {
         this.error = '';
         this.success = '';
@@ -118,6 +172,15 @@ export default (config) => ({
             this.replacing = false;
             this.pad.clear();
             this.refreshPreview();
+
+            window.dispatchEvent(new CustomEvent('signature-status-updated', {
+                detail: {
+                    registered: this.registered,
+                    state: this.state,
+                    label: this.label,
+                    version: this.version,
+                }
+            }));
         } catch (e) {
             const d = e.response && e.response.data;
             this.error = (d && (d.message || (d.errors && Object.values(d.errors)[0][0])))
@@ -127,3 +190,4 @@ export default (config) => ({
         }
     },
 });
+

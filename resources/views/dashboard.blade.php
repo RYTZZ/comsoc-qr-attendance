@@ -21,9 +21,31 @@
                         </span>
                         <a href="{{ route('signature.show') }}"
                            id="dashboard-signature-status-badge"
-                           class="px-2 py-0.5 rounded text-[10px] font-semibold border flex items-center gap-1 transition {{ ($signatureStatus['state'] ?? '') === 'registered' ? 'bg-emerald-950/40 border-emerald-500/30 text-emerald-300 hover:border-emerald-400' : (($signatureStatus['state'] ?? '') === 'unavailable' ? 'bg-rose-950/40 border-rose-500/30 text-rose-300 hover:border-rose-400' : 'bg-amber-950/40 border-amber-500/30 text-amber-300 hover:border-amber-400') }}">
-                            <span class="w-1.5 h-1.5 rounded-full {{ ($signatureStatus['state'] ?? '') === 'registered' ? 'bg-emerald-400' : (($signatureStatus['state'] ?? '') === 'unavailable' ? 'bg-rose-400' : 'bg-amber-400 animate-pulse') }}"></span>
-                            <span>{{ $signatureStatus['label'] ?? 'Signature Status' }}</span>
+                           x-data="{
+                               state: @js($signatureStatus['state'] ?? 'required'),
+                               label: @js($signatureStatus['label'] ?? 'Signature Required'),
+                               init() {
+                                   window.addEventListener('signature-status-updated', (e) => {
+                                       if (e.detail) {
+                                           this.state = e.detail.state || (e.detail.registered ? 'registered' : 'required');
+                                           this.label = e.detail.label || (e.detail.registered ? 'Signature Registered' : 'Signature Required');
+                                       }
+                                   });
+                               }
+                           }"
+                           class="px-2 py-0.5 rounded text-[10px] font-semibold border flex items-center gap-1 transition"
+                           :class="{
+                               'bg-emerald-950/40 border-emerald-500/30 text-emerald-300 hover:border-emerald-400': state === 'registered',
+                               'bg-rose-950/40 border-rose-500/30 text-rose-300 hover:border-rose-400': state === 'unavailable',
+                               'bg-amber-950/40 border-amber-500/30 text-amber-300 hover:border-amber-400': state === 'required'
+                           }">
+                            <span class="w-1.5 h-1.5 rounded-full"
+                                  :class="{
+                                      'bg-emerald-400': state === 'registered',
+                                      'bg-rose-400': state === 'unavailable',
+                                      'bg-amber-400 animate-pulse': state === 'required'
+                                  }"></span>
+                            <span x-text="label"></span>
                         </a>
                     </div>
                     <h1 class="text-2xl sm:text-3xl font-extrabold text-[#F8FAFC] font-brand-display tracking-tight mt-1 flex flex-wrap items-center gap-2">
@@ -87,8 +109,17 @@
                 </div>
             @endif
 
-            @if(($signatureStatus['state'] ?? '') === 'required')
-                <div class="bg-amber-950/40 border border-amber-500/40 rounded-2xl p-4 sm:p-5 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 shadow-lg">
+            <div x-data="{
+                state: @js($signatureStatus['state'] ?? 'required'),
+                init() {
+                    window.addEventListener('signature-status-updated', (e) => {
+                        if (e.detail) {
+                            this.state = e.detail.state || (e.detail.registered ? 'registered' : 'required');
+                        }
+                    });
+                }
+            }">
+                <div x-show="state === 'required'" x-cloak class="bg-amber-950/40 border border-amber-500/40 rounded-2xl p-4 sm:p-5 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 shadow-lg">
                     <div class="flex items-center gap-3.5">
                         <div class="w-10 h-10 rounded-xl bg-amber-500/20 border border-amber-500/40 flex items-center justify-center text-amber-300 shrink-0">
                             <i data-lucide="file-pen" class="w-5 h-5 text-amber-400"></i>
@@ -106,8 +137,8 @@
                         <i data-lucide="arrow-right" class="w-3.5 h-3.5"></i>
                     </a>
                 </div>
-            @elseif(($signatureStatus['state'] ?? '') === 'unavailable')
-                <div class="bg-rose-950/40 border border-rose-500/40 rounded-2xl p-4 sm:p-5 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 shadow-lg">
+
+                <div x-show="state === 'unavailable'" x-cloak class="bg-rose-950/40 border border-rose-500/40 rounded-2xl p-4 sm:p-5 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 shadow-lg">
                     <div class="flex items-center gap-3.5">
                         <div class="w-10 h-10 rounded-xl bg-rose-500/20 border border-rose-500/40 flex items-center justify-center text-rose-300 shrink-0">
                             <i data-lucide="alert-triangle" class="w-5 h-5 text-rose-400"></i>
@@ -122,7 +153,7 @@
                         <i data-lucide="arrow-right" class="w-3.5 h-3.5"></i>
                     </a>
                 </div>
-            @endif
+            </div>
 
             <!-- Responsive Dashboard Tab Bar -->
             <div class="bg-[#172033] p-1.5 rounded-2xl border border-[#334155] shadow-xl overflow-x-auto scrollbar-none">
@@ -229,6 +260,9 @@
                     </a>
                 </div>
                 @endif
+
+                <!-- Dedicated Signature Status & Action Hub Section -->
+                <x-signature-status-card :signature-status="$signatureStatus" />
 
                 <!-- 4 Concise Summary Metric Cards -->
                 <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">

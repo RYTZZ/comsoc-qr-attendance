@@ -103,7 +103,10 @@ Route::middleware(['auth', 'verified', 'require_password_change'])->group(functi
             ->middleware('throttle:10,1')->name('store');
         Route::put('/', [\App\Http\Controllers\MemberSignatureController::class, 'replace'])
             ->middleware('throttle:10,1')->name('replace');
+        Route::delete('/', [\App\Http\Controllers\MemberSignatureController::class, 'reset'])
+            ->middleware('throttle:10,1')->name('reset');
     });
+
 
     // Official attendance sheet export (authorized per event via the export-attendance-sheet gate)
     Route::get('/attendance-sheets/{event}/check', [\App\Http\Controllers\AttendanceSheetController::class, 'check'])

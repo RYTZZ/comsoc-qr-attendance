@@ -110,6 +110,18 @@
     <main class="auth-content-main w-full md:w-7/12 flex-1 flex flex-col justify-start sm:justify-center items-center p-4 sm:p-8 lg:p-12 relative z-10 overflow-y-auto"
           x-data="{
               step: {{ $errors->hasAny(['signature', 'signature_consent']) ? 4 : ($errors->hasAny(['password', 'password_confirmation', 'terms']) ? 3 : ($errors->hasAny(['username', 'avatar_seed', 'avatar_style']) ? 2 : 1)) }},
+              steps: [
+                  { id: 1, number: 1, title: 'Student Information', shortTitle: 'Student Info', subtitle: 'Enter your institutional student details and enrolled program' },
+                  { id: 2, number: 2, title: 'Avatar & Username', shortTitle: 'Avatar & Username', subtitle: 'Choose your Adventurer Avatar and set your unique public identity' },
+                  { id: 3, number: 3, title: 'Account Security', shortTitle: 'Account Security', subtitle: 'Configure your password and review privacy policies' },
+                  { id: 4, number: 4, title: 'Register Signature', shortTitle: 'Register Signature', subtitle: 'Provide your handwritten signature to be securely encrypted and reused for official attendance sheets' }
+              ],
+              get totalSteps() {
+                  return this.steps.length;
+              },
+              get currentStepConfig() {
+                  return this.steps.find(s => s.number === this.step) || this.steps[0];
+              },
               submitting: false,
               showPass: false,
               showConfirm: false,
@@ -517,76 +529,60 @@
                 </div>
 
                 <!-- Registration Progress Navigation -->
-                <nav aria-label="Registration Progress" class="mb-4">
-                    <ol class="grid grid-cols-2 sm:grid-cols-4 gap-1.5 sm:gap-2">
-                        <li class="flex items-center gap-1.5 sm:gap-2 p-2 sm:p-2.5 rounded-xl border transition"
-                            :class="step === 1 ? 'bg-[#560E0F]/20 border-[#560E0F] text-white' : 'bg-slate-900/40 border-slate-800 text-slate-400'">
-                            <span class="w-5 h-5 sm:w-6 sm:h-6 rounded-lg flex items-center justify-center font-bold text-xs shrink-0"
-                                  :class="step === 1 ? 'bg-[#560E0F] text-white' : (step > 1 ? 'bg-emerald-500/20 text-emerald-400 border border-emerald-500/40' : 'bg-slate-800 text-slate-400')">
-                                <template x-if="step > 1">
-                                    <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"/>
-                                    </svg>
-                                </template>
-                                <template x-if="step <= 1">
-                                    <span>1</span>
-                                </template>
-                            </span>
-                            <div class="min-w-0">
-                                <p class="text-[8px] sm:text-[9px] font-mono uppercase tracking-wider text-slate-400 truncate">STEP 1 OF 4</p>
-                                <p class="text-xs sm:text-xs font-semibold truncate" :class="step === 1 ? 'text-white' : 'text-slate-300'">Student Info</p>
-                            </div>
-                        </li>
+                <nav aria-label="Registration Progress" class="mb-5">
+                    <!-- Mobile Compact Progress Indicator (< 640px) -->
+                    <div class="sm:hidden p-3 rounded-2xl bg-slate-900/60 border border-slate-800 shadow-sm space-y-2.5">
+                        <div class="flex items-center justify-between text-xs">
+                            <span class="text-[11px] font-mono uppercase tracking-wider text-slate-400 font-semibold"
+                                  x-text="'STEP ' + step + ' OF ' + totalSteps"></span>
+                            <span class="font-bold text-white text-xs font-mono"
+                                  x-text="step + ' / ' + totalSteps"></span>
+                        </div>
+                        <div class="flex items-center gap-2">
+                            <span class="w-6 h-6 rounded-lg bg-[#560E0F] text-white flex items-center justify-center font-bold text-xs shrink-0 shadow-sm"
+                                  x-text="step"></span>
+                            <span class="text-xs font-semibold text-white truncate"
+                                  x-text="currentStepConfig.title"></span>
+                        </div>
+                        <!-- Progress bar rail -->
+                        <div class="w-full bg-slate-800 rounded-full h-1.5 overflow-hidden">
+                            <div class="bg-gradient-to-r from-[#560E0F] to-[#df747a] h-1.5 rounded-full transition-all duration-300"
+                                 :style="'width: ' + ((step / totalSteps) * 100) + '%'"></div>
+                        </div>
+                    </div>
 
-                        <li class="flex items-center gap-1.5 sm:gap-2 p-2 sm:p-2.5 rounded-xl border transition"
-                            :class="step === 2 ? 'bg-[#560E0F]/20 border-[#560E0F] text-white' : 'bg-slate-900/40 border-slate-800 text-slate-400'">
-                            <span class="w-5 h-5 sm:w-6 sm:h-6 rounded-lg flex items-center justify-center font-bold text-xs shrink-0"
-                                  :class="step === 2 ? 'bg-[#560E0F] text-white' : (step > 2 ? 'bg-emerald-500/20 text-emerald-400 border border-emerald-500/40' : 'bg-slate-800 text-slate-400')">
-                                <template x-if="step > 2">
-                                    <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"/>
-                                    </svg>
-                                </template>
-                                <template x-if="step <= 2">
-                                    <span>2</span>
-                                </template>
-                            </span>
-                            <div class="min-w-0">
-                                <p class="text-[8px] sm:text-[9px] font-mono uppercase tracking-wider text-slate-400 truncate">STEP 2 OF 4</p>
-                                <p class="text-xs sm:text-xs font-semibold truncate" :class="step === 2 ? 'text-white' : 'text-slate-300'">Avatar & Username</p>
-                            </div>
-                        </li>
-
-                        <li class="flex items-center gap-1.5 sm:gap-2 p-2 sm:p-2.5 rounded-xl border transition"
-                            :class="step === 3 ? 'bg-[#560E0F]/20 border-[#560E0F] text-white' : 'bg-slate-900/40 border-slate-800 text-slate-400'">
-                            <span class="w-5 h-5 sm:w-6 sm:h-6 rounded-lg flex items-center justify-center font-bold text-xs shrink-0"
-                                  :class="step === 3 ? 'bg-[#560E0F] text-white' : (step > 3 ? 'bg-emerald-500/20 text-emerald-400 border border-emerald-500/40' : 'bg-slate-800 text-slate-400')">
-                                <template x-if="step > 3">
-                                    <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"/>
-                                    </svg>
-                                </template>
-                                <template x-if="step <= 3">
-                                    <span>3</span>
-                                </template>
-                            </span>
-                            <div class="min-w-0">
-                                <p class="text-[8px] sm:text-[9px] font-mono uppercase tracking-wider text-slate-400 truncate">STEP 3 OF 4</p>
-                                <p class="text-xs sm:text-xs font-semibold truncate" :class="step === 3 ? 'text-white' : 'text-slate-300'">Account Security</p>
-                            </div>
-                        </li>
-
-                        <li class="flex items-center gap-1.5 sm:gap-2 p-2 sm:p-2.5 rounded-xl border transition"
-                            :class="step === 4 ? 'bg-[#560E0F]/20 border-[#560E0F] text-white' : 'bg-slate-900/40 border-slate-800 text-slate-400'">
-                            <span class="w-5 h-5 sm:w-6 sm:h-6 rounded-lg flex items-center justify-center font-bold text-xs shrink-0"
-                                  :class="step === 4 ? 'bg-[#560E0F] text-white' : 'bg-slate-800 text-slate-400'">
-                                4
-                            </span>
-                            <div class="min-w-0">
-                                <p class="text-[8px] sm:text-[9px] font-mono uppercase tracking-wider text-slate-400 truncate">STEP 4 OF 4</p>
-                                <p class="text-xs sm:text-xs font-semibold truncate" :class="step === 4 ? 'text-white' : 'text-slate-300'">Register Signature</p>
-                            </div>
-                        </li>
+                    <!-- Desktop / Tablet Grid Progress Navigation (>= 640px) -->
+                    <ol class="hidden sm:grid sm:grid-cols-4 gap-2">
+                        @php
+                            $wizardSteps = [
+                                ['number' => 1, 'title' => 'Student Information'],
+                                ['number' => 2, 'title' => 'Avatar & Username'],
+                                ['number' => 3, 'title' => 'Account Security'],
+                                ['number' => 4, 'title' => 'Register Signature'],
+                            ];
+                            $stepCount = count($wizardSteps);
+                        @endphp
+                        @foreach($wizardSteps as $ws)
+                            <li class="flex items-start gap-2.5 p-2.5 rounded-xl border transition min-h-[58px]"
+                                :class="step === {{ $ws['number'] }} ? 'bg-[#560E0F]/20 border-[#560E0F] text-white shadow-sm' : 'bg-slate-900/40 border-slate-800 text-slate-400'">
+                                <span class="w-6 h-6 rounded-lg flex items-center justify-center font-bold text-xs shrink-0 mt-0.5"
+                                      :class="step === {{ $ws['number'] }} ? 'bg-[#560E0F] text-white shadow' : (step > {{ $ws['number'] }} ? 'bg-emerald-500/20 text-emerald-400 border border-emerald-500/40' : 'bg-slate-800 text-slate-400')">
+                                    <template x-if="step > {{ $ws['number'] }}">
+                                        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"/>
+                                        </svg>
+                                    </template>
+                                    <template x-if="step <= {{ $ws['number'] }}">
+                                        <span>{{ $ws['number'] }}</span>
+                                    </template>
+                                </span>
+                                <div class="min-w-0 flex-1">
+                                    <p class="text-[9px] font-mono uppercase tracking-wider text-slate-400 leading-tight">STEP {{ $ws['number'] }} OF {{ $stepCount }}</p>
+                                    <p class="text-xs font-semibold leading-snug mt-0.5 break-words"
+                                       :class="step === {{ $ws['number'] }} ? 'text-white' : 'text-slate-300'">{{ $ws['title'] }}</p>
+                                </div>
+                            </li>
+                        @endforeach
                     </ol>
                 </nav>
 
@@ -616,10 +612,12 @@
                     <div x-show="step === 1" x-transition:enter="transition ease-out duration-200" class="space-y-3.5">
                         <div class="border-b border-slate-800 pb-2 flex items-center justify-between">
                             <div>
-                                <h3 class="font-brand-display text-sm sm:text-base font-bold text-white tracking-wide">STEP 1 OF 3 — Student Information</h3>
+                                <h3 class="font-brand-display text-sm sm:text-base font-bold text-white tracking-wide"
+                                    x-text="'STEP 1 OF ' + totalSteps + ' — Student Information'"></h3>
                                 <p class="text-xs text-[#94A3B8]">Enter your institutional student details and enrolled program</p>
                             </div>
-                            <span class="text-xs font-mono text-slate-500 hidden sm:inline">1 / 3</span>
+                            <span class="text-xs font-mono text-slate-500 hidden sm:inline"
+                                  x-text="'1 / ' + totalSteps"></span>
                         </div>
 
                         <!-- Student ID / Student Number -->
@@ -809,10 +807,12 @@
                     <div x-show="step === 2" x-cloak x-transition:enter="transition ease-out duration-200" class="space-y-4">
                         <div class="border-b border-slate-800 pb-2 flex items-center justify-between">
                             <div>
-                                <h3 class="font-brand-display text-sm sm:text-base font-bold text-white tracking-wide">STEP 2 OF 3 — Avatar & Username</h3>
+                                <h3 class="font-brand-display text-sm sm:text-base font-bold text-white tracking-wide"
+                                    x-text="'STEP 2 OF ' + totalSteps + ' — Avatar & Username'"></h3>
                                 <p class="text-xs text-[#94A3B8]">Choose your Adventurer Avatar and set your unique public identity</p>
                             </div>
-                            <span class="text-xs font-mono text-slate-500 hidden sm:inline">2 / 3</span>
+                            <span class="text-xs font-mono text-slate-500 hidden sm:inline"
+                                  x-text="'2 / ' + totalSteps"></span>
                         </div>
 
                         <!-- Public Identity Live Preview Card -->
@@ -952,10 +952,12 @@
                     <div x-show="step === 3" x-cloak x-transition:enter="transition ease-out duration-200" class="space-y-4">
                         <div class="border-b border-slate-800 pb-2 flex items-center justify-between">
                             <div>
-                                <h3 class="font-brand-display text-sm sm:text-base font-bold text-white tracking-wide">STEP 3 OF 4 — Account Security</h3>
+                                <h3 class="font-brand-display text-sm sm:text-base font-bold text-white tracking-wide"
+                                    x-text="'STEP 3 OF ' + totalSteps + ' — Account Security'"></h3>
                                 <p class="text-xs text-[#94A3B8]">Configure your password and review privacy policies</p>
                             </div>
-                            <span class="text-xs font-mono text-slate-500 hidden sm:inline">3 / 4</span>
+                            <span class="text-xs font-mono text-slate-500 hidden sm:inline"
+                                  x-text="'3 / ' + totalSteps"></span>
                         </div>
 
                         <!-- Passwords Grid with Visibility Toggles -->
@@ -1130,10 +1132,12 @@
                     <div x-show="step === 4" x-cloak x-transition:enter="transition ease-out duration-200" class="space-y-4">
                         <div class="border-b border-slate-800 pb-2 flex items-center justify-between">
                             <div>
-                                <h3 class="font-brand-display text-sm sm:text-base font-bold text-white tracking-wide">STEP 4 OF 4 — Register Your Signature</h3>
+                                <h3 class="font-brand-display text-sm sm:text-base font-bold text-white tracking-wide"
+                                    x-text="'STEP 4 OF ' + totalSteps + ' — Register Your Signature'"></h3>
                                 <p class="text-xs text-[#94A3B8]">Provide your handwritten signature to be securely encrypted and reused for official attendance sheets</p>
                             </div>
-                            <span class="text-xs font-mono text-slate-500 hidden sm:inline">4 / 4</span>
+                            <span class="text-xs font-mono text-slate-500 hidden sm:inline"
+                                  x-text="'4 / ' + totalSteps"></span>
                         </div>
 
                         <!-- Signature Canvas Card -->
