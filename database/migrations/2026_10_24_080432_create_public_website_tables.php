@@ -24,7 +24,7 @@ return new class extends Migration
         // 2. Organization Officers for Public Leadership
         Schema::create('org_officers', function (Blueprint $table) {
             $table->uuid('id')->primary();
-            $table->foreignId('user_id')->nullable()->constrained('users')->nullOnDelete();
+            $table->foreignUuid('user_id')->nullable()->constrained('users')->nullOnDelete();
             $table->string('name', 255);
             $table->string('position', 150);
             $table->string('program', 150)->nullable();
