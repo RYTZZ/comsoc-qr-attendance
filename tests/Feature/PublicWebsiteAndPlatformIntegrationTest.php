@@ -64,16 +64,36 @@ class PublicWebsiteAndPlatformIntegrationTest extends TestCase
 
     public function test_all_public_navigation_routes_resolve_correctly_without_authentication(): void
     {
+        $publicRoutes = [
+            route('public.home'),
+            route('public.about'),
+            route('public.officers'),
+            route('public.activities'),
+            route('public.achievements'),
+            route('public.gallery'),
+            route('public.partners'),
+            route('privacy'),
+        ];
+
+        foreach ($publicRoutes as $url) {
+            $response = $this->get($url);
+            $response->assertOk();
+            // Verify standardized footer across every public page (false allows unescaped ampersand matching)
+            $response->assertSee('Computing Society (COMSOC) — SorSU Bulan Campus. All rights reserved.');
+            $response->assertSee('Contact & Channels', false);
+            $response->assertSee('computingsocietysorsubc@gmail.com');
+            $response->assertSee('Official Facebook Page');
+        }
+
         $aboutRes = $this->get(route('public.about'));
-        $aboutRes->assertOk();
         $aboutRes->assertSee('Organization Background');
         $aboutRes->assertSee('A Message From The President');
         $aboutRes->assertSee('A Computing Society That Does More');
-        $this->get(route('public.officers'))->assertOk()->assertSee('Organization Leadership');
-        $this->get(route('public.activities'))->assertOk()->assertSee('COMSOC Activities');
-        $this->get(route('public.achievements'))->assertOk()->assertSee('Verified Achievements');
-        $this->get(route('public.gallery'))->assertOk()->assertSee('Approved Organization Gallery');
-        $this->get(route('public.partners'))->assertOk()->assertSee('Partners');
+        $this->get(route('public.officers'))->assertSee('Organization Leadership');
+        $this->get(route('public.activities'))->assertSee('COMSOC Activities');
+        $this->get(route('public.achievements'))->assertSee('Verified Achievements');
+        $this->get(route('public.gallery'))->assertSee('Approved Organization Gallery');
+        $this->get(route('public.partners'))->assertSee('Partners');
     }
 
     public function test_president_message_renders_and_can_be_updated_by_admin(): void

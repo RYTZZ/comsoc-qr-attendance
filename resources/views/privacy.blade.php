@@ -11,7 +11,7 @@
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Manrope:wght@600;700;800&family=Space+Grotesk:wght@600;700&display=swap" rel="stylesheet">
     @vite(['resources/css/app.css', 'resources/js/app.js'])
 </head>
-<body class="h-full bg-[#0B1120] text-[#F8FAFC] font-sans antialiased min-h-screen relative overflow-x-hidden selection:bg-[#560E0F] selection:text-white">
+<body class="h-full bg-[#0B1120] text-[#F8FAFC] font-sans antialiased min-h-screen relative overflow-x-hidden selection:bg-[#560E0F] selection:text-white flex flex-col">
 
     <x-public-auth-bg />
 
@@ -45,7 +45,7 @@
         </div>
     </header>
 
-    <main class="relative z-10 max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-12">
+    <main class="relative z-10 max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-12 flex-1 w-full">
         <div class="card bg-[#172033]/95 border border-[#334155] shadow-2xl p-6 sm:p-10 space-y-8 rounded-2xl">
 
             <!-- Title & Metadata -->
@@ -279,11 +279,10 @@
             </div>
 
         </div>
-
-        <div class="mt-6">
-            <x-public-branding-footer />
-        </div>
     </main>
+
+    <!-- Shared Public Website Footer -->
+    <x-public-website-footer />
 
 </body>
 </html>
