@@ -38,7 +38,7 @@ function initHeroSequence() {
     // Sequence elements sequentially with smooth stagger
     heroElements.forEach((el) => {
         const order = parseInt(el.getAttribute('data-hero-seq') || '0', 10);
-        const delay = Math.max(40, order * 90); // 90ms stagger
+        const delay = Math.max(60, order * 110); // 110ms stagger
         setTimeout(() => {
             el.classList.add('is-revealed');
         }, delay);
@@ -57,6 +57,9 @@ function initScrollReveals() {
         return;
     }
 
+    // Elements inside or near initial viewport on page load should reveal immediately
+    const viewportHeight = window.innerHeight || document.documentElement.clientHeight;
+
     // Observer for individual elements
     const elementObserver = new IntersectionObserver((entries, observer) => {
         entries.forEach(entry => {
@@ -67,13 +70,20 @@ function initScrollReveals() {
         });
     }, {
         root: null,
-        rootMargin: '0px 0px -40px 0px',
-        threshold: 0.12
+        rootMargin: '0px 0px -60px 0px',
+        threshold: 0.15
     });
 
     document.querySelectorAll('[data-reveal]').forEach(el => {
-        // If element is already in viewport on load, reveal promptly
-        elementObserver.observe(el);
+        // If element is already in initial viewport on page load, reveal after brief delay
+        const rect = el.getBoundingClientRect();
+        if (rect.top < viewportHeight && rect.bottom > 0) {
+            setTimeout(() => {
+                el.classList.add('is-revealed');
+            }, 100);
+        } else {
+            elementObserver.observe(el);
+        }
     });
 
     // Observer for staggered content groups (pillars, officers, activities, gallery, partners)
@@ -83,7 +93,7 @@ function initScrollReveals() {
                 const group = entry.target;
                 const items = group.querySelectorAll('[data-reveal-item]');
                 items.forEach((item, index) => {
-                    const delay = Math.min(index * 75, 450); // 75ms stagger, max 450ms
+                    const delay = Math.min(index * 120, 600); // 120ms stagger between neighboring items
                     setTimeout(() => {
                         item.classList.add('is-revealed');
                     }, delay);
@@ -94,12 +104,24 @@ function initScrollReveals() {
         });
     }, {
         root: null,
-        rootMargin: '0px 0px -40px 0px',
-        threshold: 0.1
+        rootMargin: '0px 0px -50px 0px',
+        threshold: 0.12
     });
 
     document.querySelectorAll('[data-reveal-group]').forEach(group => {
-        groupObserver.observe(group);
+        const rect = group.getBoundingClientRect();
+        if (rect.top < viewportHeight && rect.bottom > 0) {
+            const items = group.querySelectorAll('[data-reveal-item]');
+            items.forEach((item, index) => {
+                const delay = Math.min(index * 120, 600);
+                setTimeout(() => {
+                    item.classList.add('is-revealed');
+                }, delay + 100);
+            });
+            group.classList.add('is-revealed');
+        } else {
+            groupObserver.observe(group);
+        }
     });
 }
 
@@ -120,8 +142,8 @@ function initSubtleParallax() {
         lastScrollY = window.scrollY;
         if (!ticking) {
             window.requestAnimationFrame(() => {
-                // Restrained vertical translation (max 18px shift across the entire scroll)
-                const translateY = Math.min(lastScrollY * 0.04, 18);
+                // Noticeable vertical translation (max 28px shift across the scroll)
+                const translateY = Math.min(lastScrollY * 0.06, 28);
                 bgGrid.style.transform = `translate3d(0, ${translateY}px, 0)`;
                 ticking = false;
             });
