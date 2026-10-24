@@ -5,6 +5,7 @@ import { Html5Qrcode } from 'html5-qrcode';
 import { createIcons, icons } from 'lucide';
 import SignaturePad from 'signature_pad';
 import signatureRegistration from './signature';
+import { initMotionSystem } from './motion';
 
 window.Alpine = Alpine;
 window.Html5Qrcode = Html5Qrcode;
@@ -14,6 +15,7 @@ window.SignaturePad = SignaturePad;
 
 document.addEventListener('DOMContentLoaded', () => {
     createIcons({ icons });
+    initMotionSystem();
 });
 
 document.addEventListener('alpine:initialized', () => {

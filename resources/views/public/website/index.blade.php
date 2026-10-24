@@ -8,20 +8,20 @@
 
                 <!-- Left Column: Bold Typography & Narrative (7 cols) -->
                 <div class="lg:col-span-7 space-y-6 text-center lg:text-left">
-                    <div class="inline-flex items-center gap-2.5 px-3 py-1.5 rounded-full bg-[#560E0F]/25 border border-[#560E0F]/60 text-[#df747a] text-xs font-semibold tracking-wide">
+                    <div data-hero-seq="1" class="inline-flex items-center gap-2.5 px-3 py-1.5 rounded-full bg-[#560E0F]/25 border border-[#560E0F]/60 text-[#df747a] text-xs font-semibold tracking-wide">
                         <span class="w-2 h-2 rounded-full bg-[#df747a] animate-pulse"></span>
                         <span>Computing Society • Sorsogon State University – Bulan Campus</span>
                     </div>
 
-                    <h1 class="text-3xl sm:text-5xl lg:text-6xl font-black font-brand-display text-white tracking-tight leading-[1.08]">
+                    <h1 data-hero-seq="2" class="text-3xl sm:text-5xl lg:text-6xl font-black font-brand-display text-white tracking-tight leading-[1.08]">
                         {{ $settings['hero_headline'] ?? 'Where Computing Minds Build What\'s Next.' }}
                     </h1>
 
-                    <p class="text-base sm:text-lg text-slate-300 max-w-2xl mx-auto lg:mx-0 leading-relaxed font-normal">
+                    <p data-hero-seq="3" class="text-base sm:text-lg text-slate-300 max-w-2xl mx-auto lg:mx-0 leading-relaxed font-normal">
                         {{ $settings['hero_description'] ?? 'COMSOC brings computing students together to develop technical skills, create meaningful projects, build lifelong connections, and strengthen our campus community.' }}
                     </p>
 
-                    <div class="flex flex-wrap items-center justify-center lg:justify-start gap-4 pt-2">
+                    <div data-hero-seq="4" class="flex flex-wrap items-center justify-center lg:justify-start gap-4 pt-2">
                         <a href="{{ route('public.about') }}"
                            class="btn-secondary text-sm sm:text-base py-3 px-6 rounded-xl flex items-center gap-2 border-[#334155]/60 hover:border-[#df747a] transition-all">
                             <span>Discover COMSOC</span>
@@ -36,7 +36,7 @@
                     </div>
 
                     <!-- Highlight Metrics & Impact Indicators -->
-                    <div class="pt-8 grid grid-cols-3 gap-6 max-w-lg mx-auto lg:mx-0 text-left">
+                    <div data-hero-seq="5" class="pt-8 grid grid-cols-3 gap-6 max-w-lg mx-auto lg:mx-0 text-left">
                         <div>
                             <span class="block text-2xl sm:text-3xl font-black font-brand-display text-white">5</span>
                             <span class="text-xs text-slate-400">Foundational Pillars</span>
@@ -53,9 +53,9 @@
                 </div>
 
                 <!-- Right Column: Authentic Visual Presentation (5 cols) -->
-                <div class="lg:col-span-5 relative flex items-center justify-center">
+                <div data-hero-seq="5" class="lg:col-span-5 relative flex items-center justify-center">
                     @if(!empty($settings['hero_image']))
-                        <div class="relative w-full max-w-lg rounded-2xl overflow-hidden shadow-2xl border border-[#334155]/40">
+                        <div class="relative w-full max-w-lg rounded-2xl overflow-hidden shadow-2xl border border-[#334155]/40 img-reveal-container">
                             <img src="{{ asset('storage/' . $settings['hero_image']) }}" alt="COMSOC Leadership and Community" class="w-full h-80 sm:h-[420px] object-cover">
                             <div class="absolute inset-0 bg-gradient-to-t from-[#0B1120] via-transparent to-transparent opacity-60"></div>
                         </div>
@@ -90,7 +90,7 @@
     @if($settings['section_about_visible'] ?? true)
     <section id="about" class="py-16 sm:py-24 bg-[#172033]/20 scroll-mt-20">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div class="grid grid-cols-1 lg:grid-cols-12 gap-12 items-start">
+            <div class="grid grid-cols-1 lg:grid-cols-12 gap-12 items-start" data-reveal>
                 <div class="lg:col-span-5 space-y-4">
                     <span class="text-xs font-bold text-[#df747a] tracking-widest uppercase font-brand-accent">Who We Are</span>
                     <h2 class="text-3xl sm:text-4xl font-extrabold text-white font-brand-display tracking-tight leading-tight">
@@ -143,7 +143,7 @@
     @if($settings['section_pillars_visible'] ?? true)
     <section id="pillars" class="py-16 sm:py-24 scroll-mt-20">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div class="flex flex-col md:flex-row md:items-end justify-between gap-6 mb-12">
+            <div class="flex flex-col md:flex-row md:items-end justify-between gap-6 mb-12" data-reveal>
                 <div>
                     <span class="text-xs font-bold text-[#df747a] tracking-widest uppercase font-brand-accent">Core Foundations</span>
                     <h2 class="text-2xl sm:text-4xl font-extrabold text-white font-brand-display tracking-tight mt-1">
@@ -155,9 +155,9 @@
                 </div>
             </div>
 
-            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-6">
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-6" data-reveal-group>
                 @foreach($settings['pillars'] ?? [] as $pillar)
-                <div class="p-6 rounded-2xl bg-[#172033]/40 border border-[#334155]/30 hover:border-[#df747a]/50 transition-all flex flex-col justify-between group">
+                <div data-reveal-item class="p-6 rounded-2xl bg-[#172033]/40 border border-[#334155]/30 hover:border-[#df747a]/50 transition-all flex flex-col justify-between group">
                     <div class="space-y-4">
                         <div class="w-10 h-10 rounded-xl bg-[#0B1120] border border-[#334155]/50 group-hover:border-[#df747a] flex items-center justify-center text-[#df747a] transition-colors">
                             <i data-lucide="{{ $pillar['icon'] ?? 'check' }}" class="w-5 h-5"></i>
@@ -176,7 +176,7 @@
     @if($settings['section_activities_visible'] ?? true)
     <section id="activities" class="py-16 sm:py-24 bg-[#172033]/15 scroll-mt-20">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div class="flex flex-col md:flex-row md:items-end justify-between gap-6 mb-12">
+            <div class="flex flex-col md:flex-row md:items-end justify-between gap-6 mb-12" data-reveal>
                 <div>
                     <span class="text-xs font-bold text-[#df747a] tracking-widest uppercase font-brand-accent">Events & Workshops</span>
                     <h2 class="text-2xl sm:text-4xl font-extrabold text-white font-brand-display tracking-tight mt-1">
@@ -193,16 +193,18 @@
             </div>
 
             @if($activities->isEmpty())
-                <div class="p-8 text-center rounded-2xl bg-[#172033]/40 border border-[#334155]/30 text-slate-400 text-sm">
+                <div data-reveal class="p-8 text-center rounded-2xl bg-[#172033]/40 border border-[#334155]/30 text-slate-400 text-sm">
                     No public activities are currently featured. Check back soon for upcoming announcements!
                 </div>
             @else
-                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6" data-reveal-group>
                     @foreach($activities as $event)
-                    <div class="rounded-2xl bg-[#172033]/40 border border-[#334155]/30 overflow-hidden hover:border-[#df747a]/50 transition-all flex flex-col justify-between group">
+                    <div data-reveal-item class="rounded-2xl bg-[#172033]/40 border border-[#334155]/30 overflow-hidden hover:border-[#df747a]/50 transition-all flex flex-col justify-between group">
                         <div>
                             @if($event->logo_path)
-                                <img src="{{ asset('storage/' . $event->logo_path) }}" alt="{{ $event->name }}" class="w-full h-44 object-cover">
+                                <div class="w-full h-44 img-reveal-container">
+                                    <img src="{{ asset('storage/' . $event->logo_path) }}" alt="{{ $event->name }}" class="w-full h-full object-cover">
+                                </div>
                             @else
                                 <div class="w-full h-44 bg-gradient-to-r from-[#0B1120] to-[#172033] flex items-center justify-center">
                                     <i data-lucide="calendar" class="w-10 h-10 text-slate-600"></i>
@@ -251,7 +253,7 @@
     @if($settings['section_achievements_visible'] ?? true)
     <section id="achievements" class="py-16 sm:py-24 scroll-mt-20">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div class="flex flex-col md:flex-row md:items-end justify-between gap-6 mb-12">
+            <div class="flex flex-col md:flex-row md:items-end justify-between gap-6 mb-12" data-reveal>
                 <div>
                     <span class="text-xs font-bold text-[#df747a] tracking-widest uppercase font-brand-accent">Proven Track Record</span>
                     <h2 class="text-2xl sm:text-4xl font-extrabold text-white font-brand-display tracking-tight mt-1">
@@ -268,16 +270,16 @@
             </div>
 
             @if($achievements->isEmpty())
-                <div class="p-8 text-center rounded-2xl bg-[#172033]/40 border border-[#334155]/30 text-slate-400 text-sm">
+                <div data-reveal class="p-8 text-center rounded-2xl bg-[#172033]/40 border border-[#334155]/30 text-slate-400 text-sm">
                     Verified milestone records will appear here once published by administrators.
                 </div>
             @else
-                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6" data-reveal-group>
                     @foreach($achievements as $ach)
-                    <div class="rounded-2xl bg-[#172033]/40 border border-[#334155]/30 p-6 flex flex-col justify-between hover:border-[#df747a]/50 transition-all">
+                    <div data-reveal-item class="rounded-2xl bg-[#172033]/40 border border-[#334155]/30 p-6 flex flex-col justify-between hover:border-[#df747a]/50 transition-all">
                         <div class="space-y-4">
                             @if($ach->image_path)
-                                <div class="rounded-xl overflow-hidden aspect-video border border-[#334155]/40 mb-2">
+                                <div class="rounded-xl overflow-hidden aspect-video border border-[#334155]/40 mb-2 img-reveal-container">
                                     <img src="{{ asset('storage/' . $ach->image_path) }}" alt="{{ $ach->title }}" class="w-full h-full object-cover">
                                 </div>
                             @endif
@@ -309,7 +311,7 @@
     @if($settings['section_officers_visible'] ?? true)
     <section id="officers" class="py-16 sm:py-24 bg-[#172033]/20 scroll-mt-20">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div class="flex flex-col md:flex-row md:items-end justify-between gap-6 mb-12">
+            <div class="flex flex-col md:flex-row md:items-end justify-between gap-6 mb-12" data-reveal>
                 <div>
                     <span class="text-xs font-bold text-[#df747a] tracking-widest uppercase font-brand-accent">Executive Board</span>
                     <h2 class="text-2xl sm:text-4xl font-extrabold text-white font-brand-display tracking-tight mt-1">
@@ -326,13 +328,13 @@
             </div>
 
             @if($officers->isEmpty())
-                <div class="p-8 text-center rounded-2xl bg-[#172033]/40 border border-[#334155]/30 text-slate-400 text-sm">
+                <div data-reveal class="p-8 text-center rounded-2xl bg-[#172033]/40 border border-[#334155]/30 text-slate-400 text-sm">
                     Current officer roster will be published shortly.
                 </div>
             @else
-                <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-6">
+                <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-6" data-reveal-group>
                     @foreach($officers as $officer)
-                    <div class="flex flex-col items-center text-center space-y-3 group">
+                    <div data-reveal-item class="flex flex-col items-center text-center space-y-3 group">
                         <div class="w-20 h-20 sm:w-24 sm:h-24 rounded-full overflow-hidden bg-[#0B1120] border-2 border-[#334155]/60 group-hover:border-[#df747a] transition-all">
                             @if($officer->portrait_path)
                                 <img src="{{ asset('storage/' . $officer->portrait_path) }}" alt="{{ $officer->name }}" class="w-full h-full object-cover">
@@ -361,7 +363,7 @@
     @if($settings['section_gallery_visible'] ?? true)
     <section id="gallery" class="py-16 sm:py-24 scroll-mt-20" x-data="{ lightboxOpen: false, activeImage: '', activeTitle: '', activeCaption: '' }">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div class="flex flex-col md:flex-row md:items-end justify-between gap-6 mb-12">
+            <div class="flex flex-col md:flex-row md:items-end justify-between gap-6 mb-12" data-reveal>
                 <div>
                     <span class="text-xs font-bold text-[#df747a] tracking-widest uppercase font-brand-accent">Visual Memories</span>
                     <h2 class="text-2xl sm:text-4xl font-extrabold text-white font-brand-display tracking-tight mt-1">
@@ -378,15 +380,16 @@
             </div>
 
             @if($gallery->isEmpty())
-                <div class="p-8 text-center rounded-2xl bg-[#172033]/40 border border-[#334155]/30 text-slate-400 text-sm">
+                <div data-reveal class="p-8 text-center rounded-2xl bg-[#172033]/40 border border-[#334155]/30 text-slate-400 text-sm">
                     Visual records from recent events will be uploaded here.
                 </div>
             @else
-                <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+                <div class="grid grid-cols-2 md:grid-cols-4 gap-4" data-reveal-group>
                     @foreach($gallery as $photo)
-                    <button type="button"
+                    <button data-reveal-item
+                            type="button"
                             @click="lightboxOpen = true; activeImage = '{{ asset('storage/' . $photo->image_path) }}'; activeTitle = '{{ addslashes($photo->title ?? '') }}'; activeCaption = '{{ addslashes($photo->caption ?? '') }}'"
-                            class="aspect-[4/3] rounded-xl overflow-hidden bg-[#0B1120] relative group cursor-pointer focus:outline-none focus-visible:ring-2 focus-visible:ring-[#df747a] text-left block w-full border border-[#334155]/30"
+                            class="aspect-[4/3] rounded-xl overflow-hidden bg-[#0B1120] relative group cursor-pointer focus:outline-none focus-visible:ring-2 focus-visible:ring-[#df747a] text-left block w-full border border-[#334155]/30 img-reveal-container"
                             aria-label="View photo: {{ $photo->title ?: 'Gallery photo' }}">
                         <img src="{{ asset('storage/' . $photo->image_path) }}" alt="{{ $photo->alt_text }}" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" loading="lazy">
                         <div class="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center p-3 text-center">
@@ -438,7 +441,7 @@
     @if($settings['section_partners_visible'] ?? true)
     <section id="partners" class="py-16 sm:py-24 bg-[#172033]/15 scroll-mt-20">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div class="flex flex-col md:flex-row md:items-end justify-between gap-6 mb-12">
+            <div class="flex flex-col md:flex-row md:items-end justify-between gap-6 mb-12" data-reveal>
                 <div>
                     <span class="text-xs font-bold text-[#df747a] tracking-widest uppercase font-brand-accent">Collaborations</span>
                     <h2 class="text-2xl sm:text-4xl font-extrabold text-white font-brand-display tracking-tight mt-1">
@@ -455,13 +458,13 @@
             </div>
 
             @if($partners->isEmpty())
-                <div class="p-8 text-center rounded-2xl bg-[#172033]/40 border border-[#334155]/30 text-slate-400 text-sm">
+                <div data-reveal class="p-8 text-center rounded-2xl bg-[#172033]/40 border border-[#334155]/30 text-slate-400 text-sm">
                     Partner collaborations will be published upon approval.
                 </div>
             @else
-                <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-6 items-center">
+                <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-6 items-center" data-reveal-group>
                     @foreach($partners as $partner)
-                    <div class="p-4 rounded-xl bg-[#172033]/30 border border-[#334155]/30 flex flex-col items-center justify-center text-center hover:border-[#df747a]/50 transition-all min-h-[110px]">
+                    <div data-reveal-item class="p-4 rounded-xl bg-[#172033]/30 border border-[#334155]/30 flex flex-col items-center justify-center text-center hover:border-[#df747a]/50 transition-all min-h-[110px]">
                         @if($partner->logo_path)
                             <img src="{{ asset('storage/' . $partner->logo_path) }}" alt="{{ $partner->name }}" class="h-10 object-contain max-w-[100px] mb-2 filter brightness-90 hover:brightness-100 transition">
                         @else
@@ -480,7 +483,7 @@
     @if($settings['section_hub_cta_visible'] ?? true)
     <section id="hub-portal" class="py-16 sm:py-24 scroll-mt-20">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 items-center p-8 sm:p-12 rounded-3xl bg-gradient-to-r from-[#172033]/80 to-[#0B1120] border border-[#334155]/40 shadow-xl">
+            <div data-reveal class="grid grid-cols-1 lg:grid-cols-12 gap-8 items-center p-8 sm:p-12 rounded-3xl bg-gradient-to-r from-[#172033]/80 to-[#0B1120] border border-[#334155]/40 shadow-xl">
                 <div class="lg:col-span-8 space-y-4">
                     <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-[#560E0F]/40 text-[#df747a] border border-[#560E0F]/60 text-xs font-semibold">
                         <i data-lucide="layers" class="w-3.5 h-3.5"></i>
@@ -520,7 +523,7 @@
     @if($settings['section_faq_visible'] ?? true)
     <section id="faqs" class="py-16 sm:py-24 bg-[#172033]/20 scroll-mt-20">
         <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div class="text-center space-y-3 mb-12">
+            <div class="text-center space-y-3 mb-12" data-reveal>
                 <span class="text-xs font-bold text-[#df747a] tracking-widest uppercase font-brand-accent">Inquiries</span>
                 <h2 class="text-2xl sm:text-4xl font-extrabold text-white font-brand-display tracking-tight">
                     Frequently Asked Questions
@@ -531,7 +534,7 @@
             </div>
 
             @if($faqs->isEmpty())
-                <div class="space-y-4" x-data="{ activeFaq: null }">
+                <div class="space-y-4" x-data="{ activeFaq: null }" data-reveal>
                     <div class="p-6 rounded-2xl bg-[#172033]/40 border border-[#334155]/30 transition-colors">
                         <button type="button"
                                 @click="activeFaq = (activeFaq === 1 ? null : 1)"
@@ -572,7 +575,7 @@
                     </div>
                 </div>
             @else
-                <div class="space-y-4" x-data="{ activeFaq: null }">
+                <div class="space-y-4" x-data="{ activeFaq: null }" data-reveal>
                     @foreach($faqs as $idx => $faq)
                     <div class="p-6 rounded-2xl bg-[#172033]/40 border border-[#334155]/30 transition-colors">
                         <button type="button"
@@ -594,7 +597,7 @@
     @endif
 
     <!-- Section 11: Final Call to Action -->
-    <section class="py-20 sm:py-28 text-center relative overflow-hidden">
+    <section class="py-20 sm:py-28 text-center relative overflow-hidden" data-reveal>
         <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 space-y-6 relative z-10">
             <h2 class="text-3xl sm:text-5xl font-black font-brand-display text-white tracking-tight leading-tight">
                 {{ $settings['final_cta_headline'] ?? 'Be Part of the Community. Build What Comes Next.' }}

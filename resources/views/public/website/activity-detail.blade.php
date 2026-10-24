@@ -3,7 +3,7 @@
     <!-- Editorial Event Header -->
     <section class="py-16 sm:py-24 relative overflow-hidden bg-gradient-to-b from-[#0B1120] to-[#172033]/30">
         <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div class="space-y-6">
+            <div class="space-y-6" data-reveal>
                 <div>
                     <a href="{{ route('public.activities') }}" class="inline-flex items-center gap-2 text-xs font-mono font-semibold text-[#df747a] hover:text-white transition">
                         <i data-lucide="arrow-left" class="w-4 h-4"></i>
@@ -57,13 +57,13 @@
 
                     <!-- Cover Image if present -->
                     @if($event->logo_path)
-                    <div class="rounded-2xl overflow-hidden border border-[#334155]/40 shadow-2xl bg-[#0B1120]">
+                    <div data-reveal class="rounded-2xl overflow-hidden border border-[#334155]/40 shadow-2xl bg-[#0B1120] img-reveal-container">
                         <img src="{{ asset('storage/' . $event->logo_path) }}" alt="{{ $event->name }}" class="w-full max-h-[480px] object-cover">
                     </div>
                     @endif
 
                     <!-- Description / Narrative -->
-                    <div class="space-y-4">
+                    <div class="space-y-4" data-reveal>
                         <h2 class="text-2xl font-bold text-white font-brand-display">Program Overview</h2>
                         <div class="text-base text-slate-300 leading-relaxed space-y-4 whitespace-pre-line font-normal">
                             {{ $event->description ?: 'No detailed public program overview has been released yet. Registered students may monitor session announcements via COMSOC Hub.' }}
@@ -72,7 +72,7 @@
 
                     <!-- Guidelines -->
                     @if(!empty($event->participation_requirements))
-                    <div class="p-6 rounded-2xl bg-[#172033]/30 border-l-4 border-l-[#df747a] border-y border-r border-[#334155]/30 space-y-2">
+                    <div data-reveal class="p-6 rounded-2xl bg-[#172033]/30 border-l-4 border-l-[#df747a] border-y border-r border-[#334155]/30 space-y-2">
                         <h3 class="text-sm font-bold text-white flex items-center gap-2 uppercase tracking-wider font-mono">
                             <i data-lucide="info" class="w-4 h-4 text-[#df747a]"></i>
                             <span>Participation Guidelines</span>
@@ -84,16 +84,16 @@
                     <!-- Associated Gallery Highlights -->
                     @if($gallery->isNotEmpty())
                     <div class="space-y-6 pt-6">
-                        <div class="flex items-center justify-between pb-3 border-b border-[#334155]/30">
+                        <div class="flex items-center justify-between pb-3 border-b border-[#334155]/30" data-reveal>
                             <h3 class="text-xl font-bold text-white font-brand-display">Documented Moments</h3>
                             <a href="{{ route('public.gallery') }}" class="text-xs text-[#df747a] hover:text-white transition font-mono flex items-center gap-1">
                                 <span>Browse Visual Archive</span>
                                 <i data-lucide="arrow-right" class="w-3.5 h-3.5"></i>
                             </a>
                         </div>
-                        <div class="grid grid-cols-2 sm:grid-cols-3 gap-4">
+                        <div class="grid grid-cols-2 sm:grid-cols-3 gap-4" data-reveal-group>
                             @foreach($gallery as $photo)
-                            <div class="rounded-xl overflow-hidden border border-[#334155]/40 aspect-video bg-[#0B1120] group">
+                            <div data-reveal-item class="rounded-xl overflow-hidden border border-[#334155]/40 aspect-video bg-[#0B1120] group img-reveal-container">
                                 <img src="{{ asset('storage/' . $photo->image_path) }}" alt="{{ $photo->alt_text }}" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300">
                             </div>
                             @endforeach
@@ -104,7 +104,7 @@
                 </div>
 
                 <!-- Right Column: Verification & Operations Sidebar -->
-                <div class="lg:col-span-4 space-y-8">
+                <div class="lg:col-span-4 space-y-8" data-reveal>
 
                     <!-- Metadata Overview -->
                     <div class="bg-[#172033]/40 p-6 rounded-2xl border border-[#334155]/30 space-y-6">

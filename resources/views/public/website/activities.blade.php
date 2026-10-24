@@ -3,7 +3,7 @@
     <!-- Editorial Header -->
     <section class="py-16 sm:py-24 relative overflow-hidden bg-gradient-to-b from-[#0B1120] to-[#172033]/30">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div class="max-w-3xl space-y-4">
+            <div class="max-w-3xl space-y-4" data-reveal>
                 <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-[#560E0F]/20 border border-[#df747a]/30 text-[#df747a] text-xs font-mono font-semibold uppercase tracking-wider">
                     <span class="w-1.5 h-1.5 rounded-full bg-[#df747a] animate-pulse"></span>
                     <span>Initiatives & Engagements</span>
@@ -23,7 +23,7 @@
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-12">
 
             <!-- Filter Controls -->
-            <div class="flex flex-wrap items-center justify-between gap-4 pb-6 border-b border-[#334155]/30">
+            <div class="flex flex-wrap items-center justify-between gap-4 pb-6 border-b border-[#334155]/30" data-reveal>
                 <div class="flex items-center gap-2">
                     <a href="{{ route('public.activities', ['status' => 'all']) }}"
                        class="px-4 py-2 rounded-xl text-xs font-semibold transition-all {{ $filter === 'all' ? 'bg-[#560E0F] text-white shadow-lg shadow-[#560E0F]/30' : 'bg-[#172033]/40 text-slate-300 hover:text-white hover:bg-[#172033] border border-[#334155]/40' }}">
@@ -45,7 +45,7 @@
             </div>
 
             @if($activities->isEmpty())
-                <div class="py-16 text-center max-w-md mx-auto space-y-4">
+                <div data-reveal class="py-16 text-center max-w-md mx-auto space-y-4">
                     <div class="w-12 h-12 rounded-2xl bg-[#172033]/40 border border-[#334155]/40 flex items-center justify-center mx-auto text-slate-400">
                         <i data-lucide="calendar-x" class="w-6 h-6"></i>
                     </div>
@@ -63,12 +63,12 @@
                     </div>
                 </div>
             @else
-                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8" data-reveal-group>
                     @foreach($activities as $event)
-                    <article class="group flex flex-col justify-between rounded-2xl bg-[#172033]/30 border border-[#334155]/30 p-5 hover:border-[#df747a]/50 transition-colors">
+                    <article data-reveal-item class="group flex flex-col justify-between rounded-2xl bg-[#172033]/30 border border-[#334155]/30 p-5 hover:border-[#df747a]/50 transition-colors">
                         <div class="space-y-4">
                             <!-- Visual Banner -->
-                            <a href="{{ route('public.activities.detail', $event->resolved_slug) }}" class="block aspect-video rounded-xl overflow-hidden bg-[#0B1120] relative border border-[#334155]/40 group-hover:border-[#df747a]/50 transition-all">
+                            <a href="{{ route('public.activities.detail', $event->resolved_slug) }}" class="block aspect-video rounded-xl overflow-hidden bg-[#0B1120] relative border border-[#334155]/40 group-hover:border-[#df747a]/50 transition-all img-reveal-container">
                                 @if($event->logo_path)
                                     <img src="{{ asset('storage/' . $event->logo_path) }}" alt="{{ $event->name }}" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300">
                                 @else
