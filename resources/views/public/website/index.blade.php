@@ -445,7 +445,7 @@
                 <div>
                     <span class="text-xs font-bold text-[#df747a] tracking-widest uppercase font-brand-accent">Collaborations</span>
                     <h2 class="text-2xl sm:text-4xl font-extrabold text-white font-brand-display tracking-tight mt-1">
-                        Our Community & Industry Partners
+                        Our Community & Collaborators
                     </h2>
                     <p class="text-sm text-slate-300 mt-2">
                         Alliances that enrich student learning, events, and industry preparation.
@@ -462,15 +462,17 @@
                     Partner collaborations will be published upon approval.
                 </div>
             @else
-                <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-6 items-center" data-reveal-group>
+                <div class="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-4 gap-6 items-stretch" data-reveal-group>
                     @foreach($partners as $partner)
-                    <div data-reveal-item class="p-4 rounded-xl bg-[#172033]/30 border border-[#334155]/30 flex flex-col items-center justify-center text-center hover:border-[#df747a]/50 transition-all min-h-[110px]">
-                        @if($partner->logo_url)
-                            <img src="{{ $partner->logo_url }}" alt="{{ $partner->name }}" class="h-10 object-contain max-w-[100px] mb-2 filter brightness-90 hover:brightness-100 transition">
-                        @else
-                            <i data-lucide="handshake" class="w-7 h-7 text-[#df747a] mb-2"></i>
-                        @endif
-                        <span class="text-xs font-semibold text-white truncate max-w-[120px]">{{ $partner->name }}</span>
+                    <div data-reveal-item class="p-5 rounded-2xl bg-[#172033]/30 border border-[#334155]/30 flex flex-col items-center justify-center text-center hover:border-[#df747a]/50 hover:bg-[#172033]/50 transition-all min-h-[120px] group">
+                        <div class="h-12 w-full flex items-center justify-center mb-3">
+                            @if($partner->logo_url)
+                                <img src="{{ $partner->logo_url }}" alt="{{ $partner->name }}" class="max-h-12 max-w-[120px] w-auto h-auto object-contain filter brightness-95 group-hover:brightness-110 group-hover:scale-105 transition duration-300">
+                            @else
+                                <i data-lucide="handshake" class="w-8 h-8 text-[#df747a]"></i>
+                            @endif
+                        </div>
+                        <span class="text-xs font-semibold text-white tracking-wide truncate max-w-[140px]">{{ $partner->name }}</span>
                     </div>
                     @endforeach
                 </div>
