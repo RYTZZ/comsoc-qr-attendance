@@ -44,19 +44,28 @@ class OrgOfficer extends Model
 
     public function getPortraitUrlAttribute(): ?string
     {
-        if (!$this->portrait_path) {
+        $path = $this->portrait_path;
+
+        // Auto-detect Rytzz G. Grieta profile picture if not explicitly set
+        if (!$path && stripos($this->name ?? '', 'Rytzz') !== false) {
+            if (file_exists(public_path('images/RYTZZ PFP.webp'))) {
+                $path = 'images/RYTZZ PFP.webp';
+            }
+        }
+
+        if (!$path) {
             return null;
         }
 
-        if (str_starts_with($this->portrait_path, 'http://') || str_starts_with($this->portrait_path, 'https://')) {
-            return $this->portrait_path;
+        if (str_starts_with($path, 'http://') || str_starts_with($path, 'https://')) {
+            return $path;
         }
 
-        if (str_starts_with($this->portrait_path, 'images/')) {
-            return asset($this->portrait_path);
+        if (str_starts_with($path, 'images/')) {
+            return asset($path);
         }
 
-        return asset('storage/' . $this->portrait_path);
+        return asset('storage/' . $path);
     }
 
     public function getInitialsAttribute(): string

@@ -25,7 +25,7 @@ class PublicWebsiteController extends Controller
         $officers = OrgOfficer::public()->take(6)->get();
         if ($officers->isEmpty()) {
             $previewExecutive = [
-                ['name' => 'Rytzz G. Grieta', 'position' => 'President', 'category' => 'executive', 'program' => null],
+                ['name' => 'Rytzz G. Grieta', 'position' => 'President', 'category' => 'executive', 'program' => null, 'portrait_path' => 'images/RYTZZ PFP.webp'],
                 ['name' => 'John Alfred Vargas', 'position' => 'Vice President - Internal Affairs', 'category' => 'executive', 'program' => null],
                 ['name' => 'Angel Desiree Cabales', 'position' => 'Vice President - External Affairs', 'category' => 'executive', 'program' => null],
                 ['name' => 'Charlene Lizano', 'position' => 'Executive Secretary', 'category' => 'executive', 'program' => null],
@@ -129,7 +129,7 @@ class PublicWebsiteController extends Controller
         if ($officers->isEmpty()) {
             $defaultRoster = [
                 // 1. COMSOC Executive Officers
-                ['name' => 'Rytzz G. Grieta', 'position' => 'President', 'category' => 'executive', 'program' => null, 'sort_order' => 1],
+                ['name' => 'Rytzz G. Grieta', 'position' => 'President', 'category' => 'executive', 'program' => null, 'portrait_path' => 'images/RYTZZ PFP.webp', 'sort_order' => 1],
                 ['name' => 'John Alfred Vargas', 'position' => 'Vice President - Internal Affairs', 'category' => 'executive', 'program' => null, 'sort_order' => 2],
                 ['name' => 'Angel Desiree Cabales', 'position' => 'Vice President - External Affairs', 'category' => 'executive', 'program' => null, 'sort_order' => 3],
                 ['name' => 'Charlene Lizano', 'position' => 'Executive Secretary', 'category' => 'executive', 'program' => null, 'sort_order' => 4],
