@@ -1,7 +1,7 @@
 <x-public-website-layout :settings="$settings" :title="'Terms of Use'">
 
     <!-- Editorial Header -->
-    <section class="py-12 sm:py-16 relative overflow-hidden bg-gradient-to-b from-[#0B1120] to-[#172033]/30 border-b border-[#334155]/40">
+    <section class="py-12 sm:py-16 relative overflow-hidden bg-gradient-to-b from-[#0B1120] to-[#172033]/30">
         <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
             <div class="space-y-4" data-reveal>
                 <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-[#560E0F]/20 border border-[#df747a]/30 text-[#df747a] text-xs font-mono font-semibold uppercase tracking-wider">
@@ -13,7 +13,7 @@
                     Terms of Use
                 </h1>
                 
-                <p class="text-base sm:text-lg text-slate-300 leading-relaxed font-normal">
+                <p class="text-base sm:text-lg text-slate-300 leading-relaxed font-normal max-w-3xl">
                     These Terms of Use govern your access to and use of the COMSOC website, COMSOC Hub, and related digital services operated for the Computing Society of Sorsogon State University – Bulan Campus.
                 </p>
 
@@ -30,10 +30,10 @@
     </section>
 
     <!-- Main Terms of Use Document Container -->
-    <section class="pt-10 sm:pt-14 pb-16 sm:pb-24">
+    <section class="pt-6 sm:pt-8 pb-16 sm:pb-24">
         <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
             
-            <article class="rounded-2xl bg-[#172033]/40 border border-[#334155]/50 shadow-xl p-6 sm:p-10 md:p-12 space-y-10 sm:space-y-12 text-slate-300 leading-relaxed text-sm sm:text-base">
+            <article class="rounded-2xl bg-[#172033]/40 border border-[#334155]/60 shadow-xl p-6 sm:p-10 md:p-12 space-y-10 sm:space-y-12 text-slate-300 leading-relaxed text-sm sm:text-base">
 
                 <!-- 1. Acceptance of Terms -->
                 <section class="space-y-3.5" id="section-1">

@@ -607,18 +607,26 @@
         transform: translateY(0);
     }
 
-    /* Interactive hover animations for cards */
-    [data-reveal-item]:hover {
-        transform: translateY(-3px);
+    /* Subtle interactive card elevation once revealed */
+    [data-reveal-item].is-revealed {
+        transition: opacity 0.55s cubic-bezier(0.16, 1, 0.3, 1), transform 0.25s ease-out, border-color 0.25s ease-out, background-color 0.25s ease-out, box-shadow 0.25s ease-out;
+    }
+    [data-reveal-item].is-revealed:hover {
+        transform: translateY(-4px);
     }
 
-    /* Button arrow micro-animation */
-    .btn:hover [data-lucide="arrow-right"] {
-        transform: translateX(3px);
-        transition: transform 0.2s ease-in-out;
-    }
+    /* Button hover micro-interactions: arrow icon slide */
     .btn [data-lucide="arrow-right"] {
         transition: transform 0.2s ease-in-out;
+    }
+    .btn:hover [data-lucide="arrow-right"] {
+        transform: translateX(4px);
+    }
+    .btn [data-lucide="arrow-down"] {
+        transition: transform 0.2s ease-in-out;
+    }
+    .btn:hover [data-lucide="arrow-down"] {
+        transform: translateY(3px);
     }
 
     /* Image reveal transition with smooth clip & scale treatment */
