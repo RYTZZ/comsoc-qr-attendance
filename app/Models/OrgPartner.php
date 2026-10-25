@@ -42,6 +42,17 @@ class OrgPartner extends Model
         return asset('storage/' . $this->logo_path);
     }
 
+    public function getBadgeClassAttribute(): string
+    {
+        return match($this->collaboration_type) {
+            'Organization under COMSOC' => 'bg-[#df747a]/15 text-[#df747a] border-[#df747a]/30',
+            'Government Collaborator' => 'bg-sky-500/15 text-sky-300 border-sky-500/30',
+            'Community Collaborator' => 'bg-emerald-500/15 text-emerald-300 border-emerald-500/30',
+            'Academic Collaborator' => 'bg-indigo-500/15 text-indigo-300 border-indigo-500/30',
+            default => 'bg-[#172033] text-slate-300 border-[#334155]/60',
+        };
+    }
+
     public function scopePublic($query)
     {
         return $query->where('is_published', true)
@@ -49,4 +60,5 @@ class OrgPartner extends Model
             ->orderBy('name');
     }
 }
+
 

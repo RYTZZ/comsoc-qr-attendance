@@ -107,7 +107,7 @@ class WebsiteSettingsService
         // Public Contact & Socials (Verified only)
         'contact_email' => 'computingsocietysorsubc@gmail.com',
         'contact_address' => 'Zone 8, Bulan, Sorsogon, Philippines 4706',
-        'contact_facebook' => 'https://facebook.com/COMSOCSorSUBulan',
+        'contact_facebook' => 'https://www.facebook.com/comsocsorsubc',
         'contact_github' => 'https://github.com/RYTZZ/comsoc-qr-attendance',
 
         // SEO

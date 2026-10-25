@@ -6,7 +6,7 @@
     $settings = !empty($settings) ? $settings : \App\Services\WebsiteSettingsService::all();
     $contactEmail = $settings['contact_email'] ?? 'computingsocietysorsubc@gmail.com';
     $contactAddress = $settings['contact_address'] ?? 'Zone 8, Bulan, Sorsogon, Philippines 4706';
-    $contactFacebook = $settings['contact_facebook'] ?? 'https://facebook.com/COMSOCSorSUBulan';
+    $contactFacebook = $settings['contact_facebook'] ?? 'https://www.facebook.com/comsocsorsubc';
 @endphp
 
 <!-- Public Website Shared Footer -->

@@ -35,54 +35,9 @@
                     </div>
                 </div>
             @else
-                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8" data-reveal-group>
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 sm:gap-8 items-stretch" data-reveal-group>
                     @foreach($partners as $partner)
-                    <article data-reveal-item class="flex flex-col justify-between rounded-2xl bg-[#172033]/30 border border-[#334155]/30 p-6 hover:border-[#df747a]/50 transition-colors">
-                        <div class="space-y-4">
-                            <!-- Natural Logo Showcase with strict container constraints -->
-                            <div class="h-20 w-full flex items-center justify-start overflow-hidden">
-                                @if($partner->logo_url)
-                                    <img src="{{ $partner->logo_url }}" alt="{{ $partner->name }}" class="max-h-16 max-w-full w-auto h-auto object-contain filter drop-shadow">
-                                @else
-                                    <div class="w-12 h-12 rounded-xl bg-[#560E0F]/20 text-[#df747a] flex items-center justify-center border border-[#df747a]/30">
-                                        <i data-lucide="handshake" class="w-6 h-6"></i>
-                                    </div>
-                                @endif
-                            </div>
-
-                            <div>
-                                <h2 class="text-xl font-bold text-white font-brand-display">
-                                    {{ $partner->name }}
-                                </h2>
-                                @if($partner->collaboration_type)
-                                    @php
-                                        $badgeColor = match($partner->collaboration_type) {
-                                            'Organization under COMSOC' => 'bg-[#df747a]/15 text-[#df747a] border-[#df747a]/30',
-                                            'Government Collaborator' => 'bg-sky-500/15 text-sky-300 border-sky-500/30',
-                                            'Community Collaborator' => 'bg-emerald-500/15 text-emerald-300 border-emerald-500/30',
-                                            default => 'bg-[#172033] text-slate-300 border-[#334155]/60',
-                                        };
-                                    @endphp
-                                    <span class="inline-block mt-1 px-2.5 py-0.5 rounded-full text-[10px] font-mono font-semibold border {{ $badgeColor }}">
-                                        {{ $partner->collaboration_type }}
-                                    </span>
-                                @endif
-                            </div>
-
-                            <p class="text-xs text-slate-300 leading-relaxed font-normal">
-                                {{ $partner->description }}
-                            </p>
-                        </div>
-
-                        @if($partner->website_url)
-                        <div class="pt-5 mt-5 border-t border-[#334155]/20">
-                            <a href="{{ $partner->website_url }}" target="_blank" rel="noopener noreferrer" class="inline-flex items-center gap-1.5 text-xs font-semibold text-[#df747a] hover:text-white transition font-mono">
-                                <span>Official Web Address</span>
-                                <i data-lucide="external-link" class="w-3.5 h-3.5"></i>
-                            </a>
-                        </div>
-                        @endif
-                    </article>
+                        <x-partner-card :partner="$partner" />
                     @endforeach
                 </div>
             @endif
