@@ -39,10 +39,10 @@
                     @foreach($partners as $partner)
                     <article data-reveal-item class="flex flex-col justify-between rounded-2xl bg-[#172033]/30 border border-[#334155]/30 p-6 hover:border-[#df747a]/50 transition-colors">
                         <div class="space-y-4">
-                            <!-- Natural Logo Showcase (No boxes around boxes) -->
-                            <div class="h-20 flex items-center">
+                            <!-- Natural Logo Showcase with strict container constraints -->
+                            <div class="h-20 w-full flex items-center justify-start overflow-hidden">
                                 @if($partner->logo_url)
-                                    <img src="{{ $partner->logo_url }}" alt="{{ $partner->name }}" class="max-h-16 max-w-[200px] object-contain filter drop-shadow">
+                                    <img src="{{ $partner->logo_url }}" alt="{{ $partner->name }}" class="max-h-16 max-w-full w-auto h-auto object-contain filter drop-shadow">
                                 @else
                                     <div class="w-12 h-12 rounded-xl bg-[#560E0F]/20 text-[#df747a] flex items-center justify-center border border-[#df747a]/30">
                                         <i data-lucide="handshake" class="w-6 h-6"></i>

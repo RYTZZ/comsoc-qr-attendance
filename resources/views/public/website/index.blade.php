@@ -462,30 +462,46 @@
                     Partner collaborations will be published upon approval.
                 </div>
             @else
-                <div class="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-4 gap-6 items-stretch" data-reveal-group>
+                <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 items-stretch" data-reveal-group>
                     @foreach($partners as $partner)
-                    <div data-reveal-item class="p-5 rounded-2xl bg-[#172033]/30 border border-[#334155]/30 flex flex-col items-center justify-between text-center hover:border-[#df747a]/50 hover:bg-[#172033]/50 transition-all min-h-[140px] group">
-                        <div class="h-12 w-full flex items-center justify-center mb-3">
-                            @if($partner->logo_url)
-                                <img src="{{ $partner->logo_url }}" alt="{{ $partner->name }}" class="max-h-12 max-w-[120px] w-auto h-auto object-contain filter brightness-95 group-hover:brightness-110 group-hover:scale-105 transition duration-300">
-                            @else
-                                <i data-lucide="handshake" class="w-8 h-8 text-[#df747a]"></i>
-                            @endif
-                        </div>
-                        <div class="w-full flex flex-col items-center gap-1.5">
-                            <span class="text-xs font-bold text-white tracking-wide truncate max-w-full">{{ $partner->name }}</span>
-                            @if($partner->collaboration_type)
-                                @php
-                                    $badgeColor = match($partner->collaboration_type) {
-                                        'Organization under COMSOC' => 'bg-[#df747a]/15 text-[#df747a] border-[#df747a]/30',
-                                        'Government Collaborator' => 'bg-sky-500/15 text-sky-300 border-sky-500/30',
-                                        'Community Collaborator' => 'bg-emerald-500/15 text-emerald-300 border-emerald-500/30',
-                                        default => 'bg-[#172033] text-slate-300 border-[#334155]/60',
-                                    };
-                                @endphp
-                                <span class="inline-block px-2 py-0.5 rounded-full text-[10px] font-medium border leading-tight {{ $badgeColor }}">
-                                    {{ $partner->collaboration_type }}
-                                </span>
+                    <div data-reveal-item class="p-6 rounded-2xl bg-[#172033]/30 border border-[#334155]/30 flex flex-col justify-between text-left hover:border-[#df747a]/50 hover:bg-[#172033]/50 transition-all group">
+                        <div class="space-y-4">
+                            <!-- Logo Container with strict constraints to prevent any text overlap -->
+                            <div class="h-16 w-full flex items-center justify-start overflow-hidden">
+                                @if($partner->logo_url)
+                                    <img src="{{ $partner->logo_url }}" alt="{{ $partner->name }}" class="max-h-16 max-w-full w-auto h-auto object-contain filter brightness-95 group-hover:brightness-110 transition duration-300">
+                                @else
+                                    <div class="w-12 h-12 rounded-xl bg-[#560E0F]/20 text-[#df747a] flex items-center justify-center border border-[#df747a]/30">
+                                        <i data-lucide="handshake" class="w-6 h-6"></i>
+                                    </div>
+                                @endif
+                            </div>
+
+                            <!-- Partner Details: Name & Classification -->
+                            <div class="space-y-1.5">
+                                <h3 class="text-base font-bold text-white tracking-tight font-brand-display">
+                                    {{ $partner->name }}
+                                </h3>
+                                @if($partner->collaboration_type)
+                                    @php
+                                        $badgeColor = match($partner->collaboration_type) {
+                                            'Organization under COMSOC' => 'bg-[#df747a]/15 text-[#df747a] border-[#df747a]/30',
+                                            'Government Collaborator' => 'bg-sky-500/15 text-sky-300 border-sky-500/30',
+                                            'Community Collaborator' => 'bg-emerald-500/15 text-emerald-300 border-emerald-500/30',
+                                            default => 'bg-[#172033] text-slate-300 border-[#334155]/60',
+                                        };
+                                    @endphp
+                                    <span class="inline-block px-2.5 py-0.5 rounded-full text-[10px] font-mono font-semibold border leading-tight {{ $badgeColor }}">
+                                        {{ $partner->collaboration_type }}
+                                    </span>
+                                @endif
+                            </div>
+
+                            <!-- Partner Description -->
+                            @if($partner->description)
+                            <p class="text-xs text-slate-300 leading-relaxed font-normal">
+                                {{ $partner->description }}
+                            </p>
                             @endif
                         </div>
                     </div>

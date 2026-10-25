@@ -51,7 +51,7 @@ class PublicWebsiteController extends Controller
                 [
                     'name' => 'FMGTECH',
                     'logo_path' => 'images/FMGTECH.jpg',
-                    'description' => 'FMGTECH — Student tech initiative and development group established under the Computing Society.',
+                    'description' => 'FMGTECH — A technology-focused development group established under the Computing Society.',
                     'collaboration_type' => 'Organization under COMSOC',
                     'website_url' => null,
                     'sort_order' => 2,
@@ -222,7 +222,7 @@ class PublicWebsiteController extends Controller
                 [
                     'name' => 'FMGTECH',
                     'logo_path' => 'images/FMGTECH.jpg',
-                    'description' => 'FMGTECH — Student tech initiative and development group established under the Computing Society.',
+                    'description' => 'FMGTECH — A technology-focused development group established under the Computing Society.',
                     'collaboration_type' => 'Organization under COMSOC',
                     'website_url' => null,
                     'sort_order' => 2,
