@@ -8,6 +8,7 @@ export function initMotionSystem() {
     const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
     if (prefersReducedMotion) {
         document.documentElement.classList.add('reduced-motion');
+        revealAllDirectly();
         return;
     }
 
@@ -25,6 +26,15 @@ export function initMotionSystem() {
 }
 
 /**
+ * Fallback to guarantee no content remains hidden
+ */
+function revealAllDirectly() {
+    document.querySelectorAll('[data-hero-seq], [data-reveal], [data-reveal-group], [data-reveal-item]').forEach(el => {
+        el.classList.add('is-revealed');
+    });
+}
+
+/**
  * Orchestrates initial hero entrance on load
  */
 function initHeroSequence() {
@@ -38,7 +48,7 @@ function initHeroSequence() {
     // Sequence elements sequentially with smooth stagger
     heroElements.forEach((el) => {
         const order = parseInt(el.getAttribute('data-hero-seq') || '0', 10);
-        const delay = Math.max(60, order * 110); // 110ms stagger
+        const delay = Math.max(50, order * 90); // 90ms stagger
         setTimeout(() => {
             el.classList.add('is-revealed');
         }, delay);
@@ -50,10 +60,7 @@ function initHeroSequence() {
  */
 function initScrollReveals() {
     if (!('IntersectionObserver' in window)) {
-        // Fallback: reveal all immediately if IntersectionObserver unsupported
-        document.querySelectorAll('[data-reveal], [data-reveal-group], [data-reveal-item]').forEach(el => {
-            el.classList.add('is-revealed');
-        });
+        revealAllDirectly();
         return;
     }
 
@@ -69,17 +76,15 @@ function initScrollReveals() {
         });
     }, {
         root: null,
-        rootMargin: '0px 0px -40px 0px',
-        threshold: 0.15
+        rootMargin: '0px 0px -20px 0px',
+        threshold: 0.05
     });
 
-    document.querySelectorAll('[data-reveal]').forEach(el => {
+    document.querySelectorAll('[data-reveal]:not(.is-revealed)').forEach(el => {
         const rect = el.getBoundingClientRect();
-        // If element is already in the upper viewport on initial load, reveal promptly
-        if (rect.top < viewportHeight * 0.75 && rect.bottom > 0) {
-            setTimeout(() => {
-                el.classList.add('is-revealed');
-            }, 80);
+        // If element is already in or above the visible viewport on initial load, reveal immediately
+        if (rect.top <= viewportHeight * 0.9 && rect.bottom >= 0) {
+            el.classList.add('is-revealed');
         } else {
             elementObserver.observe(el);
         }
@@ -90,11 +95,11 @@ function initScrollReveals() {
         entries.forEach(entry => {
             if (entry.isIntersecting) {
                 const group = entry.target;
-                const items = group.querySelectorAll('[data-reveal-item]');
+                const items = group.querySelectorAll('[data-reveal-item]:not(.is-revealed)');
 
-                // Sequence officers/items one by one with a precise 120ms cadence
+                // Sequence cards/items with a quick 80-100ms cadence (capped so users never wait)
                 items.forEach((item, index) => {
-                    const delay = Math.min(index * 120, 1800); // 120ms interval per item
+                    const delay = Math.min(index * 90, 800);
                     setTimeout(() => {
                         item.classList.add('is-revealed');
                     }, delay);
@@ -106,26 +111,33 @@ function initScrollReveals() {
         });
     }, {
         root: null,
-        rootMargin: '0px 0px -30px 0px',
-        threshold: 0.1
+        rootMargin: '0px 0px -20px 0px',
+        threshold: 0.05
     });
 
-    document.querySelectorAll('[data-reveal-group]').forEach(group => {
+    document.querySelectorAll('[data-reveal-group]:not(.is-revealed)').forEach(group => {
         const rect = group.getBoundingClientRect();
-        // If group is already in view upon loading
-        if (rect.top < viewportHeight * 0.75 && rect.bottom > 0) {
-            const items = group.querySelectorAll('[data-reveal-item]');
+        // If group is already visible upon initial render
+        if (rect.top <= viewportHeight * 0.9 && rect.bottom >= 0) {
+            const items = group.querySelectorAll('[data-reveal-item]:not(.is-revealed)');
             items.forEach((item, index) => {
-                const delay = Math.min(index * 120, 1800);
+                const delay = Math.min(index * 80, 600);
                 setTimeout(() => {
                     item.classList.add('is-revealed');
-                }, delay + 150);
+                }, delay + 60);
             });
             group.classList.add('is-revealed');
         } else {
             groupObserver.observe(group);
         }
     });
+
+    // Safety fallback: after 2.5 seconds, ensure everything is guaranteed revealed
+    setTimeout(() => {
+        document.querySelectorAll('[data-reveal]:not(.is-revealed), [data-reveal-item]:not(.is-revealed)').forEach(el => {
+            el.classList.add('is-revealed');
+        });
+    }, 2500);
 }
 
 /**

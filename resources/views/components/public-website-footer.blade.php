@@ -14,10 +14,10 @@
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         
         <!-- Main 4-Column Responsive Grid -->
-        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-12 gap-8 lg:gap-8 pb-10 border-b border-[#334155]/40 items-start">
+        <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-12 gap-8 lg:gap-10 pb-10 border-b border-[#334155]/40 items-start">
 
-            <!-- Col 1: Organization Identity & Mission (lg:col-span-4) -->
-            <div class="min-w-0 sm:col-span-2 lg:col-span-4 space-y-3.5 pr-0 lg:pr-4">
+            <!-- Col 1: Organization Identity & Mission (xl:col-span-4) -->
+            <div class="min-w-0 md:col-span-2 xl:col-span-4 space-y-3.5 pr-0 xl:pr-6">
                 <a href="{{ route('public.home') }}" class="inline-flex items-center gap-3 group focus:outline-none focus-visible:ring-2 focus-visible:ring-[#df747a] rounded-lg">
                     <img src="{{ asset('images/COMSOC.png') }}" alt="COMSOC Emblem" class="w-10 h-10 object-contain drop-shadow-sm group-hover:scale-105 transition-transform duration-200">
                     <div>
@@ -28,69 +28,69 @@
                 <p class="text-xs font-semibold text-white tracking-wide leading-relaxed">
                     {{ $settings['org_tagline'] ?? 'Innovating Today for a Better Community.' }}
                 </p>
-                <p class="text-xs text-slate-400 leading-relaxed font-normal">
+                <p class="text-xs text-slate-400 leading-relaxed font-normal max-w-sm">
                     The official student organization representing computing and technology scholars at Sorsogon State University – Bulan Campus.
                 </p>
             </div>
 
-            <!-- Col 2: Organization Navigation (lg:col-span-2) -->
-            <nav class="min-w-0 lg:col-span-2 space-y-3" aria-label="Organization Navigation">
+            <!-- Col 2: Organization Navigation (xl:col-span-2) -->
+            <nav class="min-w-0 xl:col-span-2 space-y-3" aria-label="Organization Navigation">
                 <h3 class="text-xs font-bold text-white uppercase tracking-wider font-brand-accent">Organization</h3>
                 <ul class="space-y-2 text-xs text-slate-300">
                     <li>
-                        <a href="{{ route('public.about') }}" class="hover:text-white transition-colors duration-150 inline-block focus:outline-none focus-visible:underline focus-visible:text-white">
+                        <a href="{{ route('public.about') }}" class="hover:text-white transition-colors duration-150 inline-block focus:outline-none focus-visible:underline focus-visible:text-white whitespace-nowrap">
                             About & Mission
                         </a>
                     </li>
                     <li>
-                        <a href="{{ route('public.officers') }}" class="hover:text-white transition-colors duration-150 inline-block focus:outline-none focus-visible:underline focus-visible:text-white">
+                        <a href="{{ route('public.officers') }}" class="hover:text-white transition-colors duration-150 inline-block focus:outline-none focus-visible:underline focus-visible:text-white whitespace-nowrap">
                             Leadership
                         </a>
                     </li>
                     <li>
-                        <a href="{{ route('public.activities') }}" class="hover:text-white transition-colors duration-150 inline-block focus:outline-none focus-visible:underline focus-visible:text-white">
+                        <a href="{{ route('public.activities') }}" class="hover:text-white transition-colors duration-150 inline-block focus:outline-none focus-visible:underline focus-visible:text-white whitespace-nowrap">
                             Activities & Events
                         </a>
                     </li>
                     <li>
-                        <a href="{{ route('public.achievements') }}" class="hover:text-white transition-colors duration-150 inline-block focus:outline-none focus-visible:underline focus-visible:text-white">
+                        <a href="{{ route('public.achievements') }}" class="hover:text-white transition-colors duration-150 inline-block focus:outline-none focus-visible:underline focus-visible:text-white whitespace-nowrap">
                             Achievements
                         </a>
                     </li>
                     <li>
-                        <a href="{{ route('public.gallery') }}" class="hover:text-white transition-colors duration-150 inline-block focus:outline-none focus-visible:underline focus-visible:text-white">
+                        <a href="{{ route('public.gallery') }}" class="hover:text-white transition-colors duration-150 inline-block focus:outline-none focus-visible:underline focus-visible:text-white whitespace-nowrap">
                             Gallery
                         </a>
                     </li>
                 </ul>
             </nav>
 
-            <!-- Col 3: COMSOC Hub (lg:col-span-3) -->
-            <nav class="min-w-0 lg:col-span-3 space-y-3" aria-label="COMSOC Hub Navigation">
+            <!-- Col 3: COMSOC Hub (xl:col-span-3) -->
+            <nav class="min-w-0 xl:col-span-3 space-y-3" aria-label="COMSOC Hub Navigation">
                 <h3 class="text-xs font-bold text-white uppercase tracking-wider font-brand-accent">COMSOC Hub</h3>
                 <ul class="space-y-2 text-xs text-slate-300">
                     <li>
-                        <a href="{{ route('login') }}" class="hover:text-white transition-colors duration-150 inline-block focus:outline-none focus-visible:underline focus-visible:text-white">
+                        <a href="{{ route('login') }}" class="hover:text-white transition-colors duration-150 inline-block focus:outline-none focus-visible:underline focus-visible:text-white whitespace-nowrap">
                             Member Sign In
                         </a>
                     </li>
                     <li>
-                        <a href="{{ route('signup') }}" class="hover:text-white transition-colors duration-150 inline-block focus:outline-none focus-visible:underline focus-visible:text-white">
+                        <a href="{{ route('signup') }}" class="hover:text-white transition-colors duration-150 inline-block focus:outline-none focus-visible:underline focus-visible:text-white whitespace-nowrap">
                             Student Registration
                         </a>
                     </li>
                     <li>
-                        <a href="{{ route('account.assistance') }}" class="hover:text-white transition-colors duration-150 inline-block focus:outline-none focus-visible:underline focus-visible:text-white">
+                        <a href="{{ route('account.assistance') }}" class="hover:text-white transition-colors duration-150 inline-block focus:outline-none focus-visible:underline focus-visible:text-white whitespace-nowrap">
                             Account Assistance
                         </a>
                     </li>
                     <li>
-                        <a href="{{ route('privacy') }}" class="hover:text-white transition-colors duration-150 inline-block focus:outline-none focus-visible:underline focus-visible:text-white">
+                        <a href="{{ route('privacy') }}" class="hover:text-white transition-colors duration-150 inline-block focus:outline-none focus-visible:underline focus-visible:text-white whitespace-nowrap">
                             Data Privacy Notice
                         </a>
                     </li>
                     <li class="pt-1 border-t border-[#334155]/30">
-                        <a href="{{ route('public.partners') }}" class="text-[#df747a] hover:text-white transition-colors duration-150 inline-flex items-center gap-1.5 focus:outline-none focus-visible:underline">
+                        <a href="{{ route('public.partners') }}" class="text-[#df747a] hover:text-white transition-colors duration-150 inline-flex items-center gap-1.5 focus:outline-none focus-visible:underline whitespace-nowrap">
                             <i data-lucide="handshake" class="w-3.5 h-3.5 shrink-0" aria-hidden="true"></i>
                             <span>Partners & Collaborations</span>
                         </a>
@@ -98,8 +98,8 @@
                 </ul>
             </nav>
 
-            <!-- Col 4: Contact & Channels (lg:col-span-3) -->
-            <div class="min-w-0 sm:col-span-2 lg:col-span-3 space-y-3">
+            <!-- Col 4: Contact & Channels (xl:col-span-3) -->
+            <div class="min-w-0 xl:col-span-3 space-y-3">
                 <h3 class="text-xs font-bold text-white uppercase tracking-wider font-brand-accent">Contact & Channels</h3>
                 <ul class="space-y-2.5 text-xs text-slate-300">
                     @if(!empty($contactEmail))
@@ -151,7 +151,7 @@
                     Privacy Notice
                 </a>
                 <span class="text-slate-600 select-none" aria-hidden="true">•</span>
-                <a href="{{ route('privacy') }}" class="hover:text-white transition-colors duration-150 focus:outline-none focus-visible:underline focus-visible:text-white">
+                <a href="{{ route('public.terms') }}" class="hover:text-white transition-colors duration-150 focus:outline-none focus-visible:underline focus-visible:text-white">
                     Terms of Use
                 </a>
             </nav>

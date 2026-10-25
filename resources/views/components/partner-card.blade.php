@@ -30,15 +30,15 @@
         @endif
     </div>
 
-    <!-- Right Section: Organization Information Area (Centered) -->
-    <div class="flex-1 min-w-0 w-full flex flex-col items-center text-center justify-center space-y-2">
+    <!-- Right Section: Organization Information Area (Left-Aligned) -->
+    <div class="flex-1 min-w-0 w-full flex flex-col items-start text-left justify-center space-y-2">
         
-        <!-- 1. Organization Name (Centered) -->
+        <!-- 1. Organization Name (Left-aligned) -->
         <h3 class="text-lg sm:text-xl font-bold text-white tracking-tight font-brand-display break-words">
             {{ $partner->name }}
         </h3>
 
-        <!-- 2. Classification Badge (Centered directly beneath name) -->
+        <!-- 2. Classification Badge (Left-aligned directly beneath name) -->
         @if($partner->collaboration_type)
         <div>
             <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-[11px] font-mono font-semibold border tracking-wide {{ $badgeStyle }}">
@@ -47,14 +47,14 @@
         </div>
         @endif
 
-        <!-- 3. Organization Description (Centered with natural wrapping) -->
+        <!-- 3. Organization Description (Left-aligned directly beneath badge) -->
         @if($partner->description)
-        <p class="text-xs sm:text-sm text-slate-300 leading-relaxed font-normal break-words max-w-md pt-0.5">
+        <p class="text-xs sm:text-sm text-slate-300 leading-relaxed font-normal break-words max-w-xl pt-0.5">
             {{ $partner->description }}
         </p>
         @endif
 
-        <!-- 4. Official Website Link (Centered beneath description) -->
+        <!-- 4. Official Website Link (Left-aligned beneath description) -->
         @if(!empty($partner->website_url))
         <div class="pt-1.5">
             <a 

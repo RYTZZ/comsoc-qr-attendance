@@ -339,4 +339,13 @@ class PublicWebsiteController extends Controller
 
         return view('public.website.partners', compact('settings', 'partners'));
     }
+
+    /**
+     * Terms of Use page: Official organizational terms and platform guidelines.
+     */
+    public function termsOfUse(): View
+    {
+        $settings = WebsiteSettingsService::all();
+        return view('public.website.terms', compact('settings'));
+    }
 }

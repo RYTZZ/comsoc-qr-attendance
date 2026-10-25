@@ -30,6 +30,9 @@ Route::get('/privacy', function () {
 })->name('privacy');
 Route::get('/privacy-notice', fn() => redirect()->route('privacy'));
 
+Route::get('/terms-of-use', [PublicWebsiteController::class, 'termsOfUse'])->name('public.terms');
+Route::get('/terms', fn() => redirect()->route('public.terms'));
+
 Route::get('/', [PublicWebsiteController::class, 'index'])->name('public.home');
 Route::get('/about', [PublicWebsiteController::class, 'about'])->name('public.about');
 Route::get('/officers', [PublicWebsiteController::class, 'officers'])->name('public.officers');

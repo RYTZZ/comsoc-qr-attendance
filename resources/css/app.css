@@ -580,22 +580,22 @@
     /* When motion is initialized and ready */
     html.motion-ready:not(.reduced-motion) [data-hero-seq] {
         opacity: 0;
-        transform: translateY(32px);
-        transition: opacity 0.75s cubic-bezier(0.16, 1, 0.3, 1), transform 0.75s cubic-bezier(0.16, 1, 0.3, 1);
+        transform: translateY(20px);
+        transition: opacity 0.6s cubic-bezier(0.16, 1, 0.3, 1), transform 0.6s cubic-bezier(0.16, 1, 0.3, 1);
         will-change: opacity, transform;
     }
 
     html.motion-ready:not(.reduced-motion) [data-reveal] {
         opacity: 0;
-        transform: translateY(36px);
-        transition: opacity 0.75s cubic-bezier(0.16, 1, 0.3, 1), transform 0.75s cubic-bezier(0.16, 1, 0.3, 1);
+        transform: translateY(20px);
+        transition: opacity 0.6s cubic-bezier(0.16, 1, 0.3, 1), transform 0.6s cubic-bezier(0.16, 1, 0.3, 1);
         will-change: opacity, transform;
     }
 
     html.motion-ready:not(.reduced-motion) [data-reveal-item] {
         opacity: 0;
-        transform: translateY(32px) scale(0.98);
-        transition: opacity 0.65s cubic-bezier(0.16, 1, 0.3, 1), transform 0.65s cubic-bezier(0.16, 1, 0.3, 1);
+        transform: translateY(18px);
+        transition: opacity 0.55s cubic-bezier(0.16, 1, 0.3, 1), transform 0.55s cubic-bezier(0.16, 1, 0.3, 1);
         will-change: opacity, transform;
     }
 
@@ -604,7 +604,21 @@
     html.motion-ready:not(.reduced-motion) [data-reveal].is-revealed,
     html.motion-ready:not(.reduced-motion) [data-reveal-item].is-revealed {
         opacity: 1;
-        transform: translateY(0) scale(1);
+        transform: translateY(0);
+    }
+
+    /* Interactive hover animations for cards */
+    [data-reveal-item]:hover {
+        transform: translateY(-3px);
+    }
+
+    /* Button arrow micro-animation */
+    .btn:hover [data-lucide="arrow-right"] {
+        transform: translateX(3px);
+        transition: transform 0.2s ease-in-out;
+    }
+    .btn [data-lucide="arrow-right"] {
+        transition: transform 0.2s ease-in-out;
     }
 
     /* Image reveal transition with smooth clip & scale treatment */
