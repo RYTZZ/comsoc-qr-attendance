@@ -22,6 +22,7 @@
                 <div class="lg:col-span-4 space-y-4">
                     <span class="text-xs font-bold text-[#df747a] tracking-widest uppercase font-brand-accent">History & Identity</span>
                     <h2 class="text-2xl sm:text-3xl font-bold text-white font-brand-display">Organization Background</h2>
+                    <span class="heading-accent-line" aria-hidden="true"></span>
                     <p class="text-xs sm:text-sm text-slate-400 leading-relaxed">
                         Established as the recognized governing body for information technology, computer science, and technology education students at Sorsogon State University – Bulan Campus.
                     </p>

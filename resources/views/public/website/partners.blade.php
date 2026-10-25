@@ -32,6 +32,7 @@
                 <h2 class="text-2xl sm:text-4xl lg:text-5xl font-black text-white font-brand-display tracking-tight leading-tight">
                     Let's Build What's Next, Together.
                 </h2>
+                <span class="heading-accent-line" aria-hidden="true"></span>
                 
                 <p class="text-base sm:text-lg font-semibold text-[#df747a] tracking-wide">
                     Your expertise. Our community. Shared opportunities for innovation.

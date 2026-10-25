@@ -164,5 +164,8 @@
     <!-- Public Website Shared Footer Component -->
     <x-public-website-footer :settings="$settings" />
 
+    <!-- Floating Back-to-Top CTA Button -->
+    <x-back-to-top />
+
 </body>
 </html>

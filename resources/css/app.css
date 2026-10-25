@@ -565,11 +565,12 @@
     }
 
     /* ==========================================================================
-       COMSOC Motion & Scroll Reveal System
-       Visibly noticeable, editorial, accessible motion styles
+       COMSOC Premium Motion & Animation System
+       Engineered for reliability, progressive enhancement, and 60fps performance
        ========================================================================== */
 
-    /* By default (JS disabled or failing), all content is 100% visible and unshifted */
+    /* 1. Progressive Enhancement Baseline:
+       If JavaScript fails, crashes, or is disabled, ALL content is 100% visible and unshifted. */
     [data-hero-seq],
     [data-reveal],
     [data-reveal-item] {
@@ -577,18 +578,21 @@
         transform: none;
     }
 
-    /* When motion is initialized and ready */
+    /* 2. Hero Entrance Sequence:
+       Smooth fade-in combined with 16-24px upward movement (600-900ms) */
     html.motion-ready:not(.reduced-motion) [data-hero-seq] {
         opacity: 0;
-        transform: translateY(20px);
-        transition: opacity 0.6s cubic-bezier(0.16, 1, 0.3, 1), transform 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+        transform: translateY(22px);
+        transition: opacity 0.75s cubic-bezier(0.16, 1, 0.3, 1), transform 0.75s cubic-bezier(0.16, 1, 0.3, 1);
         will-change: opacity, transform;
     }
 
+    /* 3. Scroll-Reveal System:
+       Subtle fade-in + 18-22px upward translation over 500-700ms */
     html.motion-ready:not(.reduced-motion) [data-reveal] {
         opacity: 0;
         transform: translateY(20px);
-        transition: opacity 0.6s cubic-bezier(0.16, 1, 0.3, 1), transform 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+        transition: opacity 0.65s cubic-bezier(0.16, 1, 0.3, 1), transform 0.65s cubic-bezier(0.16, 1, 0.3, 1);
         will-change: opacity, transform;
     }
 
@@ -599,7 +603,7 @@
         will-change: opacity, transform;
     }
 
-    /* Triggered state */
+    /* 4. Triggered State: is-revealed */
     html.motion-ready:not(.reduced-motion) [data-hero-seq].is-revealed,
     html.motion-ready:not(.reduced-motion) [data-reveal].is-revealed,
     html.motion-ready:not(.reduced-motion) [data-reveal-item].is-revealed {
@@ -607,50 +611,129 @@
         transform: translateY(0);
     }
 
-    /* Subtle interactive card elevation once revealed */
-    [data-reveal-item].is-revealed {
-        transition: opacity 0.55s cubic-bezier(0.16, 1, 0.3, 1), transform 0.25s ease-out, border-color 0.25s ease-out, background-color 0.25s ease-out, box-shadow 0.25s ease-out;
+    /* 5. Section Heading Red Accent Line (Expands smoothly 400-600ms when revealed) */
+    .heading-accent-line {
+        display: block;
+        height: 2px;
+        width: 3rem;
+        background: linear-gradient(90deg, #df747a 0%, #8F3033 100%);
+        border-radius: 9999px;
+        transform-origin: left center;
+        margin-top: 0.625rem;
+        transition: transform 0.5s cubic-bezier(0.16, 1, 0.3, 1), width 0.5s cubic-bezier(0.16, 1, 0.3, 1);
     }
-    [data-reveal-item].is-revealed:hover {
-        transform: translateY(-4px);
+    html.motion-ready:not(.reduced-motion) .heading-accent-line {
+        transform: scaleX(0);
+    }
+    html.motion-ready:not(.reduced-motion) .is-revealed .heading-accent-line,
+    html.motion-ready:not(.reduced-motion) [data-reveal].is-revealed .heading-accent-line,
+    html.motion-ready:not(.reduced-motion) .heading-accent-line.is-revealed {
+        transform: scaleX(1);
     }
 
-    /* Button hover micro-interactions: arrow icon slide */
-    .btn [data-lucide="arrow-right"] {
-        transition: transform 0.2s ease-in-out;
+    /* 6. Premium Card Hover System:
+       Lifts cards 3-5px, transitions border towards COMSOC red, adds restrained glow */
+    [data-reveal-item].is-revealed,
+    .premium-card-hover {
+        transition: opacity 0.55s cubic-bezier(0.16, 1, 0.3, 1),
+                    transform 0.25s cubic-bezier(0.2, 0, 0, 1),
+                    border-color 0.25s ease-out,
+                    background-color 0.25s ease-out,
+                    box-shadow 0.25s ease-out;
+        will-change: transform, box-shadow;
     }
-    .btn:hover [data-lucide="arrow-right"] {
+
+    @media (hover: hover) and (pointer: fine) {
+        [data-reveal-item].is-revealed:hover,
+        .premium-card-hover:hover {
+            transform: translateY(-4px);
+            border-color: rgba(223, 116, 122, 0.55) !important;
+            box-shadow: 0 12px 28px -6px rgba(0, 0, 0, 0.5), 0 0 20px -2px rgba(86, 14, 15, 0.35);
+        }
+
+        /* Subtle image zoom inside card on hover */
+        [data-reveal-item]:hover img,
+        .premium-card-hover:hover img {
+            transform: scale(1.035);
+        }
+    }
+
+    /* 7. Magnetic-Feeling Buttons:
+       Smooth 180-250ms transitions on backgrounds, borders, shadows, and text colors */
+    .btn,
+    .btn-primary,
+    .btn-secondary,
+    .btn-outline {
+        transition: transform 0.2s cubic-bezier(0.2, 0, 0, 1),
+                    background 0.2s ease,
+                    background-color 0.2s ease,
+                    border-color 0.2s ease,
+                    box-shadow 0.2s ease,
+                    color 0.2s ease;
+    }
+
+    /* Arrow icon slide: 3-4px movement */
+    .btn [data-lucide="arrow-right"],
+    a [data-lucide="arrow-right"] {
+        transition: transform 0.22s cubic-bezier(0.2, 0, 0, 1);
+        display: inline-block;
+    }
+    .btn:hover [data-lucide="arrow-right"],
+    a:hover [data-lucide="arrow-right"] {
         transform: translateX(4px);
     }
-    .btn [data-lucide="arrow-down"] {
-        transition: transform 0.2s ease-in-out;
+
+    .btn [data-lucide="arrow-down"],
+    a [data-lucide="arrow-down"] {
+        transition: transform 0.22s cubic-bezier(0.2, 0, 0, 1);
+        display: inline-block;
     }
-    .btn:hover [data-lucide="arrow-down"] {
+    .btn:hover [data-lucide="arrow-down"],
+    a:hover [data-lucide="arrow-down"] {
         transform: translateY(3px);
     }
 
-    /* Image reveal transition with smooth clip & scale treatment */
+    .btn [data-lucide="chevron-right"],
+    a [data-lucide="chevron-right"] {
+        transition: transform 0.22s cubic-bezier(0.2, 0, 0, 1);
+        display: inline-block;
+    }
+    .btn:hover [data-lucide="chevron-right"],
+    a:hover [data-lucide="chevron-right"] {
+        transform: translateX(3px);
+    }
+
+    /* 8. Image Reveal & Subtle Hover Scale */
     .img-reveal-container {
         overflow: hidden;
         position: relative;
     }
-    html.motion-ready:not(.reduced-motion) .img-reveal-container img {
-        transition: transform 0.85s cubic-bezier(0.16, 1, 0.3, 1), filter 0.85s cubic-bezier(0.16, 1, 0.3, 1);
+    .img-reveal-container img {
+        transition: transform 0.65s cubic-bezier(0.16, 1, 0.3, 1), filter 0.65s cubic-bezier(0.16, 1, 0.3, 1);
     }
-    html.motion-ready:not(.reduced-motion) .img-reveal-container:hover img {
-        transform: scale(1.04);
+    @media (hover: hover) and (pointer: fine) {
+        .img-reveal-container:hover img {
+            transform: scale(1.04);
+        }
     }
 
-    /* Respect prefers-reduced-motion: disable all transitions and transforms */
+    /* 9. Full Accessibility Support: prefers-reduced-motion */
     @media (prefers-reduced-motion: reduce) {
         html [data-hero-seq],
         html [data-reveal],
         html [data-reveal-item],
-        html .img-reveal-container img {
+        html .img-reveal-container img,
+        html .heading-accent-line,
+        html .btn,
+        html [data-lucide] {
             opacity: 1 !important;
             transform: none !important;
             transition: none !important;
             animation: none !important;
+        }
+
+        .heading-accent-line {
+            transform: scaleX(1) !important;
         }
     }
 }

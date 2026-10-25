@@ -284,5 +284,8 @@
     <!-- Shared Public Website Footer -->
     <x-public-website-footer />
 
+    <!-- Floating Back-to-Top CTA Button -->
+    <x-back-to-top />
+
 </body>
 </html>

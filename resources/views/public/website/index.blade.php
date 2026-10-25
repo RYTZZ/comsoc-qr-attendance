@@ -96,6 +96,7 @@
                     <h2 class="text-3xl sm:text-4xl font-extrabold text-white font-brand-display tracking-tight leading-tight">
                         The Pulse of Computing at SorSU Bulan
                     </h2>
+                    <span class="heading-accent-line" aria-hidden="true"></span>
                     <p class="text-sm sm:text-base text-slate-300 leading-relaxed font-normal">
                         {{ $settings['org_intro'] ?? 'The official student organization representing computing and information technology students at Sorsogon State University – Bulan Campus.' }}
                     </p>
@@ -149,6 +150,7 @@
                     <h2 class="text-2xl sm:text-4xl font-extrabold text-white font-brand-display tracking-tight mt-1">
                         Our Five Organizational Pillars
                     </h2>
+                    <span class="heading-accent-line" aria-hidden="true"></span>
                     <p class="text-sm text-slate-300 mt-2 max-w-xl">
                         Every event, workshop, and collaborative project of COMSOC is anchored on these core organizational pillars.
                     </p>
@@ -182,6 +184,7 @@
                     <h2 class="text-2xl sm:text-4xl font-extrabold text-white font-brand-display tracking-tight mt-1">
                         Featured Activities & Events
                     </h2>
+                    <span class="heading-accent-line" aria-hidden="true"></span>
                     <p class="text-sm text-slate-300 mt-2">
                         Workshops, tech assemblies, hackathons, and organizational seminars.
                     </p>
