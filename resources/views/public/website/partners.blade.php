@@ -55,7 +55,15 @@
                                     {{ $partner->name }}
                                 </h2>
                                 @if($partner->collaboration_type)
-                                    <span class="inline-block mt-1 px-2.5 py-0.5 rounded-full text-[10px] font-mono font-semibold bg-[#172033] text-emerald-400 border border-emerald-500/20">
+                                    @php
+                                        $badgeColor = match($partner->collaboration_type) {
+                                            'Organization under COMSOC' => 'bg-[#df747a]/15 text-[#df747a] border-[#df747a]/30',
+                                            'Government Collaborator' => 'bg-sky-500/15 text-sky-300 border-sky-500/30',
+                                            'Community Collaborator' => 'bg-emerald-500/15 text-emerald-300 border-emerald-500/30',
+                                            default => 'bg-[#172033] text-slate-300 border-[#334155]/60',
+                                        };
+                                    @endphp
+                                    <span class="inline-block mt-1 px-2.5 py-0.5 rounded-full text-[10px] font-mono font-semibold border {{ $badgeColor }}">
                                         {{ $partner->collaboration_type }}
                                     </span>
                                 @endif
