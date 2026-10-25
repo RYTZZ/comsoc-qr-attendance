@@ -38,6 +38,18 @@ class PublicWebsiteController extends Controller
 
         // 5. Approved partners
         $partners = OrgPartner::public()->get();
+        if ($partners->isEmpty() && file_exists(public_path('images/DEVCON LEGAZPI LOGO.png'))) {
+            $defaultPartner = new OrgPartner([
+                'name' => 'DEVCON Legazpi',
+                'logo_path' => 'images/DEVCON LEGAZPI LOGO.png',
+                'description' => 'Developer Connect (DEVCON) Legazpi Chapter — Empowering developers and tech communities across the Bicol Region through workshops, events, and collaborative learning.',
+                'collaboration_type' => 'Community Partner',
+                'website_url' => 'https://devcon.ph',
+                'sort_order' => 1,
+                'is_published' => true,
+            ]);
+            $partners = collect([$defaultPartner]);
+        }
 
         // 6. FAQs
         $faqs = OrgFaq::public()->take(6)->get();
@@ -169,6 +181,18 @@ class PublicWebsiteController extends Controller
     {
         $settings = WebsiteSettingsService::all();
         $partners = OrgPartner::public()->get();
+        if ($partners->isEmpty() && file_exists(public_path('images/DEVCON LEGAZPI LOGO.png'))) {
+            $defaultPartner = new OrgPartner([
+                'name' => 'DEVCON Legazpi',
+                'logo_path' => 'images/DEVCON LEGAZPI LOGO.png',
+                'description' => 'Developer Connect (DEVCON) Legazpi Chapter — Empowering developers and tech communities across the Bicol Region through workshops, events, and collaborative learning.',
+                'collaboration_type' => 'Community Partner',
+                'website_url' => 'https://devcon.ph',
+                'sort_order' => 1,
+                'is_published' => true,
+            ]);
+            $partners = collect([$defaultPartner]);
+        }
 
         return view('public.website.partners', compact('settings', 'partners'));
     }

@@ -112,8 +112,8 @@
                         <tr class="hover:bg-slate-800/40 transition">
                             <td class="p-3 flex items-center gap-2.5">
                                 <div class="w-8 h-8 rounded-lg overflow-hidden bg-slate-950 border border-slate-800 shrink-0 flex items-center justify-center p-0.5">
-                                    @if($partner->logo_path)
-                                        <img src="{{ asset('storage/' . $partner->logo_path) }}" alt="{{ $partner->name }}" class="max-h-full max-w-full object-contain">
+                                    @if($partner->logo_url)
+                                        <img src="{{ $partner->logo_url }}" alt="{{ $partner->name }}" class="max-h-full max-w-full object-contain">
                                     @else
                                         <i data-lucide="handshake" class="w-4 h-4 text-[#df747a]"></i>
                                     @endif

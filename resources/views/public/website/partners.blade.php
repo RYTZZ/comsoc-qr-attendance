@@ -41,8 +41,8 @@
                         <div class="space-y-4">
                             <!-- Natural Logo Showcase (No boxes around boxes) -->
                             <div class="h-20 flex items-center">
-                                @if($partner->logo_path)
-                                    <img src="{{ asset('storage/' . $partner->logo_path) }}" alt="{{ $partner->name }}" class="max-h-16 max-w-[200px] object-contain filter drop-shadow">
+                                @if($partner->logo_url)
+                                    <img src="{{ $partner->logo_url }}" alt="{{ $partner->name }}" class="max-h-16 max-w-[200px] object-contain filter drop-shadow">
                                 @else
                                     <div class="w-12 h-12 rounded-xl bg-[#560E0F]/20 text-[#df747a] flex items-center justify-center border border-[#df747a]/30">
                                         <i data-lucide="handshake" class="w-6 h-6"></i>

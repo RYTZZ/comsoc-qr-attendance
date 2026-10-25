@@ -465,8 +465,8 @@
                 <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-6 items-center" data-reveal-group>
                     @foreach($partners as $partner)
                     <div data-reveal-item class="p-4 rounded-xl bg-[#172033]/30 border border-[#334155]/30 flex flex-col items-center justify-center text-center hover:border-[#df747a]/50 transition-all min-h-[110px]">
-                        @if($partner->logo_path)
-                            <img src="{{ asset('storage/' . $partner->logo_path) }}" alt="{{ $partner->name }}" class="h-10 object-contain max-w-[100px] mb-2 filter brightness-90 hover:brightness-100 transition">
+                        @if($partner->logo_url)
+                            <img src="{{ $partner->logo_url }}" alt="{{ $partner->name }}" class="h-10 object-contain max-w-[100px] mb-2 filter brightness-90 hover:brightness-100 transition">
                         @else
                             <i data-lucide="handshake" class="w-7 h-7 text-[#df747a] mb-2"></i>
                         @endif
