@@ -35,15 +35,15 @@
         @endif
     </div>
 
-    <!-- Right Section: Officer Information Area (Centered, identical to Partner-Card hierarchy) -->
-    <div class="flex-1 min-w-0 w-full flex flex-col items-center text-center justify-center space-y-1.5">
+    <!-- Right Section: Officer Information Area -->
+    <div class="flex-1 min-w-0 w-full flex flex-col items-center sm:items-start text-center sm:text-left justify-center space-y-1.5">
         
         <!-- 1. Full Name -->
         <h3 class="text-base sm:text-lg font-bold tracking-tight font-brand-display break-words {{ $isVacant ? 'text-slate-400 italic font-normal' : 'text-white' }}">
             {{ $officer->name }}
         </h3>
 
-        <!-- 2. Official Position (Centered directly beneath name) -->
+        <!-- 2. Official Position -->
         <div class="text-xs sm:text-sm font-semibold text-[#df747a]">
             {{ $officer->position }}
         </div>
@@ -64,14 +64,14 @@
         </p>
         @endif
 
-        <!-- Optional Social/Profile Link -->
+        <!-- Optional Social/Profile Link with min 44px touch target on mobile -->
         @if(!empty($officer->social_link))
         <div class="pt-1">
             <a 
                 href="{{ $officer->social_link }}" 
                 target="_blank" 
                 rel="noopener noreferrer" 
-                class="inline-flex items-center gap-1.5 text-xs font-semibold text-[#df747a] hover:text-white transition-colors duration-150 focus:outline-none focus-visible:ring-1 focus-visible:ring-[#df747a] rounded"
+                class="inline-flex items-center gap-1.5 py-1 px-1.5 text-xs font-semibold text-[#df747a] hover:text-white transition-colors duration-150 focus:outline-none focus-visible:ring-2 focus-visible:ring-[#df747a] rounded"
                 aria-label="View profile of {{ $officer->name }}"
             >
                 <span>View Profile</span>

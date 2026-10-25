@@ -72,9 +72,11 @@
                     @endforeach
                 </div>
 
-                <div class="pt-8 mt-8">
+                @if($gallery->hasPages())
+                <div class="pt-8">
                     {{ $gallery->links() }}
                 </div>
+                @endif
             @endif
 
         </div>
@@ -99,8 +101,8 @@
                     <h3 class="text-sm font-bold text-white truncate pr-4 font-brand-display" x-text="activeTitle || 'Photo Preview'"></h3>
                     <button type="button"
                             @click="lightboxOpen = false"
-                            class="p-1.5 rounded-lg text-slate-400 hover:text-white hover:bg-[#172033] focus:outline-none focus:ring-2 focus:ring-[#df747a]"
-                            aria-label="Close dialog">
+                            class="min-w-[40px] min-h-[40px] p-2 rounded-xl text-slate-300 hover:text-white hover:bg-[#172033] focus:outline-none focus-visible:ring-2 focus-visible:ring-[#df747a] flex items-center justify-center transition-colors"
+                            aria-label="Close photo preview">
                         <i data-lucide="x" class="w-5 h-5"></i>
                     </button>
                 </div>

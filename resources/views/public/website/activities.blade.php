@@ -24,17 +24,23 @@
 
             <!-- Filter Controls -->
             <div class="flex flex-wrap items-center justify-between gap-4 pb-6 border-b border-[#334155]/30" data-reveal>
-                <div class="flex items-center gap-2">
+                <div class="flex flex-wrap items-center gap-2" role="tablist" aria-label="Activity filter">
                     <a href="{{ route('public.activities', ['status' => 'all']) }}"
-                       class="px-4 py-2 rounded-xl text-xs font-semibold transition-all {{ $filter === 'all' ? 'bg-[#560E0F] text-white shadow-lg shadow-[#560E0F]/30' : 'bg-[#172033]/40 text-slate-300 hover:text-white hover:bg-[#172033] border border-[#334155]/40' }}">
+                       role="tab"
+                       aria-selected="{{ $filter === 'all' ? 'true' : 'false' }}"
+                       class="min-h-[38px] px-4 py-2 rounded-xl text-xs font-semibold inline-flex items-center justify-center transition-all focus:outline-none focus-visible:ring-2 focus-visible:ring-[#df747a] {{ $filter === 'all' ? 'bg-[#560E0F] text-white shadow-lg shadow-[#560E0F]/30 border border-[#df747a]/50' : 'bg-[#172033]/40 text-slate-300 hover:text-white hover:bg-[#172033] border border-[#334155]/40' }}">
                         All Activities
                     </a>
                     <a href="{{ route('public.activities', ['status' => 'upcoming']) }}"
-                       class="px-4 py-2 rounded-xl text-xs font-semibold transition-all {{ $filter === 'upcoming' ? 'bg-[#560E0F] text-white shadow-lg shadow-[#560E0F]/30' : 'bg-[#172033]/40 text-slate-300 hover:text-white hover:bg-[#172033] border border-[#334155]/40' }}">
+                       role="tab"
+                       aria-selected="{{ $filter === 'upcoming' ? 'true' : 'false' }}"
+                       class="min-h-[38px] px-4 py-2 rounded-xl text-xs font-semibold inline-flex items-center justify-center transition-all focus:outline-none focus-visible:ring-2 focus-visible:ring-[#df747a] {{ $filter === 'upcoming' ? 'bg-[#560E0F] text-white shadow-lg shadow-[#560E0F]/30 border border-[#df747a]/50' : 'bg-[#172033]/40 text-slate-300 hover:text-white hover:bg-[#172033] border border-[#334155]/40' }}">
                         Upcoming & Active
                     </a>
                     <a href="{{ route('public.activities', ['status' => 'completed']) }}"
-                       class="px-4 py-2 rounded-xl text-xs font-semibold transition-all {{ $filter === 'completed' ? 'bg-[#560E0F] text-white shadow-lg shadow-[#560E0F]/30' : 'bg-[#172033]/40 text-slate-300 hover:text-white hover:bg-[#172033] border border-[#334155]/40' }}">
+                       role="tab"
+                       aria-selected="{{ $filter === 'completed' ? 'true' : 'false' }}"
+                       class="min-h-[38px] px-4 py-2 rounded-xl text-xs font-semibold inline-flex items-center justify-center transition-all focus:outline-none focus-visible:ring-2 focus-visible:ring-[#df747a] {{ $filter === 'completed' ? 'bg-[#560E0F] text-white shadow-lg shadow-[#560E0F]/30 border border-[#df747a]/50' : 'bg-[#172033]/40 text-slate-300 hover:text-white hover:bg-[#172033] border border-[#334155]/40' }}">
                         Concluded
                     </a>
                 </div>
@@ -117,7 +123,7 @@
                                 <i data-lucide="map-pin" class="w-3.5 h-3.5 text-[#df747a] shrink-0"></i>
                                 <span class="truncate">{{ $event->effective_venue }}</span>
                             </span>
-                            <a href="{{ route('public.activities.detail', $event->resolved_slug) }}" class="font-semibold text-[#df747a] hover:text-white flex items-center gap-1 transition shrink-0">
+                            <a href="{{ route('public.activities.detail', $event->resolved_slug) }}" class="min-h-[36px] px-2.5 py-1.5 rounded-lg font-semibold text-[#df747a] hover:text-white inline-flex items-center gap-1 transition shrink-0 focus:outline-none focus-visible:ring-2 focus-visible:ring-[#df747a]">
                                 <span>Overview</span>
                                 <i data-lucide="arrow-right" class="w-3.5 h-3.5"></i>
                             </a>
@@ -126,9 +132,11 @@
                     @endforeach
                 </div>
 
+                @if($activities->hasPages())
                 <div class="pt-8">
                     {{ $activities->links() }}
                 </div>
+                @endif
             @endif
 
         </div>

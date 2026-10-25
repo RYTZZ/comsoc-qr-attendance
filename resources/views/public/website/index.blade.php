@@ -236,10 +236,10 @@
 
                         <div class="p-6 pt-0 mt-4 flex items-center justify-between">
                             <span class="text-[11px] text-slate-400 flex items-center gap-1 truncate max-w-[160px]">
-                                <i data-lucide="map-pin" class="w-3 h-3 text-[#df747a]"></i>
-                                <span>{{ $event->effective_venue }}</span>
+                                <i data-lucide="map-pin" class="w-3 h-3 text-[#df747a] shrink-0"></i>
+                                <span class="truncate">{{ $event->effective_venue }}</span>
                             </span>
-                            <a href="{{ route('public.activities.detail', $event->resolved_slug) }}" class="text-xs font-semibold text-[#df747a] hover:text-white flex items-center gap-1 transition-colors">
+                            <a href="{{ route('public.activities.detail', $event->resolved_slug) }}" class="min-h-[36px] px-2.5 py-1.5 rounded-lg text-xs font-semibold text-[#df747a] hover:text-white inline-flex items-center gap-1 transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-[#df747a]">
                                 <span>Details</span>
                                 <i data-lucide="chevron-right" class="w-3.5 h-3.5"></i>
                             </a>

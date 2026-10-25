@@ -61,7 +61,7 @@
                 href="{{ $partner->website_url }}" 
                 target="_blank" 
                 rel="noopener noreferrer" 
-                class="inline-flex items-center gap-1.5 text-xs font-semibold text-[#df747a] hover:text-white transition-colors duration-150 focus:outline-none focus-visible:ring-1 focus-visible:ring-[#df747a] rounded"
+                class="inline-flex items-center gap-1.5 py-1 px-1.5 text-xs font-semibold text-[#df747a] hover:text-white transition-colors duration-150 focus:outline-none focus-visible:ring-2 focus-visible:ring-[#df747a] rounded"
                 aria-label="Visit official website for {{ $partner->name }}"
             >
                 <span>Visit Official Website</span>

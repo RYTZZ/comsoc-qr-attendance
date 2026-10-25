@@ -71,8 +71,8 @@
                                 </div>
                             @endif
                             @if($ach->verification_reference)
-                                <a href="{{ $ach->verification_reference }}" target="_blank" rel="noopener noreferrer" class="inline-flex items-center gap-1 text-[11px] text-slate-400 hover:text-white transition font-mono">
-                                    <i data-lucide="external-link" class="w-3 h-3 text-[#df747a]"></i>
+                                <a href="{{ $ach->verification_reference }}" target="_blank" rel="noopener noreferrer" class="inline-flex items-center gap-1.5 py-1 px-1.5 rounded text-[11px] text-slate-400 hover:text-white transition font-mono focus:outline-none focus-visible:ring-2 focus-visible:ring-[#df747a]">
+                                    <i data-lucide="external-link" class="w-3.5 h-3.5 text-[#df747a]"></i>
                                     <span>Official Verification Reference</span>
                                 </a>
                             @endif
@@ -81,9 +81,11 @@
                     @endforeach
                 </div>
 
-                <div class="pt-8 mt-8">
+                @if($achievements->hasPages())
+                <div class="pt-8">
                     {{ $achievements->links() }}
                 </div>
+                @endif
             @endif
 
         </div>

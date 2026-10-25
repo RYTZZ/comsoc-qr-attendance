@@ -51,29 +51,35 @@
                 </a>
 
                 <!-- Desktop Navigation Links -->
-                <nav class="hidden md:flex items-center gap-1 lg:gap-2">
+                <nav class="hidden md:flex items-center gap-1 lg:gap-2" aria-label="Main Navigation">
                     <a href="{{ route('public.about') }}"
-                       class="px-3.5 py-2 rounded-lg text-sm font-medium transition-colors {{ request()->routeIs('public.about') ? 'text-white bg-[#172033]/80 border border-[#334155]/60' : 'text-slate-300 hover:text-white hover:bg-[#172033]/40' }}">
+                       class="px-3.5 py-2 rounded-lg text-sm font-medium transition-colors {{ request()->routeIs('public.about') ? 'text-white bg-[#172033]/80 border border-[#334155]/60' : 'text-slate-300 hover:text-white hover:bg-[#172033]/40' }}"
+                       {{ request()->routeIs('public.about') ? 'aria-current="page"' : '' }}>
                         About
                     </a>
                     <a href="{{ route('public.officers') }}"
-                       class="px-3.5 py-2 rounded-lg text-sm font-medium transition-colors {{ request()->routeIs('public.officers') ? 'text-white bg-[#172033]/80 border border-[#334155]/60' : 'text-slate-300 hover:text-white hover:bg-[#172033]/40' }}">
+                       class="px-3.5 py-2 rounded-lg text-sm font-medium transition-colors {{ request()->routeIs('public.officers') ? 'text-white bg-[#172033]/80 border border-[#334155]/60' : 'text-slate-300 hover:text-white hover:bg-[#172033]/40' }}"
+                       {{ request()->routeIs('public.officers') ? 'aria-current="page"' : '' }}>
                         Officers
                     </a>
                     <a href="{{ route('public.activities') }}"
-                       class="px-3.5 py-2 rounded-lg text-sm font-medium transition-colors {{ request()->routeIs('public.activities*') ? 'text-white bg-[#172033]/80 border border-[#334155]/60' : 'text-slate-300 hover:text-white hover:bg-[#172033]/40' }}">
+                       class="px-3.5 py-2 rounded-lg text-sm font-medium transition-colors {{ request()->routeIs('public.activities*') ? 'text-white bg-[#172033]/80 border border-[#334155]/60' : 'text-slate-300 hover:text-white hover:bg-[#172033]/40' }}"
+                       {{ request()->routeIs('public.activities*') ? 'aria-current="page"' : '' }}>
                         Activities
                     </a>
                     <a href="{{ route('public.achievements') }}"
-                       class="px-3.5 py-2 rounded-lg text-sm font-medium transition-colors {{ request()->routeIs('public.achievements') ? 'text-white bg-[#172033]/80 border border-[#334155]/60' : 'text-slate-300 hover:text-white hover:bg-[#172033]/40' }}">
+                       class="px-3.5 py-2 rounded-lg text-sm font-medium transition-colors {{ request()->routeIs('public.achievements') ? 'text-white bg-[#172033]/80 border border-[#334155]/60' : 'text-slate-300 hover:text-white hover:bg-[#172033]/40' }}"
+                       {{ request()->routeIs('public.achievements') ? 'aria-current="page"' : '' }}>
                         Achievements
                     </a>
                     <a href="{{ route('public.gallery') }}"
-                       class="px-3.5 py-2 rounded-lg text-sm font-medium transition-colors {{ request()->routeIs('public.gallery') ? 'text-white bg-[#172033]/80 border border-[#334155]/60' : 'text-slate-300 hover:text-white hover:bg-[#172033]/40' }}">
+                       class="px-3.5 py-2 rounded-lg text-sm font-medium transition-colors {{ request()->routeIs('public.gallery') ? 'text-white bg-[#172033]/80 border border-[#334155]/60' : 'text-slate-300 hover:text-white hover:bg-[#172033]/40' }}"
+                       {{ request()->routeIs('public.gallery') ? 'aria-current="page"' : '' }}>
                         Gallery
                     </a>
                     <a href="{{ route('public.partners') }}"
-                       class="px-3.5 py-2 rounded-lg text-sm font-medium transition-colors {{ request()->routeIs('public.partners') ? 'text-white bg-[#172033]/80 border border-[#334155]/60' : 'text-slate-300 hover:text-white hover:bg-[#172033]/40' }}">
+                       class="px-3.5 py-2 rounded-lg text-sm font-medium transition-colors {{ request()->routeIs('public.partners') ? 'text-white bg-[#172033]/80 border border-[#334155]/60' : 'text-slate-300 hover:text-white hover:bg-[#172033]/40' }}"
+                       {{ request()->routeIs('public.partners') ? 'aria-current="page"' : '' }}>
                         Partners
                     </a>
                 </nav>
@@ -117,6 +123,7 @@
         <!-- Mobile Dropdown Navigation Menu -->
         <div id="mobile-nav-menu"
              x-show="mobileMenuOpen"
+             @click.away="mobileMenuOpen = false"
              x-transition:enter="transition ease-out duration-200"
              x-transition:enter-start="opacity-0 -translate-y-2"
              x-transition:enter-end="opacity-100 translate-y-0"
@@ -125,30 +132,53 @@
              x-transition:leave-end="opacity-0 -translate-y-2"
              class="md:hidden bg-[#0B1120]/95 backdrop-blur-xl border-b border-[#334155]/60 px-4 pt-3 pb-6 space-y-1 shadow-2xl"
              style="display: none;">
-            <a href="{{ route('public.home') }}" class="block px-3 py-2.5 rounded-lg text-sm font-medium {{ request()->routeIs('public.home') ? 'text-white bg-[#172033]' : 'text-slate-300 hover:text-white hover:bg-[#172033]/60' }}">
+            <a href="{{ route('public.home') }}"
+               @click="mobileMenuOpen = false"
+               class="block px-3 py-2.5 rounded-lg text-sm font-medium transition-colors {{ request()->routeIs('public.home') ? 'text-white bg-[#172033] border border-[#334155]/60' : 'text-slate-300 hover:text-white hover:bg-[#172033]/60' }}"
+               {{ request()->routeIs('public.home') ? 'aria-current="page"' : '' }}>
                 Home
             </a>
-            <a href="{{ route('public.about') }}" class="block px-3 py-2.5 rounded-lg text-sm font-medium {{ request()->routeIs('public.about') ? 'text-white bg-[#172033]' : 'text-slate-300 hover:text-white hover:bg-[#172033]/60' }}">
+            <a href="{{ route('public.about') }}"
+               @click="mobileMenuOpen = false"
+               class="block px-3 py-2.5 rounded-lg text-sm font-medium transition-colors {{ request()->routeIs('public.about') ? 'text-white bg-[#172033] border border-[#334155]/60' : 'text-slate-300 hover:text-white hover:bg-[#172033]/60' }}"
+               {{ request()->routeIs('public.about') ? 'aria-current="page"' : '' }}>
                 About COMSOC
             </a>
-            <a href="{{ route('public.officers') }}" class="block px-3 py-2.5 rounded-lg text-sm font-medium {{ request()->routeIs('public.officers') ? 'text-white bg-[#172033]' : 'text-slate-300 hover:text-white hover:bg-[#172033]/60' }}">
+            <a href="{{ route('public.officers') }}"
+               @click="mobileMenuOpen = false"
+               class="block px-3 py-2.5 rounded-lg text-sm font-medium transition-colors {{ request()->routeIs('public.officers') ? 'text-white bg-[#172033] border border-[#334155]/60' : 'text-slate-300 hover:text-white hover:bg-[#172033]/60' }}"
+               {{ request()->routeIs('public.officers') ? 'aria-current="page"' : '' }}>
                 Leadership & Officers
             </a>
-            <a href="{{ route('public.activities') }}" class="block px-3 py-2.5 rounded-lg text-sm font-medium {{ request()->routeIs('public.activities*') ? 'text-white bg-[#172033]' : 'text-slate-300 hover:text-white hover:bg-[#172033]/60' }}">
+            <a href="{{ route('public.activities') }}"
+               @click="mobileMenuOpen = false"
+               class="block px-3 py-2.5 rounded-lg text-sm font-medium transition-colors {{ request()->routeIs('public.activities*') ? 'text-white bg-[#172033] border border-[#334155]/60' : 'text-slate-300 hover:text-white hover:bg-[#172033]/60' }}"
+               {{ request()->routeIs('public.activities*') ? 'aria-current="page"' : '' }}>
                 Activities & Events
             </a>
-            <a href="{{ route('public.achievements') }}" class="block px-3 py-2.5 rounded-lg text-sm font-medium {{ request()->routeIs('public.achievements') ? 'text-white bg-[#172033]' : 'text-slate-300 hover:text-white hover:bg-[#172033]/60' }}">
+            <a href="{{ route('public.achievements') }}"
+               @click="mobileMenuOpen = false"
+               class="block px-3 py-2.5 rounded-lg text-sm font-medium transition-colors {{ request()->routeIs('public.achievements') ? 'text-white bg-[#172033] border border-[#334155]/60' : 'text-slate-300 hover:text-white hover:bg-[#172033]/60' }}"
+               {{ request()->routeIs('public.achievements') ? 'aria-current="page"' : '' }}>
                 Achievements
             </a>
-            <a href="{{ route('public.gallery') }}" class="block px-3 py-2.5 rounded-lg text-sm font-medium {{ request()->routeIs('public.gallery') ? 'text-white bg-[#172033]' : 'text-slate-300 hover:text-white hover:bg-[#172033]/60' }}">
+            <a href="{{ route('public.gallery') }}"
+               @click="mobileMenuOpen = false"
+               class="block px-3 py-2.5 rounded-lg text-sm font-medium transition-colors {{ request()->routeIs('public.gallery') ? 'text-white bg-[#172033] border border-[#334155]/60' : 'text-slate-300 hover:text-white hover:bg-[#172033]/60' }}"
+               {{ request()->routeIs('public.gallery') ? 'aria-current="page"' : '' }}>
                 Approved Gallery
             </a>
-            <a href="{{ route('public.partners') }}" class="block px-3 py-2.5 rounded-lg text-sm font-medium {{ request()->routeIs('public.partners') ? 'text-white bg-[#172033]' : 'text-slate-300 hover:text-white hover:bg-[#172033]/60' }}">
+            <a href="{{ route('public.partners') }}"
+               @click="mobileMenuOpen = false"
+               class="block px-3 py-2.5 rounded-lg text-sm font-medium transition-colors {{ request()->routeIs('public.partners') ? 'text-white bg-[#172033] border border-[#334155]/60' : 'text-slate-300 hover:text-white hover:bg-[#172033]/60' }}"
+               {{ request()->routeIs('public.partners') ? 'aria-current="page"' : '' }}>
                 Partners & Collaborators
             </a>
 
             <div class="pt-4 border-t border-[#334155]/60">
-                <a href="{{ auth()->check() ? route('dashboard') : route('login') }}" class="btn-primary w-full text-center py-2.5 text-sm flex items-center justify-center gap-2">
+                <a href="{{ auth()->check() ? route('dashboard') : route('login') }}"
+                   @click="mobileMenuOpen = false"
+                   class="btn-primary w-full text-center py-2.5 text-sm flex items-center justify-center gap-2">
                     <i data-lucide="arrow-right" class="w-4 h-4"></i>
                     <span>Access COMSOC Hub</span>
                 </a>
