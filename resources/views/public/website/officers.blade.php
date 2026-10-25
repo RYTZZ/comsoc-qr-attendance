@@ -1,7 +1,7 @@
 <x-public-website-layout :settings="$settings" :title="'Leadership & Officers'">
 
     <!-- Editorial Page Header -->
-    <section class="py-16 sm:py-24 relative overflow-hidden bg-gradient-to-b from-[#0B1120] to-[#172033]/30">
+    <section class="py-12 sm:py-16 relative overflow-hidden bg-gradient-to-b from-[#0B1120] to-[#172033]/30">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div class="max-w-3xl space-y-4" data-reveal>
                 <span class="text-xs font-bold text-[#df747a] tracking-widest uppercase font-brand-accent">Organization Leadership</span>
@@ -16,136 +16,160 @@
     </section>
 
     <!-- Leadership Directory -->
-    <section class="py-16 sm:py-24">
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-16">
+    <section class="pt-8 sm:pt-10 pb-16 sm:pb-24">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-12">
 
             @if($officers->isEmpty())
                 <div data-reveal class="p-12 text-center rounded-2xl bg-[#172033]/40 border border-[#334155]/30 text-slate-400 text-sm max-w-xl mx-auto">
                     Leadership directory will be published shortly by authorized administrators.
                 </div>
             @else
-                <!-- Executive Officers -->
-                @if($grouped['executive']->isNotEmpty())
-                <div class="space-y-8">
-                    <div class="pb-3 flex items-center justify-between border-b border-[#334155]/30" data-reveal>
+                
+                {{-- 1. COMSOC Executive Officers --}}
+                @if(isset($grouped['executive']) && $grouped['executive']->isNotEmpty())
+                <section class="space-y-6" data-reveal>
+                    <div class="pb-3 flex items-center justify-between border-b border-[#334155]/30">
                         <div class="flex items-center gap-2.5">
-                            <i data-lucide="crown" class="w-5 h-5 text-amber-400"></i>
-                            <h2 class="text-xl sm:text-2xl font-bold text-white font-brand-display">Executive Officers</h2>
+                            <div class="w-7 h-7 rounded-lg bg-[#560E0F]/30 border border-[#df747a]/30 flex items-center justify-center text-[#df747a]">
+                                <i data-lucide="crown" class="w-4 h-4"></i>
+                            </div>
+                            <h2 class="text-xl sm:text-2xl font-bold text-white font-brand-display">COMSOC Executive Officers</h2>
                         </div>
-                        <span class="text-xs text-slate-400 font-mono">Current Term</span>
+                        <span class="text-xs text-slate-400 font-mono">Governing Board</span>
                     </div>
 
-                    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6" data-reveal-group>
+                    <div class="grid grid-cols-1 lg:grid-cols-2 gap-5 sm:gap-6 items-stretch" data-reveal-group>
                         @foreach($grouped['executive'] as $officer)
-                        <div data-reveal-item class="p-6 rounded-2xl bg-[#172033]/40 border border-[#334155]/30 flex flex-col items-center text-center group hover:border-[#df747a]/50 transition-all">
-                            <div class="w-24 h-24 sm:w-28 sm:h-28 rounded-full overflow-hidden bg-[#0B1120] border-2 border-[#334155]/50 group-hover:border-[#df747a] mb-4 transition-colors">
-                                @if($officer->portrait_path)
-                                    <img src="{{ asset('storage/' . $officer->portrait_path) }}" alt="{{ $officer->name }}" class="w-full h-full object-cover">
-                                @else
-                                    <div class="w-full h-full flex items-center justify-center text-slate-500">
-                                        <i data-lucide="user" class="w-10 h-10"></i>
-                                    </div>
-                                @endif
-                            </div>
-                            <h3 class="text-base font-bold text-white font-brand-display leading-tight">{{ $officer->name }}</h3>
-                            <p class="text-xs font-semibold text-[#df747a] mt-1">{{ $officer->position }}</p>
-                            @if($officer->program)
-                                <span class="inline-block mt-2 px-2.5 py-0.5 rounded text-[11px] font-mono bg-[#0B1120] text-slate-300 border border-[#334155]/40">
-                                    {{ $officer->program }}
-                                </span>
-                            @endif
-                            @if($officer->bio)
-                                <p class="text-xs text-slate-400 mt-3 line-clamp-3 leading-relaxed">{{ $officer->bio }}</p>
-                            @endif
-                            @if($officer->social_link)
-                                <a href="{{ $officer->social_link }}" target="_blank" rel="noopener noreferrer" class="mt-4 text-[11px] text-[#df747a] hover:text-white flex items-center gap-1 font-mono transition">
-                                    <span>Profile</span>
-                                    <i data-lucide="arrow-up-right" class="w-3.5 h-3.5"></i>
-                                </a>
-                            @endif
-                        </div>
+                            <x-officer-card :officer="$officer" />
                         @endforeach
                     </div>
-                </div>
+                </section>
                 @endif
 
-                <!-- Board of Representatives -->
-                @if($grouped['board']->isNotEmpty())
-                <div class="space-y-8 pt-8">
-                    <div class="pb-3 flex items-center justify-between border-b border-[#334155]/30" data-reveal>
+                {{-- 2. COMSOC Board of Directors --}}
+                @if(isset($grouped['board']) && $grouped['board']->isNotEmpty())
+                <section class="space-y-6 pt-4" data-reveal>
+                    <div class="pb-3 flex items-center justify-between border-b border-[#334155]/30">
                         <div class="flex items-center gap-2.5">
-                            <i data-lucide="users" class="w-5 h-5 text-blue-400"></i>
-                            <h2 class="text-xl sm:text-2xl font-bold text-white font-brand-display">Board of Representatives</h2>
+                            <div class="w-7 h-7 rounded-lg bg-indigo-500/10 border border-indigo-500/20 flex items-center justify-center text-indigo-400">
+                                <i data-lucide="shield" class="w-4 h-4"></i>
+                            </div>
+                            <h2 class="text-xl sm:text-2xl font-bold text-white font-brand-display">COMSOC Board of Directors</h2>
                         </div>
-                        <span class="text-xs text-slate-400 font-mono">Academic Year</span>
+                        <span class="text-xs text-slate-400 font-mono">Program Representatives</span>
                     </div>
 
-                    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6" data-reveal-group>
+                    <div class="grid grid-cols-1 lg:grid-cols-2 gap-5 sm:gap-6 items-stretch" data-reveal-group>
                         @foreach($grouped['board'] as $officer)
-                        <div data-reveal-item class="p-6 rounded-2xl bg-[#172033]/40 border border-[#334155]/30 flex flex-col items-center text-center group hover:border-[#df747a]/50 transition-all">
-                            <div class="w-20 h-20 sm:w-24 sm:h-24 rounded-full overflow-hidden bg-[#0B1120] border-2 border-[#334155]/50 group-hover:border-[#df747a] mb-3 transition-colors">
-                                @if($officer->portrait_path)
-                                    <img src="{{ asset('storage/' . $officer->portrait_path) }}" alt="{{ $officer->name }}" class="w-full h-full object-cover">
-                                @else
-                                    <div class="w-full h-full flex items-center justify-center text-slate-500">
-                                        <i data-lucide="user" class="w-8 h-8"></i>
-                                    </div>
-                                @endif
-                            </div>
-                            <h3 class="text-sm font-bold text-white font-brand-display leading-tight">{{ $officer->name }}</h3>
-                            <p class="text-xs text-slate-300 mt-0.5">{{ $officer->position }}</p>
-                            @if($officer->program)
-                                <span class="inline-block mt-2 px-2 py-0.5 rounded text-[10px] font-mono bg-[#0B1120] text-slate-400 border border-[#334155]/40">
-                                    {{ $officer->program }}
-                                </span>
-                            @endif
-                            @if($officer->social_link)
-                                <a href="{{ $officer->social_link }}" target="_blank" rel="noopener noreferrer" class="mt-3 text-[11px] text-[#df747a] hover:text-white flex items-center gap-1 font-mono transition">
-                                    <span>Profile</span>
-                                    <i data-lucide="arrow-up-right" class="w-3.5 h-3.5"></i>
-                                </a>
-                            @endif
-                        </div>
+                            <x-officer-card :officer="$officer" />
                         @endforeach
                     </div>
-                </div>
+                </section>
                 @endif
 
-                <!-- Advisers & Mentors -->
-                @if($grouped['adviser']->isNotEmpty())
-                <div class="space-y-8 pt-8">
-                    <div class="pb-3 flex items-center justify-between border-b border-[#334155]/30" data-reveal>
+                {{-- 3. Liaisons --}}
+                @if(isset($grouped['liaison']) && $grouped['liaison']->isNotEmpty())
+                <section class="space-y-6 pt-4" data-reveal>
+                    <div class="pb-3 flex items-center justify-between border-b border-[#334155]/30">
                         <div class="flex items-center gap-2.5">
-                            <i data-lucide="shield-check" class="w-5 h-5 text-emerald-400"></i>
-                            <h2 class="text-xl sm:text-2xl font-bold text-white font-brand-display">Faculty Advisers & Mentors</h2>
+                            <div class="w-7 h-7 rounded-lg bg-sky-500/10 border border-sky-500/20 flex items-center justify-center text-sky-400">
+                                <i data-lucide="link-2" class="w-4 h-4"></i>
+                            </div>
+                            <h2 class="text-xl sm:text-2xl font-bold text-white font-brand-display">Liaisons</h2>
                         </div>
-                        <span class="text-xs text-slate-400 font-mono">Academic Mentorship</span>
+                        <span class="text-xs text-slate-400 font-mono">External & Internal</span>
                     </div>
 
-                    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6" data-reveal-group>
-                        @foreach($grouped['adviser'] as $officer)
-                        <div data-reveal-item class="p-6 rounded-2xl bg-[#172033]/40 border border-[#334155]/30 flex items-center gap-5 group hover:border-[#df747a]/50 transition-all">
-                            <div class="w-20 h-20 rounded-full overflow-hidden bg-[#0B1120] border-2 border-[#334155]/50 group-hover:border-[#df747a] shrink-0 transition-colors">
-                                @if($officer->portrait_path)
-                                    <img src="{{ asset('storage/' . $officer->portrait_path) }}" alt="{{ $officer->name }}" class="w-full h-full object-cover">
-                                @else
-                                    <div class="w-full h-full flex items-center justify-center text-slate-500">
-                                        <i data-lucide="user" class="w-8 h-8"></i>
-                                    </div>
-                                @endif
-                            </div>
-                            <div class="space-y-1 text-left">
-                                <h3 class="text-base font-bold text-white font-brand-display leading-tight">{{ $officer->name }}</h3>
-                                <p class="text-xs font-semibold text-[#df747a]">{{ $officer->position }}</p>
-                                <span class="text-[11px] text-slate-400 font-mono block">Department of Computing</span>
-                                @if($officer->bio)
-                                    <p class="text-xs text-slate-400 line-clamp-2 leading-relaxed pt-1">{{ $officer->bio }}</p>
-                                @endif
-                            </div>
-                        </div>
+                    <div class="grid grid-cols-1 lg:grid-cols-2 gap-5 sm:gap-6 items-stretch" data-reveal-group>
+                        @foreach($grouped['liaison'] as $officer)
+                            <x-officer-card :officer="$officer" />
                         @endforeach
                     </div>
-                </div>
+                </section>
+                @endif
+
+                {{-- 4. BSIT Program Officers --}}
+                @if(isset($grouped['bsit']) && $grouped['bsit']->isNotEmpty())
+                <section class="space-y-6 pt-4" data-reveal>
+                    <div class="pb-3 flex items-center justify-between border-b border-[#334155]/30">
+                        <div class="flex items-center gap-2.5">
+                            <div class="w-7 h-7 rounded-lg bg-amber-500/10 border border-amber-500/20 flex items-center justify-center text-amber-400">
+                                <i data-lucide="terminal" class="w-4 h-4"></i>
+                            </div>
+                            <h2 class="text-xl sm:text-2xl font-bold text-white font-brand-display">BSIT Program Officers</h2>
+                        </div>
+                        <span class="text-xs text-amber-400/80 font-mono font-semibold">Information Technology</span>
+                    </div>
+
+                    <div class="grid grid-cols-1 lg:grid-cols-2 gap-5 sm:gap-6 items-stretch" data-reveal-group>
+                        @foreach($grouped['bsit'] as $officer)
+                            <x-officer-card :officer="$officer" />
+                        @endforeach
+                    </div>
+                </section>
+                @endif
+
+                {{-- 5. BSCS Program Officers --}}
+                @if(isset($grouped['bscs']) && $grouped['bscs']->isNotEmpty())
+                <section class="space-y-6 pt-4" data-reveal>
+                    <div class="pb-3 flex items-center justify-between border-b border-[#334155]/30">
+                        <div class="flex items-center gap-2.5">
+                            <div class="w-7 h-7 rounded-lg bg-cyan-500/10 border border-cyan-500/20 flex items-center justify-center text-cyan-400">
+                                <i data-lucide="cpu" class="w-4 h-4"></i>
+                            </div>
+                            <h2 class="text-xl sm:text-2xl font-bold text-white font-brand-display">BSCS Program Officers</h2>
+                        </div>
+                        <span class="text-xs text-cyan-400/80 font-mono font-semibold">Computer Science</span>
+                    </div>
+
+                    <div class="grid grid-cols-1 lg:grid-cols-2 gap-5 sm:gap-6 items-stretch" data-reveal-group>
+                        @foreach($grouped['bscs'] as $officer)
+                            <x-officer-card :officer="$officer" />
+                        @endforeach
+                    </div>
+                </section>
+                @endif
+
+                {{-- 6. BSIS Program Officers --}}
+                @if(isset($grouped['bsis']) && $grouped['bsis']->isNotEmpty())
+                <section class="space-y-6 pt-4" data-reveal>
+                    <div class="pb-3 flex items-center justify-between border-b border-[#334155]/30">
+                        <div class="flex items-center gap-2.5">
+                            <div class="w-7 h-7 rounded-lg bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center text-emerald-400">
+                                <i data-lucide="database" class="w-4 h-4"></i>
+                            </div>
+                            <h2 class="text-xl sm:text-2xl font-bold text-white font-brand-display">BSIS Program Officers</h2>
+                        </div>
+                        <span class="text-xs text-emerald-400/80 font-mono font-semibold">Information Systems</span>
+                    </div>
+
+                    <div class="grid grid-cols-1 lg:grid-cols-2 gap-5 sm:gap-6 items-stretch" data-reveal-group>
+                        @foreach($grouped['bsis'] as $officer)
+                            <x-officer-card :officer="$officer" />
+                        @endforeach
+                    </div>
+                </section>
+                @endif
+
+                {{-- 7. BTVTED Program Officers --}}
+                @if(isset($grouped['btvted']) && $grouped['btvted']->isNotEmpty())
+                <section class="space-y-6 pt-4" data-reveal>
+                    <div class="pb-3 flex items-center justify-between border-b border-[#334155]/30">
+                        <div class="flex items-center gap-2.5">
+                            <div class="w-7 h-7 rounded-lg bg-violet-500/10 border border-violet-500/20 flex items-center justify-center text-violet-400">
+                                <i data-lucide="book-open" class="w-4 h-4"></i>
+                            </div>
+                            <h2 class="text-xl sm:text-2xl font-bold text-white font-brand-display">BTVTED Program Officers</h2>
+                        </div>
+                        <span class="text-xs text-violet-400/80 font-mono font-semibold">Technical Vocational</span>
+                    </div>
+
+                    <div class="grid grid-cols-1 lg:grid-cols-2 gap-5 sm:gap-6 items-stretch" data-reveal-group>
+                        @foreach($grouped['btvted'] as $officer)
+                            <x-officer-card :officer="$officer" />
+                        @endforeach
+                    </div>
+                </section>
                 @endif
 
             @endif

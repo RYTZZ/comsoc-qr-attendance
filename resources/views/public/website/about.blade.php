@@ -1,7 +1,7 @@
 <x-public-website-layout :settings="$settings" :title="'About Us'">
 
     <!-- Editorial Page Header -->
-    <section class="py-16 sm:py-24 relative overflow-hidden bg-gradient-to-b from-[#0B1120] to-[#172033]/30">
+    <section class="py-12 sm:py-16 relative overflow-hidden bg-gradient-to-b from-[#0B1120] to-[#172033]/30">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div class="max-w-3xl space-y-4" data-reveal>
                 <span class="text-xs font-bold text-[#df747a] tracking-widest uppercase font-brand-accent">About COMSOC</span>
@@ -16,7 +16,7 @@
     </section>
 
     <!-- Detailed Narrative & Background (Asymmetric open composition without rigid full-width lines) -->
-    <section class="py-16 sm:py-24">
+    <section class="pt-8 sm:pt-10 pb-16 sm:pb-24">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div class="grid grid-cols-1 lg:grid-cols-12 gap-12 items-start" data-reveal>
                 <div class="lg:col-span-4 space-y-4">

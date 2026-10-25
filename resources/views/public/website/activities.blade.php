@@ -1,7 +1,7 @@
 <x-public-website-layout :settings="$settings" :title="'Activities & Events'">
 
     <!-- Editorial Header -->
-    <section class="py-16 sm:py-24 relative overflow-hidden bg-gradient-to-b from-[#0B1120] to-[#172033]/30">
+    <section class="py-12 sm:py-16 relative overflow-hidden bg-gradient-to-b from-[#0B1120] to-[#172033]/30">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div class="max-w-3xl space-y-4" data-reveal>
                 <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-[#560E0F]/20 border border-[#df747a]/30 text-[#df747a] text-xs font-mono font-semibold uppercase tracking-wider">
@@ -19,8 +19,8 @@
     </section>
 
     <!-- Main Activities Section -->
-    <section class="py-12 sm:py-20">
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-12">
+    <section class="pt-8 sm:pt-10 pb-16 sm:pb-24">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-8">
 
             <!-- Filter Controls -->
             <div class="flex flex-wrap items-center justify-between gap-4 pb-6 border-b border-[#334155]/30" data-reveal>

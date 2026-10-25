@@ -1,7 +1,7 @@
 <x-public-website-layout :settings="$settings" :title="'Achievements & Milestones'">
 
     <!-- Editorial Header -->
-    <section class="py-16 sm:py-24 relative overflow-hidden bg-gradient-to-b from-[#0B1120] to-[#172033]/30">
+    <section class="py-12 sm:py-16 relative overflow-hidden bg-gradient-to-b from-[#0B1120] to-[#172033]/30">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div class="max-w-3xl space-y-4" data-reveal>
                 <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-[#560E0F]/20 border border-[#df747a]/30 text-[#df747a] text-xs font-mono font-semibold uppercase tracking-wider">
@@ -19,7 +19,7 @@
     </section>
 
     <!-- Achievements Grid / Timeline -->
-    <section class="py-12 sm:py-20">
+    <section class="pt-8 sm:pt-10 pb-16 sm:pb-24">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
 
             @if($achievements->isEmpty())

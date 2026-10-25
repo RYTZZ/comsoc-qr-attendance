@@ -12,10 +12,10 @@
     };
 @endphp
 
-<article data-reveal-item class="group relative rounded-2xl bg-gradient-to-br from-[#172033]/60 via-[#172033]/30 to-[#0B1120]/80 border border-[#334155]/40 hover:border-[#df747a]/60 hover:bg-[#172033]/50 transition-all duration-300 p-5 sm:p-6 flex flex-col md:flex-row items-center md:items-start gap-5 sm:gap-6 shadow-lg shadow-black/20">
+<article data-reveal-item class="group relative rounded-2xl bg-[#172033]/30 border border-[#334155]/40 hover:border-[#df747a]/60 hover:bg-[#172033]/50 transition-all duration-300 p-5 sm:p-6 flex flex-col sm:flex-row items-center gap-5 sm:gap-6 shadow-md shadow-black/10">
     
-    <!-- Left Section: Organization Logo Container -->
-    <div class="w-full md:w-36 lg:w-40 shrink-0 flex items-center justify-center p-3 rounded-xl bg-[#0B1120]/80 border border-[#334155]/30 self-stretch min-h-[110px] md:min-h-[130px] overflow-hidden">
+    <!-- Left Section: Clean Logo Area (No nested boxes/frames/backgrounds) -->
+    <div class="w-28 sm:w-32 md:w-36 shrink-0 flex items-center justify-center">
         @if($partner->logo_url)
             <img 
                 src="{{ $partner->logo_url }}" 
@@ -30,36 +30,33 @@
         @endif
     </div>
 
-    <!-- Right Section: Organization Information & Metadata -->
-    <div class="flex-1 min-w-0 flex flex-col justify-between self-stretch space-y-3 text-center md:text-left">
-        <div class="space-y-2">
-            
-            <!-- 1. Organization Name -->
-            <h3 class="text-lg sm:text-xl font-bold text-white tracking-tight font-brand-display break-words">
-                {{ $partner->name }}
-            </h3>
+    <!-- Right Section: Organization Information Area (Centered) -->
+    <div class="flex-1 min-w-0 w-full flex flex-col items-center text-center justify-center space-y-2">
+        
+        <!-- 1. Organization Name (Centered) -->
+        <h3 class="text-lg sm:text-xl font-bold text-white tracking-tight font-brand-display break-words">
+            {{ $partner->name }}
+        </h3>
 
-            <!-- 2. Classification Badge -->
-            @if($partner->collaboration_type)
-            <div>
-                <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-[11px] font-mono font-semibold border tracking-wide {{ $badgeStyle }}">
-                    {{ $partner->collaboration_type }}
-                </span>
-            </div>
-            @endif
-
-            <!-- 3. Organization Description -->
-            @if($partner->description)
-            <p class="text-xs sm:text-sm text-slate-300 leading-relaxed font-normal break-words pt-0.5">
-                {{ $partner->description }}
-            </p>
-            @endif
-
+        <!-- 2. Classification Badge (Centered directly beneath name) -->
+        @if($partner->collaboration_type)
+        <div>
+            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-[11px] font-mono font-semibold border tracking-wide {{ $badgeStyle }}">
+                {{ $partner->collaboration_type }}
+            </span>
         </div>
+        @endif
 
-        <!-- 4. Official Website Link (Conditional) -->
+        <!-- 3. Organization Description (Centered with natural wrapping) -->
+        @if($partner->description)
+        <p class="text-xs sm:text-sm text-slate-300 leading-relaxed font-normal break-words max-w-md pt-0.5">
+            {{ $partner->description }}
+        </p>
+        @endif
+
+        <!-- 4. Official Website Link (Centered beneath description) -->
         @if(!empty($partner->website_url))
-        <div class="pt-3 border-t border-[#334155]/30 mt-auto">
+        <div class="pt-1.5">
             <a 
                 href="{{ $partner->website_url }}" 
                 target="_blank" 
@@ -72,6 +69,7 @@
             </a>
         </div>
         @endif
+
     </div>
 
 </article>

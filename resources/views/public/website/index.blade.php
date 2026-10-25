@@ -143,7 +143,7 @@
     @if($settings['section_pillars_visible'] ?? true)
     <section id="pillars" class="py-16 sm:py-24 scroll-mt-20">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div class="flex flex-col md:flex-row md:items-end justify-between gap-6 mb-12" data-reveal>
+            <div class="flex flex-col md:flex-row md:items-end justify-between gap-4 mb-8" data-reveal>
                 <div>
                     <span class="text-xs font-bold text-[#df747a] tracking-widest uppercase font-brand-accent">Core Foundations</span>
                     <h2 class="text-2xl sm:text-4xl font-extrabold text-white font-brand-display tracking-tight mt-1">
@@ -176,7 +176,7 @@
     @if($settings['section_activities_visible'] ?? true)
     <section id="activities" class="py-16 sm:py-24 bg-[#172033]/15 scroll-mt-20">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div class="flex flex-col md:flex-row md:items-end justify-between gap-6 mb-12" data-reveal>
+            <div class="flex flex-col md:flex-row md:items-end justify-between gap-4 mb-8" data-reveal>
                 <div>
                     <span class="text-xs font-bold text-[#df747a] tracking-widest uppercase font-brand-accent">Events & Workshops</span>
                     <h2 class="text-2xl sm:text-4xl font-extrabold text-white font-brand-display tracking-tight mt-1">
@@ -253,7 +253,7 @@
     @if($settings['section_achievements_visible'] ?? true)
     <section id="achievements" class="py-16 sm:py-24 scroll-mt-20">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div class="flex flex-col md:flex-row md:items-end justify-between gap-6 mb-12" data-reveal>
+            <div class="flex flex-col md:flex-row md:items-end justify-between gap-4 mb-8" data-reveal>
                 <div>
                     <span class="text-xs font-bold text-[#df747a] tracking-widest uppercase font-brand-accent">Proven Track Record</span>
                     <h2 class="text-2xl sm:text-4xl font-extrabold text-white font-brand-display tracking-tight mt-1">
@@ -311,7 +311,7 @@
     @if($settings['section_officers_visible'] ?? true)
     <section id="officers" class="py-16 sm:py-24 bg-[#172033]/20 scroll-mt-20">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div class="flex flex-col md:flex-row md:items-end justify-between gap-6 mb-12" data-reveal>
+            <div class="flex flex-col md:flex-row md:items-end justify-between gap-4 mb-8" data-reveal>
                 <div>
                     <span class="text-xs font-bold text-[#df747a] tracking-widest uppercase font-brand-accent">Executive Board</span>
                     <h2 class="text-2xl sm:text-4xl font-extrabold text-white font-brand-display tracking-tight mt-1">
@@ -335,13 +335,13 @@
                 <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-6" data-reveal-group>
                     @foreach($officers as $officer)
                     <div data-reveal-item class="flex flex-col items-center text-center space-y-3 group">
-                        <div class="w-20 h-20 sm:w-24 sm:h-24 rounded-full overflow-hidden bg-[#0B1120] border-2 border-[#334155]/60 group-hover:border-[#df747a] transition-all">
-                            @if($officer->portrait_path)
-                                <img src="{{ asset('storage/' . $officer->portrait_path) }}" alt="{{ $officer->name }}" class="w-full h-full object-cover">
+                        <div class="w-20 h-20 sm:w-24 sm:h-24 rounded-full overflow-hidden bg-[#0B1120] border-2 border-[#334155]/60 group-hover:border-[#df747a] transition-all flex items-center justify-center">
+                            @if($officer->portrait_url)
+                                <img src="{{ $officer->portrait_url }}" alt="{{ $officer->name }}" class="w-full h-full object-cover">
                             @else
-                                <div class="w-full h-full flex items-center justify-center text-slate-500">
-                                    <i data-lucide="user" class="w-8 h-8"></i>
-                                </div>
+                                <span class="text-white font-brand-display font-extrabold text-xl sm:text-2xl text-[#df747a]">
+                                    {{ $officer->initials }}
+                                </span>
                             @endif
                         </div>
                         <div>
@@ -363,7 +363,7 @@
     @if($settings['section_gallery_visible'] ?? true)
     <section id="gallery" class="py-16 sm:py-24 scroll-mt-20" x-data="{ lightboxOpen: false, activeImage: '', activeTitle: '', activeCaption: '' }">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div class="flex flex-col md:flex-row md:items-end justify-between gap-6 mb-12" data-reveal>
+            <div class="flex flex-col md:flex-row md:items-end justify-between gap-4 mb-8" data-reveal>
                 <div>
                     <span class="text-xs font-bold text-[#df747a] tracking-widest uppercase font-brand-accent">Visual Memories</span>
                     <h2 class="text-2xl sm:text-4xl font-extrabold text-white font-brand-display tracking-tight mt-1">
@@ -439,9 +439,9 @@
 
     <!-- Section 8: Verified Partners -->
     @if($settings['section_partners_visible'] ?? true)
-    <section id="partners" class="py-16 sm:py-24 bg-[#172033]/15 scroll-mt-20">
+    <section id="partners" class="py-12 sm:py-16 bg-[#172033]/15 scroll-mt-20">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div class="flex flex-col md:flex-row md:items-end justify-between gap-6 mb-12" data-reveal>
+            <div class="flex flex-col md:flex-row md:items-end justify-between gap-4 mb-8" data-reveal>
                 <div>
                     <span class="text-xs font-bold text-[#df747a] tracking-widest uppercase font-brand-accent">Collaborations</span>
                     <h2 class="text-2xl sm:text-4xl font-extrabold text-white font-brand-display tracking-tight mt-1">

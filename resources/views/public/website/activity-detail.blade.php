@@ -1,7 +1,7 @@
 <x-public-website-layout :settings="$settings" :title="$event->name">
 
     <!-- Editorial Event Header -->
-    <section class="py-16 sm:py-24 relative overflow-hidden bg-gradient-to-b from-[#0B1120] to-[#172033]/30">
+    <section class="py-12 sm:py-16 relative overflow-hidden bg-gradient-to-b from-[#0B1120] to-[#172033]/30">
         <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
             <div class="space-y-6" data-reveal>
                 <div>
@@ -48,7 +48,7 @@
     </section>
 
     <!-- Main Detail & Sidebar -->
-    <section class="py-12 sm:py-20">
+    <section class="pt-8 sm:pt-10 pb-16 sm:pb-24">
         <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
             <div class="grid grid-cols-1 lg:grid-cols-12 gap-12">
 
