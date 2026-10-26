@@ -24,7 +24,7 @@ return new class extends Migration
             $table->unsignedInteger('version')->default(1);
             $table->boolean('is_published')->default(true);
             $table->timestamp('published_at')->nullable();
-            $table->foreignId('uploaded_by')->nullable()->constrained('users')->nullOnDelete();
+            $table->foreignUuid('uploaded_by')->nullable()->constrained('users')->nullOnDelete();
             $table->timestamps();
         });
     }
