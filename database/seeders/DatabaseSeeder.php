@@ -105,6 +105,7 @@ class DatabaseSeeder extends Seeder
 
         $this->call([
             GamificationSeeder::class,
+            ConstitutionDocumentSeeder::class,
         ]);
     }
 }

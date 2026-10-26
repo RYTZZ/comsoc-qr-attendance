@@ -8,7 +8,7 @@
                 <div>
                     <div class="flex items-center gap-2">
                         <span class="px-2.5 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider bg-burgundy-deep text-[#df747a] border border-[#8F3033]/60">
-                            Official Governance
+                            Organization
                         </span>
                         @if($document && $document->is_published)
                             <span class="px-2 py-0.5 rounded-full text-[10px] font-semibold bg-emerald-500/10 text-emerald-400 border border-emerald-500/30">
@@ -44,7 +44,7 @@
         </div>
     </x-slot>
 
-    <div class="py-6 sm:py-8 bg-[#0B1120] min-h-[calc(100vh-10rem)]">
+    <div class="py-6 sm:py-8 bg-[#0B1120]">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-6">
 
             <!-- Institutional Document Overview Card -->
@@ -58,7 +58,7 @@
                             <span>Official Organizational Governance & Charter</span>
                         </div>
                         <h2 class="text-lg sm:text-xl font-bold text-white tracking-tight">
-                            {{ $document?->title ?? 'Computing Society Constitution and By-Laws' }}
+                            {{ $document?->title ?? 'COMSOC Constitutional and By-Laws' }}
                         </h2>
                         <p class="text-sm text-slate-300 leading-relaxed">
                             {{ $document?->description ?? 'This official governing document establishes the Computing Society\'s governing principles, policies, executive structure, member rights and responsibilities, electoral rules, and operational procedures across all CICT degree programs.' }}
@@ -145,41 +145,69 @@
                      class="bg-[#172033] border border-[#334155] rounded-2xl shadow-2xl overflow-hidden flex flex-col"
                      x-data="{
                          isFullscreen: false,
-                         zoomLevels: [75, 100, 125, 150, 175, 200],
-                         currentZoom: 100,
+                         zoomLevels: ['page-width', 'page-fit', '75', '100', '125', '150'],
+                         zoomLabels: { 'page-width': 'Fit Width', 'page-fit': 'Fit Page', '75': '75%', '100': '100%', '125': '125%', '150': '150%' },
+                         currentZoomIdx: 0,
                          isLoading: true,
                          hasError: false,
                          errorMessage: '',
-                         previewUrl: '{{ route('constitution.preview') }}?v={{ $document->version }}-{{ $document->updated_at?->timestamp }}',
+                         basePreviewUrl: '{{ route('constitution.preview') }}?v={{ $document->version }}-{{ $document->updated_at?->timestamp }}',
                          
+                         get currentZoomMode() {
+                             return this.zoomLevels[this.currentZoomIdx];
+                         },
+                         get currentZoomLabel() {
+                             return this.zoomLabels[this.currentZoomMode] || '100%';
+                         },
+                         get computedViewerUrl() {
+                             const mode = this.currentZoomMode;
+                             let viewParam = 'view=FitH';
+                             if (mode === 'page-fit') viewParam = 'view=Fit';
+                             else if (mode !== 'page-width') viewParam = 'zoom=' + mode;
+                             return this.basePreviewUrl + '#' + viewParam + '&toolbar=1&navpanes=1&scrollbar=1';
+                         },
                          zoomIn() {
-                             const idx = this.zoomLevels.indexOf(this.currentZoom);
-                             if (idx < this.zoomLevels.length - 1) {
-                                 this.currentZoom = this.zoomLevels[idx + 1];
+                             if (this.currentZoomIdx < this.zoomLevels.length - 1) {
+                                 this.currentZoomIdx++;
+                                 this.updateFrameUrl();
                              }
                          },
                          zoomOut() {
-                             const idx = this.zoomLevels.indexOf(this.currentZoom);
-                             if (idx > 0) {
-                                 this.currentZoom = this.zoomLevels[idx - 1];
+                             if (this.currentZoomIdx > 0) {
+                                 this.currentZoomIdx--;
+                                 this.updateFrameUrl();
                              }
                          },
                          resetZoom() {
-                             this.currentZoom = 100;
+                             this.currentZoomIdx = 0; // Fit Width default
+                             this.updateFrameUrl();
+                         },
+                         updateFrameUrl() {
+                             const frame = this.$refs.pdfFrame;
+                             if (frame) {
+                                 frame.src = this.computedViewerUrl;
+                             }
                          },
                          toggleFullscreen() {
                              const container = document.getElementById('pdf-viewer-container');
                              if (!document.fullscreenElement) {
-                                 container.requestFullscreen().then(() => {
-                                     this.isFullscreen = true;
-                                 }).catch(() => {
-                                     // Fallback css-based fullscreen
+                                 if (container.requestFullscreen) {
+                                     container.requestFullscreen().then(() => {
+                                         this.isFullscreen = true;
+                                     }).catch(() => {
+                                         this.isFullscreen = !this.isFullscreen;
+                                     });
+                                 } else {
                                      this.isFullscreen = !this.isFullscreen;
-                                 });
+                                 }
                              } else {
-                                 document.exitFullscreen().then(() => {
+                                 if (document.exitFullscreen) {
+                                     document.exitFullscreen().then(() => {
+                                         this.isFullscreen = false;
+                                     });
+                                 } else {
                                      this.isFullscreen = false;
-                                 });
+                                 }
                              }
                          },
                          onLoadSuccess() {
@@ -189,7 +217,7 @@
                          onLoadFailure() {
                              this.isLoading = false;
                              this.hasError = true;
-                             this.errorMessage = 'Unable to stream the PDF document preview. Please try refreshing or download the original file directly.';
+                             this.errorMessage = 'Unable to stream the PDF preview. You can refresh or download the document directly.';
                          }
                      }"
                      @fullscreenchange.window="isFullscreen = !!document.fullscreenElement">
@@ -202,11 +230,11 @@
                             </span>
                             <div>
                                 <h3 class="text-xs sm:text-sm font-bold text-white tracking-tight flex items-center gap-2">
-                                    <span>Interactive Document Viewer</span>
-                                    <span class="hidden sm:inline-block w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse"></span>
+                                    <span>COMSOC Constitutional and By-Laws</span>
+                                    <span class="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse"></span>
                                 </h3>
-                                <p class="text-[10px] text-slate-400 hidden sm:block">
-                                    Secure, native PDF render stream
+                                <p class="text-[10px] text-slate-400">
+                                    Official Ratified Document • Version {{ $document->version }}.0
                                 </p>
                             </div>
                         </div>
@@ -217,7 +245,7 @@
                             <div class="flex items-center bg-[#172033] border border-[#334155] rounded-xl p-1 text-slate-300">
                                 <button type="button"
                                         @click="zoomOut()"
-                                        :disabled="currentZoom <= 75"
+                                        :disabled="currentZoomIdx <= 0"
                                         class="p-1.5 hover:text-white rounded-lg hover:bg-[#1E293B] disabled:opacity-30 disabled:cursor-not-allowed transition"
                                         title="Zoom Out">
                                     <i data-lucide="zoom-out" class="w-3.5 h-3.5"></i>
@@ -225,12 +253,12 @@
                                 <button type="button"
                                         @click="resetZoom()"
                                         class="px-2 text-[11px] font-mono font-semibold text-slate-300 hover:text-white transition"
-                                        title="Reset Zoom">
-                                    <span x-text="currentZoom + '%'">100%</span>
+                                        title="Reset to Fit Width">
+                                    <span x-text="currentZoomLabel">Fit Width</span>
                                 </button>
                                 <button type="button"
                                         @click="zoomIn()"
-                                        :disabled="currentZoom >= 200"
+                                        :disabled="currentZoomIdx >= zoomLevels.length - 1"
                                         class="p-1.5 hover:text-white rounded-lg hover:bg-[#1E293B] disabled:opacity-30 disabled:cursor-not-allowed transition"
                                         title="Zoom In">
                                     <i data-lucide="zoom-in" class="w-3.5 h-3.5"></i>
@@ -252,16 +280,15 @@
                                id="btn-download-pdf-viewer"
                                class="btn-primary text-xs flex items-center gap-1.5 py-1.5 px-3 rounded-xl shadow">
                                 <i data-lucide="download" class="w-3.5 h-3.5"></i>
-                                <span class="hidden sm:inline">Download</span>
+                                <span class="hidden sm:inline">Download PDF</span>
                             </a>
                         </div>
                     </div>
 
-                    <!-- Viewer Container -->
+                    <!-- Viewer Container (Occupies available space, fits full width, no outer blank areas) -->
                     <div id="pdf-viewer-container"
-                         class="relative w-full bg-slate-950 flex flex-col items-center justify-start overflow-hidden transition-all duration-200"
-                         :class="isFullscreen ? 'fixed inset-0 z-50 h-screen w-screen' : 'h-[750px] sm:h-[850px]'"
-                         style="min-height: 520px;">
+                         class="relative w-full bg-slate-900 flex flex-col items-stretch justify-start overflow-hidden transition-all duration-200"
+                         :class="isFullscreen ? 'fixed inset-0 z-50 h-screen w-screen' : 'h-[82vh] min-h-[640px] max-h-[1000px]'">
 
                         <!-- Fullscreen close bar if hardware fullscreen was fallback -->
                         <div x-show="isFullscreen && !document.fullscreenElement"
@@ -276,7 +303,7 @@
 
                         <!-- Loading Overlay -->
                         <div x-show="isLoading && !hasError"
-                             class="absolute inset-0 z-20 bg-slate-950/90 backdrop-blur-sm flex flex-col items-center justify-center p-6 text-center">
+                             class="absolute inset-0 z-20 bg-slate-950/80 backdrop-blur-sm flex flex-col items-center justify-center p-6 text-center">
                             <div class="relative w-14 h-14 mb-4">
                                 <div class="w-14 h-14 rounded-full border-4 border-[#8F3033]/30 border-t-[#df747a] animate-spin"></div>
                                 <div class="absolute inset-0 flex items-center justify-center text-[#df747a]">
@@ -284,7 +311,7 @@
                                 </div>
                             </div>
                             <h4 class="text-sm font-bold text-white mb-1">Loading Constitutional and By-Laws...</h4>
-                            <p class="text-xs text-slate-400 max-w-xs">Fetching verified governing document stream from secure storage.</p>
+                            <p class="text-xs text-slate-400 max-w-xs">Streaming official governing document.</p>
                         </div>
 
                         <!-- Error State Overlay -->
@@ -297,12 +324,12 @@
                             <div>
                                 <h4 class="text-base font-bold text-white">Document Preview Encountered An Error</h4>
                                 <p class="text-xs text-slate-400 mt-1 max-w-md" x-text="errorMessage">
-                                    Unable to load the PDF viewer. You can download the official document directly.
+                                    Unable to stream the PDF viewer. You can download the official document directly.
                                 </p>
                             </div>
                             <div class="flex items-center gap-3">
                                 <button type="button"
-                                        @click="isLoading = true; hasError = false; $refs.pdfObject.data = previewUrl + '&t=' + Date.now()"
+                                        @click="isLoading = true; hasError = false; $refs.pdfFrame.src = computedViewerUrl + '&t=' + Date.now()"
                                         class="btn-secondary text-xs flex items-center gap-2">
                                     <i data-lucide="refresh-cw" class="w-3.5 h-3.5"></i>
                                     <span>Retry Preview</span>
@@ -314,42 +341,31 @@
                             </div>
                         </div>
 
-                        <!-- Responsive Document Frame with Zoom Scaling -->
-                        <div class="w-full h-full flex-1 overflow-auto flex items-center justify-center p-0 sm:p-2 bg-slate-950">
-                            <div class="w-full h-full transition-all duration-200 origin-top flex items-center justify-center"
-                                 :style="'transform: scale(' + (currentZoom / 100) + '); height: ' + (10000 / currentZoom) + '%; width: ' + (10000 / currentZoom) + '%;'">
-                                
-                                <object x-ref="pdfObject"
-                                        :data="previewUrl + '#toolbar=1&navpanes=1&scrollbar=1&view=FitH'"
-                                        type="application/pdf"
-                                        class="w-full h-full border-0 rounded-none sm:rounded-lg shadow-inner"
-                                        x-on:load="onLoadSuccess()"
-                                        x-on:error="onLoadFailure()">
-
-                                    <!-- Fallback iframe if object element cannot render directly on this browser -->
-                                    <iframe :src="previewUrl + '#toolbar=1&navpanes=1&scrollbar=1&view=FitH'"
-                                            class="w-full h-full border-0"
-                                            x-on:load="onLoadSuccess()"
-                                            x-on:error="onLoadFailure()">
-                                        <div class="p-8 text-center text-slate-300">
-                                            <p class="text-sm mb-4">Your browser does not support inline PDF viewing.</p>
-                                            <a href="{{ route('constitution.download') }}" class="btn-primary text-xs inline-flex items-center gap-2">
-                                                <i data-lucide="download" class="w-4 h-4"></i>
-                                                Download Official PDF
-                                            </a>
-                                        </div>
-                                    </iframe>
-                                </object>
-                            </div>
+                        <!-- Full-Viewport Embedded PDF Frame -->
+                        <div class="w-full h-full flex-1 relative bg-slate-900">
+                            <iframe x-ref="pdfFrame"
+                                    :src="computedViewerUrl"
+                                    class="w-full h-full border-0 block"
+                                    title="COMSOC Constitutional and By-Laws Viewer"
+                                    x-on:load="onLoadSuccess()"
+                                    x-on:error="onLoadFailure()">
+                                <div class="p-8 text-center text-slate-300">
+                                    <p class="text-sm mb-4">Your browser does not support inline PDF viewing.</p>
+                                    <a href="{{ route('constitution.download') }}" class="btn-primary text-xs inline-flex items-center gap-2">
+                                        <i data-lucide="download" class="w-4 h-4"></i>
+                                        Download Official PDF
+                                    </a>
+                                </div>
+                            </iframe>
                         </div>
 
                         <!-- Mobile Fallback Quick-Bar -->
-                        <div class="sm:hidden w-full bg-[#172033] border-t border-[#334155] px-4 py-2.5 flex items-center justify-between text-xs text-slate-300">
-                            <span>Having trouble viewing on mobile?</span>
+                        <div class="sm:hidden w-full bg-[#172033] border-t border-[#334155] px-4 py-2.5 flex items-center justify-between text-xs text-slate-300 shrink-0">
+                            <span>Mobile reading view:</span>
                             <a href="{{ route('constitution.preview') }}"
                                target="_blank"
                                class="font-semibold text-[#df747a] hover:underline flex items-center gap-1">
-                                <span>Open Full Screen</span>
+                                <span>Open Full Screen Tab</span>
                                 <i data-lucide="external-link" class="w-3 h-3"></i>
                             </a>
                         </div>

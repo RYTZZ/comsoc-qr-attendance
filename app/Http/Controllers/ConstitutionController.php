@@ -68,7 +68,6 @@ class ConstitutionController extends Controller
             'Pragma' => 'no-cache',
             'Expires' => '0',
             'X-Content-Type-Options' => 'nosniff',
-            'Content-Security-Policy' => "default-src 'self'",
         ]);
     }
 

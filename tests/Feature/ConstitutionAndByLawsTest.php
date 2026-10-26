@@ -80,7 +80,7 @@ class ConstitutionAndByLawsTest extends TestCase
         $indexResponse = $this->actingAs($member)->get(route('constitution.index'));
         $indexResponse->assertStatus(200);
         $indexResponse->assertSee('Computing Society Constitution and By-Laws');
-        $indexResponse->assertSee('Interactive Document Viewer');
+        $indexResponse->assertSee('COMSOC Constitutional and By-Laws');
         $indexResponse->assertSee(route('constitution.download'));
 
         // 2. Stream preview

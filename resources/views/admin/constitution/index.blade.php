@@ -244,7 +244,7 @@
                                 <input type="text"
                                        id="upload_title"
                                        name="title"
-                                       value="{{ old('title', $document?->title ?? 'Computing Society Constitution and By-Laws') }}"
+                                       value="{{ old('title', $document?->title ?? 'COMSOC Constitutional and By-Laws') }}"
                                        required
                                        class="w-full bg-slate-950 border border-slate-700 rounded-xl px-3 py-2.5 text-xs text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-amber-500">
                             </div>

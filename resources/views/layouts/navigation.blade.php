@@ -120,6 +120,18 @@
             </div>
         </div>
 
+        <!-- Organization -->
+        <div>
+            <p class="px-3 mb-2 text-[10px] font-bold uppercase tracking-widest text-[#94A3B8]">Organization</p>
+            <div class="space-y-1">
+                <a href="{{ route('constitution.index') }}"
+                   class="flex items-center gap-3 px-3 py-2.5 rounded-xl text-xs font-semibold transition {{ request()->routeIs('constitution.*') ? 'bg-burgundy-gradient text-white shadow-md' : 'text-[#94A3B8] hover:text-white hover:bg-[#1E293B]' }}">
+                    <i data-lucide="scroll-text" class="w-4 h-4 shrink-0 {{ request()->routeIs('constitution.*') ? 'text-white' : 'text-[#94A3B8]' }}"></i>
+                    <span>{{ __('Constitutional & By-Laws') }}</span>
+                </a>
+            </div>
+        </div>
+
         <!-- Community -->
         <div>
             <p class="px-3 mb-2 text-[10px] font-bold uppercase tracking-widest text-[#94A3B8]">Community</p>
@@ -152,12 +164,6 @@
                    class="flex items-center gap-3 px-3 py-2.5 rounded-xl text-xs font-semibold transition {{ request()->routeIs('helpdesk.*') ? 'bg-burgundy-gradient text-white shadow-md' : 'text-[#94A3B8] hover:text-white hover:bg-[#1E293B]' }}">
                     <i data-lucide="life-buoy" class="w-4 h-4 shrink-0 {{ request()->routeIs('helpdesk.*') ? 'text-white' : 'text-[#94A3B8]' }}"></i>
                     <span>{{ __('Help Desk & Disputes') }}</span>
-                </a>
-
-                <a href="{{ route('constitution.index') }}"
-                   class="flex items-center gap-3 px-3 py-2.5 rounded-xl text-xs font-semibold transition {{ request()->routeIs('constitution.*') ? 'bg-burgundy-gradient text-white shadow-md' : 'text-[#94A3B8] hover:text-white hover:bg-[#1E293B]' }}">
-                    <i data-lucide="scroll-text" class="w-4 h-4 shrink-0 {{ request()->routeIs('constitution.*') ? 'text-white' : 'text-[#94A3B8]' }}"></i>
-                    <span>{{ __('Constitution & By-Laws') }}</span>
                 </a>
             </div>
         </div>
