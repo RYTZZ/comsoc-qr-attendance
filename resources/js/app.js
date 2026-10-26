@@ -16,7 +16,24 @@ window.SignaturePad = SignaturePad;
 document.addEventListener('DOMContentLoaded', () => {
     createIcons({ icons });
     initMotionSystem();
+    initScrollManagement();
 });
+
+/**
+ * Ensures genuine page transitions land at the top of the viewport (scroll position 0),
+ * while preserving browser history navigation (back/forward) and explicit hash target anchors (#).
+ */
+function initScrollManagement() {
+    if (!('scrollRestoration' in history)) return;
+
+    const navEntries = performance.getEntriesByType('navigation');
+    const navType = navEntries.length > 0 ? navEntries[0].type : '';
+
+    // If navigated via standard link/redirect without an anchor hash, ensure top of page
+    if (navType === 'navigate' && !window.location.hash) {
+        window.scrollTo({ top: 0, left: 0, behavior: 'instant' });
+    }
+}
 
 document.addEventListener('alpine:initialized', () => {
     createIcons({ icons });
