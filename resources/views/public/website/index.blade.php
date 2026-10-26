@@ -594,7 +594,7 @@
     @endif
 
     <!-- Section 11: Final Call to Action -->
-    <section class="pt-16 sm:pt-20 pb-16 sm:pb-20 text-center relative overflow-hidden" data-reveal>
+    <section class="pt-16 sm:pt-20 pb-24 sm:pb-32 text-center relative overflow-hidden" data-reveal>
         <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 space-y-6 relative z-10">
             <h2 class="text-3xl sm:text-5xl font-black font-brand-display text-white tracking-tight leading-tight">
                 {{ $settings['final_cta_headline'] ?? 'Be Part of the Community. Build What Comes Next.' }}
