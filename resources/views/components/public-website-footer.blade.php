@@ -11,13 +11,13 @@
 
 <!-- Public Website Shared Footer -->
 <footer
-    class="relative z-10 bg-[#0B1120] border-t border-[#334155]/60 pt-25 sm:pt-30 pb-15 text-slate-400 text-sm mt-auto shrink-0"
+    class="relative z-10 bg-[#0B1120] border-t border-[#334155]/60 pt-16 sm:pt-20 pb-12 sm:pb-14 text-slate-400 text-sm mt-auto shrink-0"
     role="contentinfo" aria-label="Global Site Footer">
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
 
         <!-- Main 4-Column Responsive Grid -->
         <div
-            class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8 lg:gap-10 pb-10 border-b border-[#334155]/40 items-start">
+            class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8 lg:gap-10 pb-12 border-b border-[#334155]/40 items-start">
 
             <!-- Col 1: COMSOC Branding -->
             <div class="min-w-0 space-y-3.5">
@@ -163,7 +163,7 @@
         </div>
 
         <!-- Bottom Copyright & Legal Bar -->
-        <div class="pt-6 flex flex-col sm:flex-row items-center justify-between gap-4 text-xs text-slate-400">
+        <div class="pt-8 flex flex-col sm:flex-row items-center justify-between gap-4 text-xs text-slate-400">
             <p class="text-center sm:text-left leading-relaxed">
                 © {{ date('Y') }} Computing Society (COMSOC) — SorSU Bulan Campus. All rights reserved.
             </p>
