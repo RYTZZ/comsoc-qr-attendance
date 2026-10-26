@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en" class="h-full">
+<html lang="en" class="scroll-smooth">
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
@@ -11,7 +11,7 @@
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Manrope:wght@600;700;800&family=Space+Grotesk:wght@600;700&display=swap" rel="stylesheet">
     @vite(['resources/css/app.css', 'resources/js/app.js'])
 </head>
-<body class="h-full bg-[#0B1120] text-[#F8FAFC] font-sans antialiased min-h-screen relative overflow-x-hidden selection:bg-[#560E0F] selection:text-white flex flex-col">
+<body class="min-h-screen min-h-[100dvh] bg-[#0B1120] text-[#F8FAFC] font-sans antialiased relative overflow-x-hidden selection:bg-[#560E0F] selection:text-white flex flex-col">
 
     <x-public-auth-bg />
 

@@ -14,7 +14,7 @@
      }"
      x-init="checkScroll()"
      @scroll.window.passive="checkScroll()"
-     class="fixed bottom-6 right-6 z-40 select-none print:hidden pointer-events-none"
+     class="fixed bottom-6 right-4 sm:right-6 z-40 select-none print:hidden pointer-events-none pb-[env(safe-area-inset-bottom,0px)]"
      aria-live="polite">
 
     <button type="button"
