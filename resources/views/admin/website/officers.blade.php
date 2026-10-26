@@ -75,9 +75,9 @@
                     <div class="space-y-1.5">
                         <label class="text-xs font-semibold text-slate-300">Category</label>
                         <select name="category" required class="form-input w-full text-xs">
-                            <option value="executive">Executive Officer</option>
-                            <option value="board">Board Representative</option>
-                            <option value="adviser">Faculty Adviser</option>
+                            @foreach(\App\Models\OrgOfficer::CATEGORIES as $catKey => $catLabel)
+                                <option value="{{ $catKey }}">{{ $catLabel }}</option>
+                            @endforeach
                         </select>
                     </div>
 

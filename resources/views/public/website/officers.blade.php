@@ -172,6 +172,55 @@
                 </section>
                 @endif
 
+                {{-- 8. Faculty Advisers --}}
+                @if(isset($grouped['adviser']) && $grouped['adviser']->isNotEmpty())
+                <section class="space-y-6 pt-6" data-reveal>
+                    <div class="pb-3 flex items-center justify-between border-b border-[#334155]/30">
+                        <div class="flex items-center gap-2.5">
+                            <div class="w-7 h-7 rounded-lg bg-teal-500/10 border border-teal-500/20 flex items-center justify-center text-teal-400">
+                                <i data-lucide="graduation-cap" class="w-4 h-4"></i>
+                            </div>
+                            <h2 class="text-xl sm:text-2xl font-bold text-white font-brand-display">Faculty Advisers</h2>
+                        </div>
+                        <span class="text-xs text-teal-400/80 font-mono font-semibold">Academic Mentorship</span>
+                    </div>
+
+                    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5 sm:gap-6 items-stretch" data-reveal-group>
+                        @foreach($grouped['adviser'] as $officer)
+                            <x-officer-card :officer="$officer" />
+                        @endforeach
+                    </div>
+                </section>
+                @endif
+
+                {{-- 9. Other Appointed Officers (Fallback so no published officer is omitted) --}}
+                @php
+                    $knownKeys = ['executive', 'board', 'liaison', 'bsit', 'bscs', 'bsis', 'btvted', 'adviser'];
+                    $otherOfficers = $officers->reject(function ($o) use ($knownKeys) {
+                        return in_array(strtolower(trim($o->category ?? '')), $knownKeys);
+                    });
+                @endphp
+                @if($otherOfficers->isNotEmpty())
+                <section class="space-y-6 pt-6" data-reveal>
+                    <div class="pb-3 flex items-center justify-between border-b border-[#334155]/30">
+                        <div class="flex items-center gap-2.5">
+                            <div class="w-7 h-7 rounded-lg bg-slate-500/10 border border-slate-500/20 flex items-center justify-center text-slate-400">
+                                <i data-lucide="users" class="w-4 h-4"></i>
+                            </div>
+                            <h2 class="text-xl sm:text-2xl font-bold text-white font-brand-display">Additional Leadership & Appointees</h2>
+                        </div>
+                        <span class="text-xs text-slate-400 font-mono">Appointed Leaders</span>
+                    </div>
+
+                    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5 sm:gap-6 items-stretch" data-reveal-group>
+                        @foreach($otherOfficers as $officer)
+                            <x-officer-card :officer="$officer" />
+                        @endforeach
+                    </div>
+                </section>
+                @endif
+
+
             @endif
 
         </div>

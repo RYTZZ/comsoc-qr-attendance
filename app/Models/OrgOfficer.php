@@ -33,7 +33,12 @@ class OrgOfficer extends Model
 
     public const CATEGORIES = [
         'executive' => 'Executive Officer',
-        'board' => 'Board Member / Program Representative',
+        'board' => 'Board Member / Representative',
+        'liaison' => 'Liaison Officer',
+        'bsit' => 'BSIT Program Officer',
+        'bscs' => 'BSCS Program Officer',
+        'bsis' => 'BSIS Program Officer',
+        'btvted' => 'BTVTED Program Officer',
         'adviser' => 'Faculty Adviser',
     ];
 

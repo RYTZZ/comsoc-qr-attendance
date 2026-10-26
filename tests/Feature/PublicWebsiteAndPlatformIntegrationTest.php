@@ -170,12 +170,43 @@ class PublicWebsiteAndPlatformIntegrationTest extends TestCase
             'is_published' => true,
         ]);
 
+        $adviser = OrgOfficer::create([
+            'name' => 'Prof. Alan Turing',
+            'position' => 'Faculty Adviser',
+            'category' => 'adviser',
+            'is_current' => true,
+            'is_published' => true,
+        ]);
+
+        $board = OrgOfficer::create([
+            'name' => 'Grace Hopper',
+            'position' => 'Board of Director',
+            'category' => 'board',
+            'program' => 'BSCS',
+            'is_current' => true,
+            'is_published' => true,
+        ]);
+
+        $custom = OrgOfficer::create([
+            'name' => 'Ada Lovelace',
+            'position' => 'Lead Systems Architect',
+            'category' => 'appointed',
+            'is_current' => true,
+            'is_published' => true,
+        ]);
+
         $response = $this->get(route('public.officers'));
         $response->assertOk();
         $response->assertSee('Maria Clara');
+        $response->assertSee('Prof. Alan Turing');
+        $response->assertSee('Faculty Advisers');
+        $response->assertSee('Grace Hopper');
+        $response->assertSee('Ada Lovelace');
+        $response->assertSee('Additional Leadership');
         $response->assertDontSee('Secret Officer');
         $response->assertDontSee('Former Leader');
     }
+
 
     public function test_activities_showcase_only_published_and_public_events(): void
     {
