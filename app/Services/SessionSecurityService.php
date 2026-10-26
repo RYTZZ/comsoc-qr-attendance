@@ -216,4 +216,18 @@ class SessionSecurityService
             'message' => $isCurrent ? 'Current session revoked. You have been logged out.' : 'Session revoked successfully.',
         ];
     }
+
+    /**
+     * Retrieve all active, non-revoked sessions for a given user.
+     *
+     * @param User $user
+     * @return \Illuminate\Database\Eloquent\Collection<int, UserSession>
+     */
+    public function getActiveSessions(User $user)
+    {
+        return UserSession::where('user_id', $user->id)
+            ->whereNull('revoked_at')
+            ->orderByDesc('last_active_at')
+            ->get();
+    }
 }

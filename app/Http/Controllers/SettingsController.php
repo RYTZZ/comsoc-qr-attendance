@@ -50,9 +50,16 @@ class SettingsController extends Controller
 
         $signatureStatus = app(SignatureVaultService::class)->signatureStatus($user);
 
-        // Fetch recent active sessions for security overview
-        $sessionService = app(SessionSecurityService::class);
-        $activeSessions = $sessionService->getActiveSessions($user);
+        // Fetch recent active sessions for security overview safely
+        try {
+            $sessionService = app(SessionSecurityService::class);
+            $activeSessions = $sessionService->getActiveSessions($user);
+        } catch (\Throwable $e) {
+            \Illuminate\Support\Facades\Log::warning('Settings: Failed to load user active sessions: ' . $e->getMessage(), [
+                'user_id' => $user->id,
+            ]);
+            $activeSessions = collect();
+        }
 
         return view('settings.index', compact(
             'user',
