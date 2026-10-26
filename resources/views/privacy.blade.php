@@ -45,7 +45,7 @@
         </div>
     </header>
 
-    <main class="relative z-10 max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-12 flex-1 w-full">
+    <main class="relative z-10 max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-12 pb-16 sm:pb-24 lg:pb-32 flex-1 w-full">
         <div class="card bg-[#172033]/95 border border-[#334155] shadow-2xl p-6 sm:p-10 space-y-8 rounded-2xl">
 
             <!-- Title & Metadata -->
@@ -282,7 +282,9 @@
     </main>
 
     <!-- Shared Public Website Footer -->
-    <x-public-website-footer />
+    <div class="mt-8 sm:mt-12 lg:mt-16 w-full">
+        <x-public-website-footer />
+    </div>
 
     <!-- Floating Back-to-Top CTA Button -->
     <x-back-to-top />

@@ -187,12 +187,14 @@
     </header>
 
     <!-- Main Content Slot -->
-    <main id="main-content" class="flex-1 relative z-10 focus:outline-none" tabindex="-1">
+    <main id="main-content" class="flex-1 relative z-10 focus:outline-none pb-16 sm:pb-24 lg:pb-32" tabindex="-1">
         {{ $slot }}
     </main>
 
-    <!-- Public Website Shared Footer Component -->
-    <x-public-website-footer :settings="$settings" />
+    <!-- Public Website Shared Footer Component Enclosing Div -->
+    <div class="mt-8 sm:mt-12 lg:mt-16 w-full">
+        <x-public-website-footer :settings="$settings" />
+    </div>
 
     <!-- Floating Back-to-Top CTA Button -->
     <x-back-to-top />

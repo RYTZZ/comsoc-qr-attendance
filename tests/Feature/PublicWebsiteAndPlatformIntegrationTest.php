@@ -97,6 +97,8 @@ class PublicWebsiteAndPlatformIntegrationTest extends TestCase
             $resp = $this->get($url);
             $resp->assertOk();
             $resp->assertSee('pb-24 sm:pb-32');
+            $resp->assertSee('id="main-content" class="flex-1 relative z-10 focus:outline-none pb-16 sm:pb-24 lg:pb-32"', false);
+            $resp->assertSee('mt-8 sm:mt-12 lg:mt-16 w-full');
         }
 
         // Verify gallery lightbox has z-[100] and body scroll-lock handler
