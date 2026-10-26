@@ -8,20 +8,15 @@
 
                 <!-- Left Column: Bold Typography & Narrative (7 cols) -->
                 <div class="lg:col-span-7 space-y-6 text-center lg:text-left">
-                    <div data-hero-seq="1" class="inline-flex items-center gap-2.5 px-3 py-1.5 rounded-full bg-[#560E0F]/25 border border-[#560E0F]/60 text-[#df747a] text-xs font-semibold tracking-wide">
-                        <span class="w-2 h-2 rounded-full bg-[#df747a] animate-pulse"></span>
-                        <span>Computing Society • Sorsogon State University – Bulan Campus</span>
-                    </div>
-
-                    <h1 data-hero-seq="2" class="text-3xl sm:text-5xl lg:text-6xl font-black font-brand-display text-white tracking-tight leading-[1.08]">
+                    <h1 data-hero-seq="1" class="text-3xl sm:text-5xl lg:text-6xl font-black font-brand-display text-white tracking-tight leading-[1.08]">
                         {{ $settings['hero_headline'] ?? 'Where Computing Minds Build What\'s Next.' }}
                     </h1>
 
-                    <p data-hero-seq="3" class="text-base sm:text-lg text-slate-300 max-w-2xl mx-auto lg:mx-0 leading-relaxed font-normal">
+                    <p data-hero-seq="2" class="text-base sm:text-lg text-slate-300 max-w-2xl mx-auto lg:mx-0 leading-relaxed font-normal">
                         {{ $settings['hero_description'] ?? 'COMSOC brings computing students together to develop technical skills, create meaningful projects, build lifelong connections, and strengthen our campus community.' }}
                     </p>
 
-                    <div data-hero-seq="4" class="flex flex-wrap items-center justify-center lg:justify-start gap-4 pt-2">
+                    <div data-hero-seq="3" class="flex flex-wrap items-center justify-center lg:justify-start gap-4 pt-2">
                         <a href="{{ route('public.about') }}"
                            class="btn-secondary text-sm sm:text-base py-3 px-6 rounded-xl flex items-center gap-2 border-[#334155]/60 hover:border-[#df747a] transition-all">
                             <span>Discover COMSOC</span>
@@ -189,10 +184,12 @@
                         Workshops, tech assemblies, hackathons, and organizational seminars.
                     </p>
                 </div>
+                @if($activities->isNotEmpty())
                 <a href="{{ route('public.activities') }}" class="btn-secondary text-xs sm:text-sm py-2 px-4 rounded-xl flex items-center gap-1.5 self-start md:self-auto border-[#334155]/60 hover:border-[#df747a]">
                     <span>Explore All Activities</span>
                     <i data-lucide="arrow-right" class="w-4 h-4"></i>
                 </a>
+                @endif
             </div>
 
             @if($activities->isEmpty())
@@ -266,10 +263,12 @@
                         Competitive programming awards, hackathon triumphs, and academic honors.
                     </p>
                 </div>
+                @if($achievements->isNotEmpty())
                 <a href="{{ route('public.achievements') }}" class="btn-secondary text-xs sm:text-sm py-2 px-4 rounded-xl flex items-center gap-1.5 self-start md:self-auto border-[#334155]/60 hover:border-[#df747a]">
                     <span>View All Honors</span>
                     <i data-lucide="arrow-right" class="w-4 h-4"></i>
                 </a>
+                @endif
             </div>
 
             @if($achievements->isEmpty())
@@ -376,10 +375,12 @@
                         Snapshots from student assemblies, hackathons, and community outreach.
                     </p>
                 </div>
+                @if($gallery->isNotEmpty())
                 <a href="{{ route('public.gallery') }}" class="btn-secondary text-xs sm:text-sm py-2 px-4 rounded-xl flex items-center gap-1.5 self-start md:self-auto border-[#334155]/60 hover:border-[#df747a]">
                     <span>View Entire Gallery</span>
                     <i data-lucide="arrow-right" class="w-4 h-4"></i>
                 </a>
+                @endif
             </div>
 
             @if($gallery->isEmpty())

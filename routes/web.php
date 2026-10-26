@@ -105,6 +105,12 @@ Route::middleware(['auth', 'verified', 'require_password_change'])->group(functi
         ->middleware('throttle:30,1')
         ->name('profile.sessions.destroy');
 
+    // Dedicated Settings Routes
+    Route::get('/settings', [\App\Http\Controllers\SettingsController::class, 'index'])->name('settings.index');
+    Route::patch('/settings/profile', [\App\Http\Controllers\SettingsController::class, 'updateProfile'])->name('settings.profile.update');
+    Route::patch('/settings/notifications', [\App\Http\Controllers\SettingsController::class, 'updateNotifications'])->name('settings.notifications.update');
+    Route::put('/settings/password', [\App\Http\Controllers\SettingsController::class, 'updatePassword'])->name('settings.password.update');
+
     // Student signature (own account only; no ids accepted from the client)
     Route::prefix('signature')->name('signature.')->group(function () {
         Route::get('/', [\App\Http\Controllers\MemberSignatureController::class, 'show'])->name('show');

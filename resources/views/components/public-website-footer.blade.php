@@ -19,7 +19,7 @@
             <!-- Col 1: COMSOC Branding -->
             <div class="min-w-0 space-y-3.5">
                 <a href="{{ route('public.home') }}" class="inline-flex items-center gap-3 group focus:outline-none focus-visible:ring-2 focus-visible:ring-[#df747a] rounded-lg">
-                    <img src="{{ asset('images/COMSOC.png') }}" alt="COMSOC Emblem" class="w-10 h-10 object-contain drop-shadow-sm group-hover:scale-105 transition-transform duration-200">
+                    <img src="{{ asset('images/COMSOC.png') }}" alt="COMSOC Emblem" class="w-12 h-12 object-contain drop-shadow-sm group-hover:scale-105 transition-transform duration-200">
                     <div>
                         <span class="font-extrabold text-white text-lg font-brand-display block tracking-tight group-hover:text-[#df747a] transition-colors">COMSOC</span>
                         <span class="text-[11px] text-[#df747a] font-semibold tracking-wider uppercase block">SorSU Bulan Campus</span>

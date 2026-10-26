@@ -16,7 +16,7 @@
     </section>
 
     <!-- Leadership Directory -->
-    <section class="pt-8 sm:pt-10 pb-16 sm:pb-24">
+    <section class="pt-8 sm:pt-10 pb-24 sm:pb-32">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-12">
 
             @if($officers->isEmpty())
@@ -38,7 +38,7 @@
                         <span class="text-xs text-slate-400 font-mono">Governing Board</span>
                     </div>
 
-                    <div class="grid grid-cols-1 lg:grid-cols-2 gap-5 sm:gap-6 items-stretch" data-reveal-group>
+                    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5 sm:gap-6 items-stretch" data-reveal-group>
                         @foreach($grouped['executive'] as $officer)
                             <x-officer-card :officer="$officer" />
                         @endforeach
@@ -48,7 +48,7 @@
 
                 {{-- 2. COMSOC Board of Directors --}}
                 @if(isset($grouped['board']) && $grouped['board']->isNotEmpty())
-                <section class="space-y-6 pt-4" data-reveal>
+                <section class="space-y-6 pt-6" data-reveal>
                     <div class="pb-3 flex items-center justify-between border-b border-[#334155]/30">
                         <div class="flex items-center gap-2.5">
                             <div class="w-7 h-7 rounded-lg bg-indigo-500/10 border border-indigo-500/20 flex items-center justify-center text-indigo-400">
@@ -59,7 +59,7 @@
                         <span class="text-xs text-slate-400 font-mono">Program Representatives</span>
                     </div>
 
-                    <div class="grid grid-cols-1 lg:grid-cols-2 gap-5 sm:gap-6 items-stretch" data-reveal-group>
+                    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5 sm:gap-6 items-stretch" data-reveal-group>
                         @foreach($grouped['board'] as $officer)
                             <x-officer-card :officer="$officer" />
                         @endforeach
@@ -69,7 +69,7 @@
 
                 {{-- 3. Liaisons --}}
                 @if(isset($grouped['liaison']) && $grouped['liaison']->isNotEmpty())
-                <section class="space-y-6 pt-4" data-reveal>
+                <section class="space-y-6 pt-6" data-reveal>
                     <div class="pb-3 flex items-center justify-between border-b border-[#334155]/30">
                         <div class="flex items-center gap-2.5">
                             <div class="w-7 h-7 rounded-lg bg-sky-500/10 border border-sky-500/20 flex items-center justify-center text-sky-400">
@@ -80,7 +80,7 @@
                         <span class="text-xs text-slate-400 font-mono">External & Internal</span>
                     </div>
 
-                    <div class="grid grid-cols-1 lg:grid-cols-2 gap-5 sm:gap-6 items-stretch" data-reveal-group>
+                    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5 sm:gap-6 items-stretch" data-reveal-group>
                         @foreach($grouped['liaison'] as $officer)
                             <x-officer-card :officer="$officer" />
                         @endforeach
@@ -90,7 +90,7 @@
 
                 {{-- 4. BSIT Program Officers --}}
                 @if(isset($grouped['bsit']) && $grouped['bsit']->isNotEmpty())
-                <section class="space-y-6 pt-4" data-reveal>
+                <section class="space-y-6 pt-6" data-reveal>
                     <div class="pb-3 flex items-center justify-between border-b border-[#334155]/30">
                         <div class="flex items-center gap-2.5">
                             <div class="w-7 h-7 rounded-lg bg-amber-500/10 border border-amber-500/20 flex items-center justify-center text-amber-400">
@@ -101,7 +101,7 @@
                         <span class="text-xs text-amber-400/80 font-mono font-semibold">Information Technology</span>
                     </div>
 
-                    <div class="grid grid-cols-1 lg:grid-cols-2 gap-5 sm:gap-6 items-stretch" data-reveal-group>
+                    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5 sm:gap-6 items-stretch" data-reveal-group>
                         @foreach($grouped['bsit'] as $officer)
                             <x-officer-card :officer="$officer" />
                         @endforeach
@@ -111,7 +111,7 @@
 
                 {{-- 5. BSCS Program Officers --}}
                 @if(isset($grouped['bscs']) && $grouped['bscs']->isNotEmpty())
-                <section class="space-y-6 pt-4" data-reveal>
+                <section class="space-y-6 pt-6" data-reveal>
                     <div class="pb-3 flex items-center justify-between border-b border-[#334155]/30">
                         <div class="flex items-center gap-2.5">
                             <div class="w-7 h-7 rounded-lg bg-cyan-500/10 border border-cyan-500/20 flex items-center justify-center text-cyan-400">
@@ -122,7 +122,7 @@
                         <span class="text-xs text-cyan-400/80 font-mono font-semibold">Computer Science</span>
                     </div>
 
-                    <div class="grid grid-cols-1 lg:grid-cols-2 gap-5 sm:gap-6 items-stretch" data-reveal-group>
+                    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5 sm:gap-6 items-stretch" data-reveal-group>
                         @foreach($grouped['bscs'] as $officer)
                             <x-officer-card :officer="$officer" />
                         @endforeach
@@ -132,7 +132,7 @@
 
                 {{-- 6. BSIS Program Officers --}}
                 @if(isset($grouped['bsis']) && $grouped['bsis']->isNotEmpty())
-                <section class="space-y-6 pt-4" data-reveal>
+                <section class="space-y-6 pt-6" data-reveal>
                     <div class="pb-3 flex items-center justify-between border-b border-[#334155]/30">
                         <div class="flex items-center gap-2.5">
                             <div class="w-7 h-7 rounded-lg bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center text-emerald-400">
@@ -143,7 +143,7 @@
                         <span class="text-xs text-emerald-400/80 font-mono font-semibold">Information Systems</span>
                     </div>
 
-                    <div class="grid grid-cols-1 lg:grid-cols-2 gap-5 sm:gap-6 items-stretch" data-reveal-group>
+                    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5 sm:gap-6 items-stretch" data-reveal-group>
                         @foreach($grouped['bsis'] as $officer)
                             <x-officer-card :officer="$officer" />
                         @endforeach
@@ -153,7 +153,7 @@
 
                 {{-- 7. BTVTED Program Officers --}}
                 @if(isset($grouped['btvted']) && $grouped['btvted']->isNotEmpty())
-                <section class="space-y-6 pt-4" data-reveal>
+                <section class="space-y-6 pt-6" data-reveal>
                     <div class="pb-3 flex items-center justify-between border-b border-[#334155]/30">
                         <div class="flex items-center gap-2.5">
                             <div class="w-7 h-7 rounded-lg bg-violet-500/10 border border-violet-500/20 flex items-center justify-center text-violet-400">
@@ -164,7 +164,7 @@
                         <span class="text-xs text-violet-400/80 font-mono font-semibold">Technical Vocational</span>
                     </div>
 
-                    <div class="grid grid-cols-1 lg:grid-cols-2 gap-5 sm:gap-6 items-stretch" data-reveal-group>
+                    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5 sm:gap-6 items-stretch" data-reveal-group>
                         @foreach($grouped['btvted'] as $officer)
                             <x-officer-card :officer="$officer" />
                         @endforeach

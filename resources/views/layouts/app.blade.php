@@ -56,7 +56,7 @@
 
                         <div class="flex items-center gap-2.5">
                             <a href="{{ route('dashboard') }}" class="flex items-center gap-2.5 group">
-                                <div class="w-8 h-8 rounded-xl bg-[#0B1120] border border-[#334155] p-1 flex items-center justify-center shrink-0 shadow-sm group-hover:border-[#8F3033] transition">
+                                <div class="w-9 h-9 sm:w-10 sm:h-10 rounded-xl bg-[#0B1120] border border-[#334155] p-1 flex items-center justify-center shrink-0 shadow-sm group-hover:border-[#8F3033] transition">
                                     <img src="{{ asset('images/COMSOC.png') }}" alt="Computing Society Logo" class="w-full h-full object-contain">
                                 </div>
                                 <div class="flex flex-col">
@@ -107,7 +107,12 @@
 
                                 <x-dropdown-link :href="route('profile.edit')" class="text-slate-300 hover:text-white hover:bg-[#1E293B] flex items-center gap-2 text-xs py-2.5">
                                     <i data-lucide="user" class="w-4 h-4 text-slate-400"></i>
-                                    {{ __('Profile & Settings') }}
+                                    {{ __('Member Profile') }}
+                                </x-dropdown-link>
+
+                                <x-dropdown-link :href="route('settings.index')" class="text-slate-300 hover:text-white hover:bg-[#1E293B] flex items-center gap-2 text-xs py-2.5">
+                                    <i data-lucide="settings" class="w-4 h-4 text-[#df747a]"></i>
+                                    {{ __('Settings & Preferences') }}
                                 </x-dropdown-link>
 
                                 <x-dropdown-link :href="route('profile.sessions')" class="text-slate-300 hover:text-white hover:bg-[#1E293B] flex items-center gap-2 text-xs py-2.5">

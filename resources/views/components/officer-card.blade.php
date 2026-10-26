@@ -17,19 +17,19 @@
     }
 @endphp
 
-<article data-reveal-item class="group relative rounded-2xl bg-[#172033]/30 border border-[#334155]/40 hover:border-[#df747a]/60 hover:bg-[#172033]/50 transition-all duration-300 p-5 sm:p-6 flex flex-col sm:flex-row items-center gap-5 sm:gap-6 shadow-md shadow-black/10">
+<article data-reveal-item class="group relative rounded-2xl bg-[#172033]/30 border border-[#334155]/40 hover:border-[#df747a]/60 hover:bg-[#172033]/50 transition-all duration-300 p-5 sm:p-5 flex flex-col sm:flex-row items-center sm:items-start gap-4 sm:gap-5 shadow-md shadow-black/10 h-full">
     
-    <!-- Left Section: Clean Officer Portrait / Initials Avatar (No nested boxed cards) -->
-    <div class="w-24 sm:w-28 md:w-32 shrink-0 flex items-center justify-center">
+    <!-- Left Section: Clean Officer Portrait / Initials Avatar -->
+    <div class="w-20 sm:w-20 md:w-24 shrink-0 flex items-center justify-center">
         @if($officer->portrait_url)
             <img 
                 src="{{ $officer->portrait_url }}" 
                 alt="{{ $officer->name }} portrait" 
-                class="w-20 h-20 sm:w-24 sm:h-24 rounded-2xl object-cover object-center border-2 border-[#334155]/60 group-hover:border-[#df747a] transition-all duration-300 shadow-sm"
+                class="w-18 h-18 sm:w-20 sm:h-20 md:w-22 md:h-22 rounded-2xl object-cover object-center border-2 border-[#334155]/60 group-hover:border-[#df747a] transition-all duration-300 shadow-sm"
                 loading="lazy"
             >
         @else
-            <div class="w-20 h-20 sm:w-24 sm:h-24 rounded-2xl bg-gradient-to-br from-[#172033] to-[#0B1120] border-2 border-[#334155]/60 group-hover:border-[#df747a] flex flex-col items-center justify-center text-white font-brand-display font-extrabold text-xl sm:text-2xl transition-all duration-300 shadow-sm select-none">
+            <div class="w-18 h-18 sm:w-20 sm:h-20 md:w-22 md:h-22 rounded-2xl bg-gradient-to-br from-[#172033] to-[#0B1120] border-2 border-[#334155]/60 group-hover:border-[#df747a] flex flex-col items-center justify-center text-white font-brand-display font-extrabold text-xl sm:text-2xl transition-all duration-300 shadow-sm select-none">
                 <span class="{{ $isVacant ? 'text-slate-500' : 'text-[#df747a]' }}">{{ $initials }}</span>
             </div>
         @endif

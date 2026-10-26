@@ -203,9 +203,15 @@
                 </a>
 
                 <a href="{{ route('profile.edit') }}"
-                   class="flex items-center gap-3 px-3 py-2.5 rounded-xl text-xs font-semibold transition {{ request()->routeIs('profile.*') ? 'bg-burgundy-gradient text-white shadow-md' : 'text-[#94A3B8] hover:text-white hover:bg-[#1E293B]' }}">
-                    <i data-lucide="user" class="w-4 h-4 shrink-0 {{ request()->routeIs('profile.*') ? 'text-white' : 'text-[#94A3B8]' }}"></i>
-                    <span>{{ __('Profile & Settings') }}</span>
+                   class="flex items-center gap-3 px-3 py-2.5 rounded-xl text-xs font-semibold transition {{ request()->routeIs('profile.edit') ? 'bg-burgundy-gradient text-white shadow-md' : 'text-[#94A3B8] hover:text-white hover:bg-[#1E293B]' }}">
+                    <i data-lucide="user" class="w-4 h-4 shrink-0 {{ request()->routeIs('profile.edit') ? 'text-white' : 'text-[#94A3B8]' }}"></i>
+                    <span>{{ __('Member Profile') }}</span>
+                </a>
+
+                <a href="{{ route('settings.index') }}"
+                   class="flex items-center gap-3 px-3 py-2.5 rounded-xl text-xs font-semibold transition {{ request()->routeIs('settings.*') ? 'bg-burgundy-gradient text-white shadow-md' : 'text-[#94A3B8] hover:text-white hover:bg-[#1E293B]' }}">
+                    <i data-lucide="settings" class="w-4 h-4 shrink-0 {{ request()->routeIs('settings.*') ? 'text-white' : 'text-[#94A3B8]' }}"></i>
+                    <span>{{ __('Settings & Preferences') }}</span>
                 </a>
 
                 <a href="{{ route('profile.sessions') }}"
@@ -281,9 +287,9 @@
 
         <button type="button"
                 @click="openDrawer()"
-                class="flex flex-col items-center justify-center py-2 px-1 rounded-xl transition-all duration-150 min-h-[48px] {{ request()->routeIs('profile.*', 'notifications.*', 'ledger.*', 'missions.*', 'directory.*', 'opportunities.*', 'announcements.*', 'projects.*', 'volunteers.*', 'helpdesk.*', 'admin.*', 'organizer.*') ? 'bg-burgundy-gradient text-white shadow-md' : 'text-[#94A3B8] hover:text-[#F8FAFC] hover:bg-[#1E293B]' }}"
+                class="flex flex-col items-center justify-center py-2 px-1 rounded-xl transition-all duration-150 min-h-[48px] {{ request()->routeIs('settings.*', 'profile.*', 'notifications.*', 'ledger.*', 'missions.*', 'directory.*', 'opportunities.*', 'announcements.*', 'projects.*', 'volunteers.*', 'helpdesk.*', 'admin.*', 'organizer.*') ? 'bg-burgundy-gradient text-white shadow-md' : 'text-[#94A3B8] hover:text-[#F8FAFC] hover:bg-[#1E293B]' }}"
                 aria-label="Open full navigation menu">
-            <i data-lucide="menu" class="w-5 h-5 shrink-0 {{ request()->routeIs('profile.*', 'notifications.*', 'ledger.*', 'missions.*', 'directory.*', 'opportunities.*', 'announcements.*', 'projects.*', 'volunteers.*', 'helpdesk.*', 'admin.*', 'organizer.*') ? 'text-white' : 'text-[#94A3B8]' }}"></i>
+            <i data-lucide="menu" class="w-5 h-5 shrink-0 {{ request()->routeIs('settings.*', 'profile.*', 'notifications.*', 'ledger.*', 'missions.*', 'directory.*', 'opportunities.*', 'announcements.*', 'projects.*', 'volunteers.*', 'helpdesk.*', 'admin.*', 'organizer.*') ? 'text-white' : 'text-[#94A3B8]' }}"></i>
             <span class="text-[10px] font-semibold mt-1 truncate">Menu</span>
         </button>
     </div>

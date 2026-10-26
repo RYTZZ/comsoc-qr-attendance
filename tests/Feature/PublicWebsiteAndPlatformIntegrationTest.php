@@ -346,4 +346,112 @@ class PublicWebsiteAndPlatformIntegrationTest extends TestCase
         $this->actingAs($this->student)->get(route('admin.website.officers'))->assertForbidden();
         $this->actingAs($this->student)->post(route('admin.website.settings.update'), [])->assertForbidden();
     }
+
+    public function test_conditional_cta_buttons_for_empty_and_populated_content_sections(): void
+    {
+        // 1. Initial State: 0 activities, 0 honors, 0 gallery items in DB
+        $resEmpty = $this->get(route('public.home'));
+        $resEmpty->assertOk();
+        $resEmpty->assertDontSee('Explore All Activities');
+        $resEmpty->assertDontSee('View All Honors');
+        $resEmpty->assertDontSee('View Entire Gallery');
+
+        // Verify draft/unpublished items do NOT trigger CTA visibility
+        Event::create([
+            'academic_year_id' => $this->academicYear->id,
+            'name' => 'Internal Draft Event',
+            'event_date' => now()->addDays(5)->toDateString(),
+            'status' => 'draft',
+            'is_published' => false,
+            'is_public' => true,
+            'created_by' => $this->superAdmin->id,
+        ]);
+        OrgAchievement::create([
+            'title' => 'Unpublished Milestone',
+            'description' => 'Draft description',
+            'is_published' => false,
+        ]);
+        OrgGalleryItem::create([
+            'title' => 'Draft Photo',
+            'image_path' => 'gallery/draft.jpg',
+            'alt_text' => 'Draft alt',
+            'is_published' => false,
+        ]);
+
+        $resStillEmpty = $this->get(route('public.home'));
+        $resStillEmpty->assertOk();
+        $resStillEmpty->assertDontSee('Explore All Activities');
+        $resStillEmpty->assertDontSee('View All Honors');
+        $resStillEmpty->assertDontSee('View Entire Gallery');
+
+        // 2. Scenario A: 1+ published activity only
+        $event = Event::create([
+            'academic_year_id' => $this->academicYear->id,
+            'name' => 'Published Tech Workshop',
+            'event_date' => now()->addDays(2)->toDateString(),
+            'status' => 'upcoming',
+            'is_published' => true,
+            'is_public' => true,
+            'public_slug' => 'published-tech-workshop',
+            'created_by' => $this->superAdmin->id,
+        ]);
+
+        $resActivityOnly = $this->get(route('public.home'));
+        $resActivityOnly->assertOk();
+        $resActivityOnly->assertSee('Explore All Activities');
+        $resActivityOnly->assertDontSee('View All Honors');
+        $resActivityOnly->assertDontSee('View Entire Gallery');
+
+        // 3. Scenario B: 1+ published honor only (delete event)
+        $event->delete();
+        $achievement = OrgAchievement::create([
+            'title' => 'Regional Hackathon Gold',
+            'description' => 'First place winner',
+            'is_published' => true,
+        ]);
+
+        $resHonorOnly = $this->get(route('public.home'));
+        $resHonorOnly->assertOk();
+        $resHonorOnly->assertDontSee('Explore All Activities');
+        $resHonorOnly->assertSee('View All Honors');
+        $resHonorOnly->assertDontSee('View Entire Gallery');
+
+        // 4. Scenario C: 1+ published gallery item only (delete achievement)
+        $achievement->delete();
+        $gallery = OrgGalleryItem::create([
+            'title' => 'Campus Assembly 2026',
+            'image_path' => 'gallery/assembly.jpg',
+            'alt_text' => 'Campus assembly photo',
+            'is_published' => true,
+        ]);
+
+        $resGalleryOnly = $this->get(route('public.home'));
+        $resGalleryOnly->assertOk();
+        $resGalleryOnly->assertDontSee('Explore All Activities');
+        $resGalleryOnly->assertDontSee('View All Honors');
+        $resGalleryOnly->assertSee('View Entire Gallery');
+
+        // 5. Scenario D: All 3 populated
+        Event::create([
+            'academic_year_id' => $this->academicYear->id,
+            'name' => 'Published Tech Workshop',
+            'event_date' => now()->addDays(2)->toDateString(),
+            'status' => 'upcoming',
+            'is_published' => true,
+            'is_public' => true,
+            'public_slug' => 'published-tech-workshop',
+            'created_by' => $this->superAdmin->id,
+        ]);
+        OrgAchievement::create([
+            'title' => 'Regional Hackathon Gold',
+            'description' => 'First place winner',
+            'is_published' => true,
+        ]);
+
+        $resAll = $this->get(route('public.home'));
+        $resAll->assertOk();
+        $resAll->assertSee('Explore All Activities');
+        $resAll->assertSee('View All Honors');
+        $resAll->assertSee('View Entire Gallery');
+    }
 }

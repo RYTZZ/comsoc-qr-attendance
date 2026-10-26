@@ -39,7 +39,7 @@
 
                 <!-- Logo & Brand (No boxed container, clean logo and typography) -->
                 <a href="{{ route('public.home') }}" class="flex items-center gap-3.5 group focus:outline-none focus:ring-2 focus:ring-[#df747a] rounded-lg py-1 px-1.5 transition-colors">
-                    <img src="{{ asset('images/COMSOC.png') }}" alt="COMSOC Logo" class="w-9 h-9 sm:w-11 sm:h-11 object-contain drop-shadow-sm group-hover:scale-105 transition-transform">
+                    <img src="{{ asset('images/COMSOC.png') }}" alt="COMSOC Logo" class="w-11 h-11 sm:w-13 sm:h-13 object-contain drop-shadow-sm group-hover:scale-105 transition-transform">
                     <div class="flex flex-col">
                         <span class="font-extrabold text-white text-base sm:text-lg font-brand-display tracking-tight leading-none group-hover:text-[#df747a] transition-colors">
                             {{ $settings['org_short_name'] ?? 'COMSOC' }}

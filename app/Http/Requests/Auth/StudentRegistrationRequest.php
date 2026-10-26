@@ -15,6 +15,18 @@ class StudentRegistrationRequest extends FormRequest
         return true;
     }
 
+    protected function prepareForValidation(): void
+    {
+        $this->merge([
+            'student_id' => $this->student_id ? trim((string) $this->student_id) : null,
+            'first_name' => $this->first_name ? trim((string) $this->first_name) : null,
+            'last_name' => $this->last_name ? trim((string) $this->last_name) : null,
+            'middle_name' => $this->middle_name ? trim((string) $this->middle_name) : null,
+            'email' => $this->email ? strtolower(trim((string) $this->email)) : null,
+            'username' => $this->username ? strtolower(trim((string) $this->username)) : null,
+        ]);
+    }
+
     public function rules(): array
     {
         return [
@@ -31,6 +43,7 @@ class StudentRegistrationRequest extends FormRequest
                     }
                 },
                 Rule::unique('students', 'student_number'),
+                Rule::unique('users', 'student_number'),
             ],
             'first_name' => ['required', 'string', 'max:100'],
             'last_name' => ['required', 'string', 'max:100'],

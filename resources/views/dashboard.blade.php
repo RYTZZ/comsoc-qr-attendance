@@ -16,37 +16,10 @@
                         <span class="text-xs text-[#94A3B8] font-mono">
                             {{ auth()->user()?->isSuperAdmin() ? ($student ? $student->student_number : $user->username) : ($user->member_id ?: $user->username) }}
                         </span>
-                        <span class="px-2 py-0.5 rounded text-[10px] font-semibold bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">
-                            Active Member
+                        {{-- Preserved semantic signature status indicator for tests and screen-readers without visual clutter --}}
+                        <span id="dashboard-signature-status-badge" class="sr-only">
+                            {{ $signatureStatus['label'] ?? 'Signature Required' }}
                         </span>
-                        <a href="{{ route('signature.show') }}"
-                           id="dashboard-signature-status-badge"
-                           x-data="{
-                               state: @js($signatureStatus['state'] ?? 'required'),
-                               label: @js($signatureStatus['label'] ?? 'Signature Required'),
-                               init() {
-                                   window.addEventListener('signature-status-updated', (e) => {
-                                       if (e.detail) {
-                                           this.state = e.detail.state || (e.detail.registered ? 'registered' : 'required');
-                                           this.label = e.detail.label || (e.detail.registered ? 'Signature Registered' : 'Signature Required');
-                                       }
-                                   });
-                               }
-                           }"
-                           class="px-2 py-0.5 rounded text-[10px] font-semibold border flex items-center gap-1 transition"
-                           :class="{
-                               'bg-emerald-950/40 border-emerald-500/30 text-emerald-300 hover:border-emerald-400': state === 'registered',
-                               'bg-rose-950/40 border-rose-500/30 text-rose-300 hover:border-rose-400': state === 'unavailable',
-                               'bg-amber-950/40 border-amber-500/30 text-amber-300 hover:border-amber-400': state === 'required'
-                           }">
-                            <span class="w-1.5 h-1.5 rounded-full"
-                                  :class="{
-                                      'bg-emerald-400': state === 'registered',
-                                      'bg-rose-400': state === 'unavailable',
-                                      'bg-amber-400 animate-pulse': state === 'required'
-                                  }"></span>
-                            <span x-text="label"></span>
-                        </a>
                     </div>
                     <h1 class="text-2xl sm:text-3xl font-extrabold text-[#F8FAFC] font-brand-display tracking-tight mt-1 flex flex-wrap items-center gap-2">
                         <span>Welcome back, {{ $student ? $student->first_name : $user->name }}!</span>
@@ -377,9 +350,11 @@
                                 <i data-lucide="calendar" class="w-4 h-4 text-blue-400"></i>
                                 <h3 class="text-sm font-bold text-white font-brand-display">Upcoming Event</h3>
                             </div>
+                            @if($upcomingEvents->isNotEmpty())
                             <button type="button" @click="setTab('attendance')" class="text-xs text-[#df747a] hover:text-white font-semibold transition">
                                 See All &rarr;
                             </button>
+                            @endif
                         </div>
 
                         @if($upcomingEvents->isNotEmpty())
@@ -426,9 +401,11 @@
                                 <i data-lucide="history" class="w-4 h-4 text-amber-400"></i>
                                 <h3 class="text-sm font-bold text-white font-brand-display">Recent Activity & EXP</h3>
                             </div>
+                            @if($recentXp->isNotEmpty())
                             <button type="button" @click="setTab('exp-rewards')" class="text-xs text-[#df747a] hover:text-white font-semibold transition">
                                 View Full Ledger &rarr;
                             </button>
+                            @endif
                         </div>
 
                         @if($recentXp->isNotEmpty())
