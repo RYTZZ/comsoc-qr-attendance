@@ -267,6 +267,13 @@
 
 <!-- Mobile Floating Bottom Navigation Bar -->
 <nav aria-label="Mobile Bottom Navigation"
+     x-show="!readerFullscreen"
+     x-transition:enter="transition-all ease-out duration-200"
+     x-transition:enter-start="opacity-0 translate-y-6"
+     x-transition:enter-end="opacity-100 translate-y-0"
+     x-transition:leave="transition-all ease-in duration-150"
+     x-transition:leave-start="opacity-100 translate-y-0"
+     x-transition:leave-end="opacity-0 translate-y-6"
      class="lg:hidden fixed bottom-3 inset-x-3 sm:inset-x-8 max-w-lg mx-auto z-30 bg-[#172033]/95 backdrop-blur-lg border border-[#334155] rounded-2xl shadow-2xl p-1.5 transition-all duration-300 safe-area-bottom">
     <div class="grid grid-cols-5 items-center gap-1">
         <a href="{{ route('dashboard') }}"

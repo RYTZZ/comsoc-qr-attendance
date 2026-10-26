@@ -16,6 +16,7 @@
     <body class="h-full bg-[#0B1120] text-[#F8FAFC] font-sans antialiased"
           x-data="{
               drawerOpen: false,
+              readerFullscreen: false,
               openDrawer() {
                   this.drawerOpen = true;
                   this.$nextTick(() => {
@@ -35,7 +36,8 @@
                   }
               }
           }"
-          x-effect="document.body.classList.toggle('overflow-hidden', drawerOpen)"
+          x-effect="document.body.classList.toggle('overflow-hidden', drawerOpen || readerFullscreen)"
+          @reader-fullscreen.window="readerFullscreen = $event.detail"
           @keydown.escape.window="closeDrawer()">
         <div class="min-h-screen bg-[#0B1120] flex flex-col">
             @include('layouts.navigation')
