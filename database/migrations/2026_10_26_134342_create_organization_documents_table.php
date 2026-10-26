@@ -11,6 +11,8 @@ return new class extends Migration
      */
     public function up(): void
     {
+        Schema::dropIfExists('organization_documents');
+
         Schema::create('organization_documents', function (Blueprint $table) {
             $table->id();
             $table->string('code', 50)->unique(); // e.g. 'cbl'
