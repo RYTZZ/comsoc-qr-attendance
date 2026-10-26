@@ -363,7 +363,7 @@
 
     <!-- Section 7: Organization Gallery Preview (With Accessible Lightbox) -->
     @if($settings['section_gallery_visible'] ?? true)
-    <section id="gallery" class="py-16 sm:py-24 scroll-mt-20" x-data="{ lightboxOpen: false, activeImage: '', activeTitle: '', activeCaption: '' }">
+    <section id="gallery" class="py-16 sm:py-24 scroll-mt-20" x-data="{ lightboxOpen: false, activeImage: '', activeTitle: '', activeCaption: '' }" x-init="$watch('lightboxOpen', value => { if (value) { document.body.classList.add('overflow-y-hidden'); } else { document.body.classList.remove('overflow-y-hidden'); } })">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div class="flex flex-col md:flex-row md:items-end justify-between gap-4 mb-8" data-reveal>
                 <div>
@@ -414,7 +414,7 @@
              x-transition:leave-start="opacity-100"
              x-transition:leave-end="opacity-0"
              @keydown.escape.window="lightboxOpen = false"
-             class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/90 backdrop-blur-md"
+             class="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/90 backdrop-blur-md overflow-y-auto"
              style="display: none;"
              role="dialog"
              aria-modal="true"

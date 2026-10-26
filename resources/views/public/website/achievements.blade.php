@@ -19,7 +19,7 @@
     </section>
 
     <!-- Achievements Grid / Timeline -->
-    <section class="pt-8 sm:pt-10 pb-16 sm:pb-24">
+    <section class="pt-8 sm:pt-10 pb-24 sm:pb-32">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
 
             @if($achievements->isEmpty())

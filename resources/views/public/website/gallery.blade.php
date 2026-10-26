@@ -19,7 +19,20 @@
     </section>
 
     <!-- Gallery Grid with Lightbox -->
-    <section class="pt-8 sm:pt-10 pb-16 sm:pb-24" x-data="{ lightboxOpen: false, activeImage: '', activeTitle: '', activeCaption: '' }">
+    <section class="pt-8 sm:pt-10 pb-24 sm:pb-32" 
+             x-data="{ 
+                 lightboxOpen: false, 
+                 activeImage: '', 
+                 activeTitle: '', 
+                 activeCaption: '' 
+             }"
+             x-init="$watch('lightboxOpen', value => {
+                 if (value) {
+                     document.body.classList.add('overflow-y-hidden');
+                 } else {
+                     document.body.classList.remove('overflow-y-hidden');
+                 }
+             })">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
 
             @if($gallery->isEmpty())
@@ -63,7 +76,7 @@
                             @endif
                             @if($photo->event)
                                 <div class="pt-2 flex items-center gap-1.5 text-[11px] text-[#df747a] font-mono">
-                                    <i data-lucide="calendar" class="w-3 h-3 shrink-0"></i>
+                                    <i data-lucide="calendar" class="w-3.5 h-3.5 shrink-0"></i>
                                     <span class="truncate">{{ $photo->event->name }}</span>
                                 </div>
                             @endif
@@ -81,7 +94,7 @@
 
         </div>
 
-        <!-- Accessible Lightbox Modal Dialog -->
+        <!-- Accessible Lightbox Modal Dialog (teleported/fixed with z-[100] and backdrop) -->
         <div x-show="lightboxOpen"
              x-transition:enter="transition ease-out duration-200"
              x-transition:enter-start="opacity-0"
@@ -90,12 +103,12 @@
              x-transition:leave-start="opacity-100"
              x-transition:leave-end="opacity-0"
              @keydown.escape.window="lightboxOpen = false"
-             class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/90 backdrop-blur-md"
+             class="fixed inset-0 z-[100] flex items-center justify-center p-4 sm:p-6 bg-black/90 backdrop-blur-md overflow-y-auto"
              style="display: none;"
              role="dialog"
              aria-modal="true"
              aria-label="Image Preview Lightbox">
-            <div class="relative max-w-4xl w-full bg-[#0B1120] border border-[#334155] rounded-2xl overflow-hidden shadow-2xl"
+            <div class="relative max-w-4xl w-full bg-[#0B1120] border border-[#334155] rounded-2xl overflow-hidden shadow-2xl my-auto"
                  @click.away="lightboxOpen = false">
                 <div class="flex items-center justify-between p-4 border-b border-[#334155]/80 bg-[#172033]/60">
                     <h3 class="text-sm font-bold text-white truncate pr-4 font-brand-display" x-text="activeTitle || 'Photo Preview'"></h3>
@@ -115,5 +128,6 @@
             </div>
         </div>
     </section>
+
 
 </x-public-website-layout>

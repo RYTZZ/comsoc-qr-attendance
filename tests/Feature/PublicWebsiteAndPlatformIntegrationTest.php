@@ -85,6 +85,26 @@ class PublicWebsiteAndPlatformIntegrationTest extends TestCase
             $response->assertSee('Official Facebook Page');
         }
 
+        // Verify standardized footer transition spacing across Home, Gallery, Achievements, Activities, Partners
+        $pagesToCheckSpacing = [
+            route('public.home'),
+            route('public.gallery'),
+            route('public.achievements'),
+            route('public.activities'),
+            route('public.partners'),
+        ];
+        foreach ($pagesToCheckSpacing as $url) {
+            $resp = $this->get($url);
+            $resp->assertOk();
+            $resp->assertSee('pb-24 sm:pb-32');
+        }
+
+        // Verify gallery lightbox has z-[100] and body scroll-lock handler
+        $galleryRes = $this->get(route('public.gallery'));
+        $galleryRes->assertOk();
+        $galleryRes->assertSee("overflow-y-hidden");
+        $galleryRes->assertSee("z-[100]");
+
         $aboutRes = $this->get(route('public.about'));
         $aboutRes->assertSee('Organization Background');
         $aboutRes->assertSee('A Message From The President');

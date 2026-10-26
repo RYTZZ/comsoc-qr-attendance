@@ -146,7 +146,7 @@
     </section>
 
     <!-- Partners Grid Section -->
-    <section id="partners-roster" class="pt-8 sm:pt-10 pb-16 sm:pb-24 scroll-mt-16">
+    <section id="partners-roster" class="pt-8 sm:pt-10 pb-24 sm:pb-32 scroll-mt-16">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
 
             @if($partners->isEmpty())
