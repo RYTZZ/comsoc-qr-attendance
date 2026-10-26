@@ -108,22 +108,22 @@
              role="dialog"
              aria-modal="true"
              aria-label="Image Preview Lightbox">
-            <div class="relative max-w-4xl w-full bg-[#0B1120] border border-[#334155] rounded-2xl overflow-hidden shadow-2xl my-auto"
+            <div class="relative max-w-[95vw] sm:max-w-4xl w-full bg-[#0B1120] border border-[#334155] rounded-2xl overflow-hidden shadow-2xl my-auto"
                  @click.away="lightboxOpen = false">
-                <div class="flex items-center justify-between p-4 border-b border-[#334155]/80 bg-[#172033]/60">
-                    <h3 class="text-sm font-bold text-white truncate pr-4 font-brand-display" x-text="activeTitle || 'Photo Preview'"></h3>
+                <div class="flex items-center justify-between p-3.5 sm:p-4 border-b border-[#334155]/80 bg-[#172033]/60">
+                    <h3 class="text-xs sm:text-sm font-bold text-white truncate pr-3 font-brand-display" x-text="activeTitle || 'Photo Preview'"></h3>
                     <button type="button"
                             @click="lightboxOpen = false"
-                            class="min-w-[40px] min-h-[40px] p-2 rounded-xl text-slate-300 hover:text-white hover:bg-[#172033] focus:outline-none focus-visible:ring-2 focus-visible:ring-[#df747a] flex items-center justify-center transition-colors"
+                            class="min-w-[40px] min-h-[40px] p-2 rounded-xl text-slate-300 hover:text-white hover:bg-[#172033] focus:outline-none focus-visible:ring-2 focus-visible:ring-[#df747a] flex items-center justify-center transition-colors shrink-0"
                             aria-label="Close photo preview">
                         <i data-lucide="x" class="w-5 h-5"></i>
                     </button>
                 </div>
-                <div class="max-h-[75vh] overflow-hidden flex items-center justify-center bg-black">
-                    <img :src="activeImage" :alt="activeTitle || 'Gallery preview'" class="max-h-[70vh] w-auto max-w-full object-contain">
+                <div class="max-h-[60vh] sm:max-h-[75vh] overflow-hidden flex items-center justify-center bg-black">
+                    <img :src="activeImage" :alt="activeTitle || 'Gallery preview'" class="max-h-[58vh] sm:max-h-[72vh] w-auto max-w-full object-contain">
                 </div>
-                <div x-show="activeCaption" class="p-4 bg-[#0B1120] border-t border-[#334155]/80">
-                    <p class="text-xs text-slate-300 leading-relaxed" x-text="activeCaption"></p>
+                <div x-show="activeCaption" class="p-3.5 sm:p-4 bg-[#0B1120] border-t border-[#334155]/80">
+                    <p class="text-xs text-slate-300 leading-relaxed break-words" x-text="activeCaption"></p>
                 </div>
             </div>
         </div>
