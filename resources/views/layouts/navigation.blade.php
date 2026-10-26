@@ -153,6 +153,12 @@
                     <i data-lucide="life-buoy" class="w-4 h-4 shrink-0 {{ request()->routeIs('helpdesk.*') ? 'text-white' : 'text-[#94A3B8]' }}"></i>
                     <span>{{ __('Help Desk & Disputes') }}</span>
                 </a>
+
+                <a href="{{ route('constitution.index') }}"
+                   class="flex items-center gap-3 px-3 py-2.5 rounded-xl text-xs font-semibold transition {{ request()->routeIs('constitution.*') ? 'bg-burgundy-gradient text-white shadow-md' : 'text-[#94A3B8] hover:text-white hover:bg-[#1E293B]' }}">
+                    <i data-lucide="scroll-text" class="w-4 h-4 shrink-0 {{ request()->routeIs('constitution.*') ? 'text-white' : 'text-[#94A3B8]' }}"></i>
+                    <span>{{ __('Constitution & By-Laws') }}</span>
+                </a>
             </div>
         </div>
 

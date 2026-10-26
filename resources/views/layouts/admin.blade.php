@@ -260,6 +260,14 @@
                 Officer & Staff Accounts
             </a>
 
+            @if(auth()->user()->isAdmin() || auth()->user()->isSuperAdmin())
+            <a href="{{ route('admin.constitution.index') }}"
+               class="sidebar-link {{ request()->routeIs('admin.constitution.*') ? 'active' : '' }}">
+                <i data-lucide="scroll-text" class="sidebar-link-icon text-amber-400"></i>
+                Constitution & By-Laws
+            </a>
+            @endif
+
             <a href="{{ route('admin.website.settings') }}"
                class="sidebar-link {{ request()->routeIs('admin.website.*') ? 'active' : '' }}">
                 <i data-lucide="globe" class="sidebar-link-icon"></i>

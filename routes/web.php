@@ -233,6 +233,17 @@ Route::middleware(['auth', 'verified', 'require_password_change'])->group(functi
         Route::post('/applications/{application}/approve-hours', [\App\Http\Controllers\VolunteerOpportunityController::class, 'approveHours'])->name('applications.approve-hours');
     });
 
+    // Constitutional and By-Laws Module
+    Route::prefix('constitution')->name('constitution.')->group(function () {
+        Route::get('/', [\App\Http\Controllers\ConstitutionController::class, 'index'])->name('index');
+        Route::get('/preview', [\App\Http\Controllers\ConstitutionController::class, 'preview'])
+            ->middleware('throttle:60,1')
+            ->name('preview');
+        Route::get('/download', [\App\Http\Controllers\ConstitutionController::class, 'download'])
+            ->middleware('throttle:30,1')
+            ->name('download');
+    });
+
     // Event Organizer Workspace & Live Scanner
     Route::middleware(['role:event_organizer,staff,comsoc_admin,admin,super_admin'])->prefix('organizer')->name('organizer.')->group(function () {
         Route::get('/scanner', [\App\Http\Controllers\OrganizerScannerController::class, 'index'])->name('scanner');
@@ -364,6 +375,14 @@ Route::middleware(['auth', 'verified', 'require_password_change'])->group(functi
             // Evaluation Results & Analytics
             Route::get('evaluations/results', [\App\Http\Controllers\Admin\EventEvaluationReportController::class, 'index'])->name('evaluations.results.index');
             Route::get('evaluations/results/{evaluation}', [\App\Http\Controllers\Admin\EventEvaluationReportController::class, 'show'])->name('evaluations.results.show');
+
+            // Constitutional and By-Laws Admin Management
+            Route::prefix('constitution')->name('constitution.')->group(function () {
+                Route::get('/', [\App\Http\Controllers\Admin\AdminConstitutionController::class, 'index'])->name('index');
+                Route::post('/upload', [\App\Http\Controllers\Admin\AdminConstitutionController::class, 'upload'])->name('upload');
+                Route::patch('/metadata', [\App\Http\Controllers\Admin\AdminConstitutionController::class, 'updateMetadata'])->name('update-metadata');
+                Route::post('/toggle-publish', [\App\Http\Controllers\Admin\AdminConstitutionController::class, 'togglePublish'])->name('toggle-publish');
+            });
         });
 
         Route::resource('students', StudentController::class)->only(['index', 'show', 'update']);
