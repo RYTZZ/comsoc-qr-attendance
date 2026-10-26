@@ -361,7 +361,30 @@ class Event extends Model
 
     public function isEnded(): bool
     {
-        return ($this->ends_at && now()->gt($this->ends_at)) || $this->status === 'completed';
+        if (in_array($this->status, ['completed', 'archived', 'cancelled'])) {
+            return true;
+        }
+
+        if ($this->ends_at && now()->gt($this->ends_at)) {
+            return true;
+        }
+
+        // If attendance_ends_at time string (e.g. '17:00') is set and event_date is present
+        if ($this->attendance_ends_at && $this->event_date) {
+            try {
+                $attendanceEnd = \Illuminate\Support\Carbon::parse($this->event_date->format('Y-m-d') . ' ' . $this->attendance_ends_at);
+                if (now()->gt($attendanceEnd)) {
+                    return true;
+                }
+            } catch (\Throwable $e) {}
+        }
+
+        // If only event_date is specified with no ends_at, consider ended when the event calendar day has completely passed
+        if (!$this->ends_at && $this->event_date && now()->gt($this->event_date->copy()->endOfDay())) {
+            return true;
+        }
+
+        return false;
     }
 
     public function getResolvedSlugAttribute(): string

@@ -143,6 +143,31 @@
                             <a href="{{ route('events.index') }}" class="btn-secondary w-full text-xs py-2.5 flex items-center justify-center gap-1.5">
                                 <span>Return to Events & Activities</span>
                             </a>
+                @elseif(($passState ?? 'no_events') === 'ended')
+                    <!-- Case D: Event Has Ended -->
+                    <div class="w-full p-6 sm:p-8 bg-slate-900/90 rounded-2xl border border-slate-800 space-y-4 my-2">
+                        <div class="w-16 h-16 mx-auto rounded-2xl bg-amber-500/10 border border-amber-500/30 flex items-center justify-center text-amber-400 shadow-inner">
+                            <i data-lucide="calendar-x" class="w-8 h-8"></i>
+                        </div>
+                        <div class="space-y-2">
+                            <h3 class="text-base font-bold text-amber-400 font-brand-display">Event Ended</h3>
+                            <p class="text-xs text-slate-300 leading-relaxed font-medium">
+                                This event has ended. Your attendance QR Code is no longer available.
+                            </p>
+                            <p class="text-[11px] text-[#94A3B8] leading-relaxed">
+                                Attendance check-in for this event is closed. You can view your attendance records or check other upcoming events.
+                            </p>
+                        </div>
+                        <div class="pt-2 flex flex-col gap-2">
+                            @if(isset($eventRegistration))
+                                <a href="{{ route('tickets.show', $eventRegistration) }}" class="btn-secondary w-full text-xs py-2.5 flex items-center justify-center gap-1.5 font-semibold">
+                                    <i data-lucide="ticket" class="w-4 h-4"></i>
+                                    <span>View Event Pass</span>
+                                </a>
+                            @endif
+                            <a href="{{ route('events.index') }}" class="btn-primary w-full text-xs py-2 flex items-center justify-center gap-1.5">
+                                <span>Browse Events & Activities</span>
+                            </a>
                         </div>
                     </div>
                 @else

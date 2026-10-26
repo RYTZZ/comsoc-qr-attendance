@@ -35,30 +35,58 @@
     <div class="py-8 bg-[#0B1120]">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-6">
 
-            <div class="card bg-[#172033] border border-[#334155] p-4 rounded-2xl shadow-xl">
+            <div class="card bg-[#172033] border border-[#334155] p-3 sm:p-4 rounded-2xl shadow-xl">
                 <div class="flex flex-col md:flex-row md:items-center justify-between gap-4">
-                    <div class="flex flex-wrap items-center gap-2">
+                    <div class="flex items-center gap-1.5 sm:gap-2 overflow-x-auto scrollbar-none py-1" role="tablist" aria-label="Leaderboard and Recognition Tabs">
+                        <!-- Tab 1: Semester Leaderboard -->
                         <a href="{{ route('leaderboard.index', ['tab' => 'semester', 'season_id' => $selectedSeasonId]) }}"
-                           class="px-4 py-2 rounded-xl text-xs font-bold transition-all flex items-center gap-2 border {{ $tab === 'semester' ? 'bg-burgundy-gradient text-white border-[#8F3033] shadow-lg shadow-[#560E0F]/30' : 'bg-[#0B1120] text-[#94A3B8] hover:text-white border-[#334155]' }}">
-                            <i data-lucide="calendar" class="w-4 h-4"></i>
+                           role="tab"
+                           aria-selected="{{ $tab === 'semester' ? 'true' : 'false' }}"
+                           class="px-3.5 sm:px-4 py-2 sm:py-2.5 rounded-xl text-xs font-bold transition-all flex items-center gap-2 border whitespace-nowrap {{ $tab === 'semester' ? 'bg-burgundy-gradient text-white border-[#8F3033] shadow-lg shadow-[#560E0F]/30' : 'bg-[#0B1120] text-[#94A3B8] hover:text-white border-[#334155]' }}">
+                            <i data-lucide="calendar" class="w-4 h-4 text-rose-400"></i>
                             <span>Semester Leaderboard</span>
                         </a>
 
+                        <!-- Tab 2: Lifetime Leaderboard -->
                         <a href="{{ route('leaderboard.index', ['tab' => 'lifetime']) }}"
-                           class="px-4 py-2 rounded-xl text-xs font-bold transition-all flex items-center gap-2 border {{ $tab === 'lifetime' ? 'bg-burgundy-gradient text-white border-[#8F3033] shadow-lg shadow-[#560E0F]/30' : 'bg-[#0B1120] text-[#94A3B8] hover:text-white border-[#334155]' }}">
+                           role="tab"
+                           aria-selected="{{ $tab === 'lifetime' ? 'true' : 'false' }}"
+                           class="px-3.5 sm:px-4 py-2 sm:py-2.5 rounded-xl text-xs font-bold transition-all flex items-center gap-2 border whitespace-nowrap {{ $tab === 'lifetime' ? 'bg-burgundy-gradient text-white border-[#8F3033] shadow-lg shadow-[#560E0F]/30' : 'bg-[#0B1120] text-[#94A3B8] hover:text-white border-[#334155]' }}">
                             <i data-lucide="crown" class="w-4 h-4 text-amber-400"></i>
                             <span>Lifetime Leaderboard</span>
                         </a>
 
-                        <a href="{{ route('leaderboard.index', ['tab' => 'achievements']) }}"
-                           class="px-4 py-2 rounded-xl text-xs font-bold transition-all flex items-center gap-2 border {{ $tab === 'achievements' ? 'bg-burgundy-gradient text-white border-[#8F3033] shadow-lg shadow-[#560E0F]/30' : 'bg-[#0B1120] text-[#94A3B8] hover:text-white border-[#334155]' }}">
-                            <i data-lucide="award" class="w-4 h-4 text-[#df747a]"></i>
-                            <span>Milestones & Badges ({{ $unlockedCount }}/{{ $totalCount }})</span>
+                        <!-- Tab 3: Milestones -->
+                        <a href="{{ route('leaderboard.index', ['tab' => 'milestones']) }}"
+                           role="tab"
+                           aria-selected="{{ $tab === 'milestones' ? 'true' : 'false' }}"
+                           class="px-3.5 sm:px-4 py-2 sm:py-2.5 rounded-xl text-xs font-bold transition-all flex items-center gap-2 border whitespace-nowrap {{ $tab === 'milestones' ? 'bg-burgundy-gradient text-white border-[#8F3033] shadow-lg shadow-[#560E0F]/30' : 'bg-[#0B1120] text-[#94A3B8] hover:text-white border-[#334155]' }}">
+                            <i data-lucide="target" class="w-4 h-4 text-sky-400"></i>
+                            <span>Milestones</span>
+                            @if(isset($milestoneProgress) && count($milestoneProgress) > 0)
+                                <span class="px-1.5 py-0.2 rounded-full text-[10px] {{ $tab === 'milestones' ? 'bg-white/20 text-white' : 'bg-[#172033] text-slate-400' }}">
+                                    {{ collect($milestoneProgress)->where('is_unlocked', true)->count() }}/{{ count($milestoneProgress) }}
+                                </span>
+                            @endif
+                        </a>
+
+                        <!-- Tab 4: Badges -->
+                        <a href="{{ route('leaderboard.index', ['tab' => 'badges']) }}"
+                           role="tab"
+                           aria-selected="{{ $tab === 'badges' ? 'true' : 'false' }}"
+                           class="px-3.5 sm:px-4 py-2 sm:py-2.5 rounded-xl text-xs font-bold transition-all flex items-center gap-2 border whitespace-nowrap {{ $tab === 'badges' ? 'bg-burgundy-gradient text-white border-[#8F3033] shadow-lg shadow-[#560E0F]/30' : 'bg-[#0B1120] text-[#94A3B8] hover:text-white border-[#334155]' }}">
+                            <i data-lucide="award" class="w-4 h-4 text-amber-400"></i>
+                            <span>Badges</span>
+                            @if(isset($badgeProgress) && count($badgeProgress) > 0)
+                                <span class="px-1.5 py-0.2 rounded-full text-[10px] {{ $tab === 'badges' ? 'bg-white/20 text-white' : 'bg-[#172033] text-slate-400' }}">
+                                    {{ collect($badgeProgress)->where('is_unlocked', true)->count() }}/{{ count($badgeProgress) }}
+                                </span>
+                            @endif
                         </a>
                     </div>
 
                     @if($tab === 'semester' && $seasons->isNotEmpty())
-                        <form method="GET" action="{{ route('leaderboard.index') }}" class="flex items-center gap-2">
+                        <form method="GET" action="{{ route('leaderboard.index') }}" class="flex items-center gap-2 shrink-0">
                             <input type="hidden" name="tab" value="semester">
                             <span class="text-xs text-[#94A3B8] font-medium">Semester:</span>
                             <select name="season_id" onchange="this.form.submit()" class="bg-[#0B1120] border border-[#334155] text-xs rounded-xl px-3 py-1.5 text-white focus:outline-none focus:ring-2 focus:ring-[#8F3033]">
@@ -73,37 +101,118 @@
                 </div>
             </div>
 
-            @if($tab === 'achievements')
-                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                    @foreach($achievementProgress as $ach)
-                        <div class="card bg-[#172033] border rounded-2xl p-5 relative overflow-hidden transition hover:border-[#8F3033]/60 {{ $ach['is_unlocked'] ? 'border-amber-500/40 bg-gradient-to-br from-[#172033] to-amber-950/20' : 'border-[#334155] opacity-75' }}">
-                            <div class="flex items-start gap-4">
-                                <div class="w-12 h-12 rounded-2xl flex items-center justify-center shrink-0 border {{ $ach['is_unlocked'] ? 'bg-amber-500/20 border-amber-500/30 text-amber-400' : 'bg-[#0B1120] border-[#334155] text-slate-500' }}">
-                                    <i data-lucide="{{ $ach['achievement']->badge_icon ?? 'award' }}" class="w-6 h-6"></i>
-                                </div>
-                                <div class="flex-1">
-                                    <div class="flex items-center justify-between">
-                                        <h3 class="text-sm font-bold text-white font-brand-display">{{ $ach['achievement']->title }}</h3>
-                                        @if($ach['is_unlocked'])
-                                            <span class="px-2 py-0.5 rounded-full text-[10px] font-bold bg-emerald-500/20 text-emerald-400 border border-emerald-500/30">
-                                                Unlocked
-                                            </span>
-                                        @else
-                                            <span class="px-2 py-0.5 rounded-full text-[10px] font-bold bg-[#0B1120] text-slate-400 border border-[#334155]">
-                                                Locked
-                                            </span>
-                                        @endif
-                                    </div>
-                                    <p class="text-xs text-[#94A3B8] mt-1">{{ $ach['achievement']->description }}</p>
+            @if($tab === 'milestones')
+                <!-- Milestones Tab View -->
+                <div class="space-y-4">
+                    <div class="flex items-center justify-between">
+                        <div>
+                            <h2 class="text-sm font-bold text-white font-brand-display">Member Progression Milestones</h2>
+                            <p class="text-xs text-[#94A3B8]">Track your journey milestones earned through attendance, quests, and member engagement.</p>
+                        </div>
+                    </div>
 
-                                    <div class="mt-3 flex items-center justify-between text-[11px] text-[#94A3B8]">
-                                        <span>Completion Reward</span>
-                                        <span class="font-bold text-amber-400 tabular-nums">+{{ $ach['achievement']->xp_reward }} EXP</span>
+                    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                        @forelse($milestoneProgress as $ach)
+                            <div class="card bg-[#172033] border rounded-2xl p-5 relative overflow-hidden transition hover:border-[#8F3033]/60 {{ $ach['is_unlocked'] ? 'border-sky-500/40 bg-gradient-to-br from-[#172033] to-sky-950/20' : 'border-[#334155] opacity-75' }}">
+                                <div class="flex items-start gap-4">
+                                    <div class="w-12 h-12 rounded-2xl flex items-center justify-center shrink-0 border {{ $ach['is_unlocked'] ? 'bg-sky-500/20 border-sky-500/30 text-sky-400' : 'bg-[#0B1120] border-[#334155] text-slate-500' }}">
+                                        <i data-lucide="{{ $ach['achievement']->icon ?? ($ach['achievement']->badge_icon ?? 'target') }}" class="w-6 h-6"></i>
+                                    </div>
+                                    <div class="flex-1 min-w-0">
+                                        <div class="flex items-center justify-between gap-2">
+                                            <h3 class="text-sm font-bold text-white font-brand-display truncate">{{ $ach['achievement']->title }}</h3>
+                                            @if($ach['is_unlocked'])
+                                                <span class="px-2 py-0.5 rounded-full text-[10px] font-bold bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 shrink-0">
+                                                    Completed
+                                                </span>
+                                            @else
+                                                <span class="px-2 py-0.5 rounded-full text-[10px] font-bold bg-[#0B1120] text-slate-400 border border-[#334155] shrink-0">
+                                                    In Progress
+                                                </span>
+                                            @endif
+                                        </div>
+                                        <p class="text-xs text-[#94A3B8] mt-1">{{ $ach['achievement']->description }}</p>
+
+                                        <!-- Progress Bar -->
+                                        <div class="mt-3">
+                                            <div class="flex items-center justify-between text-[11px] mb-1 font-mono">
+                                                <span class="text-[#94A3B8]">Progress</span>
+                                                <span class="text-white font-bold">{{ $ach['current'] }}/{{ $ach['threshold'] }} ({{ $ach['percent'] }}%)</span>
+                                            </div>
+                                            <div class="w-full h-1.5 rounded-full bg-[#0B1120] overflow-hidden border border-[#334155]/60">
+                                                <div class="h-full rounded-full transition-all duration-500 {{ $ach['is_unlocked'] ? 'bg-emerald-400' : 'bg-sky-500' }}" style="width: {{ $ach['percent'] }}%"></div>
+                                            </div>
+                                        </div>
+
+                                        <div class="mt-3 pt-2.5 border-t border-[#334155]/60 flex items-center justify-between text-[11px] text-[#94A3B8]">
+                                            <span>Reward</span>
+                                            <span class="font-bold text-amber-400 tabular-nums">
+                                                +{{ $ach['achievement']->xp_bonus ?? ($ach['achievement']->xp_reward ?? 0) }} EXP
+                                            </span>
+                                        </div>
                                     </div>
                                 </div>
                             </div>
+                        @empty
+                            <div class="col-span-full card bg-[#172033] border border-[#334155] rounded-2xl p-8 text-center text-[#94A3B8] text-xs">
+                                <i data-lucide="target" class="w-8 h-8 text-slate-600 mx-auto mb-2"></i>
+                                <p>No milestones configured yet for this season.</p>
+                            </div>
+                        @endforelse
+                    </div>
+                </div>
+
+            @elseif($tab === 'badges')
+                <!-- Badges Tab View -->
+                <div class="space-y-4">
+                    <div class="flex items-center justify-between">
+                        <div>
+                            <h2 class="text-sm font-bold text-white font-brand-display">Earned Badges & Honor Awards</h2>
+                            <p class="text-xs text-[#94A3B8]">Collect official badges celebrating community leadership, hackathons, and activities.</p>
                         </div>
-                    @endforeach
+                    </div>
+
+                    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                        @forelse($badgeProgress as $ach)
+                            <div class="card bg-[#172033] border rounded-2xl p-5 relative overflow-hidden transition hover:border-[#8F3033]/60 {{ $ach['is_unlocked'] ? 'border-amber-500/40 bg-gradient-to-br from-[#172033] to-amber-950/20' : 'border-[#334155] opacity-75' }}">
+                                <div class="flex items-start gap-4">
+                                    <div class="w-12 h-12 rounded-2xl flex items-center justify-center shrink-0 border {{ $ach['is_unlocked'] ? 'bg-amber-500/20 border-amber-500/30 text-amber-400' : 'bg-[#0B1120] border-[#334155] text-slate-500' }}">
+                                        <i data-lucide="{{ $ach['achievement']->icon ?? ($ach['achievement']->badge_icon ?? 'award') }}" class="w-6 h-6"></i>
+                                    </div>
+                                    <div class="flex-1 min-w-0">
+                                        <div class="flex items-center justify-between gap-2">
+                                            <h3 class="text-sm font-bold text-white font-brand-display truncate">{{ $ach['achievement']->title }}</h3>
+                                            @if($ach['is_unlocked'])
+                                                <span class="px-2 py-0.5 rounded-full text-[10px] font-bold bg-amber-500/20 text-amber-300 border border-amber-500/40 shrink-0">
+                                                    Earned
+                                                </span>
+                                            @else
+                                                <span class="px-2 py-0.5 rounded-full text-[10px] font-bold bg-[#0B1120] text-slate-400 border border-[#334155] shrink-0">
+                                                    Unearned
+                                                </span>
+                                            @endif
+                                        </div>
+                                        <p class="text-xs text-[#94A3B8] mt-1">{{ $ach['achievement']->description }}</p>
+
+                                        <div class="mt-3 pt-2.5 border-t border-[#334155]/60 flex items-center justify-between text-[11px] text-[#94A3B8]">
+                                            <span class="inline-flex items-center gap-1">
+                                                <i data-lucide="tag" class="w-3 h-3 text-slate-500"></i>
+                                                <span>{{ $ach['achievement']->category ?? 'Badge' }}</span>
+                                            </span>
+                                            <span class="font-bold text-amber-400 tabular-nums">
+                                                +{{ $ach['achievement']->xp_bonus ?? ($ach['achievement']->xp_reward ?? 0) }} EXP
+                                            </span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        @empty
+                            <div class="col-span-full card bg-[#172033] border border-[#334155] rounded-2xl p-8 text-center text-[#94A3B8] text-xs">
+                                <i data-lucide="award" class="w-8 h-8 text-slate-600 mx-auto mb-2"></i>
+                                <p>No badges configured yet.</p>
+                            </div>
+                        @endforelse
+                    </div>
                 </div>
             @else
                 @php

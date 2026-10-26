@@ -182,6 +182,7 @@ class SignatureVaultService
 
         if (!$signature) {
             return [
+                'registered' => false,
                 'state' => 'required',
                 'label' => 'Signature Required',
                 'is_usable' => false,
@@ -199,6 +200,7 @@ class SignatureVaultService
             ]);
 
             return [
+                'registered' => false,
                 'state' => 'unavailable',
                 'label' => 'Signature Unavailable',
                 'is_usable' => false,
@@ -208,6 +210,7 @@ class SignatureVaultService
         }
 
         return [
+            'registered' => true,
             'state' => 'registered',
             'label' => 'Signature Registered',
             'is_usable' => true,

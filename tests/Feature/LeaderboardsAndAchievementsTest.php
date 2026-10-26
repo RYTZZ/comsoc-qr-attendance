@@ -241,4 +241,72 @@ class LeaderboardsAndAchievementsTest extends TestCase
             'achievement_id' => $ach->id,
         ]);
     }
+
+    public function test_leaderboard_four_tabbed_interface_renders_and_isolates_content(): void
+    {
+        $member = User::factory()->create(['name' => 'Dana Leader', 'role' => 'student']);
+        UserProfile::create(['user_id' => $member->id, 'is_public' => true]);
+
+        MemberSeasonStat::create([
+            'user_id' => $member->id,
+            'season_id' => $this->season->id,
+            'season_xp' => 750,
+            'redeemable_points' => 300,
+            'current_level' => 3,
+        ]);
+
+        $milestone = Achievement::create([
+            'slug' => 'master-of-attendance',
+            'title' => 'Master of Attendance',
+            'category' => 'Milestone',
+            'criteria_type' => 'event_attendance',
+            'criteria_threshold' => 5,
+            'xp_bonus' => 200,
+            'points_bonus' => 100,
+            'icon' => 'calendar-check',
+            'description' => 'Attend 5 verified events.',
+            'is_active' => true,
+        ]);
+
+        $badge = Achievement::create([
+            'slug' => 'community-champion-badge',
+            'title' => 'Community Champion Badge',
+            'category' => 'Honor',
+            'criteria_type' => 'custom',
+            'criteria_threshold' => 1,
+            'xp_bonus' => 500,
+            'points_bonus' => 250,
+            'icon' => 'shield',
+            'description' => 'Honored for exceptional community leadership.',
+            'is_active' => true,
+        ]);
+
+        // 1. Tab: Semester Leaderboard
+        $resSemester = $this->actingAs($member)->get(route('leaderboard.index', ['tab' => 'semester']));
+        $resSemester->assertOk();
+        $resSemester->assertSee('Semester Leaderboard');
+        $resSemester->assertSee('Official Semester Rankings');
+        $resSemester->assertSee('Dana Leader');
+        $resSemester->assertSee('750 EXP');
+
+        // 2. Tab: Lifetime Leaderboard
+        $resLifetime = $this->actingAs($member)->get(route('leaderboard.index', ['tab' => 'lifetime']));
+        $resLifetime->assertOk();
+        $resLifetime->assertSee('Lifetime Leaderboard');
+        $resLifetime->assertSee('All-Time Lifetime Rankings');
+
+        // 3. Tab: Milestones
+        $resMilestones = $this->actingAs($member)->get(route('leaderboard.index', ['tab' => 'milestones']));
+        $resMilestones->assertOk();
+        $resMilestones->assertSee('Member Progression Milestones');
+        $resMilestones->assertSee('Master of Attendance');
+        $resMilestones->assertSee('Progress');
+
+        // 4. Tab: Badges
+        $resBadges = $this->actingAs($member)->get(route('leaderboard.index', ['tab' => 'badges']));
+        $resBadges->assertOk();
+        $resBadges->assertSee('Earned Badges & Honor Awards', false);
+        $resBadges->assertSee('Community Champion Badge');
+        $resBadges->assertSee('Honor');
+    }
 }

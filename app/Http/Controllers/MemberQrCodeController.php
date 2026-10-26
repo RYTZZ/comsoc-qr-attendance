@@ -36,12 +36,13 @@ class MemberQrCodeController extends Controller
             })
             ->get();
 
-        // Filter approved registrations with active, published events
+        // Filter approved registrations with active, non-ended, published events
         $approvedRegistrations = $allRegistrations->filter(function ($reg) {
             return $reg->status === 'approved'
                 && $reg->event
-                && ($reg->event->is_published || $reg->event->status === 'published')
-                && !in_array($reg->event->status, ['draft', 'archived']);
+                && ($reg->event->is_published || $reg->event->status === 'published' || $reg->event->status === 'ongoing')
+                && !in_array($reg->event->status, ['draft', 'archived', 'cancelled'])
+                && !$reg->event->isEnded();
         });
 
         $pendingRegistrations = $allRegistrations->filter(fn($reg) => $reg->status === 'pending');
@@ -50,7 +51,7 @@ class MemberQrCodeController extends Controller
         $requestedEventId = $request->input('event_id');
         $event = null;
         $eventRegistration = null;
-        $passState = 'no_events'; // 'active', 'no_events', 'pending', 'revoked'
+        $passState = 'no_events'; // 'active', 'no_events', 'pending', 'revoked', 'ended'
 
         if ($requestedEventId) {
             $event = \App\Models\Event::where('id', $requestedEventId)->first();
@@ -58,6 +59,8 @@ class MemberQrCodeController extends Controller
 
             if (!$eventRegistration) {
                 $passState = 'no_events';
+            } elseif ($event && $event->isEnded()) {
+                $passState = 'ended';
             } elseif ($eventRegistration->status === 'pending') {
                 $passState = 'pending';
             } elseif (in_array($eventRegistration->status, ['rejected', 'cancelled', 'revoked'])) {
@@ -70,9 +73,9 @@ class MemberQrCodeController extends Controller
                 }
             }
         } else {
-            // No event_id parameter specified in query string
+            // No event_id parameter specified in query string:
+            // Prefer active, non-ended approved events first
             if ($approvedRegistrations->isNotEmpty()) {
-                // Default to the first (or most recently joined) approved event
                 $eventRegistration = $approvedRegistrations->first();
                 $event = $eventRegistration->event;
 
@@ -81,22 +84,33 @@ class MemberQrCodeController extends Controller
                 } else {
                     $passState = 'active';
                 }
-            } elseif ($pendingRegistrations->isNotEmpty()) {
-                $eventRegistration = $pendingRegistrations->first();
-                $event = $eventRegistration->event;
-                $passState = 'pending';
-            } elseif ($revokedRegistrations->isNotEmpty()) {
-                $eventRegistration = $revokedRegistrations->first();
-                $event = $eventRegistration->event;
-                $passState = 'revoked';
             } else {
-                $passState = 'no_events';
+                // Check if user has an approved registration for an event that has ended
+                $endedRegistration = $allRegistrations->first(function ($reg) {
+                    return $reg->status === 'approved' && $reg->event && $reg->event->isEnded();
+                });
+
+                if ($endedRegistration) {
+                    $eventRegistration = $endedRegistration;
+                    $event = $endedRegistration->event;
+                    $passState = 'ended';
+                } elseif ($pendingRegistrations->isNotEmpty()) {
+                    $eventRegistration = $pendingRegistrations->first();
+                    $event = $eventRegistration->event;
+                    $passState = 'pending';
+                } elseif ($revokedRegistrations->isNotEmpty()) {
+                    $eventRegistration = $revokedRegistrations->first();
+                    $event = $eventRegistration->event;
+                    $passState = 'revoked';
+                } else {
+                    $passState = 'no_events';
+                }
             }
         }
 
-        // Only generate valid token if state is active and an approved event exists
+        // Only generate valid token if state is active and an approved non-ended event exists
         $tokenData = null;
-        if ($passState === 'active' && $event) {
+        if ($passState === 'active' && $event && !$event->isEnded()) {
             $tokenData = $this->dynamicQrService->generateTokenForUser($user, $event);
         }
 
@@ -136,7 +150,7 @@ class MemberQrCodeController extends Controller
         if ($eventId) {
             $event = \App\Models\Event::where('id', $eventId)->first();
         } else {
-            // Find user's first approved active event
+            // Find user's first approved active, non-ended event
             $firstApproved = \App\Models\EventRegistration::with('event')
                 ->where('status', 'approved')
                 ->where(function ($q) use ($user, $student) {
@@ -148,11 +162,14 @@ class MemberQrCodeController extends Controller
                 })
                 ->whereHas('event', function ($eq) {
                     $eq->where(function ($sub) {
-                        $sub->where('is_published', true)->orWhere('status', 'published');
-                    })->whereNotIn('status', ['draft', 'archived']);
+                        $sub->where('is_published', true)->orWhere('status', 'published')->orWhere('status', 'ongoing');
+                    })->whereNotIn('status', ['draft', 'archived', 'cancelled', 'completed']);
                 })
                 ->latest()
-                ->first();
+                ->get()
+                ->first(function ($reg) {
+                    return $reg->event && !$reg->event->isEnded();
+                });
 
             $event = $firstApproved?->event;
         }
@@ -161,6 +178,14 @@ class MemberQrCodeController extends Controller
             return response()->json([
                 'success' => false,
                 'message' => 'Join an event through Events & Activities to access its Dynamic Attendance QR Code.',
+            ], 403);
+        }
+
+        if ($event->isEnded()) {
+            return response()->json([
+                'success' => false,
+                'message' => 'This event has ended. Your attendance QR Code is no longer available.',
+                'event_ended' => true,
             ], 403);
         }
 

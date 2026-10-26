@@ -504,4 +504,50 @@ class EventSpecificDynamicQrSecurityTest extends TestCase
         ]);
         $refreshCancelled->assertStatus(403);
     }
+
+    public function test_ended_event_blocks_dynamic_qr_display_and_refresh(): void
+    {
+        $endedEvent = Event::create([
+            'academic_year_id' => $this->ay->id,
+            'created_by' => $this->superAdmin->id,
+            'name' => 'Past Tech Conference 2025',
+            'slug' => 'past-tech-conference-2025',
+            'event_date' => Carbon::now()->subDays(5)->toDateString(),
+            'start_time' => '08:00:00',
+            'end_time' => '17:00:00',
+            'status' => 'completed',
+            'attendance_starts_at' => Carbon::now()->subDays(5)->setTime(7, 30),
+            'attendance_ends_at' => Carbon::now()->subDays(5)->setTime(18, 0),
+            'ends_at' => Carbon::now()->subDays(5)->setTime(18, 0),
+        ]);
+
+        EventRegistration::create([
+            'event_id' => $endedEvent->id,
+            'user_id' => $this->studentUser->id,
+            'full_name' => $this->studentUser->name,
+            'email' => $this->studentUser->email,
+            'status' => 'approved',
+            'ticket_code' => 'TCK-ENDED999',
+        ]);
+
+        $this->assertTrue($endedEvent->isEnded());
+
+        // GET member dynamic QR view for ended event
+        $res = $this->actingAs($this->studentUser)->get(route('member.dynamic_qr', ['event_id' => $endedEvent->id]));
+        $res->assertOk();
+        $res->assertSee('Event Ended');
+        $res->assertSee('This event has ended. Your attendance QR Code is no longer available.');
+        $res->assertDontSee('id="qrcode-canvas"', false);
+
+        // POST direct refresh request for ended event
+        $refreshRes = $this->actingAs($this->studentUser)->postJson(route('member.dynamic_qr.refresh'), [
+            'event_id' => $endedEvent->id,
+        ]);
+        $refreshRes->assertStatus(403);
+        $refreshRes->assertJsonFragment([
+            'success' => false,
+            'event_ended' => true,
+            'message' => 'This event has ended. Your attendance QR Code is no longer available.',
+        ]);
+    }
 }

@@ -31,28 +31,38 @@
         </div>
     </div>
 
-    <!-- Floating New Device Login Alerts (for active sessions) -->
-    <div class="fixed bottom-6 right-6 z-50 max-w-sm w-full space-y-3 pointer-events-none">
+    <!-- Auto-Dismissing Toast Notification for New Device Login Alerts -->
+    <div class="fixed top-5 right-5 sm:top-6 sm:right-6 z-50 max-w-sm w-[calc(100vw-2.5rem)] sm:w-full space-y-3 pointer-events-none">
         <template x-for="alert in alerts" :key="alert.id">
-            <div class="pointer-events-auto bg-[#172033] border border-[#8F3033] shadow-2xl rounded-2xl p-4 flex items-start gap-3.5 animate-slide-up transform transition-all duration-300">
-                <div class="w-9 h-9 rounded-xl bg-[#560E0F] border border-[#8F3033] text-red-300 flex items-center justify-center shrink-0">
+            <div x-transition:enter="transition ease-out duration-300"
+                 x-transition:enter-start="opacity-0 translate-y-[-12px] sm:translate-y-0 sm:translate-x-4 scale-95"
+                 x-transition:enter-end="opacity-100 translate-y-0 sm:translate-x-0 scale-100"
+                 x-transition:leave="transition ease-in duration-250"
+                 x-transition:leave-start="opacity-100 scale-100"
+                 x-transition:leave-end="opacity-0 translate-y-[-8px] sm:translate-x-4 scale-95"
+                 class="pointer-events-auto relative overflow-hidden bg-[#172033]/95 backdrop-blur-md border border-[#8F3033]/70 shadow-2xl rounded-2xl p-4 flex items-start gap-3.5 transition-all">
+                
+                <!-- Toast Accent Countdown Progress Bar (4.5s) -->
+                <div class="absolute bottom-0 left-0 h-1 bg-gradient-to-r from-[#8F3033] to-[#df747a] animate-[toastProgress_4.5s_linear_forwards] w-full origin-left"></div>
+
+                <div class="w-9 h-9 rounded-xl bg-[#560E0F]/80 border border-[#8F3033] text-red-300 flex items-center justify-center shrink-0 shadow-inner">
                     <i data-lucide="shield-alert" class="w-5 h-5 text-red-400"></i>
                 </div>
                 <div class="flex-1 min-w-0">
                     <div class="flex items-center justify-between gap-2">
                         <h4 class="text-xs font-bold text-white uppercase tracking-wider font-brand-display" x-text="alert.title"></h4>
-                        <button @click="dismissAlert(alert.id)" class="text-slate-400 hover:text-white p-1 rounded transition">
+                        <button type="button" @click="dismissAlert(alert.id)" class="text-slate-400 hover:text-white p-1 rounded-lg hover:bg-slate-800 transition" aria-label="Dismiss notification">
                             <i data-lucide="x" class="w-3.5 h-3.5"></i>
                         </button>
                     </div>
                     <p class="text-xs text-slate-300 mt-1 leading-relaxed" x-text="alert.body"></p>
                     <div class="mt-3 flex items-center gap-2">
                         <a :href="alert.target_url || '{{ route('profile.sessions') }}'" 
-                           class="btn-primary text-[11px] py-1 px-2.5 bg-[#560E0F] hover:bg-[#8F3033] border-[#8F3033] flex items-center gap-1 font-semibold">
+                           class="btn-primary text-[11px] py-1 px-2.5 bg-[#560E0F] hover:bg-[#8F3033] border-[#8F3033] flex items-center gap-1 font-semibold shadow-sm">
                             <span>Review Sessions</span>
                             <i data-lucide="arrow-right" class="w-3 h-3"></i>
                         </a>
-                        <button @click="dismissAlert(alert.id)" class="text-[11px] text-slate-400 hover:text-slate-200 py-1 px-2">
+                        <button type="button" @click="dismissAlert(alert.id)" class="text-[11px] text-slate-400 hover:text-slate-200 py-1 px-2">
                             Dismiss
                         </button>
                     </div>
@@ -62,12 +72,20 @@
     </div>
 </div>
 
+<style>
+    @keyframes toastProgress {
+        from { transform: scaleX(1); }
+        to { transform: scaleX(0); }
+    }
+</style>
+
 <script>
     function sessionSecurityMonitor() {
         return {
             sessionReplaced: false,
             alerts: [],
             dismissedIds: new Set(),
+            timers: new Map(),
             pollInterval: null,
             channel: null,
 
@@ -88,7 +106,7 @@
                 try {
                     const replacedAt = localStorage.getItem('comsoc_session_replaced');
                     if (replacedAt && (Date.now() - parseInt(replacedAt, 10)) < 86400000) {
-                        // Optional check: we verify with backend first or wait for first poll
+                        // Handled on backend poll check
                     }
                 } catch (e) {}
 
@@ -111,6 +129,10 @@
                     clearInterval(this.pollInterval);
                     this.pollInterval = null;
                 }
+                // Clear any active auto-dismiss timers
+                this.timers.forEach(t => clearTimeout(t));
+                this.timers.clear();
+
                 document.body.style.overflow = 'hidden';
                 try {
                     localStorage.setItem('comsoc_session_replaced', Date.now().toString());
@@ -148,9 +170,20 @@
                         }
 
                         if (data.unread_alerts) {
-                            const newAlerts = data.unread_alerts.filter(a => !this.dismissedIds.has(a.id));
-                            if (newAlerts.length > 0) {
-                                this.alerts = newAlerts;
+                            const incomingAlerts = data.unread_alerts.filter(a => !this.dismissedIds.has(a.id));
+                            
+                            // Check for newly arrived alerts to schedule auto-dismiss (4.5s)
+                            incomingAlerts.forEach(a => {
+                                if (!this.timers.has(a.id)) {
+                                    const timerId = setTimeout(() => {
+                                        this.dismissAlert(a.id);
+                                    }, 4500);
+                                    this.timers.set(a.id, timerId);
+                                }
+                            });
+
+                            this.alerts = incomingAlerts;
+                            if (incomingAlerts.length > 0) {
                                 this.$nextTick(() => {
                                     if (window.lucide) window.lucide.createIcons();
                                 });
@@ -163,14 +196,20 @@
             },
 
             dismissAlert(id) {
+                if (this.timers.has(id)) {
+                    clearTimeout(this.timers.get(id));
+                    this.timers.delete(id);
+                }
                 this.dismissedIds.add(id);
                 this.alerts = this.alerts.filter(a => a.id !== id);
+
+                const tokenMeta = document.querySelector('meta[name="csrf-token"]');
                 fetch(`/notifications/${id}/read`, {
                     method: 'POST',
                     headers: {
                         'Accept': 'application/json',
                         'Content-Type': 'application/json',
-                        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content'),
+                        'X-CSRF-TOKEN': tokenMeta ? tokenMeta.getAttribute('content') : '',
                         'X-Requested-With': 'XMLHttpRequest',
                     }
                 }).catch(() => {});

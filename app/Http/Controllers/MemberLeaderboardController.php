@@ -26,7 +26,15 @@ class MemberLeaderboardController extends Controller
             ? ($seasons->firstWhere('id', $selectedSeasonId) ?: $activeSeason)
             : $activeSeason;
 
-        $tab = $request->input('tab', 'semester'); // 'semester', 'lifetime', 'achievements'
+        $rawTab = $request->input('tab', 'semester');
+        // Support legacy 'achievements' query parameter by mapping to 'milestones' or 'badges'
+        $tab = match ($rawTab) {
+            'lifetime' => 'lifetime',
+            'milestones' => 'milestones',
+            'badges' => 'badges',
+            'achievements' => 'milestones',
+            default => 'semester',
+        };
 
         $leaderboard = null;
         $userRank = null;
@@ -37,8 +45,7 @@ class MemberLeaderboardController extends Controller
                 page: (int) $request->input('page', 1)
             );
             $userRank = $leaderboardService->getUserRank(user: $user, type: 'lifetime');
-        } else {
-            // Default: Semester Leaderboard
+        } elseif ($tab === 'semester') {
             $leaderboard = $leaderboardService->getSemesterLeaderboard(
                 season: $season,
                 perPage: 25,
@@ -47,9 +54,25 @@ class MemberLeaderboardController extends Controller
             $userRank = $leaderboardService->getUserRank(user: $user, type: 'semester', season: $season);
         }
 
-        $achievementProgress = $achievementService->getMemberProgress($user);
-        $unlockedAchievementsCount = collect($achievementProgress)->where('is_unlocked', true)->count();
-        $totalAchievementsCount = count($achievementProgress);
+        $allProgress = $achievementService->getMemberProgress($user);
+        
+        // Split progress into Milestones vs Badges
+        $milestoneProgress = collect($allProgress)->filter(function ($item) {
+            return ($item['achievement']->category ?? '') === 'Milestone';
+        })->values()->all();
+
+        $badgeProgress = collect($allProgress)->filter(function ($item) {
+            return ($item['achievement']->category ?? '') !== 'Milestone';
+        })->values()->all();
+
+        // If no milestones are explicitly categorized, preserve all in milestones and badges
+        if (empty($milestoneProgress) && !empty($allProgress)) {
+            $milestoneProgress = $allProgress;
+            $badgeProgress = $allProgress;
+        }
+
+        $unlockedAchievementsCount = collect($allProgress)->where('is_unlocked', true)->count();
+        $totalAchievementsCount = count($allProgress);
 
         return view('leaderboards.index', [
             'seasons' => $seasons,
@@ -58,7 +81,9 @@ class MemberLeaderboardController extends Controller
             'tab' => $tab,
             'leaderboard' => $leaderboard,
             'userRank' => $userRank,
-            'achievementProgress' => $achievementProgress,
+            'achievementProgress' => $allProgress,
+            'milestoneProgress' => $milestoneProgress,
+            'badgeProgress' => $badgeProgress,
             'unlockedCount' => $unlockedAchievementsCount,
             'totalCount' => $totalAchievementsCount,
         ]);
