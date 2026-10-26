@@ -10,7 +10,7 @@
 @endphp
 
 <!-- Public Website Shared Footer -->
-<footer class="relative z-10 bg-[#0B1120] border-t border-[#334155]/60 pt-12 pb-8 text-slate-400 text-sm mt-auto shrink-0" role="contentinfo" aria-label="Global Site Footer">
+<footer class="relative z-10 bg-[#0B1120] border-t border-[#334155]/60 pt-16 sm:pt-20 pb-10 text-slate-400 text-sm mt-auto shrink-0" role="contentinfo" aria-label="Global Site Footer">
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         
         <!-- Main 4-Column Responsive Grid -->
