@@ -14,7 +14,7 @@
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         
         <!-- Main 4-Column Responsive Grid -->
-        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8 lg:gap-10 pb-10 border-b border-[#334155]/40 items-start">
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8 lg:gap-10 pb-10 border-b border-[#334155]/40 items-start">
 
             <!-- Col 1: COMSOC Branding -->
             <div class="min-w-0 space-y-3.5">
@@ -25,7 +25,7 @@
                         <span class="text-[11px] text-[#df747a] font-semibold tracking-wider uppercase block">SorSU Bulan Campus</span>
                     </div>
                 </a>
-                <p class="text-xs font-semibold text-white tracking-wide leading-relaxed">
+                <p class="text-xs font-semibold text-slate-200 tracking-wide leading-relaxed">
                     {{ $settings['org_tagline'] ?? 'Innovating Today for a Better Community.' }}
                 </p>
                 <p class="text-xs text-slate-400 leading-relaxed font-normal">
@@ -36,29 +36,29 @@
             <!-- Col 2: Organization Navigation -->
             <nav class="min-w-0 space-y-3" aria-label="Organization Navigation">
                 <h3 class="text-xs font-bold text-white uppercase tracking-wider font-brand-accent">Organization</h3>
-                <ul class="space-y-2 text-xs text-slate-300">
+                <ul class="space-y-2.5 text-xs text-slate-300">
                     <li>
-                        <a href="{{ route('public.about') }}" class="hover:text-white transition-colors duration-150 inline-block focus:outline-none focus-visible:underline focus-visible:text-white whitespace-nowrap">
+                        <a href="{{ route('public.about') }}" class="hover:text-white transition-colors duration-150 inline-block focus:outline-none focus-visible:underline focus-visible:text-white">
                             About & Mission
                         </a>
                     </li>
                     <li>
-                        <a href="{{ route('public.officers') }}" class="hover:text-white transition-colors duration-150 inline-block focus:outline-none focus-visible:underline focus-visible:text-white whitespace-nowrap">
+                        <a href="{{ route('public.officers') }}" class="hover:text-white transition-colors duration-150 inline-block focus:outline-none focus-visible:underline focus-visible:text-white">
                             Leadership
                         </a>
                     </li>
                     <li>
-                        <a href="{{ route('public.activities') }}" class="hover:text-white transition-colors duration-150 inline-block focus:outline-none focus-visible:underline focus-visible:text-white whitespace-nowrap">
+                        <a href="{{ route('public.activities') }}" class="hover:text-white transition-colors duration-150 inline-block focus:outline-none focus-visible:underline focus-visible:text-white">
                             Activities & Events
                         </a>
                     </li>
                     <li>
-                        <a href="{{ route('public.achievements') }}" class="hover:text-white transition-colors duration-150 inline-block focus:outline-none focus-visible:underline focus-visible:text-white whitespace-nowrap">
+                        <a href="{{ route('public.achievements') }}" class="hover:text-white transition-colors duration-150 inline-block focus:outline-none focus-visible:underline focus-visible:text-white">
                             Achievements
                         </a>
                     </li>
                     <li>
-                        <a href="{{ route('public.gallery') }}" class="hover:text-white transition-colors duration-150 inline-block focus:outline-none focus-visible:underline focus-visible:text-white whitespace-nowrap">
+                        <a href="{{ route('public.gallery') }}" class="hover:text-white transition-colors duration-150 inline-block focus:outline-none focus-visible:underline focus-visible:text-white">
                             Gallery
                         </a>
                     </li>
@@ -68,29 +68,29 @@
             <!-- Col 3: COMSOC Hub -->
             <nav class="min-w-0 space-y-3" aria-label="COMSOC Hub Navigation">
                 <h3 class="text-xs font-bold text-white uppercase tracking-wider font-brand-accent">COMSOC Hub</h3>
-                <ul class="space-y-2 text-xs text-slate-300">
+                <ul class="space-y-2.5 text-xs text-slate-300">
                     <li>
-                        <a href="{{ route('login') }}" class="hover:text-white transition-colors duration-150 inline-block focus:outline-none focus-visible:underline focus-visible:text-white whitespace-nowrap">
+                        <a href="{{ route('login') }}" class="hover:text-white transition-colors duration-150 inline-block focus:outline-none focus-visible:underline focus-visible:text-white">
                             Member Sign In
                         </a>
                     </li>
                     <li>
-                        <a href="{{ route('signup') }}" class="hover:text-white transition-colors duration-150 inline-block focus:outline-none focus-visible:underline focus-visible:text-white whitespace-nowrap">
+                        <a href="{{ route('signup') }}" class="hover:text-white transition-colors duration-150 inline-block focus:outline-none focus-visible:underline focus-visible:text-white">
                             Student Registration
                         </a>
                     </li>
                     <li>
-                        <a href="{{ route('account.assistance') }}" class="hover:text-white transition-colors duration-150 inline-block focus:outline-none focus-visible:underline focus-visible:text-white whitespace-nowrap">
+                        <a href="{{ route('account.assistance') }}" class="hover:text-white transition-colors duration-150 inline-block focus:outline-none focus-visible:underline focus-visible:text-white">
                             Account Assistance
                         </a>
                     </li>
                     <li>
-                        <a href="{{ route('privacy') }}" class="hover:text-white transition-colors duration-150 inline-block focus:outline-none focus-visible:underline focus-visible:text-white whitespace-nowrap">
+                        <a href="{{ route('privacy') }}" class="hover:text-white transition-colors duration-150 inline-block focus:outline-none focus-visible:underline focus-visible:text-white">
                             Data Privacy Notice
                         </a>
                     </li>
                     <li>
-                        <a href="{{ route('public.partners') }}" class="text-[#df747a] hover:text-white transition-colors duration-150 inline-flex items-center gap-1.5 focus:outline-none focus-visible:underline whitespace-nowrap">
+                        <a href="{{ route('public.partners') }}" class="text-[#df747a] hover:text-white transition-colors duration-150 inline-flex items-center gap-1.5 focus:outline-none focus-visible:underline">
                             <i data-lucide="handshake" class="w-3.5 h-3.5 shrink-0" aria-hidden="true"></i>
                             <span>Partners & Collaborations</span>
                         </a>
