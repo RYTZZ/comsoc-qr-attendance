@@ -317,10 +317,12 @@
                                 </div>
                             </div>
 
-                            <!-- PDF Viewport Container (Fixed deliberately to 750px height on desktop, flexible on mobile) -->
+                            <!-- PDF Viewport Container (Deliberately expanded to min(78vh, 900px) on desktop, min-h-[650px], and 65vh on mobile) -->
                             <div id="pdf-viewer-container"
                                  class="relative w-full bg-slate-900 flex-1 flex flex-col items-stretch justify-start overflow-hidden transition-all duration-200"
-                                 :class="isFullscreen ? 'h-[calc(100vh-3.5rem)]' : 'h-[500px] sm:h-[620px] md:h-[700px] lg:h-[750px] min-h-[420px]'">
+                                 :class="isFullscreen 
+                                    ? 'h-[calc(100vh-3.5rem)]' 
+                                    : 'h-[65vh] min-h-[450px] sm:min-h-[550px] lg:h-[min(78vh,900px)] lg:min-h-[650px] xl:min-h-[750px]'">
 
                                 <!-- Loading Overlay -->
                                 <div x-show="isLoading && !hasError"
