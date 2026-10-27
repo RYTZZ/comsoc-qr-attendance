@@ -6,11 +6,6 @@
             <div>
                 <h1 class="text-xl sm:text-2xl font-bold text-white font-brand-display">Achievements & Milestones</h1>
                 <p class="text-xs sm:text-sm text-slate-400 mt-1">Manage verified accomplishments, hackathon wins, student showcases, and institutional awards.</p>
-            </div>
-            <a href="{{ route('public.achievements') }}" target="_blank" class="btn-secondary text-xs py-2 px-3 flex items-center gap-1.5">
-                <i data-lucide="external-link" class="w-3.5 h-3.5"></i>
-                <span>Preview Achievements Page</span>
-            </a>
         </div>
 
         @if(session('success'))

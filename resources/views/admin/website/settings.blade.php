@@ -8,12 +8,6 @@
                 <h1 class="text-xl sm:text-2xl font-bold text-white font-brand-display">Public Website Management</h1>
                 <p class="text-xs sm:text-sm text-slate-400 mt-1">Configure homepage content, hero banners, section visibility, and portal links.</p>
             </div>
-            <div class="flex items-center gap-2">
-                <a href="{{ route('public.home') }}" target="_blank" class="btn-secondary text-xs py-2 px-3 flex items-center gap-1.5">
-                    <i data-lucide="external-link" class="w-3.5 h-3.5"></i>
-                    <span>Preview Public Website</span>
-                </a>
-            </div>
         </div>
 
         @if(session('success'))

@@ -22,7 +22,6 @@ use App\Http\Controllers\Kiosk\SnackKioskController;
 use App\Http\Controllers\Admin\WebsiteManagementController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\PublicRegistrationController;
-use App\Http\Controllers\PublicWebsiteController;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/privacy', function () {
@@ -30,17 +29,21 @@ Route::get('/privacy', function () {
 })->name('privacy');
 Route::get('/privacy-notice', fn() => redirect()->route('privacy'));
 
-Route::get('/terms-of-use', [PublicWebsiteController::class, 'termsOfUse'])->name('public.terms');
-Route::get('/terms', fn() => redirect()->route('public.terms'));
-
-Route::get('/', [PublicWebsiteController::class, 'index'])->name('public.home');
-Route::get('/about', [PublicWebsiteController::class, 'about'])->name('public.about');
-Route::get('/officers', [PublicWebsiteController::class, 'officers'])->name('public.officers');
-Route::get('/activities', [PublicWebsiteController::class, 'activities'])->name('public.activities');
-Route::get('/activities/{slug}', [PublicWebsiteController::class, 'activityDetails'])->name('public.activities.detail');
-Route::get('/achievements', [PublicWebsiteController::class, 'achievements'])->name('public.achievements');
-Route::get('/gallery', [PublicWebsiteController::class, 'gallery'])->name('public.gallery');
-Route::get('/partners', [PublicWebsiteController::class, 'partners'])->name('public.partners');
+Route::get('/', function () {
+    if (!auth()->check()) {
+        return redirect()->route('login');
+    }
+    return redirect()->route('dashboard');
+})->name('home');
+Route::get('/terms-of-use', fn() => redirect()->route('privacy'))->name('public.terms');
+Route::get('/terms', fn() => redirect()->route('privacy'));
+Route::get('/about', fn() => redirect()->route('home'));
+Route::get('/officers', fn() => redirect()->route('home'));
+Route::get('/activities', fn() => redirect()->route('home'));
+Route::get('/activities/{slug}', fn() => redirect()->route('home'));
+Route::get('/achievements', fn() => redirect()->route('home'));
+Route::get('/gallery', fn() => redirect()->route('home'));
+Route::get('/partners', fn() => redirect()->route('home'));
 
 Route::get('/dashboard', function () {
     $user = auth()->user();

@@ -770,52 +770,6 @@
         border-color: #df747a;
     }
 
-    /* 6. Navigation Micro-Interactions:
-       Animated underline, smooth hover/focus transitions, header scroll transition */
-    .public-nav-header {
-        transition: background-color 0.3s cubic-bezier(0.16, 1, 0.3, 1),
-                    border-color 0.3s cubic-bezier(0.16, 1, 0.3, 1),
-                    box-shadow 0.3s cubic-bezier(0.16, 1, 0.3, 1);
-    }
-
-    .public-nav-header.is-scrolled {
-        background-color: rgba(11, 17, 32, 0.95);
-        border-color: rgba(86, 14, 15, 0.35);
-        box-shadow: 0 10px 30px -10px rgba(0, 0, 0, 0.6), 0 1px 0 0 rgba(143, 48, 51, 0.15);
-    }
-
-    .public-nav-link {
-        position: relative;
-        transition: color 0.22s ease-out, background-color 0.22s ease-out, border-color 0.22s ease-out;
-    }
-
-    .public-nav-link::after {
-        content: '';
-        position: absolute;
-        bottom: 4px;
-        left: 50%;
-        width: 0;
-        height: 2px;
-        background: linear-gradient(90deg, #df747a 0%, #8F3033 100%);
-        border-radius: 9999px;
-        transition: width 0.24s cubic-bezier(0.16, 1, 0.3, 1), left 0.24s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.24s ease-out;
-        opacity: 0;
-        pointer-events: none;
-    }
-
-    .public-nav-link:hover::after,
-    .public-nav-link:focus-visible::after {
-        width: calc(100% - 1.75rem);
-        left: 0.875rem;
-        opacity: 1;
-    }
-
-    .public-nav-link.is-active::after {
-        width: calc(100% - 1.75rem);
-        left: 0.875rem;
-        opacity: 1;
-    }
-
     /* 7. Premium Feature Card Hover System:
        Restrained interactive feedback: 3-4px lift, border towards burgundy (#560E0F / #df747a),
        subtle shadow and glow, icon micro-translation/scale within 180-250ms */
@@ -919,18 +873,11 @@
         html .heading-accent-line,
         html .btn,
         html [data-lucide],
-        html .public-nav-header,
-        html .public-nav-link,
-        html .public-nav-link::after,
         html .hero-ambient-glow {
             opacity: 1 !important;
             transform: none !important;
             transition: none !important;
             animation: none !important;
-        }
-
-        .public-nav-link::after {
-            display: none !important;
         }
 
         .heading-accent-line {

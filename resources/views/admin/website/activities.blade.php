@@ -6,11 +6,6 @@
             <div>
                 <h1 class="text-xl sm:text-2xl font-bold text-white font-brand-display">Public Activities Visibility</h1>
                 <p class="text-xs sm:text-sm text-slate-400 mt-1">Select which existing system events are featured on the public website without duplicate data entry.</p>
-            </div>
-            <a href="{{ route('public.activities') }}" target="_blank" class="btn-secondary text-xs py-2 px-3 flex items-center gap-1.5">
-                <i data-lucide="external-link" class="w-3.5 h-3.5"></i>
-                <span>Preview Activities Page</span>
-            </a>
         </div>
 
         @if(session('success'))

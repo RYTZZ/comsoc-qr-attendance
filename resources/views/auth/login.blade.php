@@ -28,15 +28,6 @@
     <!-- LEFT BRANDING PANEL (Approx. 41.6% width on desktop)     -->
     <!-- ======================================================== -->
     <aside class="auth-branding-aside w-full md:w-5/12 flex flex-col items-center justify-center p-8 sm:p-12 lg:p-16 border-b md:border-b-0 md:border-r border-[#334155] select-none bg-[#0B1120]/70 backdrop-blur-sm relative z-10 shrink-0">
-        <!-- Return to Public Website Link -->
-        <div class="w-full max-w-sm mb-6 text-left">
-            <a href="{{ route('public.home') }}" class="inline-flex items-center gap-1.5 text-xs text-slate-400 hover:text-white transition group focus:outline-none focus:ring-2 focus:ring-[#df747a] rounded-lg px-2 py-1">
-                <svg class="w-3.5 h-3.5 text-[#df747a] group-hover:-translate-x-0.5 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"/>
-                </svg>
-                <span>Return to COMSOC Website</span>
-            </a>
-        </div>
 
         <div class="w-full max-w-sm mx-auto flex flex-col items-center text-center">
             

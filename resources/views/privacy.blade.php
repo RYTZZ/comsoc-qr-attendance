@@ -281,9 +281,9 @@
         </div>
     </main>
 
-    <!-- Shared Public Website Footer -->
+    <!-- Shared QR Attendance Branding Footer -->
     <div class="mt-8 sm:mt-12 lg:mt-16 w-full">
-        <x-public-website-footer />
+        <x-public-branding-footer />
     </div>
 
     <!-- Floating Back-to-Top CTA Button -->

@@ -37,7 +37,6 @@ class AppServiceProvider extends ServiceProvider
         });
 
         \Illuminate\Support\Facades\Blade::component('layouts.admin', 'admin-layout');
-        \Illuminate\Support\Facades\Blade::component('layouts.public-website', 'public-website-layout');
 
         if (app()->environment('production')) {
             URL::forceScheme('https');

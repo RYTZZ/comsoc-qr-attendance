@@ -11,7 +11,7 @@ class SecurityHeadersTest extends TestCase
 
     public function test_web_routes_include_defensive_security_headers(): void
     {
-        $response = $this->get('/');
+        $response = $this->get(route('login'));
 
         $response->assertStatus(200);
         $response->assertHeader('X-Frame-Options', 'SAMEORIGIN');
