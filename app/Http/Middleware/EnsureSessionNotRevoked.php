@@ -58,8 +58,8 @@ class EnsureSessionNotRevoked
                 ]);
             }
 
-            // Update session activity asynchronously / throttled
-            if ($userSession) {
+            // Update session activity asynchronously / throttled for genuine user requests (exclude background poll)
+            if ($userSession && !$request->is('*/poll*')) {
                 app(SessionSecurityService::class)->touchActivity($sessionId);
             }
         }
