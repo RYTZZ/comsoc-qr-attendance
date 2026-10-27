@@ -90,10 +90,15 @@
 
                             <div class="flex items-center gap-2 shrink-0">
                                 @if(!$isCurrent)
-                                <form method="POST" action="{{ route('profile.sessions.destroy', $session) }}" onsubmit="return confirm('Revoke this session? This device will be logged out immediately.');">
+                                <form method="POST" action="{{ route('profile.sessions.destroy', $session) }}">
                                     @csrf
                                     @method('DELETE')
-                                    <button type="submit" class="btn-secondary text-xs text-rose-300 hover:text-rose-200 hover:bg-rose-950/40 border-rose-900/50 py-1.5 px-3 flex items-center gap-1.5 transition">
+                                    <button type="submit"
+                                            data-confirm="Revoke this session? This device will be logged out immediately."
+                                            data-confirm-title="Revoke Session"
+                                            data-confirm-type="danger"
+                                            data-confirm-btn="Revoke"
+                                            class="btn-secondary text-xs text-rose-300 hover:text-rose-200 hover:bg-rose-950/40 border-rose-900/50 py-1.5 px-3 flex items-center gap-1.5 transition">
                                         <i data-lucide="log-out" class="w-3.5 h-3.5 text-rose-400"></i>
                                         <span>Revoke Session</span>
                                     </button>

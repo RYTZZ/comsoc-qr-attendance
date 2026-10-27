@@ -82,7 +82,8 @@
                             <i data-lucide="ticket" class="w-8 h-8"></i>
                         </div>
                         <div class="space-y-2">
-                            <h3 class="text-base font-bold text-white font-brand-display">No Event Attendance QR Available</h3>
+                            <h3 class="text-base font-bold text-white font-brand-display">No Event/Activity</h3>
+                            <p class="text-[11px] font-semibold text-slate-400 uppercase tracking-wider">No Event Attendance QR Available</p>
                             <p class="text-xs text-slate-300 leading-relaxed font-medium">
                                 You haven't joined any eligible events or activities yet. Join an event through Events & Activities to access its Dynamic Attendance QR Code.
                             </p>

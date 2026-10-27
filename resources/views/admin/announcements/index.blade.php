@@ -112,10 +112,16 @@
                                         </button>
                                     </form>
 
-                                    <form method="POST" action="{{ route('admin.announcements.destroy', $ann) }}" onsubmit="return confirm('Permanently delete this announcement?');">
+                                    <form method="POST" action="{{ route('admin.announcements.destroy', $ann) }}">
                                         @csrf
                                         @method('DELETE')
-                                        <button type="submit" class="p-1 text-slate-500 hover:text-red-400 transition" title="Delete">
+                                        <button type="submit"
+                                                data-confirm="Permanently delete this announcement?"
+                                                data-confirm-title="Delete Announcement"
+                                                data-confirm-type="danger"
+                                                data-confirm-btn="Delete"
+                                                class="p-1 text-slate-500 hover:text-red-400 transition"
+                                                title="Delete">
                                             <i data-lucide="trash-2" class="w-4 h-4"></i>
                                         </button>
                                     </form>

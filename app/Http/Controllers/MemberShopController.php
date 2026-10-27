@@ -85,6 +85,38 @@ class MemberShopController extends Controller
             ->where('reward_id', $reward->id)
             ->count();
 
+        // Check COMSOC Membership and Fee Payment Requirements
+        $membershipEligible = true;
+        $membershipIneligibleReason = null;
+        if ($user->student || in_array($user->role, ['student', 'member'])) {
+            $student = $user->student;
+            $hasMembershipsInSystem = \App\Models\Membership::count() > 0;
+
+            if ($student) {
+                $activeYear = \App\Models\AcademicYear::active();
+                $membershipQuery = \App\Models\Membership::where('student_id', $student->id);
+                if ($activeYear) {
+                    $membershipQuery->where('academic_year_id', $activeYear->id);
+                }
+                $membership = $membershipQuery->latest()->first();
+
+                if (!$membership || $membership->status !== 'active') {
+                    $membershipEligible = false;
+                    $membershipIneligibleReason = 'Membership approval required.';
+                } else {
+                    $requiredFee = (float) config('app.membership_fee', env('MEMBERSHIP_FEE', 100));
+                    $feePaid = (float) ($membership->fee_paid ?? 0);
+                    if ($feePaid < $requiredFee || empty($membership->paid_at)) {
+                        $membershipEligible = false;
+                        $membershipIneligibleReason = 'Required membership fee not yet verified.';
+                    }
+                }
+            } elseif ($hasMembershipsInSystem) {
+                $membershipEligible = false;
+                $membershipIneligibleReason = 'Membership approval required.';
+            }
+        }
+
         return view('shop.show', [
             'reward' => $reward,
             'spendableExp' => $spendableExp,
@@ -94,6 +126,8 @@ class MemberShopController extends Controller
             'hasEnoughPoints' => $hasEnoughPoints,
             'hasStock' => $hasStock,
             'userRedemptionsCount' => $userRedemptionsCount,
+            'membershipEligible' => $membershipEligible,
+            'membershipIneligibleReason' => $membershipIneligibleReason,
         ]);
     }
 

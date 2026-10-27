@@ -140,10 +140,16 @@
                                     </form>
                                     @endif
 
-                                    <form method="POST" action="{{ route('notifications.destroy', $notif) }}" onsubmit="return confirm('Delete this notification?');">
+                                    <form method="POST" action="{{ route('notifications.destroy', $notif) }}">
                                         @csrf
                                         @method('DELETE')
-                                        <button type="submit" class="text-[11px] text-slate-500 hover:text-red-400 p-1" title="Delete notification">
+                                        <button type="submit"
+                                                data-confirm="Delete this notification?"
+                                                data-confirm-title="Delete Notification"
+                                                data-confirm-type="danger"
+                                                data-confirm-btn="Delete"
+                                                class="text-[11px] text-slate-500 hover:text-red-400 p-1"
+                                                title="Delete notification">
                                             <i data-lucide="trash-2" class="w-3.5 h-3.5"></i>
                                         </button>
                                     </form>

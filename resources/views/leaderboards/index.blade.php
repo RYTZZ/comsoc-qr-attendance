@@ -56,7 +56,16 @@
                             <span>Lifetime Leaderboard</span>
                         </a>
 
-                        <!-- Tab 3: Milestones -->
+                        <!-- Tab 3: Verified Attendance Rankings -->
+                        <a href="{{ route('leaderboard.index', ['tab' => 'attendance', 'season_id' => $selectedSeasonId]) }}"
+                           role="tab"
+                           aria-selected="{{ $tab === 'attendance' ? 'true' : 'false' }}"
+                           class="px-3.5 sm:px-4 py-2 sm:py-2.5 rounded-xl text-xs font-bold transition-all flex items-center gap-2 border whitespace-nowrap {{ $tab === 'attendance' ? 'bg-burgundy-gradient text-white border-[#8F3033] shadow-lg shadow-[#560E0F]/30' : 'bg-[#0B1120] text-[#94A3B8] hover:text-white border-[#334155]' }}">
+                            <i data-lucide="calendar-check" class="w-4 h-4 text-emerald-400"></i>
+                            <span>Attendance Rankings</span>
+                        </a>
+
+                        <!-- Tab 4: Milestones -->
                         <a href="{{ route('leaderboard.index', ['tab' => 'milestones']) }}"
                            role="tab"
                            aria-selected="{{ $tab === 'milestones' ? 'true' : 'false' }}"
@@ -70,7 +79,7 @@
                             @endif
                         </a>
 
-                        <!-- Tab 4: Badges -->
+                        <!-- Tab 5: Badges -->
                         <a href="{{ route('leaderboard.index', ['tab' => 'badges']) }}"
                            role="tab"
                            aria-selected="{{ $tab === 'badges' ? 'true' : 'false' }}"
@@ -101,7 +110,105 @@
                 </div>
             </div>
 
-            @if($tab === 'milestones')
+            @if($tab === 'attendance')
+                <!-- Attendance Rankings (Individuals, Blocks, Year Levels, Programs) -->
+                <div class="space-y-4">
+                    <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                        <div>
+                            <h2 class="text-sm font-bold text-white font-brand-display">Verified Attendance Rankings</h2>
+                            <p class="text-xs text-[#94A3B8]">Ranked by attendance rate relative to eligible event opportunities. Cancellation and unassigned events excluded.</p>
+                        </div>
+
+                        <!-- Sub-categories: Individual, Blocks, Year Levels, Programs -->
+                        <div class="flex items-center gap-1 bg-[#172033] p-1 rounded-xl border border-[#334155]">
+                            <a href="{{ route('leaderboard.index', ['tab' => 'attendance', 'group' => 'individual', 'season_id' => $selectedSeasonId]) }}"
+                               class="px-2.5 py-1 rounded-lg text-xs font-semibold {{ $attendanceGroup === 'individual' ? 'bg-[#560E0F] text-white shadow' : 'text-slate-400 hover:text-white' }}">
+                                Individual
+                            </a>
+                            <a href="{{ route('leaderboard.index', ['tab' => 'attendance', 'group' => 'blocks', 'season_id' => $selectedSeasonId]) }}"
+                               class="px-2.5 py-1 rounded-lg text-xs font-semibold {{ $attendanceGroup === 'blocks' ? 'bg-[#560E0F] text-white shadow' : 'text-slate-400 hover:text-white' }}">
+                                Blocks
+                            </a>
+                            <a href="{{ route('leaderboard.index', ['tab' => 'attendance', 'group' => 'year_levels', 'season_id' => $selectedSeasonId]) }}"
+                               class="px-2.5 py-1 rounded-lg text-xs font-semibold {{ $attendanceGroup === 'year_levels' ? 'bg-[#560E0F] text-white shadow' : 'text-slate-400 hover:text-white' }}">
+                                Year Levels
+                            </a>
+                            <a href="{{ route('leaderboard.index', ['tab' => 'attendance', 'group' => 'programs', 'season_id' => $selectedSeasonId]) }}"
+                               class="px-2.5 py-1 rounded-lg text-xs font-semibold {{ $attendanceGroup === 'programs' ? 'bg-[#560E0F] text-white shadow' : 'text-slate-400 hover:text-white' }}">
+                                Programs
+                            </a>
+                        </div>
+                    </div>
+
+                    <div class="card bg-[#172033] border border-[#334155] rounded-2xl overflow-hidden shadow-xl">
+                        <div class="overflow-x-auto">
+                            <table class="w-full text-left border-collapse">
+                                <thead>
+                                    <tr class="border-b border-[#334155] text-[10px] uppercase tracking-wider text-[#94A3B8] bg-[#0B1120]/80">
+                                        <th class="py-3 px-4 w-16 text-center">Rank</th>
+                                        <th class="py-3 px-4">{{ $attendanceGroup === 'individual' ? 'Member' : 'Cohort / Group' }}</th>
+                                        <th class="py-3 px-4 text-center">Verified Attendance</th>
+                                        <th class="py-3 px-4 text-center">Eligible Opportunities</th>
+                                        <th class="py-3 px-4 text-right">Attendance Rate</th>
+                                    </tr>
+                                </thead>
+                                <tbody class="divide-y divide-[#334155]/60">
+                                    @forelse($attendanceLeaderboard ?? [] as $idx => $row)
+                                        @php
+                                            $rank = $idx + 1;
+                                            $isMe = ($attendanceGroup === 'individual' && isset($row->id) && $row->id === auth()->id());
+                                        @endphp
+                                        <tr class="transition {{ $isMe ? 'bg-[#560E0F]/20 border-l-4 border-l-[#8F3033]' : 'hover:bg-[#1E293B]/40' }}">
+                                            <td class="py-3 px-4 text-center">
+                                                @if($rank === 1)
+                                                    <span class="inline-flex items-center justify-center w-6 h-6 rounded-full bg-amber-500 text-slate-950 font-black text-xs">1</span>
+                                                @elseif($rank === 2)
+                                                    <span class="inline-flex items-center justify-center w-6 h-6 rounded-full bg-slate-300 text-slate-950 font-black text-xs">2</span>
+                                                @elseif($rank === 3)
+                                                    <span class="inline-flex items-center justify-center w-6 h-6 rounded-full bg-amber-700 text-white font-black text-xs">3</span>
+                                                @else
+                                                    <span class="font-mono text-[#94A3B8] font-semibold tabular-nums">{{ $rank }}</span>
+                                                @endif
+                                            </td>
+                                            <td class="py-3 px-4">
+                                                @if($attendanceGroup === 'individual')
+                                                    <div class="flex items-center gap-2.5">
+                                                        <span class="font-bold text-white font-brand-display">{{ $row->display_username }}</span>
+                                                        <span class="text-[11px] text-slate-400 font-mono">({{ $row->program }} • {{ $row->year_level }})</span>
+                                                        @if($isMe)
+                                                            <span class="px-1.5 py-0.5 rounded text-[9px] font-bold bg-[#560E0F] text-white border border-[#8F3033]">YOU</span>
+                                                        @endif
+                                                    </div>
+                                                @else
+                                                    <div class="font-bold text-white font-brand-display">
+                                                        {{ $row->group_name }}
+                                                        <span class="text-[11px] text-slate-400 font-mono ml-2">({{ $row->member_count }} members)</span>
+                                                    </div>
+                                                @endif
+                                            </td>
+                                            <td class="py-3 px-4 text-center font-mono text-slate-200 tabular-nums">
+                                                {{ number_format($row->verified_attendance) }}
+                                            </td>
+                                            <td class="py-3 px-4 text-center font-mono text-slate-400 tabular-nums">
+                                                {{ number_format($row->eligible_events ?? $row->eligible_opportunities ?? 0) }}
+                                            </td>
+                                            <td class="py-3 px-4 text-right font-mono font-bold text-emerald-400 tabular-nums">
+                                                {{ number_format($row->attendance_rate, 1) }}%
+                                            </td>
+                                        </tr>
+                                    @empty
+                                        <tr>
+                                            <td colspan="5" class="py-8 text-center text-[#94A3B8] text-xs">
+                                                No verified attendance records found for this academic period.
+                                            </td>
+                                        </tr>
+                                    @endforelse
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            @elseif($tab === 'milestones')
                 <!-- Milestones Tab View -->
                 <div class="space-y-4">
                     <div class="flex items-center justify-between">

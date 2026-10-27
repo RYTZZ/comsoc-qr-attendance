@@ -104,7 +104,7 @@ export default (config) => ({
                 cancelText: 'Keep Current Signature',
                 type: 'danger',
             })
-            : window.confirm('Resetting will deactivate your current signature. You will need to register a new signature for future attendance sheets. Continue?');
+            : false;
 
         if (!confirmed) {
             return;

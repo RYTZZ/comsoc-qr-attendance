@@ -264,9 +264,32 @@ class User extends Authenticatable
         return $this->username ?: ($this->nickname ?: $this->name);
     }
 
+    public function getDisplayUsernameAttribute(): string
+    {
+        if (!empty($this->username)) {
+            return '@' . ltrim($this->username, '@');
+        }
+
+        return 'Username not set';
+    }
+
+    public function getRawUsernameAttribute(): ?string
+    {
+        return !empty($this->username) ? ltrim($this->username, '@') : null;
+    }
+
+    public function getGreetingNameAttribute(): string
+    {
+        return $this->raw_username ? "Hi, {$this->raw_username}!" : "Hi!";
+    }
+
     public function getPublicNameAttribute(): string
     {
-        return $this->username ?: ($this->nickname ?: $this->name);
+        if (!empty($this->username)) {
+            return '@' . ltrim($this->username, '@');
+        }
+
+        return 'Username not set';
     }
 
     public function hasCompletedAdventurerSetup(): bool

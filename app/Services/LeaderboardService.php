@@ -183,4 +183,177 @@ class LeaderboardService
             'score' => $userLifetime,
         ];
     }
+
+    /**
+     * Verified Attendance Rankings for Individuals, Blocks, Year Levels, and Academic Programs.
+     * Calculated as: (verified attendance count / eligible event opportunities) * 100
+     */
+    public function getAttendanceLeaderboard(string $group = 'individual', ?Season $season = null): Collection
+    {
+        $season = $season ?: (Season::where('is_active', true)->first() ?: Season::latest('start_date')->first());
+        $startDate = $season?->start_date ? $season->start_date . ' 00:00:00' : '2000-01-01 00:00:00';
+        $endDate = $season?->end_date ? $season->end_date . ' 23:59:59' : '2099-12-31 23:59:59';
+
+        // 1. Eligible Events: published or ongoing, non-cancelled, non-draft, within season range
+        $eligibleEvents = \App\Models\Event::whereNotIn('status', ['draft', 'cancelled', 'archived'])
+            ->whereBetween('event_date', [substr($startDate, 0, 10), substr($endDate, 0, 10)])
+            ->get();
+
+        $totalEligibleEventsCount = $eligibleEvents->count();
+
+        if ($group === 'individual') {
+            $users = User::query()
+                ->with('student')
+                ->whereIn('role', ['member', 'student'])
+                ->where('is_active', true)
+                ->where('is_eligible', true)
+                ->get();
+
+            return $users->map(function ($u) use ($eligibleEvents, $totalEligibleEventsCount) {
+                $student = $u->student;
+                $verifiedCount = 0;
+                $eligibleCount = 0;
+
+                foreach ($eligibleEvents as $event) {
+                    $isEligible = true;
+                    if ($event->requires_registration) {
+                        $isRegistered = \App\Models\EventRegistration::where('event_id', $event->id)
+                            ->where('status', 'approved')
+                            ->where(function ($q) use ($u, $student) {
+                                $q->where('user_id', $u->id)
+                                  ->orWhere('email', strtolower($u->email));
+                                if ($student) $q->orWhere('email', strtolower($student->email));
+                            })
+                            ->exists();
+                        if (!$isRegistered) $isEligible = false;
+                    }
+
+                    if ($isEligible) {
+                        $eligibleCount++;
+                        $attended = \App\Models\AttendanceRecord::where('event_id', $event->id)
+                            ->where(function ($q) use ($u, $student) {
+                                $q->where('user_id', $u->id);
+                                if ($student) $q->orWhere('participant_id', $student->id);
+                            })
+                            ->exists();
+                        if ($attended) $verifiedCount++;
+                    }
+                }
+
+                $rate = $eligibleCount > 0 ? round(($verifiedCount / $eligibleCount) * 100, 1) : 0.0;
+
+                return (object) [
+                    'id' => $u->id,
+                    'display_username' => $u->display_username,
+                    'name' => $u->display_name,
+                    'avatar_seed' => $u->avatar_seed,
+                    'avatar_style' => $u->avatar_style,
+                    'program' => $student?->program ?? 'Computing Society',
+                    'year_level' => $student?->year_level ?? '—',
+                    'block' => $student?->block ?? '—',
+                    'verified_attendance' => $verifiedCount,
+                    'eligible_events' => $eligibleCount,
+                    'attendance_rate' => $rate,
+                ];
+            })
+            ->sortBy([
+                ['attendance_rate', 'desc'],
+                ['verified_attendance', 'desc'],
+                ['display_username', 'asc'],
+            ])
+            ->values();
+        }
+
+        if ($group === 'blocks') {
+            $students = \App\Models\Student::whereNotNull('block')->whereNotNull('year_level')->whereNotNull('program')->get();
+            $grouped = $students->groupBy(fn($s) => "{$s->program} - Year {$s->year_level} (Block {$s->block})");
+
+            return $grouped->map(function ($groupStudents, $key) use ($eligibleEvents) {
+                $memberCount = $groupStudents->count();
+                $studentIds = $groupStudents->pluck('id')->toArray();
+                $totalEligibleOpportunities = $memberCount * $eligibleEvents->count();
+
+                $verifiedCount = \App\Models\AttendanceRecord::whereIn('event_id', $eligibleEvents->pluck('id'))
+                    ->whereIn('participant_id', $studentIds)
+                    ->distinct()
+                    ->count('event_id');
+
+                $rate = $totalEligibleOpportunities > 0
+                    ? round(($verifiedCount / $totalEligibleOpportunities) * 100, 1)
+                    : 0.0;
+
+                return (object) [
+                    'group_name' => $key,
+                    'member_count' => $memberCount,
+                    'verified_attendance' => $verifiedCount,
+                    'eligible_opportunities' => $totalEligibleOpportunities,
+                    'attendance_rate' => $rate,
+                ];
+            })
+            ->sortByDesc('attendance_rate')
+            ->values();
+        }
+
+        if ($group === 'year_levels') {
+            $yearLevels = \App\Models\Student::YEAR_LEVELS;
+            return collect($yearLevels)->map(function ($year) use ($eligibleEvents) {
+                $students = \App\Models\Student::where('year_level', $year)->get();
+                $memberCount = $students->count();
+                $studentIds = $students->pluck('id')->toArray();
+                $totalOpportunities = $memberCount * $eligibleEvents->count();
+
+                $verifiedCount = \App\Models\AttendanceRecord::whereIn('event_id', $eligibleEvents->pluck('id'))
+                    ->whereIn('participant_id', $studentIds)
+                    ->count();
+
+                $rate = $totalOpportunities > 0
+                    ? round(($verifiedCount / $totalOpportunities) * 100, 1)
+                    : 0.0;
+
+                return (object) [
+                    'group_name' => $year,
+                    'member_count' => $memberCount,
+                    'verified_attendance' => $verifiedCount,
+                    'eligible_opportunities' => $totalOpportunities,
+                    'attendance_rate' => $rate,
+                ];
+            })
+            ->sortByDesc('attendance_rate')
+            ->values();
+        }
+
+        if ($group === 'programs') {
+            $programs = ['BSIT', 'BSCS', 'BSIS', 'BTVTEd'];
+            return collect($programs)->map(function ($prog) use ($eligibleEvents) {
+                $students = \App\Models\Student::where(function ($q) use ($prog) {
+                    $q->where('program', $prog)
+                      ->orWhere('program', 'like', "%{$prog}%");
+                })->get();
+
+                $memberCount = $students->count();
+                $studentIds = $students->pluck('id')->toArray();
+                $totalOpportunities = $memberCount * $eligibleEvents->count();
+
+                $verifiedCount = \App\Models\AttendanceRecord::whereIn('event_id', $eligibleEvents->pluck('id'))
+                    ->whereIn('participant_id', $studentIds)
+                    ->count();
+
+                $rate = $totalOpportunities > 0
+                    ? round(($verifiedCount / $totalOpportunities) * 100, 1)
+                    : 0.0;
+
+                return (object) [
+                    'group_name' => $prog,
+                    'member_count' => $memberCount,
+                    'verified_attendance' => $verifiedCount,
+                    'eligible_opportunities' => $totalOpportunities,
+                    'attendance_rate' => $rate,
+                ];
+            })
+            ->sortByDesc('attendance_rate')
+            ->values();
+        }
+
+        return collect();
+    }
 }

@@ -27,14 +27,18 @@ class MemberLeaderboardController extends Controller
             : $activeSeason;
 
         $rawTab = $request->input('tab', 'semester');
-        // Support legacy 'achievements' query parameter by mapping to 'milestones' or 'badges'
+        // Support verified attendance categories and legacy tabs
         $tab = match ($rawTab) {
             'lifetime' => 'lifetime',
+            'attendance' => 'attendance',
             'milestones' => 'milestones',
             'badges' => 'badges',
             'achievements' => 'milestones',
             default => 'semester',
         };
+
+        $attendanceGroup = $request->input('group', 'individual'); // individual, blocks, year_levels, programs
+        $attendanceLeaderboard = null;
 
         $leaderboard = null;
         $userRank = null;
@@ -45,6 +49,11 @@ class MemberLeaderboardController extends Controller
                 page: (int) $request->input('page', 1)
             );
             $userRank = $leaderboardService->getUserRank(user: $user, type: 'lifetime');
+        } elseif ($tab === 'attendance') {
+            $attendanceLeaderboard = $leaderboardService->getAttendanceLeaderboard(
+                group: $attendanceGroup,
+                season: $season
+            );
         } elseif ($tab === 'semester') {
             $leaderboard = $leaderboardService->getSemesterLeaderboard(
                 season: $season,
@@ -79,6 +88,8 @@ class MemberLeaderboardController extends Controller
             'currentSeason' => $season,
             'selectedSeasonId' => $season?->id,
             'tab' => $tab,
+            'attendanceGroup' => $attendanceGroup,
+            'attendanceLeaderboard' => $attendanceLeaderboard,
             'leaderboard' => $leaderboard,
             'userRank' => $userRank,
             'achievementProgress' => $allProgress,

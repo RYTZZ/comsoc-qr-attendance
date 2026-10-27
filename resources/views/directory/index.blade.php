@@ -170,8 +170,11 @@
 
                                     <div>
                                         <h3 class="text-sm font-bold text-white group-hover:text-rose-300 transition-colors line-clamp-1">
-                                            {{ $member->username ? '@' . $member->username : $member->public_name }}
+                                            {{ $member->display_username }}
                                         </h3>
+                                        <span class="text-xs text-slate-300 font-medium block">
+                                            {{ $member->name }}
+                                        </span>
                                         <span class="text-[11px] text-slate-400 block font-mono">
                                             {{ $stud ? "{$stud->program} • {$stud->year_level}" : 'Computing Society' }}
                                         </span>
@@ -276,7 +279,15 @@
                                             <div class="flex items-center gap-3">
                                                 <x-user-avatar :user="$cand" size="md" class="border border-amber-500/40 shadow-sm" />
                                                 <div>
-                                                    <h3 class="text-sm font-bold text-white">{{ $cand->username ? '@' . $cand->username : $cand->public_name }}</h3>
+                                                    <div class="flex items-center gap-2">
+                                                        <h3 class="text-sm font-bold text-white">{{ $cand->display_username }}</h3>
+                                                        <span class="px-1.5 py-0.5 rounded text-[9px] font-semibold bg-emerald-500/20 text-emerald-300 border border-emerald-500/30">
+                                                            Teammate Candidate
+                                                        </span>
+                                                    </div>
+                                                    <span class="text-xs text-slate-300 font-medium block">
+                                                        {{ $cand->name }}
+                                                    </span>
                                                     <span class="text-[10px] text-slate-400 font-mono">
                                                         {{ $cand->student?->program ?? 'Computing Society' }}
                                                     </span>

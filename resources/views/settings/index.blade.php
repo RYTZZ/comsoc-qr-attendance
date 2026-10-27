@@ -39,17 +39,38 @@
                 </div>
             @endif
 
-            <!-- Section 1: Account Information & Profile Preferences -->
+            <!-- Section 1: Account Information & Preferences -->
             <section class="card bg-[#172033] border border-[#334155] shadow-xl rounded-2xl overflow-hidden">
                 <div class="p-6 border-b border-[#334155]/60 flex items-center justify-between bg-[#172033]/60">
                     <div class="flex items-center gap-3">
                         <div class="w-9 h-9 rounded-xl bg-[#560E0F]/20 border border-[#df747a]/30 text-[#df747a] flex items-center justify-center">
-                            <i data-lucide="user-check" class="w-5 h-5"></i>
+                            <i data-lucide="sliders" class="w-5 h-5"></i>
                         </div>
                         <div>
                             <h2 class="text-base font-bold text-white font-brand-display">Account Information & Preferences</h2>
-                            <p class="text-xs text-slate-400">Update your basic display information, bio, and directory visibility.</p>
+                            <p class="text-xs text-slate-400">Hub preferences and directory visibility. Edit personal profile details in Member Profile.</p>
                         </div>
+                    </div>
+                    <a href="{{ route('profile.edit') }}" class="btn-secondary text-xs flex items-center gap-1.5 py-1.5 px-3">
+                        <i data-lucide="user" class="w-3.5 h-3.5 text-[#df747a]"></i>
+                        <span>Edit Personal Profile</span>
+                    </a>
+                </div>
+
+                <!-- Identity Overview (Read-only consolidated link to Profile) -->
+                <div class="p-6 border-b border-[#334155]/40 bg-[#0B1120]/40 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                    <div class="flex items-center gap-3">
+                        <div class="w-10 h-10 rounded-xl bg-[#560E0F]/30 border border-[#df747a]/30 flex items-center justify-center text-white font-bold">
+                            {{ substr($user->name, 0, 1) }}
+                        </div>
+                        <div>
+                            <div class="text-sm font-semibold text-white">{{ $user->name }}</div>
+                            <div class="text-xs text-slate-400">{{ $user->email }}</div>
+                        </div>
+                    </div>
+                    <div class="flex items-center gap-2">
+                        <span class="text-[11px] text-slate-400">Identity managed in</span>
+                        <a href="{{ route('profile.edit') }}" class="text-xs text-[#df747a] hover:underline font-medium">Member Profile &rarr;</a>
                     </div>
                 </div>
 
@@ -57,52 +78,8 @@
                     @csrf
                     @method('PATCH')
 
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
-                        <div>
-                            <label for="name" class="label text-xs text-[#94A3B8] font-semibold">Full Name</label>
-                            <input type="text" name="name" id="name" value="{{ old('name', $user->name) }}" required class="input text-xs w-full">
-                            <x-input-error class="mt-1" :messages="$errors->get('name')" />
-                        </div>
-
-                        <div>
-                            <label for="email" class="label text-xs text-[#94A3B8] font-semibold">Email Address</label>
-                            <input type="email" name="email" id="email" value="{{ old('email', $user->email) }}" required class="input text-xs w-full">
-                            <x-input-error class="mt-1" :messages="$errors->get('email')" />
-                        </div>
-                    </div>
-
-                    @if($user->student)
-                        <div class="p-3.5 rounded-xl bg-[#0B1120] border border-[#334155]/60 flex flex-wrap items-center justify-between gap-3 text-xs">
-                            <div class="flex items-center gap-2 text-slate-300">
-                                <i data-lucide="graduation-cap" class="w-4 h-4 text-[#df747a]"></i>
-                                <span>Academic Record: <strong>{{ $user->student->program }}</strong> ({{ $user->student->year_level }}, Block {{ $user->student->block }})</span>
-                            </div>
-                            <span class="text-[11px] font-mono text-slate-400">Student ID is protected and verified</span>
-                        </div>
-                    @endif
-
-                    <div>
-                        <label for="bio" class="label text-xs text-[#94A3B8] font-semibold">Short Bio & Statement</label>
-                        <textarea name="bio" id="bio" rows="3" class="input text-xs w-full resize-none" placeholder="Tell fellow members what computing projects or tech areas you are passionate about...">{{ old('bio', $profile->bio) }}</textarea>
-                        <x-input-error class="mt-1" :messages="$errors->get('bio')" />
-                    </div>
-
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
-                        <div>
-                            <label for="github_url" class="label text-xs text-[#94A3B8] font-semibold">GitHub Profile URL</label>
-                            <input type="url" name="github_url" id="github_url" value="{{ old('github_url', $profile->github_url) }}" placeholder="https://github.com/username" class="input text-xs w-full">
-                            <x-input-error class="mt-1" :messages="$errors->get('github_url')" />
-                        </div>
-
-                        <div>
-                            <label for="linkedin_url" class="label text-xs text-[#94A3B8] font-semibold">LinkedIn Profile URL</label>
-                            <input type="url" name="linkedin_url" id="linkedin_url" value="{{ old('linkedin_url', $profile->linkedin_url) }}" placeholder="https://linkedin.com/in/username" class="input text-xs w-full">
-                            <x-input-error class="mt-1" :messages="$errors->get('linkedin_url')" />
-                        </div>
-                    </div>
-
                     <!-- Visibility Radio Group -->
-                    <div class="pt-2 border-t border-[#334155]/60" x-data="{ currentSetting: '{{ old('visibility', $profile->visibility ?? 'public') }}' }">
+                    <div x-data="{ currentSetting: '{{ old('visibility', $profile->visibility ?? 'public') }}' }">
                         <label class="label text-xs font-semibold text-white mb-2 block">Directory Visibility</label>
                         <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
                             <label class="p-3.5 rounded-xl border cursor-pointer transition flex flex-col justify-between"
@@ -152,7 +129,7 @@
 
                     <div class="flex justify-end pt-2">
                         <button type="submit" class="btn-primary text-xs py-2 px-5">
-                            Save Account Information
+                            Save Privacy Preferences
                         </button>
                     </div>
                 </form>

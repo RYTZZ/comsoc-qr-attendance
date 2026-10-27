@@ -68,9 +68,14 @@
                         <a href="{{ route('admin.evaluation-templates.edit', $t) }}" class="btn-secondary btn-xs">
                             Edit
                         </a>
-                        <form method="POST" action="{{ route('admin.evaluation-templates.toggle-active', $t) }}" class="inline-block" onsubmit="return confirm('Toggle active status for this template?');">
+                        <form method="POST" action="{{ route('admin.evaluation-templates.toggle-active', $t) }}" class="inline-block">
                             @csrf
-                            <button type="submit" class="btn-xs {{ $t->is_active ? 'text-amber-400 hover:text-amber-300' : 'text-emerald-400 hover:text-emerald-300' }}">
+                            <button type="submit"
+                                    data-confirm="Toggle active status for this template?"
+                                    data-confirm-title="Toggle Template Status"
+                                    data-confirm-type="warning"
+                                    data-confirm-btn="Confirm"
+                                    class="btn-xs {{ $t->is_active ? 'text-amber-400 hover:text-amber-300' : 'text-emerald-400 hover:text-emerald-300' }}">
                                 {{ $t->is_active ? 'Deactivate' : 'Activate' }}
                             </button>
                         </form>

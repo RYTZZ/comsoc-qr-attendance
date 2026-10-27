@@ -121,9 +121,26 @@
                             <span>{{ $proj->active_members_count }} / {{ $proj->team_size_target }} members</span>
                         </div>
 
-                        <a href="{{ route('projects.show', $proj) }}" class="btn-secondary text-[11px] py-1 px-3">
-                            {{ $proj->is_recruiting ? 'Join Team' : 'View Team' }}
-                        </a>
+                        <div class="flex items-center gap-2">
+                            @if($proj->owner_id === auth()->id() || auth()->user()?->isAdmin() || auth()->user()?->isSuperAdmin() || auth()->user()?->isComsocAdmin())
+                            <form method="POST" action="{{ route('projects.destroy', $proj) }}" class="inline">
+                                @csrf
+                                @method('DELETE')
+                                <button type="submit"
+                                        data-confirm="Are you sure you want to delete '{{ $proj->title }}'? This cannot be undone."
+                                        data-confirm-title="Delete Project Post"
+                                        data-confirm-type="danger"
+                                        data-confirm-btn="Delete"
+                                        class="p-1 text-slate-500 hover:text-rose-400 rounded transition"
+                                        title="Delete Project">
+                                    <i data-lucide="trash-2" class="w-4 h-4"></i>
+                                </button>
+                            </form>
+                            @endif
+                            <a href="{{ route('projects.show', $proj) }}" class="btn-secondary text-[11px] py-1 px-3">
+                                {{ $proj->is_recruiting ? 'Join Team' : 'View Team' }}
+                            </a>
+                        </div>
                     </div>
                 </div>
                 @endforeach

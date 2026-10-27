@@ -42,6 +42,44 @@ class MarketplaceService
             ];
         }
 
+        // 1b. Enforce COMSOC Membership and Fee Payment Requirements
+        // Exclude system administrators (e.g. super_admin) if not student-linked
+        if ($user->student || in_array($user->role, ['student', 'member'])) {
+            $student = $user->student;
+            $hasMembershipsInSystem = \App\Models\Membership::count() > 0;
+
+            if ($student) {
+                // Find current active membership record
+                $activeYear = \App\Models\AcademicYear::active();
+                $membershipQuery = \App\Models\Membership::where('student_id', $student->id);
+                if ($activeYear) {
+                    $membershipQuery->where('academic_year_id', $activeYear->id);
+                }
+                $membership = $membershipQuery->latest()->first();
+
+                if (!$membership || $membership->status !== 'active') {
+                    return [
+                        'success' => false,
+                        'message' => 'Membership approval required.',
+                    ];
+                }
+
+                $requiredFee = (float) config('app.membership_fee', env('MEMBERSHIP_FEE', 100));
+                $feePaid = (float) ($membership->fee_paid ?? 0);
+                if ($feePaid < $requiredFee || empty($membership->paid_at)) {
+                    return [
+                        'success' => false,
+                        'message' => 'Required membership fee not yet verified.',
+                    ];
+                }
+            } elseif ($hasMembershipsInSystem) {
+                return [
+                    'success' => false,
+                    'message' => 'Membership approval required. No student record linked to account.',
+                ];
+            }
+        }
+
         return DB::transaction(function () use ($user, $reward, $notes) {
             // 2. Lock reward record for pessimistic concurrency safety
             /** @var Reward $lockedReward */

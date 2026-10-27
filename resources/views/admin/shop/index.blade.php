@@ -560,10 +560,15 @@
                                                 @endif
 
                                                 @if(auth()->user()->isSuperAdmin() && $reward->redemptions_count === 0)
-                                                    <form action="{{ route('admin.shop.destroy', $reward) }}" method="POST" class="inline" onsubmit="return confirm('Permanently delete reward item {{ addslashes($reward->title) }}?');">
+                                                    <form action="{{ route('admin.shop.destroy', $reward) }}" method="POST" class="inline">
                                                         @csrf
                                                         @method('DELETE')
-                                                        <button type="submit" class="btn-secondary text-xs py-1.5 px-2.5 text-rose-400 border-rose-500/30">
+                                                        <button type="submit"
+                                                                data-confirm="Permanently delete reward item {{ addslashes($reward->title) }}?"
+                                                                data-confirm-title="Delete Reward Item"
+                                                                data-confirm-type="danger"
+                                                                data-confirm-btn="Delete"
+                                                                class="btn-secondary text-xs py-1.5 px-2.5 text-rose-400 border-rose-500/30">
                                                             <i data-lucide="trash-2" class="w-3.5 h-3.5"></i>
                                                         </button>
                                                     </form>

@@ -221,6 +221,7 @@ Route::middleware(['auth', 'verified', 'require_password_change'])->group(functi
             ->name('apply');
         Route::post('/applications/{application}/decide', [\App\Http\Controllers\ProjectCollaborationController::class, 'decideApplication'])->name('applications.decide');
         Route::post('/{project}/milestones', [\App\Http\Controllers\ProjectCollaborationController::class, 'addMilestone'])->name('milestones.store');
+        Route::delete('/{project}', [\App\Http\Controllers\ProjectCollaborationController::class, 'destroy'])->name('destroy');
     });
 
     // Volunteer Opportunities Board

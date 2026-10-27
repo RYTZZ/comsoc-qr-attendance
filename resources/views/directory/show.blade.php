@@ -9,7 +9,7 @@
                     @php
                         $vis = $member->profile?->visibility ?? ($member->profile?->is_public ? 'public' : 'private');
                         $isPrivileged = auth()->id() === $member->id || auth()->user()?->isAdmin() || auth()->user()?->isSuperAdmin();
-                        $publicIdentity = $member->username ? '@' . $member->username : $member->public_name;
+                        $publicIdentity = $member->display_username;
                     @endphp
                     @if($vis === 'public')
                         <span class="px-2 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider bg-cyan-500/20 border border-cyan-500/40 text-cyan-300">

@@ -139,7 +139,17 @@
                         @endif
 
                         <div class="border-t border-slate-800 pt-6">
-                            @if(!$hasStock)
+                            @if(isset($membershipEligible) && !$membershipEligible)
+                                <div class="p-4 rounded-xl bg-amber-500/10 border border-amber-500/30 text-amber-300 text-xs text-center font-medium space-y-1">
+                                    <div class="font-bold flex items-center justify-center gap-1.5">
+                                        <i data-lucide="shield-alert" class="w-4 h-4 text-amber-400"></i>
+                                        <span>{{ $membershipIneligibleReason ?? 'Membership approval required.' }}</span>
+                                    </div>
+                                    <p class="text-[11px] text-slate-400">
+                                        You must have an approved COMSOC membership with verified fee payment to redeem reward items from the shop.
+                                    </p>
+                                </div>
+                            @elseif(!$hasStock)
                                 <div class="p-4 rounded-xl bg-rose-500/10 border border-rose-500/30 text-rose-300 text-xs text-center font-medium">
                                     This reward is currently out of stock. Please check back later.
                                 </div>

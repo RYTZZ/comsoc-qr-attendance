@@ -144,13 +144,14 @@ class MemberSupportTicketController extends Controller
 
         // Hide internal notes from ordinary members
         $isStaffOrAdmin = $user->isAdmin() || $user->isStaff() || $user->isSuperAdmin();
-        $messagesQuery = $ticket->messages()->with('user');
+        $ticket->load(['assignedStaff', 'event', 'xpTransaction', 'rewardRedemption.reward', 'attendanceRecord.attendanceSession']);
+        $messagesQuery = $ticket->messages()->with(['user.student']);
         if (!$isStaffOrAdmin) {
             $messagesQuery->where('is_internal_note', false);
         }
-        $messages = $messagesQuery->get();
+        $messages = $messagesQuery->orderBy('created_at', 'asc')->get();
 
-        $histories = $ticket->histories()->with('actor')->get();
+        $histories = $ticket->histories()->with('actor')->orderBy('created_at', 'desc')->get();
 
         return view('helpdesk.show', compact('ticket', 'messages', 'histories', 'isStaffOrAdmin'));
     }

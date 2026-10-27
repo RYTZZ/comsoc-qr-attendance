@@ -78,9 +78,9 @@ class SettingsController extends Controller
         $user = $request->user();
 
         $validated = $request->validate([
-            'name' => ['required', 'string', 'max:255'],
+            'name' => ['nullable', 'string', 'max:255'],
             'email' => [
-                'required',
+                'nullable',
                 'string',
                 'lowercase',
                 'email',
@@ -94,11 +94,11 @@ class SettingsController extends Controller
         ]);
 
         DB::transaction(function () use ($user, $validated) {
-            $emailChanged = $user->email !== $validated['email'];
-            $user->name = $validated['name'];
-            $user->email = $validated['email'];
-
-            if ($emailChanged) {
+            if (!empty($validated['name'])) {
+                $user->name = $validated['name'];
+            }
+            if (!empty($validated['email']) && $user->email !== $validated['email']) {
+                $user->email = $validated['email'];
                 $user->email_verified_at = null;
                 if ($user->student) {
                     $user->student->update(['email' => $validated['email']]);
@@ -108,13 +108,20 @@ class SettingsController extends Controller
 
             $isPublic = ($validated['visibility'] === 'public');
             $profile = UserProfile::firstOrCreate(['user_id' => $user->id]);
-            $profile->update([
-                'bio' => $validated['bio'] ?? null,
+            $profileData = [
                 'visibility' => $validated['visibility'],
                 'is_public' => $isPublic,
-                'github_url' => $validated['github_url'] ?? null,
-                'linkedin_url' => $validated['linkedin_url'] ?? null,
-            ]);
+            ];
+            if (array_key_exists('bio', $validated)) {
+                $profileData['bio'] = $validated['bio'];
+            }
+            if (array_key_exists('github_url', $validated)) {
+                $profileData['github_url'] = $validated['github_url'];
+            }
+            if (array_key_exists('linkedin_url', $validated)) {
+                $profileData['linkedin_url'] = $validated['linkedin_url'];
+            }
+            $profile->update($profileData);
         });
 
         return redirect()->route('settings.index')

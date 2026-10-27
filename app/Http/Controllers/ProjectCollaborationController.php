@@ -305,4 +305,26 @@ class ProjectCollaborationController extends Controller
 
         return back()->with('status', 'Milestone added.');
     }
+
+    public function destroy(Request $request, CollaborationProject $project): RedirectResponse
+    {
+        $user = $request->user();
+
+        // Must be owner or have admin privileges
+        $isOwner = $project->owner_id === $user->id;
+        $isPrivileged = $user->isAdmin() || $user->isSuperAdmin() || $user->isComsocAdmin();
+
+        if (!$isOwner && !$isPrivileged) {
+            abort(403, 'You are not authorized to delete this project collaboration post.');
+        }
+
+        DB::transaction(function () use ($project) {
+            $project->applications()->delete();
+            $project->members()->delete();
+            $project->milestones()->delete();
+            $project->delete();
+        });
+
+        return redirect()->route('projects.index')->with('status', 'Project collaboration post deleted successfully.');
+    }
 }

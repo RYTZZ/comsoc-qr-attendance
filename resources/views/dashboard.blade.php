@@ -22,10 +22,8 @@
                         </span>
                     </div>
                     <h1 class="text-2xl sm:text-3xl font-extrabold text-[#F8FAFC] font-brand-display tracking-tight mt-1 flex flex-wrap items-center gap-2">
-                        <span>Welcome back, {{ $student ? $student->first_name : $user->name }}!</span>
-                        @if($user->username)
-                            <span class="text-sm sm:text-base font-normal font-mono text-[#df747a]">({{ '@' . $user->username }})</span>
-                        @endif
+                        <span>{{ $user->greeting_name }}</span>
+                        <span class="sr-only">Welcome back, {{ $student->first_name ?? $user->name }}!</span>
                     </h1>
                     <p class="text-xs text-[#94A3B8] mt-0.5">
                         {{ $student ? "{$student->program} • Year {$student->year_level} (Block {$student->block})" : 'Computing Society Member' }}

@@ -102,7 +102,10 @@
 
                 <div class="pt-2">
                     <button type="submit" class="btn-primary text-xs py-2.5 px-5 bg-rose-700 hover:bg-rose-800 border-rose-600 font-bold flex items-center gap-2"
-                            onclick="return confirm('Are you strictly sure? This process is irreversible and creates permanent leaderboard snapshots.');">
+                            data-confirm="Are you strictly sure? This process is irreversible and creates permanent leaderboard snapshots."
+                            data-confirm-title="Finalize Academic Season Reset"
+                            data-confirm-type="danger"
+                            data-confirm-btn="Finalize Reset">
                         <i data-lucide="check" class="w-4 h-4"></i>
                         <span>Confirm and Finalize Season Reset</span>
                     </button>

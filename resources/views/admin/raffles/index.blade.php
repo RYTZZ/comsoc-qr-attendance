@@ -62,9 +62,14 @@
                         <td class="p-3 text-right space-x-2">
                             <a href="{{ route('admin.raffles.show', $raffle) }}" class="btn-ghost btn-xs">View</a>
                             @if(!$raffle->isDrawn())
-                                <form action="{{ route('admin.raffles.draw', $raffle) }}" method="POST" class="inline" onsubmit="return confirm('Execute randomized draw for verified attendees?');">
+                                <form action="{{ route('admin.raffles.draw', $raffle) }}" method="POST" class="inline">
                                     @csrf
-                                    <button type="submit" class="btn-primary btn-xs">Draw Now</button>
+                                    <button type="submit"
+                                            data-confirm="Execute randomized draw for verified attendees?"
+                                            data-confirm-title="Execute Raffle Draw"
+                                            data-confirm-type="warning"
+                                            data-confirm-btn="Draw Winners"
+                                            class="btn-primary btn-xs">Draw Now</button>
                                 </form>
                             @endif
                         </td>

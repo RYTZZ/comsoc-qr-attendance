@@ -30,6 +30,21 @@
                     <span>Live Demo</span>
                 </a>
                 @endif
+                @if($isOwner || auth()->user()?->isAdmin() || auth()->user()?->isSuperAdmin() || auth()->user()?->isComsocAdmin())
+                <form method="POST" action="{{ route('projects.destroy', $project) }}" class="inline">
+                    @csrf
+                    @method('DELETE')
+                    <button type="submit"
+                            data-confirm="Are you sure you want to delete this project collaboration post? All applications and milestones will be removed."
+                            data-confirm-title="Delete Project Collaboration"
+                            data-confirm-type="danger"
+                            data-confirm-btn="Delete Project"
+                            class="px-3 py-2 rounded-xl text-xs font-semibold text-rose-300 bg-rose-500/10 hover:bg-rose-500/20 border border-rose-500/30 transition flex items-center gap-1.5">
+                        <i data-lucide="trash-2" class="w-4 h-4 text-rose-400"></i>
+                        <span>Delete</span>
+                    </button>
+                </form>
+                @endif
             </div>
         </div>
     </x-slot>

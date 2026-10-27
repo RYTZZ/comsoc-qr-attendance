@@ -41,6 +41,16 @@ class EventAttendanceService
             }
         }
 
+        // 1b. Validate event status: ended or cancelled events cannot record attendance
+        if ($event->isEnded() || in_array($event->status, ['cancelled', 'archived', 'draft'])) {
+            return [
+                'success' => false,
+                'code' => 'event_inactive_or_ended',
+                'message' => 'Attendance check-in is not permitted. This event has ended, been cancelled, or is inactive.',
+                'result_type' => 'Event ended',
+            ];
+        }
+
         // 2. Validate session belongs to event and is active
         if ($session->event_id !== $event->id) {
             return [
