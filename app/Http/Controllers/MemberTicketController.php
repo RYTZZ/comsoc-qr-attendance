@@ -74,9 +74,9 @@ class MemberTicketController extends Controller
                 ->get();
         }
 
-        // Generate event-specific dynamic rolling QR token for approved ticket holders
+        // Generate event-specific dynamic rolling QR token for approved ticket holders only if event is active & not ended
         $dynamicPass = null;
-        if ($ticket->status === 'approved' && $user->is_active && $user->is_eligible) {
+        if ($ticket->status === 'approved' && $user->is_active && $user->is_eligible && $event && !$event->isEnded()) {
             $tokenData = $this->dynamicQrService->generateTokenForUser($user, $event);
             $dynamicPass = [
                 'payload' => $tokenData['qr_payload'],
@@ -106,6 +106,7 @@ class MemberTicketController extends Controller
         if (!$canView) {
             return response()->json([
                 'success' => false,
+                'code' => 'UNAUTHORIZED',
                 'message' => 'Unauthorized access to this event pass.',
             ], 403);
         }
@@ -113,6 +114,7 @@ class MemberTicketController extends Controller
         if ($ticket->status !== 'approved') {
             return response()->json([
                 'success' => false,
+                'code' => 'REGISTRATION_NOT_APPROVED',
                 'message' => 'Registration pass is not active or approved.',
             ], 403);
         }
@@ -120,11 +122,37 @@ class MemberTicketController extends Controller
         if (!$user->is_active || !$user->is_eligible) {
             return response()->json([
                 'success' => false,
+                'code' => 'ATTENDANCE_NOT_ELIGIBLE',
                 'message' => 'Member account is inactive or ineligible.',
             ], 403);
         }
 
         $event = $ticket->event;
+        if (!$event) {
+            return response()->json([
+                'success' => false,
+                'code' => 'EVENT_NOT_FOUND',
+                'message' => 'Associated event could not be found.',
+            ], 404);
+        }
+
+        if ($event->isEnded()) {
+            return response()->json([
+                'success' => false,
+                'code' => 'EVENT_ENDED',
+                'event_ended' => true,
+                'message' => 'This event has ended. The attendance pass is no longer available.',
+            ], 403);
+        }
+
+        if (in_array($event->status, ['cancelled', 'archived', 'draft'])) {
+            return response()->json([
+                'success' => false,
+                'code' => 'EVENT_CANCELLED',
+                'message' => 'This event has been cancelled or is inactive.',
+            ], 403);
+        }
+
         $tokenData = $this->dynamicQrService->generateTokenForUser($user, $event);
 
         return response()->json([

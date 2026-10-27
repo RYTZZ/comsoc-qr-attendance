@@ -266,30 +266,59 @@ class User extends Authenticatable
 
     public function getDisplayUsernameAttribute(): string
     {
-        if (!empty($this->username)) {
-            return '@' . ltrim($this->username, '@');
+        $raw = trim($this->username ?? '');
+        $studentNumber = $this->student?->student_number ?? $this->student_number ?? null;
+
+        // Determine if raw username resembles a student number or student ID
+        $isStudentId = false;
+        if ($raw !== '') {
+            $normalizedRaw = strtolower(ltrim($raw, '@'));
+            if ($studentNumber && $normalizedRaw === strtolower(trim($studentNumber))) {
+                $isStudentId = true;
+            } elseif (preg_match('/^\d{6,12}$/', $normalizedRaw) || preg_match('/^\d{2,4}-\d{4,8}$/', $normalizedRaw)) {
+                $isStudentId = true;
+            }
         }
 
+        // Rule 1: Valid configured username exists and is not a student number
+        if ($raw !== '' && !$isStudentId) {
+            return '@' . ltrim($raw, '@');
+        }
+
+        // Rule 2: Fallback to member's actual first name (without '@')
+        $firstName = trim($this->student?->first_name ?? '');
+        if ($firstName === '' && !empty($this->name)) {
+            $parts = explode(' ', trim($this->name));
+            $firstName = trim($parts[0] ?? '');
+        }
+
+        if ($firstName !== '') {
+            return $firstName;
+        }
+
+        // Rule 3: If neither username nor first name is available
         return 'Username not set';
     }
 
     public function getRawUsernameAttribute(): ?string
     {
-        return !empty($this->username) ? ltrim($this->username, '@') : null;
+        $display = $this->display_username;
+        if ($display === 'Username not set') {
+            return null;
+        }
+
+        return ltrim($display, '@');
     }
 
     public function getGreetingNameAttribute(): string
     {
-        return $this->raw_username ? "Hi, {$this->raw_username}!" : "Hi!";
+        $raw = $this->raw_username;
+        return $raw ? "Hi, {$raw}!" : "Hi!";
     }
 
     public function getPublicNameAttribute(): string
     {
-        if (!empty($this->username)) {
-            return '@' . ltrim($this->username, '@');
-        }
-
-        return 'Username not set';
+        return $this->display_username;
     }
 
     public function hasCompletedAdventurerSetup(): bool

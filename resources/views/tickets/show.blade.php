@@ -35,7 +35,12 @@
                             <span class="px-2.5 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider bg-[#560E0F] text-white border border-[#8F3033]">
                                 {{ $event->event_type ?: 'Official Activity' }}
                             </span>
-                            @if($ticket->status === 'approved')
+                            @if($event && $event->isEnded())
+                                <span class="px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-amber-500/20 text-amber-400 border border-amber-500/30 flex items-center gap-1">
+                                    <i data-lucide="calendar-x" class="w-3 h-3"></i>
+                                    <span>Event Ended</span>
+                                </span>
+                            @elseif($ticket->status === 'approved')
                                 <span class="px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 flex items-center gap-1">
                                     <span class="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse"></span>
                                     <span>Active Event Pass</span>
@@ -204,9 +209,26 @@
                             </div>
                         </div>
                     @else
-                        <!-- Ineligible, Pending, or Revoked State -->
+                        <!-- Ineligible, Pending, Revoked, or Ended State -->
                         <div class="flex flex-col items-center text-center p-8 bg-slate-900/80 rounded-2xl border border-slate-800">
-                            @if($ticket->status === 'pending')
+                            @if($event && $event->isEnded())
+                                <div class="w-12 h-12 rounded-2xl bg-amber-500/10 border border-amber-500/30 flex items-center justify-center text-amber-400 mb-3">
+                                    <i data-lucide="calendar-x" class="w-6 h-6"></i>
+                                </div>
+                                <h3 class="text-sm font-bold text-amber-400 font-brand-display">Event Ended</h3>
+                                <p class="text-xs text-slate-300 mt-1 max-w-xs leading-relaxed font-medium">
+                                    This event has ended. The attendance pass is no longer available.
+                                </p>
+                                <p class="text-[11px] text-[#94A3B8] mt-1 max-w-xs leading-relaxed">
+                                    Attendance check-in for this event is closed. You can view your attendance records below or explore other upcoming events.
+                                </p>
+                                <div class="mt-4 w-full max-w-xs">
+                                    <a href="{{ route('events.index') }}" class="btn-primary w-full text-xs py-2 flex items-center justify-center gap-1.5 font-bold shadow-md">
+                                        <i data-lucide="calendar" class="w-3.5 h-3.5"></i>
+                                        <span>Browse Events & Activities</span>
+                                    </a>
+                                </div>
+                            @elseif($ticket->status === 'pending')
                                 <div class="w-12 h-12 rounded-2xl bg-amber-500/10 border border-amber-500/30 flex items-center justify-center text-amber-400 mb-3">
                                     <i data-lucide="clock" class="w-6 h-6"></i>
                                 </div>
@@ -461,6 +483,14 @@
 
                         if (!response.ok) {
                             const errData = await response.json().catch(() => null);
+                            if (errData?.event_ended || errData?.code === 'EVENT_ENDED') {
+                                if (this.timerInterval) clearInterval(this.timerInterval);
+                                const container = document.getElementById('event-qrcode-canvas');
+                                if (container) container.innerHTML = '';
+                                this.payload = '';
+                                this.errorMessage = 'This event has ended. The attendance pass is no longer available.';
+                                return;
+                            }
                             throw new Error(errData?.message || ('Server responded with ' + response.status));
                         }
 

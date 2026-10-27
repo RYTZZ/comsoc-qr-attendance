@@ -21,6 +21,10 @@ class DynamicQrService
      */
     public function generateTokenForUser(User $user, ?\App\Models\Event $event = null): array
     {
+        if ($event && ($event->isEnded() || in_array($event->status, ['cancelled', 'archived', 'draft']))) {
+            throw new \InvalidArgumentException('Cannot issue attendance QR pass for an event that has ended, been cancelled, or is inactive.');
+        }
+
         // Generate cryptographic token
         $rawEntropy = Str::random(32);
         $expiresAt = now()->addSeconds(self::TOKEN_TTL_SECONDS);

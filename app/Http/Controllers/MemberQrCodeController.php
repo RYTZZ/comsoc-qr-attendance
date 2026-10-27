@@ -140,6 +140,7 @@ class MemberQrCodeController extends Controller
         if (!$user->is_active || !$user->is_eligible) {
             return response()->json([
                 'success' => false,
+                'code' => 'ATTENDANCE_NOT_ELIGIBLE',
                 'message' => 'Account is deactivated or not in good standing.',
             ], 403);
         }
@@ -177,6 +178,7 @@ class MemberQrCodeController extends Controller
         if (!$event) {
             return response()->json([
                 'success' => false,
+                'code' => 'EVENT_NOT_OPEN',
                 'message' => 'Join an event through Events & Activities to access its Dynamic Attendance QR Code.',
             ], 403);
         }
@@ -184,8 +186,17 @@ class MemberQrCodeController extends Controller
         if ($event->isEnded()) {
             return response()->json([
                 'success' => false,
-                'message' => 'This event has ended. Your attendance QR Code is no longer available.',
+                'code' => 'EVENT_ENDED',
+                'message' => 'This event has ended. The attendance pass is no longer available.',
                 'event_ended' => true,
+            ], 403);
+        }
+
+        if (in_array($event->status, ['cancelled', 'archived', 'draft'])) {
+            return response()->json([
+                'success' => false,
+                'code' => 'EVENT_CANCELLED',
+                'message' => 'This event has been cancelled or is inactive.',
             ], 403);
         }
 
@@ -204,6 +215,7 @@ class MemberQrCodeController extends Controller
         if (!$registration) {
             return response()->json([
                 'success' => false,
+                'code' => 'REGISTRATION_REQUIRED',
                 'message' => 'Join this event to access your Dynamic Attendance QR Code.',
             ], 403);
         }

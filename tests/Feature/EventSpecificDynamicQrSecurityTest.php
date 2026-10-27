@@ -546,8 +546,9 @@ class EventSpecificDynamicQrSecurityTest extends TestCase
         $refreshRes->assertStatus(403);
         $refreshRes->assertJsonFragment([
             'success' => false,
+            'code' => 'EVENT_ENDED',
             'event_ended' => true,
-            'message' => 'This event has ended. Your attendance QR Code is no longer available.',
+            'message' => 'This event has ended. The attendance pass is no longer available.',
         ]);
     }
 }

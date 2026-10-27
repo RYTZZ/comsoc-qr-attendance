@@ -453,7 +453,16 @@
                         });
 
                         if (!response.ok) {
-                            throw new Error('Server responded with ' + response.status);
+                            const errData = await response.json().catch(() => null);
+                            if (errData?.event_ended || errData?.code === 'EVENT_ENDED') {
+                                if (this.timerInterval) clearInterval(this.timerInterval);
+                                const container = document.getElementById('qrcode-canvas');
+                                if (container) container.innerHTML = '';
+                                this.payload = '';
+                                this.errorMessage = 'This event has ended. The attendance pass is no longer available.';
+                                return;
+                            }
+                            throw new Error(errData?.message || ('Server responded with ' + response.status));
                         }
 
                         const data = await response.json();
@@ -474,7 +483,7 @@
                         this.syncTiming();
                     } catch (error) {
                         console.error('QR Refresh Error:', error);
-                        this.errorMessage = 'Connection interrupted. Tap retry.';
+                        this.errorMessage = error.message || 'Connection interrupted. Tap retry.';
                     } finally {
                         this.refreshing = false;
                         if (window.lucideIcons && window.createIcons) {
