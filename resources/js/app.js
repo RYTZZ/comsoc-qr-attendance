@@ -5,6 +5,7 @@ import { Html5Qrcode } from 'html5-qrcode';
 import { createIcons, icons } from 'lucide';
 import SignaturePad from 'signature_pad';
 import signatureRegistration from './signature';
+import constitutionPdfViewer from './constitution-viewer';
 import { initMotionSystem } from './motion';
 
 window.Alpine = Alpine;
@@ -44,6 +45,7 @@ window.refreshIcons = () => {
 };
 
 Alpine.data('signatureRegistration', signatureRegistration);
+Alpine.data('constitutionPdfViewer', constitutionPdfViewer);
 
 Alpine.data('customDropdown', (config) => ({
     name: config.name,

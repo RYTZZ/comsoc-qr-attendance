@@ -44,92 +44,16 @@
         </div>
     </x-slot>
 
-    <div class="py-6 sm:py-8 bg-[#0B1120]"
-         x-data="{
-             isFullscreen: false,
-             zoomLevels: ['page-width', 'page-fit', '75', '100', '125', '150'],
-             zoomLabels: { 'page-width': 'Fit Width', 'page-fit': 'Fit Page', '75': '75%', '100': '100%', '125': '125%', '150': '150%' },
-             currentZoomIdx: 0,
-             isLoading: true,
-             hasError: false,
-             errorMessage: '',
-             basePreviewUrl: '{{ route('constitution.preview') }}?v={{ $document?->version }}-{{ $document?->updated_at?->timestamp }}',
-
-             get currentZoomMode() {
-                 return this.zoomLevels[this.currentZoomIdx];
-             },
-             get currentZoomLabel() {
-                 return this.zoomLabels[this.currentZoomMode] || '100%';
-             },
-             get computedViewerUrl() {
-                 const mode = this.currentZoomMode;
-                 let viewParam = 'view=FitH';
-                 if (mode === 'page-fit') viewParam = 'view=Fit';
-                 else if (mode !== 'page-width') viewParam = 'zoom=' + mode;
-                 return this.basePreviewUrl + '#' + viewParam + '&toolbar=1&navpanes=1&scrollbar=1';
-             },
-             zoomIn() {
-                 if (this.currentZoomIdx < this.zoomLevels.length - 1) {
-                     this.currentZoomIdx++;
-                     this.updateFrameUrl();
-                 }
-             },
-             zoomOut() {
-                 if (this.currentZoomIdx > 0) {
-                     this.currentZoomIdx--;
-                     this.updateFrameUrl();
-                 }
-             },
-             resetZoom() {
-                 this.currentZoomIdx = 0; // Fit Width default
-                 this.updateFrameUrl();
-             },
-             updateFrameUrl() {
-                 const frame = this.$refs.pdfFrame;
-                 if (frame) {
-                     frame.src = this.computedViewerUrl;
-                 }
-             },
-             toggleFullscreen() {
-                 if (!this.isFullscreen) {
-                     this.enterFullscreen();
-                 } else {
-                     this.exitFullscreen();
-                 }
-             },
-             enterFullscreen() {
-                 this.isFullscreen = true;
-                 window.dispatchEvent(new CustomEvent('reader-fullscreen', { detail: true }));
-                 const el = document.getElementById('cbl-viewer-card');
-                 if (el && el.requestFullscreen && !document.fullscreenElement) {
-                     el.requestFullscreen().catch(() => {});
-                 }
-             },
-             exitFullscreen() {
-                 this.isFullscreen = false;
-                 window.dispatchEvent(new CustomEvent('reader-fullscreen', { detail: false }));
-                 if (document.fullscreenElement && document.exitFullscreen) {
-                     document.exitFullscreen().catch(() => {});
-                 }
-             },
-             onLoadSuccess() {
-                 this.isLoading = false;
-                 this.hasError = false;
-             },
-             onLoadFailure() {
-                 this.isLoading = false;
-                 this.hasError = true;
-                 this.errorMessage = 'Unable to stream the PDF preview. You can refresh or download the document directly.';
-             }
-         }"
-         @fullscreenchange.window="if (!document.fullscreenElement && isFullscreen) { isFullscreen = false; window.dispatchEvent(new CustomEvent('reader-fullscreen', { detail: false })); }"
-         @keydown.escape.window="if (isFullscreen) { exitFullscreen(); }">
+    <div class="py-6 sm:py-8 bg-[#0B1120]">
 
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
 
             @if($isAvailable)
                 <!-- Two-Column Side-by-Side Document Layout on Desktop -->
-                <div class="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
+                <div class="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start"
+                     x-data="constitutionPdfViewer({ url: '{{ route('constitution.preview') }}?v={{ $document?->version }}-{{ $document?->updated_at?->timestamp }}' })"
+                     @fullscreenchange.window="if (!document.fullscreenElement && isFullscreen) { isFullscreen = false; window.dispatchEvent(new CustomEvent('reader-fullscreen', { detail: false })); }"
+                     @keydown.escape.window="if (isFullscreen) { exitFullscreen(); }">
 
                     <!-- ======================================================== -->
                     <!-- LEFT COLUMN: Document Information (Approx 35% on desktop)-->
@@ -264,7 +188,10 @@
                                             <span class="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse hidden sm:inline-block"></span>
                                         </h3>
                                         <p class="text-[10px] text-slate-400 truncate hidden sm:block">
-                                            Official Ratified Document • Version {{ $document->version }}.0
+                                            Official Ratified Document • Version {{ $document->version }}.0 
+                                            <template x-if="totalPages > 0">
+                                                <span>• <span x-text="totalPages"></span> Pages</span>
+                                            </template>
                                         </p>
                                     </div>
                                 </div>
@@ -317,24 +244,24 @@
                                 </div>
                             </div>
 
-                            <!-- PDF Viewport Container (Deliberately expanded to min(78vh, 900px) on desktop, min-h-[650px], and 65vh on mobile) -->
+                            <!-- PDF Viewport Container (750-900px on desktop, 65-75vh on mobile) -->
                             <div id="pdf-viewer-container"
-                                 class="relative w-full bg-slate-900 flex-1 flex flex-col items-stretch justify-start overflow-hidden transition-all duration-200"
+                                 class="relative w-full bg-slate-950 flex-1 flex flex-col items-stretch justify-start overflow-hidden transition-all duration-200"
                                  :class="isFullscreen 
                                     ? 'h-[calc(100vh-3.5rem)]' 
-                                    : 'h-[65vh] min-h-[450px] sm:min-h-[550px] lg:h-[min(78vh,900px)] lg:min-h-[650px] xl:min-h-[750px]'">
+                                    : 'h-[68vh] min-h-[480px] sm:min-h-[580px] lg:h-[min(78vh,900px)] lg:min-h-[750px] xl:min-h-[800px]'">
 
                                 <!-- Loading Overlay -->
                                 <div x-show="isLoading && !hasError"
-                                     class="absolute inset-0 z-20 bg-slate-950/80 backdrop-blur-sm flex flex-col items-center justify-center p-6 text-center">
+                                     class="absolute inset-0 z-20 bg-slate-950/85 backdrop-blur-sm flex flex-col items-center justify-center p-6 text-center">
                                     <div class="relative w-12 h-12 sm:w-14 sm:h-14 mb-3">
                                         <div class="w-full h-full rounded-full border-4 border-[#8F3033]/30 border-t-[#df747a] animate-spin"></div>
                                         <div class="absolute inset-0 flex items-center justify-center text-[#df747a]">
                                             <i data-lucide="scroll-text" class="w-5 h-5"></i>
                                         </div>
                                     </div>
-                                    <h4 class="text-xs sm:text-sm font-bold text-white mb-0.5">Loading Document...</h4>
-                                    <p class="text-[11px] text-slate-400 max-w-xs">Fetching official PDF stream.</p>
+                                    <h4 class="text-xs sm:text-sm font-bold text-white mb-0.5">Loading Complete Document...</h4>
+                                    <p class="text-[11px] text-slate-400 max-w-xs">Rendering all pages in high-resolution vector fidelity.</p>
                                 </div>
 
                                 <!-- Error State Overlay -->
@@ -347,12 +274,12 @@
                                     <div>
                                         <h4 class="text-sm sm:text-base font-bold text-white">Document Preview Encountered An Error</h4>
                                         <p class="text-xs text-slate-400 mt-1 max-w-md" x-text="errorMessage">
-                                            Unable to stream the PDF viewer. You can download the official document directly.
+                                            Unable to render the document. You can download the official document directly.
                                         </p>
                                     </div>
                                     <div class="flex items-center gap-3">
                                         <button type="button"
-                                                @click="isLoading = true; hasError = false; $refs.pdfFrame.src = computedViewerUrl + '&t=' + Date.now()"
+                                                @click="retry()"
                                                 class="btn-secondary text-xs flex items-center gap-2">
                                             <i data-lucide="refresh-cw" class="w-3.5 h-3.5"></i>
                                             <span>Retry Preview</span>
@@ -364,32 +291,21 @@
                                     </div>
                                 </div>
 
-                                <!-- Embedded PDF Frame with width: 100% and height: 100% -->
-                                <div class="w-full h-full flex-1 relative bg-slate-900">
-                                    <iframe x-ref="pdfFrame"
-                                            :src="computedViewerUrl"
-                                            class="w-full h-full border-0 block"
-                                            title="COMSOC Constitutional and By-Laws Viewer"
-                                            x-on:load="onLoadSuccess()"
-                                            x-on:error="onLoadFailure()">
-                                        <div class="p-8 text-center text-slate-300">
-                                            <p class="text-sm mb-4">Your browser does not support inline PDF viewing.</p>
-                                            <a href="{{ route('constitution.download') }}" class="btn-primary text-xs inline-flex items-center gap-2">
-                                                <i data-lucide="download" class="w-4 h-4"></i>
-                                                Download Official PDF
-                                            </a>
-                                        </div>
-                                    </iframe>
+                                <!-- Scrollable Multi-Page Pages Container -->
+                                <div x-ref="pagesContainer"
+                                     class="w-full h-full flex-1 overflow-y-auto overflow-x-auto p-3 sm:p-5 flex flex-col items-center space-y-4 select-text focus:outline-none"
+                                     tabindex="0"
+                                     aria-label="Constitutional and By-Laws multi-page document stream">
                                 </div>
 
                                 <!-- Mobile Compact Helper Footnote (Normal mode only) -->
                                 <div x-show="!isFullscreen"
                                      class="sm:hidden w-full bg-[#172033]/90 border-t border-[#334155] px-3 py-1.5 flex items-center justify-between text-[11px] text-slate-400 shrink-0">
-                                    <span>Tap Full Screen for expanded view</span>
+                                    <span>Scroll down to read all pages</span>
                                     <button type="button"
                                             @click="enterFullscreen()"
                                             class="font-semibold text-[#df747a] hover:underline flex items-center gap-1">
-                                        <span>Expand</span>
+                                        <span>Full Screen</span>
                                         <i data-lucide="maximize-2" class="w-3 h-3"></i>
                                     </button>
                                 </div>

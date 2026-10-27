@@ -21,6 +21,7 @@
     "dependencies": {
         "html5-qrcode": "^2.3.8",
         "lucide": "^1.47.0",
+        "pdfjs-dist": "^3.11.174",
         "signature_pad": "^5.1.4"
     }
 }
