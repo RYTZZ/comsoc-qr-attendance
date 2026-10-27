@@ -125,250 +125,277 @@
          @fullscreenchange.window="if (!document.fullscreenElement && isFullscreen) { isFullscreen = false; window.dispatchEvent(new CustomEvent('reader-fullscreen', { detail: false })); }"
          @keydown.escape.window="if (isFullscreen) { exitFullscreen(); }">
 
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-6">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
 
-            <!-- Institutional Document Overview Card (Hidden only in fullscreen reading mode) -->
-            <div x-show="!isFullscreen"
-                 x-transition:leave="transition-all duration-200"
-                 class="bg-[#172033]/90 border border-[#334155] rounded-2xl p-5 sm:p-6 shadow-xl relative overflow-hidden backdrop-blur-md">
-                <div class="absolute -right-16 -top-16 w-56 h-56 rounded-full bg-gradient-to-br from-[#8F3033]/20 to-transparent blur-3xl pointer-events-none"></div>
-
-                <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 items-start relative z-10">
-                    <div class="lg:col-span-2 space-y-3">
-                        <div class="flex items-center gap-2 text-xs font-semibold text-[#df747a]">
-                            <i data-lucide="shield-check" class="w-4 h-4"></i>
-                            <span>Official Organizational Governance & Charter</span>
-                        </div>
-                        <h2 class="text-lg sm:text-xl font-bold text-white tracking-tight">
-                            {{ $document?->title ?? 'COMSOC Constitutional and By-Laws' }}
-                        </h2>
-                        <p class="text-sm text-slate-300 leading-relaxed">
-                            {{ $document?->description ?? 'This official governing document establishes the Computing Society\'s governing principles, policies, executive structure, member rights and responsibilities, electoral rules, and operational procedures across all CICT degree programs.' }}
-                        </p>
-
-                        <!-- Organization Meta Highlights -->
-                        <div class="pt-2 flex flex-wrap items-center gap-y-2 gap-x-4 text-xs text-slate-400">
-                            <span class="inline-flex items-center gap-1.5">
-                                <i data-lucide="building" class="w-3.5 h-3.5 text-slate-500"></i>
-                                Sorsogon State University – Bulan Campus
-                            </span>
-                            <span class="inline-flex items-center gap-1.5">
-                                <i data-lucide="graduation-cap" class="w-3.5 h-3.5 text-slate-500"></i>
-                                CICT: BSCS • BSIT • BSIS • BTVTED-CSS
-                            </span>
-                        </div>
-                    </div>
-
-                    <!-- Document Metadata Panel -->
-                    <div class="bg-[#0B1120]/80 border border-[#334155] rounded-xl p-4 space-y-3">
-                        <div class="text-[11px] font-bold text-slate-400 uppercase tracking-wider flex items-center justify-between border-b border-[#334155]/60 pb-2">
-                            <span>Document Information</span>
-                            <i data-lucide="file-text" class="w-3.5 h-3.5 text-slate-400"></i>
-                        </div>
-
-                        @if($document && $document->fileExists())
-                            <dl class="text-xs space-y-2">
-                                <div class="flex justify-between items-center">
-                                    <dt class="text-slate-400">File Format:</dt>
-                                    <dd class="font-semibold text-slate-200 uppercase flex items-center gap-1">
-                                        <span class="w-2 h-2 rounded-full bg-rose-500"></span>
-                                        PDF Document
-                                    </dd>
-                                </div>
-                                <div class="flex justify-between items-center">
-                                    <dt class="text-slate-400">File Size:</dt>
-                                    <dd class="font-medium text-slate-300 font-mono">{{ $document->formattedFileSize() }}</dd>
-                                </div>
-                                <div class="flex justify-between items-center">
-                                    <dt class="text-slate-400">Active Version:</dt>
-                                    <dd class="font-semibold text-[#df747a] font-mono">v{{ $document->version }}.0</dd>
-                                </div>
-                                <div class="flex justify-between items-center">
-                                    <dt class="text-slate-400">Last Updated:</dt>
-                                    <dd class="text-slate-300 font-medium">{{ $document->updated_at?->format('M d, Y') ?? 'N/A' }}</dd>
-                                </div>
-                                <div class="flex justify-between items-center">
-                                    <dt class="text-slate-400">Status:</dt>
-                                    <dd>
-                                        @if($document->is_published)
-                                            <span class="px-2 py-0.5 rounded text-[10px] font-bold bg-emerald-500/20 text-emerald-300 border border-emerald-500/30">
-                                                Published
-                                            </span>
-                                        @else
-                                            <span class="px-2 py-0.5 rounded text-[10px] font-bold bg-amber-500/20 text-amber-300 border border-amber-500/30">
-                                                Unpublished
-                                            </span>
-                                        @endif
-                                    </dd>
-                                </div>
-                            </dl>
-                        @else
-                            <div class="py-2 text-center text-xs text-slate-400">
-                                Document awaiting administrator publication.
-                            </div>
-                        @endif
-
-                        @if(Auth::user()->isAdmin() || Auth::user()->isSuperAdmin())
-                            <div class="pt-2 border-t border-[#334155]/60">
-                                <a href="{{ route('admin.constitution.index') }}"
-                                   class="w-full inline-flex items-center justify-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold bg-amber-500/10 text-amber-300 hover:bg-amber-500/20 border border-amber-500/30 transition">
-                                    <i data-lucide="settings" class="w-3.5 h-3.5"></i>
-                                    <span>Manage in Admin Console</span>
-                                </a>
-                            </div>
-                        @endif
-                    </div>
-                </div>
-            </div>
-
-            <!-- PDF Viewer Section -->
             @if($isAvailable)
-                <div id="cbl-viewer-card"
-                     class="transition-all duration-200 overflow-hidden flex flex-col"
-                     :class="isFullscreen 
-                        ? 'fixed inset-0 z-50 h-screen w-screen bg-[#0B1120] rounded-none border-0' 
-                        : 'bg-[#172033] border border-[#334155] rounded-2xl shadow-2xl'">
+                <!-- Two-Column Side-by-Side Document Layout on Desktop -->
+                <div class="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
 
-                    <!-- Responsive Unified Toolbar -->
-                    <div class="bg-[#0B1120] border-b border-[#334155] px-3 sm:px-4 py-2.5 sm:py-3 flex items-center justify-between gap-2 shrink-0 z-10">
-                        <div class="flex items-center gap-2.5 min-w-0">
-                            <span class="inline-flex items-center justify-center w-7 h-7 rounded-lg bg-rose-500/10 border border-rose-500/30 text-rose-400 shrink-0">
-                                <i data-lucide="file-text" class="w-4 h-4"></i>
-                            </span>
-                            <div class="min-w-0">
-                                <h3 class="text-xs sm:text-sm font-bold text-white tracking-tight truncate flex items-center gap-2">
-                                    <span>COMSOC Constitutional and By-Laws</span>
-                                    <span class="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse hidden sm:inline-block"></span>
-                                </h3>
-                                <p class="text-[10px] text-slate-400 truncate hidden sm:block">
-                                    Official Ratified Document • Version {{ $document->version }}.0
+                    <!-- ======================================================== -->
+                    <!-- LEFT COLUMN: Document Information (Approx 35% on desktop)-->
+                    <!-- ======================================================== -->
+                    <div x-show="!isFullscreen"
+                         class="lg:col-span-4 xl:col-span-4 space-y-5">
+
+                        <!-- Main Governance Card -->
+                        <div class="bg-[#172033]/90 border border-[#334155] rounded-2xl p-5 sm:p-6 shadow-xl relative overflow-hidden backdrop-blur-md space-y-4">
+                            <div class="absolute -right-12 -top-12 w-44 h-44 rounded-full bg-gradient-to-br from-[#8F3033]/20 to-transparent blur-2xl pointer-events-none"></div>
+
+                            <div class="space-y-2 relative z-10">
+                                <div class="flex items-center gap-2 text-xs font-semibold text-[#df747a]">
+                                    <i data-lucide="shield-check" class="w-4 h-4 shrink-0"></i>
+                                    <span>Official Organizational Governance & Charter</span>
+                                </div>
+                                <h2 class="text-lg sm:text-xl font-bold text-white tracking-tight">
+                                    {{ $document?->title ?? 'COMSOC Constitutional and By-Laws' }}
+                                </h2>
+                                <p class="text-xs sm:text-sm text-slate-300 leading-relaxed">
+                                    {{ $document?->description ?? 'This official governing document establishes the Computing Society\'s governing principles, policies, executive structure, member rights and responsibilities, electoral rules, and operational procedures across all CICT degree programs.' }}
                                 </p>
                             </div>
-                        </div>
 
-                        <!-- Viewer Action Controls -->
-                        <div class="flex items-center gap-1.5 sm:gap-2 shrink-0">
-                            <!-- Zoom Controls -->
-                            <div class="flex items-center bg-[#172033] border border-[#334155] rounded-xl p-0.5 sm:p-1 text-slate-300">
-                                <button type="button"
-                                        @click="zoomOut()"
-                                        :disabled="currentZoomIdx <= 0"
-                                        class="p-1 sm:p-1.5 hover:text-white rounded-lg hover:bg-[#1E293B] disabled:opacity-30 disabled:cursor-not-allowed transition"
-                                        title="Zoom Out">
-                                    <i data-lucide="zoom-out" class="w-3.5 h-3.5"></i>
-                                </button>
-                                <button type="button"
-                                        @click="resetZoom()"
-                                        class="px-1.5 sm:px-2 text-[10px] sm:text-[11px] font-mono font-semibold text-slate-300 hover:text-white transition whitespace-nowrap"
-                                        title="Reset to Fit Width">
-                                    <span x-text="currentZoomLabel">Fit Width</span>
-                                </button>
-                                <button type="button"
-                                        @click="zoomIn()"
-                                        :disabled="currentZoomIdx >= zoomLevels.length - 1"
-                                        class="p-1 sm:p-1.5 hover:text-white rounded-lg hover:bg-[#1E293B] disabled:opacity-30 disabled:cursor-not-allowed transition"
-                                        title="Zoom In">
-                                    <i data-lucide="zoom-in" class="w-3.5 h-3.5"></i>
-                                </button>
-                            </div>
-
-                            <!-- Full Screen Button / Close Fullscreen Button -->
-                            <button type="button"
-                                    id="btn-toggle-fullscreen"
-                                    @click="toggleFullscreen()"
-                                    class="p-1.5 sm:px-3 sm:py-2 bg-[#172033] hover:bg-[#1E293B] border border-[#334155] text-slate-300 hover:text-white rounded-xl transition flex items-center gap-1.5 text-xs font-semibold"
-                                    :class="isFullscreen ? 'border-rose-500/40 text-rose-300 bg-rose-500/10 hover:bg-rose-500/20' : ''"
-                                    :title="isFullscreen ? 'Exit Full Screen' : 'Full Screen Reading'">
-                                <i :data-lucide="isFullscreen ? 'minimize-2' : 'maximize-2'" class="w-3.5 h-3.5"></i>
-                                <span class="hidden md:inline" x-text="isFullscreen ? 'Exit Full Screen' : 'Full Screen'">Full Screen</span>
-                            </button>
-
-                            <!-- Primary Download Button inside Toolbar -->
-                            <a href="{{ route('constitution.download') }}"
-                               id="btn-download-pdf-viewer"
-                               class="btn-primary text-xs flex items-center gap-1.5 py-1.5 px-2.5 sm:px-3 rounded-xl shadow"
-                               title="Download Official PDF">
-                                <i data-lucide="download" class="w-3.5 h-3.5"></i>
-                                <span class="hidden sm:inline">Download</span>
-                            </a>
-                        </div>
-                    </div>
-
-                    <!-- Viewer Viewport Container -->
-                    <div id="pdf-viewer-container"
-                         class="relative w-full bg-slate-900 flex-1 flex flex-col items-stretch justify-start overflow-hidden transition-all duration-200"
-                         :class="isFullscreen ? 'h-[calc(100vh-3.5rem)]' : 'h-[58vh] sm:h-[72vh] md:h-[78vh] min-h-[380px] sm:min-h-[560px] max-h-[920px]'">
-
-                        <!-- Loading Overlay -->
-                        <div x-show="isLoading && !hasError"
-                             class="absolute inset-0 z-20 bg-slate-950/80 backdrop-blur-sm flex flex-col items-center justify-center p-6 text-center">
-                            <div class="relative w-12 h-12 sm:w-14 sm:h-14 mb-3">
-                                <div class="w-full h-full rounded-full border-4 border-[#8F3033]/30 border-t-[#df747a] animate-spin"></div>
-                                <div class="absolute inset-0 flex items-center justify-center text-[#df747a]">
-                                    <i data-lucide="scroll-text" class="w-5 h-5"></i>
+                            <!-- Campus and Academic Program Information -->
+                            <div class="pt-3 border-t border-[#334155]/60 space-y-2 text-xs text-slate-400 relative z-10">
+                                <div class="flex items-start gap-2">
+                                    <i data-lucide="building" class="w-3.5 h-3.5 text-slate-500 shrink-0 mt-0.5"></i>
+                                    <span>Sorsogon State University – Bulan Campus</span>
+                                </div>
+                                <div class="flex items-start gap-2">
+                                    <i data-lucide="graduation-cap" class="w-3.5 h-3.5 text-slate-500 shrink-0 mt-0.5"></i>
+                                    <span>CICT: BSCS • BSIT • BSIS • BTVTED-CSS</span>
                                 </div>
                             </div>
-                            <h4 class="text-xs sm:text-sm font-bold text-white mb-0.5">Loading Document...</h4>
-                            <p class="text-[11px] text-slate-400 max-w-xs">Fetching official PDF stream.</p>
                         </div>
 
-                        <!-- Error State Overlay -->
-                        <div x-show="hasError"
-                             x-cloak
-                             class="absolute inset-0 z-20 bg-slate-950/95 flex flex-col items-center justify-center p-6 text-center space-y-4">
-                            <div class="w-12 h-12 rounded-2xl bg-rose-500/10 border border-rose-500/30 flex items-center justify-center text-rose-400">
-                                <i data-lucide="alert-circle" class="w-6 h-6"></i>
+                        <!-- Compact Document Metadata Panel -->
+                        <div class="bg-[#172033]/90 border border-[#334155] rounded-2xl p-5 shadow-xl backdrop-blur-md space-y-3.5">
+                            <div class="text-[11px] font-bold text-slate-400 uppercase tracking-wider flex items-center justify-between border-b border-[#334155]/60 pb-2.5">
+                                <span class="flex items-center gap-1.5">
+                                    <i data-lucide="file-text" class="w-3.5 h-3.5 text-[#df747a]"></i>
+                                    <span>Document Details</span>
+                                </span>
+                                <span class="font-mono text-[10px] text-slate-500">RATIFIED</span>
                             </div>
-                            <div>
-                                <h4 class="text-sm sm:text-base font-bold text-white">Document Preview Encountered An Error</h4>
-                                <p class="text-xs text-slate-400 mt-1 max-w-md" x-text="errorMessage">
-                                    Unable to stream the PDF viewer. You can download the official document directly.
-                                </p>
-                            </div>
-                            <div class="flex items-center gap-3">
-                                <button type="button"
-                                        @click="isLoading = true; hasError = false; $refs.pdfFrame.src = computedViewerUrl + '&t=' + Date.now()"
-                                        class="btn-secondary text-xs flex items-center gap-2">
-                                    <i data-lucide="refresh-cw" class="w-3.5 h-3.5"></i>
-                                    <span>Retry Preview</span>
-                                </button>
-                                <a href="{{ route('constitution.download') }}" class="btn-primary text-xs flex items-center gap-2">
-                                    <i data-lucide="download" class="w-3.5 h-3.5"></i>
-                                    <span>Download File</span>
+
+                            @if($document && $document->fileExists())
+                                <dl class="text-xs space-y-2.5">
+                                    <div class="flex justify-between items-center">
+                                        <dt class="text-slate-400">File Format:</dt>
+                                        <dd class="font-semibold text-slate-200 uppercase flex items-center gap-1.5">
+                                            <span class="w-2 h-2 rounded-full bg-rose-500"></span>
+                                            PDF Document
+                                        </dd>
+                                    </div>
+                                    <div class="flex justify-between items-center">
+                                        <dt class="text-slate-400">File Size:</dt>
+                                        <dd class="font-medium text-slate-300 font-mono">{{ $document->formattedFileSize() }}</dd>
+                                    </div>
+                                    <div class="flex justify-between items-center">
+                                        <dt class="text-slate-400">Active Version:</dt>
+                                        <dd class="font-semibold text-[#df747a] font-mono">v{{ $document->version }}.0</dd>
+                                    </div>
+                                    <div class="flex justify-between items-center">
+                                        <dt class="text-slate-400">Last Updated:</dt>
+                                        <dd class="text-slate-300 font-medium">{{ $document->updated_at?->format('M d, Y') ?? 'N/A' }}</dd>
+                                    </div>
+                                    <div class="flex justify-between items-center">
+                                        <dt class="text-slate-400">Publication Status:</dt>
+                                        <dd>
+                                            @if($document->is_published)
+                                                <span class="px-2 py-0.5 rounded text-[10px] font-bold bg-emerald-500/20 text-emerald-300 border border-emerald-500/30">
+                                                    Published
+                                                </span>
+                                            @else
+                                                <span class="px-2 py-0.5 rounded text-[10px] font-bold bg-amber-500/20 text-amber-300 border border-amber-500/30">
+                                                    Unpublished
+                                                </span>
+                                            @endif
+                                        </dd>
+                                    </div>
+                                </dl>
+                            @else
+                                <div class="py-2 text-center text-xs text-slate-400">
+                                    Document awaiting administrator publication.
+                                </div>
+                            @endif
+
+                            <!-- Quick Download CTA Card on Left Column -->
+                            <div class="pt-3 border-t border-[#334155]/60 flex flex-col gap-2">
+                                <a href="{{ route('constitution.download') }}"
+                                   id="btn-download-pdf-sidebar"
+                                   class="btn-primary text-xs w-full py-2.5 flex items-center justify-center gap-2 shadow-lg">
+                                    <i data-lucide="download" class="w-4 h-4"></i>
+                                    <span>Download Official PDF</span>
                                 </a>
+
+                                @if(Auth::user()->isAdmin() || Auth::user()->isSuperAdmin())
+                                    <a href="{{ route('admin.constitution.index') }}"
+                                       class="w-full inline-flex items-center justify-center gap-1.5 px-3 py-2 rounded-xl text-xs font-semibold bg-amber-500/10 text-amber-300 hover:bg-amber-500/20 border border-amber-500/30 transition">
+                                        <i data-lucide="settings" class="w-3.5 h-3.5"></i>
+                                        <span>Manage in Admin Console</span>
+                                    </a>
+                                @endif
                             </div>
                         </div>
 
-                        <!-- Full-Viewport Embedded PDF Frame (Fit Width & Vertical Scrolling) -->
-                        <div class="w-full h-full flex-1 relative bg-slate-900">
-                            <iframe x-ref="pdfFrame"
-                                    :src="computedViewerUrl"
-                                    class="w-full h-full border-0 block"
-                                    title="COMSOC Constitutional and By-Laws Viewer"
-                                    x-on:load="onLoadSuccess()"
-                                    x-on:error="onLoadFailure()">
-                                <div class="p-8 text-center text-slate-300">
-                                    <p class="text-sm mb-4">Your browser does not support inline PDF viewing.</p>
-                                    <a href="{{ route('constitution.download') }}" class="btn-primary text-xs inline-flex items-center gap-2">
-                                        <i data-lucide="download" class="w-4 h-4"></i>
-                                        Download Official PDF
+                    </div>
+
+                    <!-- ======================================================== -->
+                    <!-- RIGHT COLUMN: PDF Preview Section (Approx 65% on desktop)-->
+                    <!-- ======================================================== -->
+                    <div class="lg:col-span-8 xl:col-span-8 w-full min-w-0"
+                         :class="isFullscreen ? 'fixed inset-0 z-50 col-span-12 w-screen h-screen' : ''">
+
+                        <div id="cbl-viewer-card"
+                             class="transition-all duration-200 overflow-hidden flex flex-col"
+                             :class="isFullscreen 
+                                ? 'fixed inset-0 z-50 h-screen w-screen bg-[#0B1120] rounded-none border-0' 
+                                : 'bg-[#172033] border border-[#334155] rounded-2xl shadow-2xl'">
+
+                            <!-- Responsive Unified Document Toolbar -->
+                            <div class="bg-[#0B1120] border-b border-[#334155] px-3 sm:px-4 py-2.5 sm:py-3 flex flex-wrap sm:flex-nowrap items-center justify-between gap-2.5 shrink-0 z-10">
+                                <div class="flex items-center gap-2.5 min-w-0 max-w-full">
+                                    <span class="inline-flex items-center justify-center w-7 h-7 rounded-lg bg-rose-500/10 border border-rose-500/30 text-rose-400 shrink-0">
+                                        <i data-lucide="file-text" class="w-4 h-4"></i>
+                                    </span>
+                                    <div class="min-w-0">
+                                        <h3 class="text-xs sm:text-sm font-bold text-white tracking-tight truncate flex items-center gap-2">
+                                            <span>COMSOC Constitutional and By-Laws</span>
+                                            <span class="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse hidden sm:inline-block"></span>
+                                        </h3>
+                                        <p class="text-[10px] text-slate-400 truncate hidden sm:block">
+                                            Official Ratified Document • Version {{ $document->version }}.0
+                                        </p>
+                                    </div>
+                                </div>
+
+                                <!-- Viewer Action Controls -->
+                                <div class="flex items-center gap-1.5 sm:gap-2 shrink-0 ml-auto">
+                                    <!-- Zoom Controls -->
+                                    <div class="flex items-center bg-[#172033] border border-[#334155] rounded-xl p-0.5 sm:p-1 text-slate-300">
+                                        <button type="button"
+                                                @click="zoomOut()"
+                                                :disabled="currentZoomIdx <= 0"
+                                                class="p-1 sm:p-1.5 hover:text-white rounded-lg hover:bg-[#1E293B] disabled:opacity-30 disabled:cursor-not-allowed transition"
+                                                title="Zoom Out">
+                                            <i data-lucide="zoom-out" class="w-3.5 h-3.5"></i>
+                                        </button>
+                                        <button type="button"
+                                                @click="resetZoom()"
+                                                class="px-1.5 sm:px-2 text-[10px] sm:text-[11px] font-mono font-semibold text-slate-300 hover:text-white transition whitespace-nowrap"
+                                                title="Reset to Fit Width">
+                                            <span x-text="currentZoomLabel">Fit Width</span>
+                                        </button>
+                                        <button type="button"
+                                                @click="zoomIn()"
+                                                :disabled="currentZoomIdx >= zoomLevels.length - 1"
+                                                class="p-1 sm:p-1.5 hover:text-white rounded-lg hover:bg-[#1E293B] disabled:opacity-30 disabled:cursor-not-allowed transition"
+                                                title="Zoom In">
+                                            <i data-lucide="zoom-in" class="w-3.5 h-3.5"></i>
+                                        </button>
+                                    </div>
+
+                                    <!-- Full Screen Button -->
+                                    <button type="button"
+                                            id="btn-toggle-fullscreen"
+                                            @click="toggleFullscreen()"
+                                            class="p-1.5 sm:px-3 sm:py-2 bg-[#172033] hover:bg-[#1E293B] border border-[#334155] text-slate-300 hover:text-white rounded-xl transition flex items-center gap-1.5 text-xs font-semibold"
+                                            :class="isFullscreen ? 'border-rose-500/40 text-rose-300 bg-rose-500/10 hover:bg-rose-500/20' : ''"
+                                            :title="isFullscreen ? 'Exit Full Screen' : 'Full Screen Reading'">
+                                        <i :data-lucide="isFullscreen ? 'minimize-2' : 'maximize-2'" class="w-3.5 h-3.5"></i>
+                                        <span class="hidden md:inline" x-text="isFullscreen ? 'Exit Full Screen' : 'Full Screen'">Full Screen</span>
+                                    </button>
+
+                                    <!-- Download Button inside Toolbar -->
+                                    <a href="{{ route('constitution.download') }}"
+                                       id="btn-download-pdf-viewer"
+                                       class="btn-primary text-xs flex items-center gap-1.5 py-1.5 px-2.5 sm:px-3 rounded-xl shadow"
+                                       title="Download Official PDF">
+                                        <i data-lucide="download" class="w-3.5 h-3.5"></i>
+                                        <span class="hidden sm:inline">Download</span>
                                     </a>
                                 </div>
-                            </iframe>
+                            </div>
+
+                            <!-- PDF Viewport Container (Fixed deliberately to 750px height on desktop, flexible on mobile) -->
+                            <div id="pdf-viewer-container"
+                                 class="relative w-full bg-slate-900 flex-1 flex flex-col items-stretch justify-start overflow-hidden transition-all duration-200"
+                                 :class="isFullscreen ? 'h-[calc(100vh-3.5rem)]' : 'h-[500px] sm:h-[620px] md:h-[700px] lg:h-[750px] min-h-[420px]'">
+
+                                <!-- Loading Overlay -->
+                                <div x-show="isLoading && !hasError"
+                                     class="absolute inset-0 z-20 bg-slate-950/80 backdrop-blur-sm flex flex-col items-center justify-center p-6 text-center">
+                                    <div class="relative w-12 h-12 sm:w-14 sm:h-14 mb-3">
+                                        <div class="w-full h-full rounded-full border-4 border-[#8F3033]/30 border-t-[#df747a] animate-spin"></div>
+                                        <div class="absolute inset-0 flex items-center justify-center text-[#df747a]">
+                                            <i data-lucide="scroll-text" class="w-5 h-5"></i>
+                                        </div>
+                                    </div>
+                                    <h4 class="text-xs sm:text-sm font-bold text-white mb-0.5">Loading Document...</h4>
+                                    <p class="text-[11px] text-slate-400 max-w-xs">Fetching official PDF stream.</p>
+                                </div>
+
+                                <!-- Error State Overlay -->
+                                <div x-show="hasError"
+                                     x-cloak
+                                     class="absolute inset-0 z-20 bg-slate-950/95 flex flex-col items-center justify-center p-6 text-center space-y-4">
+                                    <div class="w-12 h-12 rounded-2xl bg-rose-500/10 border border-rose-500/30 flex items-center justify-center text-rose-400">
+                                        <i data-lucide="alert-circle" class="w-6 h-6"></i>
+                                    </div>
+                                    <div>
+                                        <h4 class="text-sm sm:text-base font-bold text-white">Document Preview Encountered An Error</h4>
+                                        <p class="text-xs text-slate-400 mt-1 max-w-md" x-text="errorMessage">
+                                            Unable to stream the PDF viewer. You can download the official document directly.
+                                        </p>
+                                    </div>
+                                    <div class="flex items-center gap-3">
+                                        <button type="button"
+                                                @click="isLoading = true; hasError = false; $refs.pdfFrame.src = computedViewerUrl + '&t=' + Date.now()"
+                                                class="btn-secondary text-xs flex items-center gap-2">
+                                            <i data-lucide="refresh-cw" class="w-3.5 h-3.5"></i>
+                                            <span>Retry Preview</span>
+                                        </button>
+                                        <a href="{{ route('constitution.download') }}" class="btn-primary text-xs flex items-center gap-2">
+                                            <i data-lucide="download" class="w-3.5 h-3.5"></i>
+                                            <span>Download File</span>
+                                        </a>
+                                    </div>
+                                </div>
+
+                                <!-- Embedded PDF Frame with width: 100% and height: 100% -->
+                                <div class="w-full h-full flex-1 relative bg-slate-900">
+                                    <iframe x-ref="pdfFrame"
+                                            :src="computedViewerUrl"
+                                            class="w-full h-full border-0 block"
+                                            title="COMSOC Constitutional and By-Laws Viewer"
+                                            x-on:load="onLoadSuccess()"
+                                            x-on:error="onLoadFailure()">
+                                        <div class="p-8 text-center text-slate-300">
+                                            <p class="text-sm mb-4">Your browser does not support inline PDF viewing.</p>
+                                            <a href="{{ route('constitution.download') }}" class="btn-primary text-xs inline-flex items-center gap-2">
+                                                <i data-lucide="download" class="w-4 h-4"></i>
+                                                Download Official PDF
+                                            </a>
+                                        </div>
+                                    </iframe>
+                                </div>
+
+                                <!-- Mobile Compact Helper Footnote (Normal mode only) -->
+                                <div x-show="!isFullscreen"
+                                     class="sm:hidden w-full bg-[#172033]/90 border-t border-[#334155] px-3 py-1.5 flex items-center justify-between text-[11px] text-slate-400 shrink-0">
+                                    <span>Tap Full Screen for expanded view</span>
+                                    <button type="button"
+                                            @click="enterFullscreen()"
+                                            class="font-semibold text-[#df747a] hover:underline flex items-center gap-1">
+                                        <span>Expand</span>
+                                        <i data-lucide="maximize-2" class="w-3 h-3"></i>
+                                    </button>
+                                </div>
+                            </div>
                         </div>
 
-                        <!-- Mobile Compact Helper Footnote (Normal mode only) -->
-                        <div x-show="!isFullscreen"
-                             class="sm:hidden w-full bg-[#172033]/90 border-t border-[#334155] px-3 py-1.5 flex items-center justify-between text-[11px] text-slate-400 shrink-0">
-                            <span>Tap Expand icon for full screen reading</span>
-                            <button type="button"
-                                    @click="enterFullscreen()"
-                                    class="font-semibold text-[#df747a] hover:underline flex items-center gap-1">
-                                <span>Expand</span>
-                                <i data-lucide="maximize-2" class="w-3 h-3"></i>
-                            </button>
-                        </div>
                     </div>
+
                 </div>
 
             @else
