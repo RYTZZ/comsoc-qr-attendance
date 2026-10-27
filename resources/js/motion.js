@@ -21,7 +21,10 @@ export function initMotionSystem() {
     // 4. Scroll-Triggered Section & Item Reveals via IntersectionObserver
     initScrollReveals();
 
-    // 5. Subtle Ambient Parallax for Decorative Grid
+    // 5. Header Scroll Interaction
+    initNavigationScroll();
+
+    // 6. Subtle Ambient Parallax for Decorative Grid
     initSubtleParallax();
 }
 
@@ -163,4 +166,28 @@ function initSubtleParallax() {
             ticking = true;
         }
     }, { passive: true });
+}
+
+/**
+ * Navigation Micro-Interactions: Smooth header transition on scroll
+ */
+function initNavigationScroll() {
+    const header = document.querySelector('.public-nav-header');
+    if (!header) return;
+
+    let isScrolled = false;
+    const updateHeader = () => {
+        const scrolled = window.scrollY > 20;
+        if (scrolled !== isScrolled) {
+            isScrolled = scrolled;
+            if (isScrolled) {
+                header.classList.add('is-scrolled');
+            } else {
+                header.classList.remove('is-scrolled');
+            }
+        }
+    };
+
+    window.addEventListener('scroll', updateHeader, { passive: true });
+    updateHeader();
 }

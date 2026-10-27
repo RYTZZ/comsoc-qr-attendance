@@ -3,6 +3,9 @@
     <!-- Hero Section: Editorial & Asymmetric, Clean Logo & Typography -->
     @if($settings['section_hero_visible'] ?? true)
     <section id="hero" class="relative overflow-hidden pt-12 pb-20 sm:pt-20 sm:pb-32 scroll-mt-20">
+        <!-- Hero Ambient Burgundy-Navy Drifting Glow -->
+        <div class="hero-ambient-glow pointer-events-none select-none" aria-hidden="true"></div>
+
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
             <div class="grid grid-cols-1 lg:grid-cols-12 gap-12 lg:gap-8 items-center">
 
@@ -48,7 +51,7 @@
                 </div>
 
                 <!-- Right Column: Authentic Visual Presentation (5 cols) -->
-                <div data-hero-seq="5" class="lg:col-span-5 relative flex items-center justify-center">
+                <div data-hero-seq="4" class="lg:col-span-5 relative flex items-center justify-center">
                     @if(!empty($settings['hero_image']))
                         <div class="relative w-full max-w-lg rounded-2xl overflow-hidden shadow-2xl border border-[#334155]/40 img-reveal-container">
                             <img src="{{ asset('storage/' . $settings['hero_image']) }}" alt="COMSOC Leadership and Community" class="w-full h-80 sm:h-[420px] object-cover">
@@ -337,14 +340,16 @@
                 <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-6" data-reveal-group>
                     @foreach($officers as $officer)
                     <div data-reveal-item class="flex flex-col items-center text-center space-y-3 group">
-                        <div class="w-20 h-20 sm:w-24 sm:h-24 rounded-full overflow-hidden bg-[#0B1120] border-2 border-[#334155]/60 group-hover:border-[#df747a] transition-all flex items-center justify-center">
-                            @if($officer->portrait_url)
-                                <img src="{{ $officer->portrait_url }}" alt="{{ $officer->name }}" class="w-full h-full object-cover">
-                            @else
-                                <span class="text-white font-brand-display font-extrabold text-xl sm:text-2xl text-[#df747a]">
-                                    {{ $officer->initials }}
-                                </span>
-                            @endif
+                        <div class="officer-avatar-container">
+                            <div class="officer-avatar officer-avatar-sm">
+                                @if($officer->portrait_url)
+                                    <img src="{{ $officer->portrait_url }}" alt="{{ $officer->name }}" loading="lazy">
+                                @else
+                                    <span class="officer-avatar-initials text-[#df747a]" data-length="{{ mb_strlen($officer->initials ?? '') }}" aria-hidden="true">
+                                        {{ $officer->initials }}
+                                    </span>
+                                @endif
+                            </div>
                         </div>
                         <div>
                             <h4 class="text-sm font-bold text-white font-brand-display leading-tight group-hover:text-[#df747a] transition-colors">{{ $officer->name }}</h4>

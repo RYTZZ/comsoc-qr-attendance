@@ -33,15 +33,15 @@
     <x-public-auth-bg />
 
     <!-- Top Navigation Bar -->
-    <header class="sticky top-0 z-40 bg-[#0B1120]/85 backdrop-blur-xl border-b border-[#334155]/40 transition-all duration-200">
+    <header class="sticky top-0 z-40 bg-[#0B1120]/85 backdrop-blur-xl border-b border-[#334155]/40 transition-all duration-300 public-nav-header">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div class="flex items-center justify-between h-16 sm:h-20">
 
                 <!-- Logo & Brand (No boxed container, clean logo and typography) -->
                 <a href="{{ route('public.home') }}" class="flex items-center gap-3.5 group focus:outline-none focus:ring-2 focus:ring-[#df747a] rounded-lg py-1 px-1.5 transition-colors">
-                    <img src="{{ asset('images/COMSOC.png') }}" alt="COMSOC Logo" class="w-11 h-11 sm:w-13 sm:h-13 object-contain drop-shadow-sm group-hover:scale-105 transition-transform">
+                    <img src="{{ asset('images/COMSOC.png') }}" alt="COMSOC Logo" class="w-11 h-11 sm:w-13 sm:h-13 object-contain drop-shadow-sm group-hover:scale-105 transition-transform duration-200">
                     <div class="flex flex-col">
-                        <span class="font-extrabold text-white text-base sm:text-lg font-brand-display tracking-tight leading-none group-hover:text-[#df747a] transition-colors">
+                        <span class="font-extrabold text-white text-base sm:text-lg font-brand-display tracking-tight leading-none group-hover:text-[#df747a] transition-colors duration-200">
                             {{ $settings['org_short_name'] ?? 'COMSOC' }}
                         </span>
                         <span class="text-[10px] sm:text-[11px] text-slate-400 font-medium tracking-wide mt-0.5">
@@ -53,32 +53,32 @@
                 <!-- Desktop Navigation Links -->
                 <nav class="hidden md:flex items-center gap-1 lg:gap-2" aria-label="Main Navigation">
                     <a href="{{ route('public.about') }}"
-                       class="px-3.5 py-2 rounded-lg text-sm font-medium transition-colors {{ request()->routeIs('public.about') ? 'text-white bg-[#172033]/80 border border-[#334155]/60' : 'text-slate-300 hover:text-white hover:bg-[#172033]/40' }}"
+                       class="public-nav-link px-3.5 py-2 rounded-lg text-sm font-medium transition-colors duration-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-[#df747a] {{ request()->routeIs('public.about') ? 'text-white bg-[#172033]/80 border border-[#334155]/60 is-active' : 'text-slate-300 hover:text-white hover:bg-[#172033]/40' }}"
                        {{ request()->routeIs('public.about') ? 'aria-current="page"' : '' }}>
                         About
                     </a>
                     <a href="{{ route('public.officers') }}"
-                       class="px-3.5 py-2 rounded-lg text-sm font-medium transition-colors {{ request()->routeIs('public.officers') ? 'text-white bg-[#172033]/80 border border-[#334155]/60' : 'text-slate-300 hover:text-white hover:bg-[#172033]/40' }}"
+                       class="public-nav-link px-3.5 py-2 rounded-lg text-sm font-medium transition-colors duration-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-[#df747a] {{ request()->routeIs('public.officers') ? 'text-white bg-[#172033]/80 border border-[#334155]/60' : 'text-slate-300 hover:text-white hover:bg-[#172033]/40' }}"
                        {{ request()->routeIs('public.officers') ? 'aria-current="page"' : '' }}>
                         Officers
                     </a>
                     <a href="{{ route('public.activities') }}"
-                       class="px-3.5 py-2 rounded-lg text-sm font-medium transition-colors {{ request()->routeIs('public.activities*') ? 'text-white bg-[#172033]/80 border border-[#334155]/60' : 'text-slate-300 hover:text-white hover:bg-[#172033]/40' }}"
+                       class="public-nav-link px-3.5 py-2 rounded-lg text-sm font-medium transition-colors duration-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-[#df747a] {{ request()->routeIs('public.activities*') ? 'text-white bg-[#172033]/80 border border-[#334155]/60' : 'text-slate-300 hover:text-white hover:bg-[#172033]/40' }}"
                        {{ request()->routeIs('public.activities*') ? 'aria-current="page"' : '' }}>
                         Activities
                     </a>
                     <a href="{{ route('public.achievements') }}"
-                       class="px-3.5 py-2 rounded-lg text-sm font-medium transition-colors {{ request()->routeIs('public.achievements') ? 'text-white bg-[#172033]/80 border border-[#334155]/60' : 'text-slate-300 hover:text-white hover:bg-[#172033]/40' }}"
+                       class="public-nav-link px-3.5 py-2 rounded-lg text-sm font-medium transition-colors duration-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-[#df747a] {{ request()->routeIs('public.achievements') ? 'text-white bg-[#172033]/80 border border-[#334155]/60' : 'text-slate-300 hover:text-white hover:bg-[#172033]/40' }}"
                        {{ request()->routeIs('public.achievements') ? 'aria-current="page"' : '' }}>
                         Achievements
                     </a>
                     <a href="{{ route('public.gallery') }}"
-                       class="px-3.5 py-2 rounded-lg text-sm font-medium transition-colors {{ request()->routeIs('public.gallery') ? 'text-white bg-[#172033]/80 border border-[#334155]/60' : 'text-slate-300 hover:text-white hover:bg-[#172033]/40' }}"
+                       class="public-nav-link px-3.5 py-2 rounded-lg text-sm font-medium transition-colors duration-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-[#df747a] {{ request()->routeIs('public.gallery') ? 'text-white bg-[#172033]/80 border border-[#334155]/60' : 'text-slate-300 hover:text-white hover:bg-[#172033]/40' }}"
                        {{ request()->routeIs('public.gallery') ? 'aria-current="page"' : '' }}>
                         Gallery
                     </a>
                     <a href="{{ route('public.partners') }}"
-                       class="px-3.5 py-2 rounded-lg text-sm font-medium transition-colors {{ request()->routeIs('public.partners') ? 'text-white bg-[#172033]/80 border border-[#334155]/60' : 'text-slate-300 hover:text-white hover:bg-[#172033]/40' }}"
+                       class="public-nav-link px-3.5 py-2 rounded-lg text-sm font-medium transition-colors duration-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-[#df747a] {{ request()->routeIs('public.partners') ? 'text-white bg-[#172033]/80 border border-[#334155]/60' : 'text-slate-300 hover:text-white hover:bg-[#172033]/40' }}"
                        {{ request()->routeIs('public.partners') ? 'aria-current="page"' : '' }}>
                         Partners
                     </a>

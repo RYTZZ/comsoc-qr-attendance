@@ -346,23 +346,29 @@
 
     .auth-ambient-glow {
         background: radial-gradient(ellipse 70% 50% at 50% 25%, rgba(86, 14, 15, 0.32) 0%, rgba(23, 32, 51, 0.2) 45%, transparent 75%);
-        animation: ambientDrift 18s ease-in-out infinite alternate;
+        animation: ambientDriftBurgundy 22s ease-in-out infinite alternate;
+        will-change: transform, opacity;
     }
 
     .auth-ambient-glow-secondary {
-        background: radial-gradient(circle 380px at 80% 75%, rgba(143, 48, 51, 0.16) 0%, transparent 65%);
+        background: radial-gradient(circle 420px at 80% 75%, rgba(143, 48, 51, 0.16) 0%, transparent 65%);
+        animation: ambientNavyGlow 28s ease-in-out infinite alternate;
+        will-change: transform, opacity;
     }
 
-    .particle-float-1 {
-        animation: floatParticle1 12s ease-in-out infinite;
-    }
-
-    .particle-float-2 {
-        animation: floatParticle2 16s ease-in-out infinite;
-    }
-
-    .particle-float-3 {
-        animation: floatParticle3 20s ease-in-out infinite;
+    /* Hero section dedicated slow-drifting burgundy & deep navy ambient glow */
+    .hero-ambient-glow {
+        position: absolute;
+        inset: 0;
+        pointer-events: none;
+        overflow: hidden;
+        z-index: 0;
+        background: 
+            radial-gradient(circle 500px at 15% 20%, rgba(86, 14, 15, 0.28) 0%, transparent 70%),
+            radial-gradient(circle 420px at 85% 45%, rgba(143, 48, 51, 0.18) 0%, transparent 65%),
+            radial-gradient(ellipse 60% 40% at 50% 80%, rgba(11, 17, 32, 0.4) 0%, transparent 80%);
+        animation: ambientDriftBurgundy 24s ease-in-out infinite alternate;
+        will-change: transform, opacity;
     }
 
     .circuit-pulse {
@@ -403,29 +409,35 @@
         }
     }
 
-    @keyframes ambientDrift {
+    /* Understated, elegant ambient drifting burgundy glow over deep navy background */
+    @keyframes ambientDriftBurgundy {
         0% {
-            transform: scale(1) translateY(0);
+            transform: translate3d(0, 0, 0) scale(1);
             opacity: 0.85;
         }
         50% {
-            transform: scale(1.05) translateY(-15px);
+            transform: translate3d(24px, -18px, 0) scale(1.05);
             opacity: 1;
         }
         100% {
-            transform: scale(0.98) translateY(10px);
+            transform: translate3d(-18px, 14px, 0) scale(0.98);
             opacity: 0.85;
         }
     }
 
-    @keyframes floatParticle1 {
-        0%, 100% { transform: translate(0, 0); opacity: 0.25; }
-        50% { transform: translate(12px, -20px); opacity: 0.6; }
-    }
-
-    @keyframes floatParticle2 {
-        0%, 100% { transform: translate(0, 0); opacity: 0.35; }
-        50% { transform: translate(-14px, -18px); opacity: 0.7; }
+    @keyframes ambientNavyGlow {
+        0% {
+            transform: translate3d(0, 0, 0) scale(0.96);
+            opacity: 0.7;
+        }
+        50% {
+            transform: translate3d(-20px, 16px, 0) scale(1.04);
+            opacity: 0.95;
+        }
+        100% {
+            transform: translate3d(16px, -12px, 0) scale(1);
+            opacity: 0.75;
+        }
     }
 
     @keyframes floatParticle3 {
@@ -457,6 +469,8 @@
         }
 
         .auth-ambient-glow,
+        .auth-ambient-glow-secondary,
+        .hero-ambient-glow,
         .particle-float-1,
         .particle-float-2,
         .particle-float-3,
@@ -631,15 +645,204 @@
         transform: scaleX(1);
     }
 
-    /* 6. Premium Card Hover System:
-       Lifts cards 3-5px, transitions border towards COMSOC red, adds restrained glow */
+    /* ==========================================================================
+       COMSOC Officer Avatar Component System
+       Guarantees fixed-width/height, perfect 50% circular outline, flex-centered initials,
+       and consistent typographic rendering across two-letter, three-letter, and mobile layouts.
+       ========================================================================== */
+    .officer-avatar-container {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        flex-shrink: 0;
+        box-sizing: border-box;
+    }
+
+    .officer-avatar {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        flex-shrink: 0;
+        box-sizing: border-box;
+        border-radius: 50%;
+        overflow: hidden;
+        position: relative;
+        text-align: center;
+        background: linear-gradient(135deg, #172033 0%, #0B1120 100%);
+        border: 2px solid rgba(51, 65, 85, 0.6);
+        box-shadow: 0 2px 6px -1px rgba(0, 0, 0, 0.35);
+        transition: border-color 0.25s ease-out, transform 0.25s ease-out, box-shadow 0.25s ease-out;
+    }
+
+    /* Fixed sizes */
+    .officer-avatar-md {
+        width: 5rem; /* 80px */
+        height: 5rem;
+        min-width: 5rem;
+        min-height: 5rem;
+        max-width: 5rem;
+        max-height: 5rem;
+    }
+
+    @media (min-width: 640px) {
+        .officer-avatar-md {
+            width: 5.5rem; /* 88px */
+            height: 5.5rem;
+            min-width: 5.5rem;
+            min-height: 5.5rem;
+            max-width: 5.5rem;
+            max-height: 5.5rem;
+        }
+    }
+
+    .officer-avatar-sm {
+        width: 4.5rem; /* 72px */
+        height: 4.5rem;
+        min-width: 4.5rem;
+        min-height: 4.5rem;
+        max-width: 4.5rem;
+        max-height: 4.5rem;
+    }
+
+    @media (min-width: 640px) {
+        .officer-avatar-sm {
+            width: 5rem; /* 80px */
+            height: 5rem;
+            min-width: 5rem;
+            min-height: 5rem;
+            max-width: 5rem;
+            max-height: 5rem;
+        }
+    }
+
+    .officer-avatar img {
+        width: 100%;
+        height: 100%;
+        border-radius: 50%;
+        object-fit: cover;
+        object-position: center;
+        display: block;
+    }
+
+    .officer-avatar-initials {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        width: 100%;
+        height: 100%;
+        margin: 0;
+        padding: 0;
+        white-space: nowrap;
+        text-align: center;
+        line-height: 1;
+        font-family: 'Space Grotesk', 'Manrope', system-ui, sans-serif;
+        font-weight: 700;
+        letter-spacing: -0.02em;
+        user-select: none;
+    }
+
+    /* Responsive font-sizing that prevents overflow or elongation for 1, 2, or 3+ character initials */
+    .officer-avatar-md .officer-avatar-initials {
+        font-size: 1.5rem; /* 24px */
+    }
+
+    .officer-avatar-md .officer-avatar-initials[data-length="3"] {
+        font-size: 1.15rem; /* 18.5px */
+        letter-spacing: -0.04em;
+    }
+
+    .officer-avatar-md .officer-avatar-initials[data-length="4"] {
+        font-size: 0.95rem; /* 15px */
+        letter-spacing: -0.05em;
+    }
+
+    @media (min-width: 640px) {
+        .officer-avatar-md .officer-avatar-initials {
+            font-size: 1.65rem; /* 26.5px */
+        }
+        .officer-avatar-md .officer-avatar-initials[data-length="3"] {
+            font-size: 1.25rem; /* 20px */
+        }
+    }
+
+    .officer-avatar-sm .officer-avatar-initials {
+        font-size: 1.35rem; /* 21.5px */
+    }
+
+    .officer-avatar-sm .officer-avatar-initials[data-length="3"] {
+        font-size: 1.05rem; /* 17px */
+        letter-spacing: -0.04em;
+    }
+
+    @media (min-width: 640px) {
+        .officer-avatar-sm .officer-avatar-initials {
+            font-size: 1.5rem;
+        }
+        .officer-avatar-sm .officer-avatar-initials[data-length="3"] {
+            font-size: 1.15rem;
+        }
+    }
+
+    .group:hover .officer-avatar {
+        border-color: #df747a;
+    }
+
+    /* 6. Navigation Micro-Interactions:
+       Animated underline, smooth hover/focus transitions, header scroll transition */
+    .public-nav-header {
+        transition: background-color 0.3s cubic-bezier(0.16, 1, 0.3, 1),
+                    border-color 0.3s cubic-bezier(0.16, 1, 0.3, 1),
+                    box-shadow 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+
+    .public-nav-header.is-scrolled {
+        background-color: rgba(11, 17, 32, 0.95);
+        border-color: rgba(86, 14, 15, 0.35);
+        box-shadow: 0 10px 30px -10px rgba(0, 0, 0, 0.6), 0 1px 0 0 rgba(143, 48, 51, 0.15);
+    }
+
+    .public-nav-link {
+        position: relative;
+        transition: color 0.22s ease-out, background-color 0.22s ease-out, border-color 0.22s ease-out;
+    }
+
+    .public-nav-link::after {
+        content: '';
+        position: absolute;
+        bottom: 4px;
+        left: 50%;
+        width: 0;
+        height: 2px;
+        background: linear-gradient(90deg, #df747a 0%, #8F3033 100%);
+        border-radius: 9999px;
+        transition: width 0.24s cubic-bezier(0.16, 1, 0.3, 1), left 0.24s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.24s ease-out;
+        opacity: 0;
+        pointer-events: none;
+    }
+
+    .public-nav-link:hover::after,
+    .public-nav-link:focus-visible::after {
+        width: calc(100% - 1.75rem);
+        left: 0.875rem;
+        opacity: 1;
+    }
+
+    .public-nav-link.is-active::after {
+        width: calc(100% - 1.75rem);
+        left: 0.875rem;
+        opacity: 1;
+    }
+
+    /* 7. Premium Feature Card Hover System:
+       Restrained interactive feedback: 3-4px lift, border towards burgundy (#560E0F / #df747a),
+       subtle shadow and glow, icon micro-translation/scale within 180-250ms */
     [data-reveal-item].is-revealed,
     .premium-card-hover {
         transition: opacity 0.55s cubic-bezier(0.16, 1, 0.3, 1),
-                    transform 0.25s cubic-bezier(0.2, 0, 0, 1),
-                    border-color 0.25s ease-out,
-                    background-color 0.25s ease-out,
-                    box-shadow 0.25s ease-out;
+                    transform 0.22s cubic-bezier(0.2, 0, 0, 1),
+                    border-color 0.22s ease-out,
+                    background-color 0.22s ease-out,
+                    box-shadow 0.22s ease-out;
         will-change: transform, box-shadow;
     }
 
@@ -648,7 +851,14 @@
         .premium-card-hover:hover {
             transform: translateY(-4px);
             border-color: rgba(223, 116, 122, 0.55) !important;
-            box-shadow: 0 12px 28px -6px rgba(0, 0, 0, 0.5), 0 0 20px -2px rgba(86, 14, 15, 0.35);
+            box-shadow: 0 12px 28px -6px rgba(0, 0, 0, 0.5), 0 0 22px -2px rgba(86, 14, 15, 0.38);
+        }
+
+        /* Subtle icon micro-interaction within card on hover (180-250ms) */
+        [data-reveal-item]:hover [data-lucide],
+        .premium-card-hover:hover [data-lucide] {
+            transform: scale(1.08) translateY(-1px);
+            transition: transform 0.22s cubic-bezier(0.2, 0, 0, 1);
         }
 
         /* Subtle image zoom inside card on hover */
@@ -658,7 +868,7 @@
         }
     }
 
-    /* 7. Magnetic-Feeling Buttons:
+    /* 8. Magnetic-Feeling Buttons:
        Smooth 180-250ms transitions on backgrounds, borders, shadows, and text colors */
     .btn,
     .btn-primary,
@@ -725,11 +935,19 @@
         html .img-reveal-container img,
         html .heading-accent-line,
         html .btn,
-        html [data-lucide] {
+        html [data-lucide],
+        html .public-nav-header,
+        html .public-nav-link,
+        html .public-nav-link::after,
+        html .hero-ambient-glow {
             opacity: 1 !important;
             transform: none !important;
             transition: none !important;
             animation: none !important;
+        }
+
+        .public-nav-link::after {
+            display: none !important;
         }
 
         .heading-accent-line {
