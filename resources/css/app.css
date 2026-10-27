@@ -674,44 +674,44 @@
         transition: border-color 0.25s ease-out, transform 0.25s ease-out, box-shadow 0.25s ease-out;
     }
 
-    /* Fixed sizes */
+    /* Fixed avatar sizes matching executive board specification (56px desktop, 52px mobile) */
     .officer-avatar-md {
-        width: 5rem; /* 80px */
-        height: 5rem;
-        min-width: 5rem;
-        min-height: 5rem;
-        max-width: 5rem;
-        max-height: 5rem;
+        width: 3.25rem; /* 52px mobile */
+        height: 3.25rem;
+        min-width: 3.25rem;
+        min-height: 3.25rem;
+        max-width: 3.25rem;
+        max-height: 3.25rem;
     }
 
     @media (min-width: 640px) {
         .officer-avatar-md {
-            width: 5.5rem; /* 88px */
-            height: 5.5rem;
-            min-width: 5.5rem;
-            min-height: 5.5rem;
-            max-width: 5.5rem;
-            max-height: 5.5rem;
+            width: 3.5rem; /* 56px desktop */
+            height: 3.5rem;
+            min-width: 3.5rem;
+            min-height: 3.5rem;
+            max-width: 3.5rem;
+            max-height: 3.5rem;
         }
     }
 
     .officer-avatar-sm {
-        width: 4.5rem; /* 72px */
-        height: 4.5rem;
-        min-width: 4.5rem;
-        min-height: 4.5rem;
-        max-width: 4.5rem;
-        max-height: 4.5rem;
+        width: 3.25rem; /* 52px mobile */
+        height: 3.25rem;
+        min-width: 3.25rem;
+        min-height: 3.25rem;
+        max-width: 3.25rem;
+        max-height: 3.25rem;
     }
 
     @media (min-width: 640px) {
         .officer-avatar-sm {
-            width: 5rem; /* 80px */
-            height: 5rem;
-            min-width: 5rem;
-            min-height: 5rem;
-            max-width: 5rem;
-            max-height: 5rem;
+            width: 3.5rem; /* 56px desktop */
+            height: 3.5rem;
+            min-width: 3.5rem;
+            min-height: 3.5rem;
+            max-width: 3.5rem;
+            max-height: 3.5rem;
         }
     }
 
@@ -737,49 +737,32 @@
         line-height: 1;
         font-family: 'Space Grotesk', 'Manrope', system-ui, sans-serif;
         font-weight: 700;
-        letter-spacing: -0.02em;
+        letter-spacing: -0.01em;
         user-select: none;
+        color: #df747a;
     }
 
-    /* Responsive font-sizing that prevents overflow or elongation for 1, 2, or 3+ character initials */
-    .officer-avatar-md .officer-avatar-initials {
-        font-size: 1.5rem; /* 24px */
+    /* Proportional font-sizing for 52px - 56px circular avatars */
+    .officer-avatar .officer-avatar-initials {
+        font-size: 1.15rem; /* ~18.5px */
     }
 
-    .officer-avatar-md .officer-avatar-initials[data-length="3"] {
-        font-size: 1.15rem; /* 18.5px */
+    .officer-avatar .officer-avatar-initials[data-length="3"] {
+        font-size: 0.95rem; /* ~15px */
+        letter-spacing: -0.03em;
+    }
+
+    .officer-avatar .officer-avatar-initials[data-length="4"] {
+        font-size: 0.8rem; /* ~13px */
         letter-spacing: -0.04em;
     }
 
-    .officer-avatar-md .officer-avatar-initials[data-length="4"] {
-        font-size: 0.95rem; /* 15px */
-        letter-spacing: -0.05em;
-    }
-
     @media (min-width: 640px) {
-        .officer-avatar-md .officer-avatar-initials {
-            font-size: 1.65rem; /* 26.5px */
-        }
-        .officer-avatar-md .officer-avatar-initials[data-length="3"] {
+        .officer-avatar .officer-avatar-initials {
             font-size: 1.25rem; /* 20px */
         }
-    }
-
-    .officer-avatar-sm .officer-avatar-initials {
-        font-size: 1.35rem; /* 21.5px */
-    }
-
-    .officer-avatar-sm .officer-avatar-initials[data-length="3"] {
-        font-size: 1.05rem; /* 17px */
-        letter-spacing: -0.04em;
-    }
-
-    @media (min-width: 640px) {
-        .officer-avatar-sm .officer-avatar-initials {
-            font-size: 1.5rem;
-        }
-        .officer-avatar-sm .officer-avatar-initials[data-length="3"] {
-            font-size: 1.15rem;
+        .officer-avatar .officer-avatar-initials[data-length="3"] {
+            font-size: 1rem; /* 16px */
         }
     }
 

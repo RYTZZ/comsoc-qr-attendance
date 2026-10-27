@@ -17,14 +17,14 @@
     }
 @endphp
 
-<article data-reveal-item class="group relative rounded-2xl bg-[#172033]/30 border border-[#334155]/40 hover:border-[#df747a]/60 hover:bg-[#172033]/50 transition-all duration-300 p-5 sm:p-5 flex flex-col sm:flex-row items-center sm:items-start gap-4 sm:gap-5 shadow-md shadow-black/10 h-full">
+<article data-reveal-item class="group relative rounded-2xl bg-[#172033]/30 border border-[#334155]/40 hover:border-[#df747a]/60 hover:bg-[#172033]/50 transition-all duration-300 p-5 sm:p-5 flex flex-col sm:flex-row items-center gap-4 sm:gap-5 shadow-md shadow-black/10 h-full">
     
     @php
         $initialsLen = mb_strlen($initials);
     @endphp
 
     <!-- Left Section: Clean Officer Portrait / Initials Avatar (Circular, Fixed-Dimension) -->
-    <div class="officer-avatar-container w-20 sm:w-24 shrink-0">
+    <div class="officer-avatar-container shrink-0">
         <div class="officer-avatar officer-avatar-md">
             @if($officer->portrait_url)
                 <img 
