@@ -7,13 +7,17 @@ pdfjsLib.GlobalWorkerOptions.workerSrc = new URL(
 ).toString();
 
 export default function constitutionPdfViewer(config) {
+    // pdf.js objects use native #private fields; wrapping them in Alpine's
+    // reactive Proxy makes every method call throw, leaving a blank viewport.
+    // Keep the document in a closure, outside reactive state.
+    let pdfDocRaw = null;
+
     return {
         url: config.url,
         isFullscreen: false,
         isLoading: true,
         hasError: false,
         errorMessage: '',
-        pdfDoc: null,
         totalPages: 0,
         renderedPages: 0,
         
@@ -62,12 +66,13 @@ export default function constitutionPdfViewer(config) {
             try {
                 const loadingTask = pdfjsLib.getDocument({
                     url: this.url,
-                    cMapUrl: 'https://unpkg.com/pdfjs-dist@3.11.174/cmaps/',
+                    cMapUrl: 'https://unpkg.com/pdfjs-dist@4.10.38/cmaps/',
                     cMapPacked: true,
+                    withCredentials: true,
                 });
 
-                this.pdfDoc = await loadingTask.promise;
-                this.totalPages = this.pdfDoc.numPages;
+                pdfDocRaw = await loadingTask.promise;
+                this.totalPages = pdfDocRaw.numPages;
                 this.isLoading = false;
 
                 await this.$nextTick();
@@ -81,7 +86,7 @@ export default function constitutionPdfViewer(config) {
         },
 
         async renderAllPages() {
-            if (!this.pdfDoc) return;
+            if (!pdfDocRaw) return;
             const container = this.$refs.pagesContainer;
             if (!container) return;
 
@@ -94,7 +99,7 @@ export default function constitutionPdfViewer(config) {
 
             for (let pageNum = 1; pageNum <= this.totalPages; pageNum++) {
                 try {
-                    const page = await this.pdfDoc.getPage(pageNum);
+                    const page = await pdfDocRaw.getPage(pageNum);
                     const unscaledViewport = page.getViewport({ scale: 1 });
 
                     // Compute scale based on selected zoom mode

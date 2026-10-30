@@ -173,7 +173,7 @@
                                             {{ $member->display_username }}
                                         </h3>
                                         <span class="text-xs text-slate-300 font-medium block">
-                                            {{ $member->name }}
+                                            {{ $member->public_real_name }}
                                         </span>
                                         <span class="text-[11px] text-slate-400 block font-mono">
                                             {{ $stud ? "{$stud->program} • {$stud->year_level}" : 'Computing Society' }}
@@ -286,7 +286,7 @@
                                                         </span>
                                                     </div>
                                                     <span class="text-xs text-slate-300 font-medium block">
-                                                        {{ $cand->name }}
+                                                        {{ $cand->public_real_name }}
                                                     </span>
                                                     <span class="text-[10px] text-slate-400 font-mono">
                                                         {{ $cand->student?->program ?? 'Computing Society' }}

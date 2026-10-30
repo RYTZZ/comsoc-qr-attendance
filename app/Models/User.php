@@ -264,35 +264,58 @@ class User extends Authenticatable
         return $this->username ?: ($this->nickname ?: $this->name);
     }
 
+    /**
+     * Whether a string equals or resembles this member's Student ID Number.
+     */
+    public function looksLikeStudentId(?string $value): bool
+    {
+        $value = strtolower(ltrim(trim((string) $value), '@'));
+        if ($value === '') {
+            return false;
+        }
+
+        $studentNumber = $this->student?->student_number ?? $this->student_number ?? null;
+        $strip = fn ($s) => preg_replace('/[^a-z0-9]/', '', strtolower((string) $s));
+        if ($studentNumber && $strip($value) !== '' && $strip($value) === $strip($studentNumber)) {
+            return true;
+        }
+
+        return (bool) preg_match('/^\d{6,12}$/', $value)
+            || (bool) preg_match('/^\d{2,4}[-_ ]?\d{3,8}([-_ ]?[a-z0-9]{1,2})?$/', $value);
+    }
+
+    /**
+     * Real name safe for directory display (never a Student ID Number).
+     */
+    public function getPublicRealNameAttribute(): string
+    {
+        $first = trim($this->student?->first_name ?? '');
+        $last = trim($this->student?->last_name ?? '');
+        if ($first !== '' && !$this->looksLikeStudentId($first)) {
+            return trim($first . ' ' . $last);
+        }
+
+        $name = trim((string) $this->name);
+        return $this->looksLikeStudentId($name) ? '' : $name;
+    }
+
     public function getDisplayUsernameAttribute(): string
     {
         $raw = trim($this->username ?? '');
-        $studentNumber = $this->student?->student_number ?? $this->student_number ?? null;
-
-        // Determine if raw username resembles a student number or student ID
-        $isStudentId = false;
-        if ($raw !== '') {
-            $normalizedRaw = strtolower(ltrim($raw, '@'));
-            if ($studentNumber && $normalizedRaw === strtolower(trim($studentNumber))) {
-                $isStudentId = true;
-            } elseif (preg_match('/^\d{6,12}$/', $normalizedRaw) || preg_match('/^\d{2,4}-\d{4,8}$/', $normalizedRaw)) {
-                $isStudentId = true;
-            }
-        }
 
         // Rule 1: Valid configured username exists and is not a student number
-        if ($raw !== '' && !$isStudentId) {
+        if ($raw !== '' && !$this->looksLikeStudentId($raw)) {
             return '@' . ltrim($raw, '@');
         }
 
-        // Rule 2: Fallback to member's actual first name (without '@')
+        // Rule 2: Fallback to member's actual first name (without '@'), never the Student ID
         $firstName = trim($this->student?->first_name ?? '');
-        if ($firstName === '' && !empty($this->name)) {
+        if (($firstName === '' || $this->looksLikeStudentId($firstName)) && !empty($this->name)) {
             $parts = explode(' ', trim($this->name));
             $firstName = trim($parts[0] ?? '');
         }
 
-        if ($firstName !== '') {
+        if ($firstName !== '' && !$this->looksLikeStudentId($firstName)) {
             return $firstName;
         }
 

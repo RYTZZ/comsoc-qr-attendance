@@ -361,7 +361,7 @@ class Event extends Model
 
     public function isEnded(): bool
     {
-        if (in_array($this->status, ['completed', 'archived', 'cancelled'])) {
+        if (in_array($this->status, ['ended', 'completed', 'archived', 'cancelled'])) {
             return true;
         }
 

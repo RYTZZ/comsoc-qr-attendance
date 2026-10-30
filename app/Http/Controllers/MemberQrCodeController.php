@@ -187,7 +187,7 @@ class MemberQrCodeController extends Controller
             return response()->json([
                 'success' => false,
                 'code' => 'EVENT_ENDED',
-                'message' => 'This event has ended. The attendance pass is no longer available.',
+                'message' => 'This event has ended. Your attendance QR Code is no longer available.',
                 'event_ended' => true,
             ], 403);
         }

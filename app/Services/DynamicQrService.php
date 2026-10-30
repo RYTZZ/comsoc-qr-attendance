@@ -80,6 +80,28 @@ class DynamicQrService
     }
 
     /**
+     * Build a rejection result if the event a token belongs to has ended or is inactive.
+     */
+    private function endedEventRejection(?string $eventId): ?array
+    {
+        if (!$eventId) {
+            return null;
+        }
+
+        $event = \App\Models\Event::find($eventId);
+        if ($event && ($event->isEnded() || in_array($event->status, ['cancelled', 'archived', 'draft']))) {
+            return [
+                'valid' => false,
+                'code' => 'event_ended',
+                'message' => 'This event has ended. Your attendance QR Code is no longer available.',
+                'user' => null,
+            ];
+        }
+
+        return null;
+    }
+
+    /**
      * Generate an unambiguous 6-character manual token.
      */
     private function generateUniqueManualToken(): string
@@ -201,6 +223,10 @@ class DynamicQrService
                 'message' => 'Unrecognized or superseded token.',
                 'user' => null,
             ];
+        }
+
+        if ($rejection = $this->endedEventRejection($tokenRecord->event_id ?? ($payload['eid'] ?? null))) {
+            return $rejection;
         }
 
         if ($expectedEvent && $tokenRecord->event_id && $tokenRecord->event_id !== $expectedEvent->id) {
@@ -332,6 +358,10 @@ class DynamicQrService
                 'message' => 'Manual attendance token has expired. Please use the current token on the screen.',
                 'user' => null,
             ];
+        }
+
+        if ($rejection = $this->endedEventRejection($tokenRecord->event_id)) {
+            return $rejection;
         }
 
         // Resolve member user
