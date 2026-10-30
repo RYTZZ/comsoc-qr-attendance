@@ -124,7 +124,7 @@ export default function constitutionPdfViewer(config) {
 
                     // Outer page wrapper card
                     const pageCard = document.createElement('div');
-                    pageCard.className = 'cbl-pdf-page-card bg-white shadow-2xl rounded-sm mx-auto my-3 relative overflow-hidden transition-all';
+                    pageCard.className = 'cbl-pdf-page-card shrink-0 bg-white shadow-2xl rounded-sm mx-auto my-3 relative overflow-hidden transition-all';
                     pageCard.style.width = `${Math.floor(viewport.width)}px`;
                     pageCard.style.maxWidth = '100%';
 

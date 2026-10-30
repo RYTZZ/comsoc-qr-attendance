@@ -293,7 +293,8 @@
 
                                 <!-- Scrollable Multi-Page Pages Container -->
                                 <div x-ref="pagesContainer"
-                                     class="w-full h-full flex-1 overflow-y-auto overflow-x-auto p-3 sm:p-5 flex flex-col items-center space-y-4 select-text focus:outline-none"
+                                     class="w-full min-h-0 flex-1 overflow-y-auto overflow-x-auto overscroll-contain p-3 sm:p-5 flex flex-col items-center space-y-4 select-text focus:outline-none"
+                                     style="-webkit-overflow-scrolling: touch; touch-action: pan-x pan-y pinch-zoom;"
                                      tabindex="0"
                                      aria-label="Constitutional and By-Laws multi-page document stream">
                                 </div>
