@@ -192,6 +192,27 @@ Route::middleware(['auth', 'verified', 'require_password_change'])->group(functi
         Route::get('/', [\App\Http\Controllers\AnnouncementController::class, 'index'])->name('index');
         Route::get('/{announcement}', [\App\Http\Controllers\AnnouncementController::class, 'show'])->name('show');
         Route::post('/{announcement}/acknowledge', [\App\Http\Controllers\AnnouncementController::class, 'acknowledge'])->name('acknowledge');
+
+        // Announcement Engagement: Reactions & Threaded Comments
+        Route::get('/{announcement}/engagement', [\App\Http\Controllers\AnnouncementEngagementController::class, 'getEngagement'])->name('engagement');
+        Route::post('/{announcement}/reactions', [\App\Http\Controllers\AnnouncementEngagementController::class, 'toggleReaction'])
+            ->middleware('throttle:60,1')
+            ->name('reactions.toggle');
+
+        Route::get('/{announcement}/comments', [\App\Http\Controllers\AnnouncementCommentController::class, 'index'])->name('comments.index');
+        Route::post('/{announcement}/comments', [\App\Http\Controllers\AnnouncementCommentController::class, 'store'])
+            ->middleware('throttle:30,1')
+            ->name('comments.store');
+        Route::put('/comments/{comment}', [\App\Http\Controllers\AnnouncementCommentController::class, 'update'])
+            ->middleware('throttle:30,1')
+            ->name('comments.update');
+        Route::delete('/comments/{comment}', [\App\Http\Controllers\AnnouncementCommentController::class, 'destroy'])
+            ->name('comments.destroy');
+        Route::post('/comments/{comment}/report', [\App\Http\Controllers\AnnouncementCommentController::class, 'report'])
+            ->middleware('throttle:15,1')
+            ->name('comments.report');
+        Route::post('/comments/{comment}/moderate', [\App\Http\Controllers\AnnouncementCommentController::class, 'moderate'])
+            ->name('comments.moderate');
     });
 
     // Member Help Desk & Dispute Center

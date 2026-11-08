@@ -72,6 +72,30 @@ class Announcement extends Model
         return $this->hasMany(AnnouncementReceipt::class);
     }
 
+    public function reactions(): HasMany
+    {
+        return $this->hasMany(AnnouncementReaction::class);
+    }
+
+    public function comments(): HasMany
+    {
+        return $this->hasMany(AnnouncementComment::class);
+    }
+
+    public function activeComments(): HasMany
+    {
+        return $this->hasMany(AnnouncementComment::class)
+            ->where('status', AnnouncementComment::STATUS_ACTIVE);
+    }
+
+    public function mainComments(): HasMany
+    {
+        return $this->hasMany(AnnouncementComment::class)
+            ->whereNull('parent_id')
+            ->where('status', AnnouncementComment::STATUS_ACTIVE)
+            ->latest('created_at');
+    }
+
     public function scopeActive(Builder $query): Builder
     {
         return $query->where('is_active', true)

@@ -92,6 +92,9 @@
                     @endif
                 </div>
 
+                <!-- Complete Announcement Engagement System: Exactly 6 Reactions & Expandable Threaded Comments -->
+                <x-announcement-engagement-section :announcement="$announcement" />
+
             </div>
         </div>
     </div>

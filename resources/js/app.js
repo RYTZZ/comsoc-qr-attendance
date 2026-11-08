@@ -6,6 +6,7 @@ import { createIcons, icons } from 'lucide';
 import SignaturePad from 'signature_pad';
 import signatureRegistration from './signature';
 import constitutionPdfViewer from './constitution-viewer';
+import announcementEngagement from './announcement-engagement';
 import { initMotionSystem } from './motion';
 
 window.Alpine = Alpine;
@@ -46,6 +47,7 @@ window.refreshIcons = () => {
 
 Alpine.data('signatureRegistration', signatureRegistration);
 Alpine.data('constitutionPdfViewer', constitutionPdfViewer);
+Alpine.data('announcementEngagement', announcementEngagement);
 
 Alpine.data('customDropdown', (config) => ({
     name: config.name,
