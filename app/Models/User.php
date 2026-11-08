@@ -138,7 +138,7 @@ class User extends Authenticatable implements MustVerifyEmail
 
             // If email_verified_at is not explicitly provided, default to now() for active accounts in test/legacy seeds
             if (! array_key_exists('email_verified_at', $user->getAttributes())) {
-                $user->email_verified_at = now();
+                $user->email_verified_at = \Illuminate\Support\Carbon::now();
             }
         });
     }
