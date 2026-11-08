@@ -346,4 +346,57 @@ class EmailVerificationOtpTest extends TestCase
         $resp2 = $this->actingAs($superAdmin)->get(route('admin.dashboard'));
         $resp2->assertStatus(200);
     }
+
+    public function test_resend_endpoint_returns_json_with_cooldown_and_server_time(): void
+    {
+        Mail::fake();
+
+        $user = User::factory()->unverified()->create([
+            'email' => 'jsonresend@sorsu.edu.ph',
+            'role' => 'student',
+            'is_active' => true,
+        ]);
+
+        $response = $this->actingAs($user)->postJson(route('verification.send'));
+
+        $response->assertStatus(200);
+        $response->assertJsonStructure([
+            'success',
+            'message',
+            'cooldown_seconds',
+            'cooldown_expires_at',
+            'server_time',
+        ]);
+        $this->assertTrue($response->json('success'));
+        $this->assertEquals(60, $response->json('cooldown_seconds'));
+
+        // Immediate subsequent request must return 429 JSON response
+        $throttledResponse = $this->actingAs($user)->postJson(route('verification.send'));
+        $throttledResponse->assertStatus(429);
+        $throttledResponse->assertJsonStructure([
+            'success',
+            'message',
+            'cooldown_seconds',
+            'cooldown_expires_at',
+            'server_time',
+        ]);
+        $this->assertFalse($throttledResponse->json('success'));
+        $this->assertGreaterThan(0, $throttledResponse->json('cooldown_seconds'));
+    }
+
+    public function test_email_template_contains_required_branding_logo_and_security_notice(): void
+    {
+        $mailable = new EmailVerificationOtpMail('Juan Dela Cruz', '456789', 15);
+        $rendered = $mailable->render();
+
+        $this->assertStringContainsString('Verify Your Email Address', $rendered);
+        $this->assertStringContainsString('Hello, Juan Dela Cruz!', $rendered);
+        $this->assertStringContainsString('456789', $rendered);
+        $this->assertStringContainsString('15 minutes', $rendered);
+        $this->assertStringContainsString('Never share this verification code with anyone', $rendered);
+        $this->assertStringContainsString('One Community. One Platform. More Possibilities.', $rendered);
+        $this->assertStringContainsString('Computing Society Organization', $rendered);
+        $this->assertStringContainsString(date('Y'), $rendered);
+        $this->assertStringContainsString('COMSOC.png', $rendered);
+    }
 }

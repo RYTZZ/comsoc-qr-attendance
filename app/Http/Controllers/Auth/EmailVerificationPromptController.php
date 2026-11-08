@@ -22,10 +22,13 @@ class EmailVerificationPromptController extends Controller
         }
 
         $cooldownSeconds = $otpService->remainingResendCooldownSeconds($user);
+        $cooldownExpiresAt = $cooldownSeconds > 0 ? now()->addSeconds($cooldownSeconds)->getTimestamp() : null;
 
         return view('auth.verify-email', [
             'user' => $user,
             'cooldownSeconds' => $cooldownSeconds,
+            'cooldownExpiresAt' => $cooldownExpiresAt,
+            'serverTime' => now()->getTimestamp(),
             'expirationMinutes' => EmailVerificationOtpService::EXPIRATION_MINUTES,
             'maxAttempts' => EmailVerificationOtpService::MAX_ATTEMPTS,
         ]);
