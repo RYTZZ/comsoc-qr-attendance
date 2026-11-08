@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="{{ str_replace('_', '-', app()->getLocale()) }}" class="h-full">
     <head>
         <meta charset="utf-8">
@@ -182,7 +182,7 @@
                     </div>
                 @endisset
 
-                <main class="flex-1 pb-28 lg:pb-10">
+                <main class="flex-1 pb-32 lg:pb-10">
                     {{ $slot }}
                 </main>
             </div>
@@ -190,40 +190,52 @@
 
         <!-- Mobile Floating 5-Icon Bottom Action Dock (Thumb-Zone Navigation) -->
         @auth
-        <nav x-show="!readerFullscreen" class="lg:hidden fixed bottom-0 inset-x-0 z-30 bg-[#0B1120]/95 backdrop-blur-xl border-t border-white/10 px-2 pt-1.5 pb-[calc(0.375rem+env(safe-area-inset-bottom,0px))] shadow-2xl"
+        <nav x-show="!readerFullscreen"
+             x-transition:enter="transition ease-out duration-200"
+             x-transition:enter-start="opacity-0 translate-y-4"
+             x-transition:enter-end="opacity-100 translate-y-0"
+             x-transition:leave="transition ease-in duration-150"
+             x-transition:leave-start="opacity-100 translate-y-0"
+             x-transition:leave-end="opacity-0 translate-y-4"
+             class="lg:hidden fixed inset-x-3 sm:inset-x-6 bottom-[calc(0.75rem+env(safe-area-inset-bottom,0px))] z-30 mx-auto max-w-md floating-glass-dock px-2.5 sm:px-3.5 py-1.5"
              aria-label="Mobile Bottom Dock">
-            <div class="grid grid-cols-5 items-center max-w-md mx-auto">
+            <div class="grid grid-cols-5 items-center gap-0.5 sm:gap-1">
                 <a href="{{ route('dashboard') }}"
-                   class="flex flex-col items-center justify-center py-1 rounded-xl text-[10px] font-semibold transition {{ request()->routeIs('dashboard') ? 'text-[#df747a]' : 'text-slate-400 hover:text-white' }}">
-                    <i data-lucide="home" class="w-4 h-4 mb-0.5"></i>
-                    <span>Home</span>
+                   aria-current="{{ request()->routeIs('dashboard') ? 'page' : 'false' }}"
+                   class="flex flex-col items-center justify-center min-h-[44px] py-1 px-1 rounded-full text-[10px] font-semibold transition-colors duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#df747a]/60 {{ request()->routeIs('dashboard') ? 'text-[#df747a] bg-[#560E0F]/25' : 'text-slate-400 hover:text-white' }}">
+                    <i data-lucide="home" class="w-4 h-4 mb-0.5 shrink-0"></i>
+                    <span class="truncate max-w-full leading-tight">Home</span>
                 </a>
 
                 <a href="{{ route('activities.index') }}"
-                   class="flex flex-col items-center justify-center py-1 rounded-xl text-[10px] font-semibold transition {{ request()->routeIs('activities.*') ? 'text-[#df747a]' : 'text-slate-400 hover:text-white' }}">
-                    <i data-lucide="layers" class="w-4 h-4 mb-0.5"></i>
-                    <span>Activities</span>
+                   aria-current="{{ request()->routeIs('activities.*') ? 'page' : 'false' }}"
+                   class="flex flex-col items-center justify-center min-h-[44px] py-1 px-1 rounded-full text-[10px] font-semibold transition-colors duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#df747a]/60 {{ request()->routeIs('activities.*') ? 'text-[#df747a] bg-[#560E0F]/25' : 'text-slate-400 hover:text-white' }}">
+                    <i data-lucide="layers" class="w-4 h-4 mb-0.5 shrink-0"></i>
+                    <span class="truncate max-w-full leading-tight">Activities</span>
                 </a>
 
                 <div class="flex flex-col items-center justify-center">
                     <a href="{{ route('member.dynamic_qr') }}"
-                       class="-mt-5 w-12 h-12 rounded-2xl bg-gradient-to-br from-[#560E0F] to-[#E11D48] text-white shadow-lg shadow-[#8F3033]/50 border border-[#fda4af]/40 flex flex-col items-center justify-center transition transform active:scale-95"
+                       aria-current="{{ request()->routeIs('member.dynamic_qr') ? 'page' : 'false' }}"
+                       class="-mt-5 w-12 h-12 rounded-2xl bg-gradient-to-br from-[#560E0F] to-[#E11D48] text-white shadow-lg shadow-[#8F3033]/50 border border-[#fda4af]/40 flex flex-col items-center justify-center transition duration-200 transform active:scale-95 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#fda4af]"
                        aria-label="Open My QR Pass">
-                        <i data-lucide="qr-code" class="w-5 h-5"></i>
+                        <i data-lucide="qr-code" class="w-5 h-5 shrink-0"></i>
                         <span class="text-[8px] font-extrabold uppercase tracking-tighter leading-none mt-0.5">MY QR</span>
                     </a>
                 </div>
 
                 <a href="{{ route('missions.index') }}"
-                   class="flex flex-col items-center justify-center py-1 rounded-xl text-[10px] font-semibold transition {{ request()->routeIs('missions.*') || request()->routeIs('shop.*') ? 'text-[#df747a]' : 'text-slate-400 hover:text-white' }}">
-                    <i data-lucide="target" class="w-4 h-4 mb-0.5"></i>
-                    <span>Quests</span>
+                   aria-current="{{ request()->routeIs('missions.*') || request()->routeIs('shop.*') ? 'page' : 'false' }}"
+                   class="flex flex-col items-center justify-center min-h-[44px] py-1 px-1 rounded-full text-[10px] font-semibold transition-colors duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#df747a]/60 {{ request()->routeIs('missions.*') || request()->routeIs('shop.*') ? 'text-[#df747a] bg-[#560E0F]/25' : 'text-slate-400 hover:text-white' }}">
+                    <i data-lucide="target" class="w-4 h-4 mb-0.5 shrink-0"></i>
+                    <span class="truncate max-w-full leading-tight">Quests</span>
                 </a>
 
                 <a href="{{ route('directory.index') }}"
-                   class="flex flex-col items-center justify-center py-1 rounded-xl text-[10px] font-semibold transition {{ request()->routeIs('directory.*') || request()->routeIs('projects.*') ? 'text-[#df747a]' : 'text-slate-400 hover:text-white' }}">
-                    <i data-lucide="users" class="w-4 h-4 mb-0.5"></i>
-                    <span>Community</span>
+                   aria-current="{{ request()->routeIs('directory.*') || request()->routeIs('projects.*') ? 'page' : 'false' }}"
+                   class="flex flex-col items-center justify-center min-h-[44px] py-1 px-1 rounded-full text-[10px] font-semibold transition-colors duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#df747a]/60 {{ request()->routeIs('directory.*') || request()->routeIs('projects.*') ? 'text-[#df747a] bg-[#560E0F]/25' : 'text-slate-400 hover:text-white' }}">
+                    <i data-lucide="users" class="w-4 h-4 mb-0.5 shrink-0"></i>
+                    <span class="truncate max-w-full leading-tight">Community</span>
                 </a>
             </div>
         </nav>
