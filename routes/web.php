@@ -348,6 +348,14 @@ Route::middleware(['auth', 'verified', 'require_password_change'])->group(functi
             Route::resource('users', UserController::class)->except(['show']);
             Route::post('users/{user}/toggle-active', [UserController::class, 'toggleActive'])->name('users.toggle-active');
             Route::post('users/{user}/reset-password', [UserController::class, 'resetPassword'])->name('users.reset-password');
+            Route::post('users/{user}/suspend', [UserController::class, 'suspend'])->name('users.suspend');
+            Route::post('users/{user}/reactivate', [UserController::class, 'reactivate'])->name('users.reactivate');
+            Route::post('users/{user}/restore', [UserController::class, 'restore'])->withTrashed()->name('users.restore');
+
+            Route::post('students/{student}/suspend', [StudentController::class, 'suspendAccount'])->name('students.suspend');
+            Route::post('students/{student}/reactivate', [StudentController::class, 'reactivateAccount'])->name('students.reactivate');
+            Route::delete('students/{student}/account', [StudentController::class, 'deleteAccount'])->name('students.delete-account');
+            Route::post('students/{student}/restore', [StudentController::class, 'restoreAccount'])->name('students.restore-account');
 
             Route::get('students/exp-points', [\App\Http\Controllers\Admin\StudentExpPointsController::class, 'index'])->name('students.exp-points.index');
             Route::post('students/exp-points/adjust', [\App\Http\Controllers\Admin\StudentExpPointsController::class, 'adjust'])->name('students.exp-points.adjust');

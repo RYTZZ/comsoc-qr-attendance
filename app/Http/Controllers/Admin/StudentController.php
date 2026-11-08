@@ -26,12 +26,28 @@ class StudentController extends Controller
             ? $request->academic_year_id
             : $activeYear?->id;
 
+        $includeDeleted = $request->input('account_status') === 'deleted' && $request->user()?->isSuperAdmin();
+
         $query = Student::with([
                 'memberships' => fn($q) => $q
                     ->when($yearId, fn($m) => $m->where('academic_year_id', $yearId))
                     ->with('activeQrCode'),
                 'user',
+                'userWithTrashed',
             ])
+            ->when(! $includeDeleted, function ($q) {
+                $q->whereDoesntHave('userWithTrashed', fn ($uq) => $uq->onlyTrashed());
+            })
+            ->when($request->filled('account_status'), function ($q) use ($request) {
+                $status = $request->input('account_status');
+                if ($status === 'active') {
+                    $q->whereHas('user', fn ($uq) => $uq->where('is_active', true)->whereNull('suspended_at'));
+                } elseif ($status === 'suspended') {
+                    $q->whereHas('user', fn ($uq) => $uq->where('is_active', false)->whereNotNull('suspended_at'));
+                } elseif ($status === 'deleted' && $request->user()?->isSuperAdmin()) {
+                    $q->whereHas('userWithTrashed', fn ($uq) => $uq->onlyTrashed());
+                }
+            })
             ->when($request->search, fn($q) => $q->where(fn($s) => $s
                 ->whereLike('student_number', "%{$request->search}%")
                 ->orWhereLike('last_name', "%{$request->search}%")
@@ -93,7 +109,10 @@ class StudentController extends Controller
     public function show(Student $student): View
     {
         $activeYear = AcademicYear::active();
-        $student->load(['memberships.academicYear', 'memberships.qrCodes', 'memberships.activeQrCode']);
+        $student->load(['memberships.academicYear', 'memberships.qrCodes', 'memberships.activeQrCode', 'user', 'userWithTrashed']);
+        if ($student->userWithTrashed?->trashed() && ! auth()->user()?->isSuperAdmin()) {
+            abort(404);
+        }
         $yearLevels = Student::YEAR_LEVELS;
         $programs = \App\Models\Program::activeOptions();
         return view('admin.students.show', compact('student', 'activeYear', 'yearLevels', 'programs'));
@@ -130,6 +149,111 @@ class StudentController extends Controller
         AuditLogger::log('student.email_updated', $student, [], ['email' => $validated['email']]);
 
         return back()->with('success', "Registered email updated for {$student->display_name}.");
+    }
+
+    public function suspendAccount(Request $request, Student $student): RedirectResponse
+    {
+        if (! $request->user()?->isSuperAdmin()) {
+            abort(403, 'Only Super Administrators can suspend student accounts.');
+        }
+
+        $account = $student->userWithTrashed;
+        if (! $account) {
+            return back()->with('error', 'This student does not have a registered user account.');
+        }
+
+        $validated = $request->validate([
+            'reason' => ['required', 'string', 'min:3', 'max:1000'],
+        ]);
+
+        try {
+            app(\App\Services\AccountStatusService::class)->suspend($account, $request->user(), $validated['reason']);
+        } catch (\Illuminate\Auth\Access\AuthorizationException $e) {
+            abort(403, $e->getMessage());
+        } catch (\InvalidArgumentException $e) {
+            return back()->withErrors(['reason' => $e->getMessage()])->with('error', $e->getMessage());
+        }
+
+        return back()->with('success', "Student account for {$student->display_name} has been suspended.");
+    }
+
+    public function reactivateAccount(Request $request, Student $student): RedirectResponse
+    {
+        if (! $request->user()?->isSuperAdmin()) {
+            abort(403, 'Only Super Administrators can reactivate student accounts.');
+        }
+
+        $account = $student->userWithTrashed;
+        if (! $account) {
+            return back()->with('error', 'This student does not have a registered user account.');
+        }
+
+        $validated = $request->validate([
+            'reason' => ['nullable', 'string', 'max:1000'],
+        ]);
+
+        try {
+            app(\App\Services\AccountStatusService::class)->reactivate($account, $request->user(), $validated['reason'] ?? null);
+        } catch (\Illuminate\Auth\Access\AuthorizationException $e) {
+            abort(403, $e->getMessage());
+        } catch (\InvalidArgumentException $e) {
+            return back()->withErrors(['reason' => $e->getMessage()])->with('error', $e->getMessage());
+        }
+
+        return back()->with('success', "Student account for {$student->display_name} has been reactivated.");
+    }
+
+    public function deleteAccount(Request $request, Student $student): RedirectResponse
+    {
+        if (! $request->user()?->isSuperAdmin()) {
+            abort(403, 'Only Super Administrators can delete student accounts.');
+        }
+
+        $account = $student->userWithTrashed;
+        if (! $account) {
+            return back()->with('error', 'This student does not have a registered user account.');
+        }
+
+        $validated = $request->validate([
+            'reason' => ['required', 'string', 'min:3', 'max:1000'],
+            'confirm_delete' => ['sometimes', 'accepted'],
+        ]);
+
+        try {
+            app(\App\Services\AccountStatusService::class)->delete($account, $request->user(), $validated['reason']);
+        } catch (\Illuminate\Auth\Access\AuthorizationException $e) {
+            abort(403, $e->getMessage());
+        } catch (\InvalidArgumentException $e) {
+            return back()->withErrors(['reason' => $e->getMessage()])->with('error', $e->getMessage());
+        }
+
+        return back()->with('success', "Student account for {$student->display_name} has been deleted. Historical records remain preserved.");
+    }
+
+    public function restoreAccount(Request $request, Student $student): RedirectResponse
+    {
+        if (! $request->user()?->isSuperAdmin()) {
+            abort(403, 'Only Super Administrators can restore student accounts.');
+        }
+
+        $account = $student->userWithTrashed;
+        if (! $account) {
+            return back()->with('error', 'This student does not have a registered user account.');
+        }
+
+        $validated = $request->validate([
+            'reason' => ['nullable', 'string', 'max:1000'],
+        ]);
+
+        try {
+            app(\App\Services\AccountStatusService::class)->restore($account, $request->user(), $validated['reason'] ?? null);
+        } catch (\Illuminate\Auth\Access\AuthorizationException $e) {
+            abort(403, $e->getMessage());
+        } catch (\InvalidArgumentException $e) {
+            return back()->withErrors(['reason' => $e->getMessage()])->with('error', $e->getMessage());
+        }
+
+        return back()->with('success', "Student account for {$student->display_name} has been restored.");
     }
 
     private function exportStudentsCsv($records, string $filename): StreamedResponse

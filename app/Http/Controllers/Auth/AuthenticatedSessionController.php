@@ -23,10 +23,23 @@ class AuthenticatedSessionController extends Controller
 
         $user = Auth::user();
 
-        if (!$user->is_active) {
-            \App\Services\AuditLogger::log('auth.login_blocked_inactive', $user, [], ['email' => $user->email]);
-            Auth::logout();
-            return back()->withErrors(['email' => 'Your account has been deactivated.']);
+        if (! $user || ! $user->is_active || $user->isSuspended() || $user->trashed()) {
+            $isSuspended = $user && $user->isSuspended();
+            \App\Services\AuditLogger::log(
+                $isSuspended ? 'auth.login_blocked_suspended' : 'auth.login_blocked_inactive',
+                $user,
+                [],
+                ['email' => $user?->email]
+            );
+            Auth::guard('web')->logout();
+            $request->session()->invalidate();
+            $request->session()->regenerateToken();
+
+            return back()->withErrors([
+                'email' => $isSuspended
+                    ? 'Your account has been suspended. Please contact the COMSOC administrators.'
+                    : 'Your account has been deactivated.',
+            ]);
         }
 
         $user->update(['last_activity_at' => now()]);

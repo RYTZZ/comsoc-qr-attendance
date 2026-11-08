@@ -14,7 +14,37 @@ class EnsureSessionNotRevoked
     public function handle(Request $request, Closure $next): Response
     {
         if (Auth::check() && $request->hasSession()) {
-            $user = Auth::user();
+            $user = Auth::user()?->fresh() ?? Auth::user();
+
+            // Immediately block and invalidate sessions for suspended, deactivated, or soft-deleted accounts
+            if (! $user || ! $user->is_active || $user->isSuspended() || $user->trashed()) {
+                if ($request->is('logout')) {
+                    return $next($request);
+                }
+
+                $wasSuspended = $user && $user->isSuspended();
+
+                Auth::guard('web')->logout();
+                $request->session()->invalidate();
+                $request->session()->regenerateToken();
+
+                $message = $wasSuspended
+                    ? 'Your COMSOC Hub account has been suspended. Please contact the COMSOC administrators.'
+                    : 'Your COMSOC Hub account is no longer active.';
+
+                if ($request->expectsJson() || $request->is('*/poll*') || $request->is('api/*')) {
+                    return response()->json([
+                        'account_suspended' => $wasSuspended,
+                        'session_replaced' => true,
+                        'message' => $message,
+                    ], 401);
+                }
+
+                return redirect()->route('login')->withErrors([
+                    'email' => $message,
+                ]);
+            }
+
             $sessionId = $request->session()->getId();
             $sessionIdHash = hash('sha256', $sessionId);
             $storedSessionHash = $request->session()->get('current_session_hash');

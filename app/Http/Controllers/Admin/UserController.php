@@ -19,12 +19,18 @@ class UserController extends Controller
 {
     public function index(Request $request): View
     {
-        $query = User::with(['student', 'kiosk.assignedEvent', 'creator'])
+        $baseQuery = $request->status === 'deleted'
+            ? User::onlyTrashed()
+            : User::query();
+
+        $query = $baseQuery->with(['student', 'kiosk.assignedEvent', 'creator'])
             ->when($request->role, fn($q) => $q->where('role', $request->role))
             ->when($request->position, fn($q) => $q->where('officer_position', $request->position))
             ->when($request->filled('status'), function ($q) use ($request) {
                 if ($request->status === 'active') {
-                    $q->where('is_active', true);
+                    $q->where('is_active', true)->whereNull('suspended_at');
+                } elseif ($request->status === 'suspended') {
+                    $q->where('is_active', false)->whereNotNull('suspended_at');
                 } elseif ($request->status === 'inactive') {
                     $q->where('is_active', false);
                 }
@@ -72,7 +78,9 @@ class UserController extends Controller
         $statuses = [
             '' => 'All Statuses',
             'active' => 'Active',
+            'suspended' => 'Suspended',
             'inactive' => 'Inactive',
+            'deleted' => 'Deleted (Archived)',
         ];
 
         $eventOptions = ['' => 'All Events'];
@@ -351,7 +359,18 @@ class UserController extends Controller
         }
 
         $user->is_active = !$user->is_active;
+        if ($user->is_active) {
+            $user->suspended_at = null;
+            $user->suspended_by = null;
+            $user->suspension_reason = null;
+            $user->reactivated_at = now();
+            $user->reactivated_by = $currentUser->id;
+        }
         $user->save();
+
+        if (! $user->is_active) {
+            app(\App\Services\AccountStatusService::class)->terminateAccess($user);
+        }
 
         if ($user->kiosk) {
             $user->kiosk->is_active = $user->is_active;
@@ -363,6 +382,48 @@ class UserController extends Controller
 
         $statusText = $user->is_active ? 'activated' : 'deactivated';
         return back()->with('success', "Account '{$user->name}' has been {$statusText}.");
+    }
+
+    public function suspend(Request $request, User $user): RedirectResponse
+    {
+        if (! $request->user()?->isSuperAdmin()) {
+            abort(403, 'Only Super Administrators can suspend student accounts.');
+        }
+
+        $validated = $request->validate([
+            'reason' => ['required', 'string', 'min:3', 'max:1000'],
+        ]);
+
+        try {
+            app(\App\Services\AccountStatusService::class)->suspend($user, $request->user(), $validated['reason']);
+        } catch (\Illuminate\Auth\Access\AuthorizationException $e) {
+            abort(403, $e->getMessage());
+        } catch (\InvalidArgumentException $e) {
+            return back()->withErrors(['reason' => $e->getMessage()])->with('error', $e->getMessage());
+        }
+
+        return back()->with('success', "Student account '{$user->name}' has been suspended.");
+    }
+
+    public function reactivate(Request $request, User $user): RedirectResponse
+    {
+        if (! $request->user()?->isSuperAdmin()) {
+            abort(403, 'Only Super Administrators can reactivate student accounts.');
+        }
+
+        $validated = $request->validate([
+            'reason' => ['nullable', 'string', 'max:1000'],
+        ]);
+
+        try {
+            app(\App\Services\AccountStatusService::class)->reactivate($user, $request->user(), $validated['reason'] ?? null);
+        } catch (\Illuminate\Auth\Access\AuthorizationException $e) {
+            abort(403, $e->getMessage());
+        } catch (\InvalidArgumentException $e) {
+            return back()->withErrors(['reason' => $e->getMessage()])->with('error', $e->getMessage());
+        }
+
+        return back()->with('success', "Student account '{$user->name}' has been reactivated.");
     }
 
     public function resetPassword(Request $request, User $user): RedirectResponse
@@ -393,12 +454,58 @@ class UserController extends Controller
         return back()->with('success', "Password for '{$user->name}' has been reset successfully.");
     }
 
-    public function destroy(User $user): RedirectResponse
+    public function destroy(Request $request, User $user): RedirectResponse
     {
-        if ($user->role === 'super_admin') {
-            return back()->with('error', 'Super Admin accounts cannot be deleted. Deactivate instead.');
+        if (! $request->user()?->isSuperAdmin()) {
+            abort(403, 'Only Super Administrators can delete student accounts.');
         }
 
-        return back()->with('error', 'To preserve historical records and audit logs, accounts cannot be permanently deleted. Please deactivate the account instead.');
+        if ($user->id === $request->user()->id) {
+            return back()->withErrors(['account' => 'You cannot delete your own account.'])->with('error', 'You cannot delete your own account.');
+        }
+
+        if ($user->role === 'super_admin') {
+            return back()->withErrors(['account' => 'Super Admin accounts cannot be deleted.'])->with('error', 'Super Admin accounts cannot be deleted. Deactivate instead.');
+        }
+
+        if ($user->role !== 'student') {
+            return back()->withErrors(['account' => 'Only student accounts can be deleted here.'])->with('error', 'To preserve historical records and audit logs, non-student administrative accounts cannot be deleted. Please deactivate the account instead.');
+        }
+
+        $validated = $request->validate([
+            'reason' => ['required', 'string', 'min:3', 'max:1000'],
+            'confirm_delete' => ['sometimes', 'accepted'],
+        ]);
+
+        try {
+            app(\App\Services\AccountStatusService::class)->delete($user, $request->user(), $validated['reason']);
+        } catch (\Illuminate\Auth\Access\AuthorizationException $e) {
+            abort(403, $e->getMessage());
+        } catch (\InvalidArgumentException $e) {
+            return back()->withErrors(['reason' => $e->getMessage()])->with('error', $e->getMessage());
+        }
+
+        return back()->with('success', "Student account '{$user->name}' has been deleted. Historical records remain preserved.");
+    }
+
+    public function restore(Request $request, User $user): RedirectResponse
+    {
+        if (! $request->user()?->isSuperAdmin()) {
+            abort(403, 'Only Super Administrators can restore student accounts.');
+        }
+
+        $validated = $request->validate([
+            'reason' => ['nullable', 'string', 'max:1000'],
+        ]);
+
+        try {
+            app(\App\Services\AccountStatusService::class)->restore($user, $request->user(), $validated['reason'] ?? null);
+        } catch (\Illuminate\Auth\Access\AuthorizationException $e) {
+            abort(403, $e->getMessage());
+        } catch (\InvalidArgumentException $e) {
+            return back()->withErrors(['reason' => $e->getMessage()])->with('error', $e->getMessage());
+        }
+
+        return back()->with('success', "Student account '{$user->name}' has been restored.");
     }
 }

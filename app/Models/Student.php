@@ -137,6 +137,11 @@ class Student extends Model
         return $this->hasOne(User::class);
     }
 
+    public function userWithTrashed(): HasOne
+    {
+        return $this->hasOne(User::class)->withTrashed();
+    }
+
     public function attendanceRecords(): HasMany
     {
         return $this->hasMany(AttendanceRecord::class, 'participant_id');

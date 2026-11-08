@@ -1,11 +1,21 @@
 <x-layouts.admin :title="$student->display_name">
 <div class="page-header">
-    <div class="flex items-center gap-3">
-        <a href="{{ route('admin.students.index') }}" class="btn-secondary btn-sm">← Back</a>
-        <div>
-            <h1 class="page-title">{{ $student->full_name }}</h1>
-            <p class="text-xs text-slate-400 mt-0.5 font-mono">{{ auth()->user()?->isSuperAdmin() ? $student->student_number : ($student->user?->member_id ?? 'RESTRICTED') }}</p>
+    <div class="flex flex-wrap items-center justify-between gap-3">
+        <div class="flex items-center gap-3">
+            <a href="{{ route('admin.students.index') }}" class="btn-secondary btn-sm">← Back</a>
+            <div>
+                <h1 class="page-title">{{ $student->full_name }}</h1>
+                <p class="text-xs text-slate-400 mt-0.5 font-mono">{{ auth()->user()?->isSuperAdmin() ? $student->student_number : ($student->user?->member_id ?? 'RESTRICTED') }}</p>
+            </div>
         </div>
+        @php
+            $studentAccount = $student->userWithTrashed ?? $student->user;
+        @endphp
+        @if($studentAccount && auth()->user()?->isSuperAdmin())
+            <div class="flex items-center gap-2">
+                <x-student-account-actions :account="$studentAccount" :student="$student" :show-view-link="false" />
+            </div>
+        @endif
     </div>
 </div>
 

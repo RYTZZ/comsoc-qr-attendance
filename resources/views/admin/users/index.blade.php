@@ -138,13 +138,17 @@
                         <td class="py-3 px-4">
                             <div class="flex flex-col gap-1">
                                 <div>
-                                    @if($user->is_active)
+                                    @if($user->trashed())
+                                        <span class="px-2 py-0.5 rounded text-[10px] font-bold uppercase bg-rose-500/20 text-rose-300 border border-rose-500/30">Deleted</span>
+                                    @elseif($user->isSuspended())
+                                        <span class="px-2 py-0.5 rounded text-[10px] font-bold uppercase bg-amber-500/20 text-amber-300 border border-amber-500/30" title="{{ $user->suspension_reason }}">Suspended</span>
+                                    @elseif($user->is_active)
                                         <span class="badge badge-active">Active</span>
                                     @else
                                         <span class="badge badge-inactive">Inactive</span>
                                     @endif
                                 </div>
-                                @if($user->must_change_password)
+                                @if($user->must_change_password && !$user->trashed())
                                     <div>
                                         <span class="px-1.5 py-0.5 rounded text-[10px] font-bold uppercase tracking-wider bg-amber-500/20 text-amber-300 border border-amber-500/30" title="User must update password on next sign-in">
                                             Password Reset Required
@@ -180,7 +184,9 @@
                         <td class="py-3 px-4 text-right space-x-1 whitespace-nowrap"
                             x-data="{ showResetModal: false }">
 
-                            @if($user->id !== auth()->id())
+                            @if($user->role === 'student')
+                                <x-student-account-actions :account="$user" :student="$user->student" :show-view-link="true" />
+                            @elseif($user->id !== auth()->id() && !$user->trashed())
                                 <form method="POST" action="{{ route('admin.users.toggle-active', $user) }}" class="inline">
                                     @csrf
                                     <button type="submit"
@@ -190,11 +196,13 @@
                                 </form>
                             @endif
 
-                            <a href="{{ route('admin.users.edit', $user) }}" class="btn-secondary btn-sm">Edit</a>
+                            @if(!$user->trashed())
+                                <a href="{{ route('admin.users.edit', $user) }}" class="btn-secondary btn-sm">Edit</a>
 
-                            <button type="button" @click="$dispatch('open-modal', 'reset-modal-{{ $user->id }}')" class="btn-secondary btn-sm text-slate-400 hover:text-white">
-                                Reset PW
-                            </button>
+                                <button type="button" @click="$dispatch('open-modal', 'reset-modal-{{ $user->id }}')" class="btn-secondary btn-sm text-slate-400 hover:text-white">
+                                    Reset PW
+                                </button>
+                            @endif
 
                             @if($user->role === 'kiosk' && $user->kiosk)
                                 <a href="{{ route('kiosk.attendance', $user->kiosk) }}" target="_blank" class="btn-secondary btn-sm text-[#cc7478] border-[#560E0F]/30">

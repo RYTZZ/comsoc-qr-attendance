@@ -110,6 +110,21 @@
                 placeholder="All Academic Years"
                 buttonClass="py-2 text-xs sm:text-sm" />
         </div>
+        @if(auth()->user()?->isSuperAdmin())
+        <div class="w-full sm:w-40">
+            <x-custom-dropdown
+                name="account_status"
+                :options="[
+                    '' => 'All Accounts',
+                    'active' => 'Active Account',
+                    'suspended' => 'Suspended Account',
+                    'deleted' => 'Deleted Account',
+                ]"
+                :value="request('account_status', '')"
+                placeholder="All Accounts"
+                buttonClass="py-2 text-xs sm:text-sm" />
+        </div>
+        @endif
         <button type="submit" class="btn-secondary text-sm">Filter</button>
         <a href="{{ route('admin.students.index') }}" class="btn-secondary text-sm">Reset</a>
     </form>
@@ -161,7 +176,8 @@
                 <th>Program & Year</th>
                 <th>Membership</th>
                 <th>QR</th>
-                <th></th>
+                <th>Account Status</th>
+                <th class="text-right">Actions</th>
             </tr>
         </thead>
         <tbody>
@@ -169,6 +185,7 @@
             @php
                 $membership = $student->memberships->first();
                 $activeQr = $membership?->activeQrCode;
+                $studentAccount = $student->userWithTrashed ?? $student->user;
             @endphp
             <tr>
                 <td class="font-mono text-sm">{{ (auth()->user()?->isSuperAdmin() || auth()->user()?->isAdmin()) ? $student->student_number : ($student->user?->member_id ?? 'RESTRICTED') }}</td>
@@ -200,12 +217,28 @@
                     @endif
                 </td>
                 <td>
-                    <a href="{{ route('admin.students.show', $student) }}" class="btn-secondary btn-sm">Manage</a>
+                    @if(!$studentAccount)
+                        <span class="text-slate-500 text-xs">Unregistered</span>
+                    @elseif($studentAccount->trashed())
+                        <span class="px-2 py-0.5 rounded text-[10px] font-bold uppercase bg-rose-500/20 text-rose-300 border border-rose-500/30">Deleted</span>
+                    @elseif($studentAccount->isSuspended())
+                        <span class="px-2 py-0.5 rounded text-[10px] font-bold uppercase bg-amber-500/20 text-amber-300 border border-amber-500/30" title="{{ $studentAccount->suspension_reason }}">Suspended</span>
+                    @elseif($studentAccount->is_active)
+                        <span class="badge badge-active text-xs">Active</span>
+                    @else
+                        <span class="badge badge-inactive text-xs">Inactive</span>
+                    @endif
+                </td>
+                <td class="text-right whitespace-nowrap space-x-1">
+                    <a href="{{ route('admin.students.show', $student) }}" class="btn-secondary btn-sm">View Account</a>
+                    @if($studentAccount && auth()->user()?->isSuperAdmin())
+                        <x-student-account-actions :account="$studentAccount" :student="$student" :show-view-link="false" />
+                    @endif
                 </td>
             </tr>
             @empty
             <tr>
-                <td colspan="6">
+                <td colspan="7">
                     <div class="empty-state">
                         <div class="empty-state-icon flex items-center justify-center">
                             <i data-lucide="users" class="w-8 h-8 text-slate-500"></i>

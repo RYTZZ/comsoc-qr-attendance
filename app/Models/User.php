@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Concerns\HasUuids;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Foundation\Auth\User as Authenticatable;
@@ -11,7 +12,30 @@ use Illuminate\Notifications\Notifiable;
 
 class User extends Authenticatable
 {
-    use HasFactory, HasUuids, Notifiable;
+    use HasFactory, HasUuids, Notifiable, SoftDeletes;
+
+    /**
+     * Account is suspended (login blocked, record and history preserved).
+     */
+    public function isSuspended(): bool
+    {
+        return $this->suspended_at !== null && ! $this->is_active;
+    }
+
+    /**
+     * Human-readable account status: active | suspended | inactive | deleted.
+     */
+    public function accountStatus(): string
+    {
+        if ($this->trashed()) {
+            return 'deleted';
+        }
+        if ($this->isSuspended()) {
+            return 'suspended';
+        }
+
+        return $this->is_active ? 'active' : 'inactive';
+    }
 
     public const POSITIONS = [
         'President' => 'President',
@@ -92,6 +116,8 @@ class User extends Authenticatable
             'activation_otp_expires_at' => 'datetime',
             'password' => 'hashed',
             'is_active' => 'boolean',
+            'suspended_at' => 'datetime',
+            'reactivated_at' => 'datetime',
             'is_eligible' => 'boolean',
             'is_activated' => 'boolean',
             'is_registrar_imported' => 'boolean',
