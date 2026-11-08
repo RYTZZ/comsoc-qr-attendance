@@ -47,6 +47,9 @@ class MemberDashboardController extends Controller
             }
             return redirect()->route('kiosk.hub');
         }
+        if (!$user->isStudent() && !in_array($user->role, ['event_organizer', 'staff', 'event_staff'], true)) {
+            return redirect()->route('admin.dashboard');
+        }
         if ($user->isStudent() || in_array($user->role, ['event_organizer', 'staff', 'event_staff'], true)) {
             return $this->index($request);
         }

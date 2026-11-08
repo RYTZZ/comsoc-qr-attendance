@@ -93,15 +93,19 @@ class SettingsController extends Controller
             'linkedin_url' => ['nullable', 'url', 'max:255'],
         ]);
 
-        DB::transaction(function () use ($user, $validated) {
+        $previousEmail = $user->email;
+        $emailChanged = false;
+
+        DB::transaction(function () use ($user, $validated, &$emailChanged) {
             if (!empty($validated['name'])) {
                 $user->name = $validated['name'];
             }
-            if (!empty($validated['email']) && $user->email !== $validated['email']) {
-                $user->email = $validated['email'];
+            if (!empty($validated['email']) && strtolower(trim((string) $user->email)) !== strtolower(trim((string) $validated['email']))) {
+                $emailChanged = true;
+                $user->email = strtolower(trim((string) $validated['email']));
                 $user->email_verified_at = null;
                 if ($user->student) {
-                    $user->student->update(['email' => $validated['email']]);
+                    $user->student->update(['email' => $user->email]);
                 }
             }
             $user->save();
@@ -123,6 +127,14 @@ class SettingsController extends Controller
             }
             $profile->update($profileData);
         });
+
+        if ($emailChanged) {
+            app(\App\Services\EmailVerificationOtpService::class)->handleEmailAddressChanged(
+                $user,
+                $previousEmail,
+                $request->ip()
+            );
+        }
 
         $rewardResult = app(\App\Services\ProfileCompletionService::class)
             ->evaluateAndAwardIfComplete($user, $request->user());

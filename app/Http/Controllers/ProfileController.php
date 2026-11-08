@@ -106,15 +106,18 @@ class ProfileController extends Controller
         $user = $request->user();
         $validated = $request->validated();
 
-        DB::transaction(function () use ($user, $validated, $request) {
+        $previousEmail = $user->email;
+        $emailChanged = false;
+
+        DB::transaction(function () use ($user, $validated, $request, &$emailChanged) {
             $user->name = $validated['name'];
-            $emailChanged = $user->email !== $validated['email'];
-            $user->email = $validated['email'];
+            $emailChanged = strtolower(trim((string) $user->email)) !== strtolower(trim((string) $validated['email']));
+            $user->email = strtolower(trim((string) $validated['email']));
 
             if ($emailChanged) {
                 $user->email_verified_at = null;
                 if ($user->student) {
-                    $user->student->update(['email' => $validated['email']]);
+                    $user->student->update(['email' => $user->email]);
                 }
             }
 
@@ -165,6 +168,14 @@ class ProfileController extends Controller
             }
             $user->skills()->sync($skillIds);
         });
+
+        if ($emailChanged) {
+            app(\App\Services\EmailVerificationOtpService::class)->handleEmailAddressChanged(
+                $user,
+                $previousEmail,
+                $request->ip()
+            );
+        }
 
         $rewardResult = app(\App\Services\ProfileCompletionService::class)
             ->evaluateAndAwardIfComplete($user, $request->user());

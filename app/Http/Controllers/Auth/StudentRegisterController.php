@@ -65,6 +65,7 @@ class StudentRegisterController extends Controller
                 'name' => $fullName,
                 'username' => $username,
                 'email' => $email,
+                'email_verified_at' => null,
                 'password' => Hash::make($validated['password']),
                 'role' => 'student', // Never grant officer privileges during self-registration
                 'avatar_style' => $avatarStyle,
@@ -143,6 +144,9 @@ class StudentRegisterController extends Controller
         Auth::login($user);
 
         app(\App\Services\SessionSecurityService::class)->handleLogin($user, $request);
+
+        // Automatically issue the six-digit email verification OTP (delivery failures never block registration)
+        app(\App\Services\EmailVerificationOtpService::class)->issueAndSend($user, $request->ip(), enforceCooldown: false);
 
         return redirect()->route('dashboard')
             ->with('status', 'Registration successful! Welcome to the COMSOC HUB community.')

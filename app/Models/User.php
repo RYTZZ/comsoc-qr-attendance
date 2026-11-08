@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Database\Eloquent\Concerns\HasUuids;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\SoftDeletes;
@@ -10,7 +11,7 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 
-class User extends Authenticatable
+class User extends Authenticatable implements MustVerifyEmail
 {
     use HasFactory, HasUuids, Notifiable, SoftDeletes;
 
@@ -134,7 +135,37 @@ class User extends Authenticatable
             if (empty($user->member_id)) {
                 $user->member_id = self::generateUniqueMemberId();
             }
+
+            // If email_verified_at is not explicitly provided, default to now() for active accounts in test/legacy seeds
+            if (! array_key_exists('email_verified_at', $user->getAttributes())) {
+                $user->email_verified_at = now();
+            }
         });
+    }
+
+    /**
+     * Determine if the user has verified their email address.
+     */
+    public function hasVerifiedEmail(): bool
+    {
+        return ! is_null($this->email_verified_at);
+    }
+
+    /**
+     * Send the six-digit email verification OTP notification.
+     */
+    public function sendEmailVerificationNotification(): void
+    {
+        app(\App\Services\EmailVerificationOtpService::class)->issueAndSend(
+            $this,
+            request()?->ip(),
+            enforceCooldown: false
+        );
+    }
+
+    public function emailVerificationCodes(): HasMany
+    {
+        return $this->hasMany(EmailVerificationCode::class);
     }
 
     public static function generateUniqueMemberId(): string

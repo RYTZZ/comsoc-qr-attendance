@@ -38,7 +38,7 @@ Route::redirect('/gallery', '/')->name('public.gallery');
 Route::redirect('/partners', '/')->name('public.partners');
 
 Route::get('/dashboard', [\App\Http\Controllers\MemberDashboardController::class, 'dashboard'])
-    ->middleware(['auth'])
+    ->middleware(['auth', 'verified'])
     ->name('dashboard');
 
 Route::get('/register', [PublicRegistrationController::class, 'index'])->name('public.register');
