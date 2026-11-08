@@ -570,14 +570,23 @@ class StudentSignatureAndAttendanceSheetTest extends TestCase
         $resProfile->assertSee('Signature Required');
         $resProfile->assertSee('id="profile-signature-status-card"', false);
 
-        // After registration -> shows Signature Registered
+        // After registration -> signature status component is hidden from dashboard, visible on digital signature & profile
         $vault->store($user, $this->sigDataUrl(300, 100, [10, 20, 30]), false);
 
         $resDash2 = $this->actingAs($user)->get(route('dashboard'));
         $resDash2->assertOk();
-        $resDash2->assertSee('Signature Registered');
+        $resDash2->assertDontSee('id="dashboard-signature-status-section"', false);
+        $resDash2->assertDontSee('Signature Required');
+
+        // Visible on Digital Signature section
+        $resSig = $this->actingAs($user)->get(route('signature.show'));
+        $resSig->assertOk();
+        $resSig->assertSee('Registered');
+        $resSig->assertSee('Signature Status');
 
         $resProfile2 = $this->actingAs($user)->get(route('profile.edit'));
+        $resProfile2->assertOk();
+        $resProfile2->assertSee('Signature Registered');
         $resProfile2->assertOk();
         $resProfile2->assertSee('Signature Registered');
     }
@@ -876,12 +885,20 @@ class StudentSignatureAndAttendanceSheetTest extends TestCase
         // Register signature
         $this->register($student);
 
-        // Now registered
+        // Now registered -> component is completely hidden from dashboard, visible in digital signature section
         $res2 = $this->actingAs($student)->get(route('dashboard'));
         $res2->assertOk();
-        $res2->assertSee('id="dashboard-signature-status-section"', false);
-        $res2->assertSee('dashboard-view-signature-btn');
-        $res2->assertSee('dashboard-reset-signature-btn');
-        $res2->assertSee('dashboard-register-new-signature-btn');
+        $res2->assertDontSee('id="dashboard-signature-status-section"', false);
+        $res2->assertDontSee('dashboard-view-signature-btn');
+        $res2->assertDontSee('dashboard-reset-signature-btn');
+        $res2->assertDontSee('dashboard-register-new-signature-btn');
+
+        // And present in Digital Signature section
+        $resSig = $this->actingAs($student)->get(route('signature.show'));
+        $resSig->assertOk();
+        $resSig->assertSee('Signature Status');
+        $resSig->assertSee('Registered');
+        $resSig->assertSee('signature-replace-btn');
+        $resSig->assertSee('signature-reset-btn');
     }
 }

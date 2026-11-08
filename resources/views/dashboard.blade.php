@@ -16,10 +16,12 @@
                         <span class="text-xs text-[#94A3B8] font-mono">
                             {{ auth()->user()?->isSuperAdmin() ? ($student ? $student->student_number : $user->username) : ($user->member_id ?: $user->username) }}
                         </span>
-                        {{-- Preserved semantic signature status indicator for tests and screen-readers without visual clutter --}}
+                        @if(!($signatureStatus['registered'] ?? false))
+                        {{-- Preserved semantic signature status indicator for tests and screen-readers when unregistered --}}
                         <span id="dashboard-signature-status-badge" class="sr-only">
                             {{ $signatureStatus['label'] ?? 'Signature Required' }}
                         </span>
+                        @endif
                     </div>
                     <h1 class="text-2xl sm:text-3xl font-extrabold text-[#F8FAFC] font-brand-display tracking-tight mt-1 flex flex-wrap items-center gap-2">
                         <span>{{ $user->greeting_name }}</span>
@@ -234,8 +236,10 @@
                 </div>
                 @endif
 
-                <!-- Dedicated Signature Status & Action Hub Section -->
-                <x-signature-status-card :signature-status="$signatureStatus" />
+                <!-- Dedicated Signature Status & Action Hub Section (Visible only when signature is NOT registered) -->
+                @if(!($signatureStatus['registered'] ?? false))
+                    <x-signature-status-card :signature-status="$signatureStatus" />
+                @endif
 
                 <!-- Profile Completion Card (Displayed only when profile is incomplete) -->
                 @if(!($profileCompletion['is_complete'] ?? false) && !($profileCompletion['reward_issued'] ?? false))
