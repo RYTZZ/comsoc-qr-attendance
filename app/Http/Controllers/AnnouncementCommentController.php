@@ -29,8 +29,8 @@ class AnnouncementCommentController extends Controller
                 }
             })
             ->with([
-                'user:id,name,role',
-                'user.student:user_id,first_name,last_name,avatar',
+                'user:id,name,role,avatar_seed,avatar_style',
+                'user.student:user_id,first_name,last_name',
                 'replies' => function ($q) use ($user) {
                     $q->where(function ($query) use ($user) {
                         $query->where('status', AnnouncementComment::STATUS_ACTIVE);
@@ -38,8 +38,8 @@ class AnnouncementCommentController extends Controller
                             $query->orWhere('status', AnnouncementComment::STATUS_HIDDEN);
                         }
                     })->with([
-                        'user:id,name,role',
-                        'user.student:user_id,first_name,last_name,avatar',
+                        'user:id,name,role,avatar_seed,avatar_style',
+                        'user.student:user_id,first_name,last_name',
                     ])->oldest('created_at');
                 },
             ])
@@ -97,7 +97,7 @@ class AnnouncementCommentController extends Controller
             'status' => AnnouncementComment::STATUS_ACTIVE,
         ]);
 
-        $comment->load(['user:id,name,role', 'user.student:user_id,first_name,last_name,avatar']);
+        $comment->load(['user:id,name,role,avatar_seed,avatar_style', 'user.student:user_id,first_name,last_name']);
 
         // Audit log
         AuditLogger::log(
@@ -282,6 +282,8 @@ class AnnouncementCommentController extends Controller
             ? trim($student->first_name . ' ' . $student->last_name)
             : ($author?->name ?? 'Unknown Member');
 
+        $avatarUrl = $author ? \App\Services\AvatarService::getUrl($author->avatar_seed, $author->avatar_style ?? 'adventurer') : \App\Services\AvatarService::getUrl();
+
         $replies = [];
         if ($comment->relationLoaded('replies')) {
             $replies = $comment->replies->map(fn($r) => $this->formatComment($r, $viewer))->all();
@@ -300,7 +302,7 @@ class AnnouncementCommentController extends Controller
                 'id' => $author?->id,
                 'name' => $displayName,
                 'role' => $author?->role,
-                'avatar' => $student?->avatar ?? null,
+                'avatar' => $avatarUrl,
                 'initials' => strtoupper(substr($displayName, 0, 2)),
             ],
             'can_edit' => $viewer ? $viewer->id === $comment->user_id : false,

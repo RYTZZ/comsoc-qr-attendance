@@ -3,9 +3,9 @@
 @php
     $user = auth()->user();
     $student = $user?->student;
-    $userAvatar = $student?->avatar ?? null;
+    $userAvatar = $user ? \App\Services\AvatarService::getUrl($user->avatar_seed, $user->avatar_style ?? 'adventurer') : \App\Services\AvatarService::getUrl();
     $userName = $student ? trim($student->first_name . ' ' . $student->last_name) : ($user?->name ?? 'You');
-    $userInitials = strtoupper(substr($userName, 0, 2));
+    $userInitials = $user ? strtoupper(substr($user->nickname ?: $user->name, 0, 2)) : 'ME';
 @endphp
 
 <div x-data="announcementEngagement({
@@ -166,19 +166,26 @@
         <div class="flex items-center justify-between">
             <h3 class="text-sm font-bold text-white font-brand-display flex items-center gap-2">
                 <span>Discussion</span>
-                <span class="text-xs font-semibold px-2 py-0.5 rounded-full bg-slate-800 text-slate-300 border border-slate-700/60" x-text="totalComments"></span>
+                <span class="text-xs font-semibold px-2 py-0.5 rounded-full bg-slate-800 text-slate-300 border border-slate-700/60"
+                      x-show="totalComments > 0"
+                      x-cloak
+                      x-text="totalComments"></span>
             </h3>
         </div>
 
         <div class="flex items-start gap-3">
-            <!-- Student Avatar -->
-            <div class="w-10 h-10 rounded-full bg-slate-800 border border-slate-700 flex items-center justify-center shrink-0 text-xs font-bold text-slate-200 overflow-hidden shadow-md mt-0.5">
+            <!-- Student Avatar (Using COMSOC Hub Avatar System) -->
+            <div class="w-10 h-10 rounded-full bg-[#560E0F]/40 border border-[#8F3033]/60 flex items-center justify-center shrink-0 overflow-hidden shadow-md mt-0.5">
                 <template x-if="currentUser.avatar">
-                    <img :src="currentUser.avatar" class="w-full h-full object-cover" :alt="currentUser.name">
+                    <img :src="currentUser.avatar"
+                         class="w-full h-full object-cover"
+                         :alt="currentUser.name"
+                         @error="$el.style.display='none'; $el.nextElementSibling.style.display='flex'">
                 </template>
-                <template x-if="!currentUser.avatar">
+                <div class="w-full h-full flex items-center justify-center bg-[#560E0F] text-white text-xs font-bold font-brand-display"
+                     :style="currentUser.avatar ? 'display: none;' : 'display: flex;'">
                     <span x-text="currentUser.initials"></span>
-                </template>
+                </div>
             </div>
 
             <!-- Cohesive Comment Input & Submit Action Card -->
@@ -195,28 +202,24 @@
                 <div class="flex items-center justify-between px-3 py-2 border-t border-slate-800/80 bg-slate-950/40 rounded-b-2xl">
                     <span class="text-[11px] text-slate-500 font-mono" x-text="newCommentText.length + '/2000'"></span>
 
+                    <!-- Fixed Dimension, Non-Shrinking Send Button (40x40px, Maroon Gradient, Visible White Send Icon) -->
                     <button type="button"
                             @click="submitMainComment()"
                             :disabled="submitting || !newCommentText.trim()"
-                            class="inline-flex items-center justify-center gap-1.5 px-3.5 py-1.5 rounded-xl font-bold text-xs text-white bg-gradient-to-r from-[#560E0F] to-[#8F3033] hover:from-[#6d1416] hover:to-[#a2383c] border border-[#8F3033]/50 shadow-md shadow-[#560E0F]/30 focus:outline-none focus:ring-2 focus:ring-[#8F3033] transition-all disabled:opacity-40 disabled:cursor-not-allowed active:scale-95"
-                            title="Post comment">
+                            aria-label="Send comment"
+                            title="Send comment"
+                            class="w-10 h-10 min-w-[40px] min-h-[40px] shrink-0 rounded-xl bg-gradient-to-r from-[#560E0F] to-[#8F3033] hover:from-[#6d1416] hover:to-[#a2383c] border border-[#8F3033]/60 shadow-md shadow-[#560E0F]/40 flex items-center justify-center text-white focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-[#8F3033] focus-visible:ring-offset-[#0B1120] transition-all duration-150 disabled:opacity-40 disabled:cursor-not-allowed active:scale-95">
                         <template x-if="!submitting">
-                            <span class="inline-flex items-center gap-1.5">
-                                <span>Send</span>
-                                <svg xmlns="http://www.w3.org/2000/svg" class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                                    <path d="m22 2-7 20-4-9-9-4Z"/>
-                                    <path d="M22 2 11 13"/>
-                                </svg>
-                            </span>
+                            <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5 text-white" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                                <path d="m22 2-7 20-4-9-9-4Z"/>
+                                <path d="M22 2 11 13"/>
+                            </svg>
                         </template>
                         <template x-if="submitting">
-                            <span class="inline-flex items-center gap-1.5" x-cloak>
-                                <svg class="animate-spin w-3.5 h-3.5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                                    <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
-                                    <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8H4z"></path>
-                                </svg>
-                                <span>Sending...</span>
-                            </span>
+                            <svg class="animate-spin w-5 h-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" x-cloak>
+                                <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                                <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8H4z"></path>
+                            </svg>
                         </template>
                     </button>
                 </div>
@@ -249,13 +252,17 @@
                 <!-- Comment Header -->
                 <div class="flex items-start justify-between gap-3">
                     <div class="flex items-center gap-2.5">
-                        <div class="w-8 h-8 rounded-full bg-slate-800 border border-slate-700 flex items-center justify-center shrink-0 text-xs font-bold text-slate-200 overflow-hidden">
+                        <div class="w-8 h-8 rounded-full bg-[#560E0F]/40 border border-[#8F3033]/60 flex items-center justify-center shrink-0 overflow-hidden shadow-sm">
                             <template x-if="comment.author.avatar">
-                                <img :src="comment.author.avatar" class="w-full h-full object-cover" :alt="comment.author.name">
+                                <img :src="comment.author.avatar"
+                                     class="w-full h-full object-cover"
+                                     :alt="comment.author.name"
+                                     @error="$el.style.display='none'; $el.nextElementSibling.style.display='flex'">
                             </template>
-                            <template x-if="!comment.author.avatar">
+                            <div class="w-full h-full flex items-center justify-center bg-[#560E0F] text-white text-[11px] font-bold font-brand-display"
+                                 :style="comment.author.avatar ? 'display: none;' : 'display: flex;'">
                                 <span x-text="comment.author.initials"></span>
-                            </template>
+                            </div>
                         </div>
                         <div>
                             <div class="flex items-center gap-1.5 flex-wrap">
@@ -374,13 +381,17 @@
 
                             <div class="flex items-start justify-between gap-2">
                                 <div class="flex items-center gap-2">
-                                    <div class="w-6 h-6 rounded-full bg-slate-800 border border-slate-700 flex items-center justify-center shrink-0 text-[10px] font-bold text-slate-200 overflow-hidden">
+                                    <div class="w-6 h-6 rounded-full bg-[#560E0F]/40 border border-[#8F3033]/60 flex items-center justify-center shrink-0 overflow-hidden shadow-xs">
                                         <template x-if="reply.author.avatar">
-                                            <img :src="reply.author.avatar" class="w-full h-full object-cover" :alt="reply.author.name">
+                                            <img :src="reply.author.avatar"
+                                                 class="w-full h-full object-cover"
+                                                 :alt="reply.author.name"
+                                                 @error="$el.style.display='none'; $el.nextElementSibling.style.display='flex'">
                                         </template>
-                                        <template x-if="!reply.author.avatar">
+                                        <div class="w-full h-full flex items-center justify-center bg-[#560E0F] text-white text-[9px] font-bold font-brand-display"
+                                             :style="reply.author.avatar ? 'display: none;' : 'display: flex;'">
                                             <span x-text="reply.author.initials"></span>
-                                        </template>
+                                        </div>
                                     </div>
                                     <div>
                                         <div class="flex items-center gap-1.5 flex-wrap">
@@ -500,24 +511,20 @@
                                 <button type="button"
                                         @click="submitReply(comment)"
                                         :disabled="submittingReply || !replyText.trim()"
-                                        class="inline-flex items-center gap-1.5 px-3 py-1 rounded-lg text-xs font-bold text-white bg-gradient-to-r from-[#560E0F] to-[#8F3033] hover:from-[#6d1416] hover:to-[#a2383c] border border-[#8F3033]/50 shadow focus:outline-none disabled:opacity-40 disabled:cursor-not-allowed transition">
+                                        aria-label="Send reply"
+                                        title="Send reply"
+                                        class="w-8 h-8 min-w-[32px] min-h-[32px] shrink-0 rounded-lg bg-gradient-to-r from-[#560E0F] to-[#8F3033] hover:from-[#6d1416] hover:to-[#a2383c] border border-[#8F3033]/60 shadow flex items-center justify-center text-white focus:outline-none focus-visible:ring-2 focus-visible:ring-[#8F3033] transition-all disabled:opacity-40 disabled:cursor-not-allowed active:scale-95">
                                     <template x-if="!submittingReply">
-                                        <span class="inline-flex items-center gap-1.5">
-                                            <span>Reply</span>
-                                            <svg xmlns="http://www.w3.org/2000/svg" class="w-3 h-3" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                                                <path d="m22 2-7 20-4-9-9-4Z"/>
-                                                <path d="M22 2 11 13"/>
-                                            </svg>
-                                        </span>
+                                        <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4 text-white" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                                            <path d="m22 2-7 20-4-9-9-4Z"/>
+                                            <path d="M22 2 11 13"/>
+                                        </svg>
                                     </template>
                                     <template x-if="submittingReply">
-                                        <span class="inline-flex items-center gap-1" x-cloak>
-                                            <svg class="animate-spin w-3 h-3 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                                                <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
-                                                <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8H4z"></path>
-                                            </svg>
-                                            <span>Replying...</span>
-                                        </span>
+                                        <svg class="animate-spin w-4 h-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" x-cloak>
+                                            <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                                            <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8H4z"></path>
+                                        </svg>
                                     </template>
                                 </button>
                             </div>
