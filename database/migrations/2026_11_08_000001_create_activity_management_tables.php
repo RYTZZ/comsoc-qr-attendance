@@ -8,6 +8,9 @@ return new class extends Migration
 {
     public function up(): void
     {
+        // Clean up any partial tables from an interrupted MySQL migration run
+        $this->down();
+
         // 1. Dynamic Registration Forms (Super Admin Exclusive)
         Schema::create('registration_forms', function (Blueprint $table) {
             $table->uuid('id')->primary();
@@ -19,21 +22,21 @@ return new class extends Migration
             $table->unsignedInteger('version')->default(1);
             $table->json('published_snapshot')->nullable();
             $table->boolean('is_template')->default(false);
-            $table->foreignUuid('parent_form_id')->nullable()->constrained('registration_forms')->nullOnDelete();
-            $table->foreignUuid('created_by')->constrained('users')->cascadeOnDelete();
-            $table->foreignUuid('updated_by')->nullable()->constrained('users')->nullOnDelete();
+            $table->foreignUuid('parent_form_id')->nullable()->constrained('registration_forms', 'id', 'reg_forms_parent_fk')->nullOnDelete();
+            $table->foreignUuid('created_by')->constrained('users', 'id', 'reg_forms_created_by_fk')->cascadeOnDelete();
+            $table->foreignUuid('updated_by')->nullable()->constrained('users', 'id', 'reg_forms_updated_by_fk')->nullOnDelete();
             $table->timestamp('published_at')->nullable();
             $table->timestamp('archived_at')->nullable();
             $table->softDeletes();
             $table->timestamps();
 
-            $table->index(['status', 'is_template']);
+            $table->index(['status', 'is_template'], 'reg_forms_status_tpl_idx');
         });
 
         // 2. Dynamic Registration Form Fields (Questions)
         Schema::create('registration_form_fields', function (Blueprint $table) {
             $table->uuid('id')->primary();
-            $table->foreignUuid('registration_form_id')->constrained('registration_forms')->cascadeOnDelete();
+            $table->foreignUuid('registration_form_id')->constrained('registration_forms', 'id', 'reg_form_fields_form_fk')->cascadeOnDelete();
             $table->string('field_key', 100);
             $table->string('label');
             $table->text('help_text')->nullable();
@@ -45,20 +48,20 @@ return new class extends Migration
             $table->json('validation_rules')->nullable(); // accepted_file_types, max_file_size_kb, min, max
             $table->timestamps();
 
-            $table->index(['registration_form_id', 'sort_order']);
+            $table->index(['registration_form_id', 'sort_order'], 'reg_form_fields_sort_idx');
         });
 
         // 3. Dynamic Registration Form Options (for dropdown, multiple_choice, checkboxes)
         Schema::create('registration_form_options', function (Blueprint $table) {
             $table->uuid('id')->primary();
-            $table->foreignUuid('registration_form_field_id')->constrained('registration_form_fields')->cascadeOnDelete();
+            $table->foreignUuid('registration_form_field_id')->constrained('registration_form_fields', 'id', 'reg_form_opts_field_fk')->cascadeOnDelete();
             $table->string('label');
             $table->string('value');
             $table->unsignedInteger('sort_order')->default(0);
             $table->boolean('is_enabled')->default(true);
             $table->timestamps();
 
-            $table->index(['registration_form_field_id', 'sort_order']);
+            $table->index(['registration_form_field_id', 'sort_order'], 'reg_form_opts_field_sort_idx');
         });
 
         // 4. Parent Activities / Events (Level 1)
@@ -253,12 +256,12 @@ return new class extends Migration
         // 10. Session-Level Registrations & Independent Completion
         Schema::create('activity_session_registrations', function (Blueprint $table) {
             $table->uuid('id')->primary();
-            $table->foreignUuid('activity_id')->constrained('activities')->cascadeOnDelete();
-            $table->foreignUuid('activity_session_id')->constrained('activity_sessions')->cascadeOnDelete();
-            $table->foreignUuid('activity_registration_id')->constrained('activity_registrations')->cascadeOnDelete();
-            $table->foreignUuid('user_id')->constrained('users')->cascadeOnDelete();
-            $table->foreignUuid('activity_team_id')->nullable()->constrained('activity_teams')->nullOnDelete();
-            $table->foreignUuid('registration_form_id')->nullable()->constrained('registration_forms')->nullOnDelete();
+            $table->foreignUuid('activity_id')->constrained('activities', 'id', 'act_sess_reg_act_fk')->cascadeOnDelete();
+            $table->foreignUuid('activity_session_id')->constrained('activity_sessions', 'id', 'act_sess_reg_sess_fk')->cascadeOnDelete();
+            $table->foreignUuid('activity_registration_id')->constrained('activity_registrations', 'id', 'act_sess_reg_parent_fk')->cascadeOnDelete();
+            $table->foreignUuid('user_id')->constrained('users', 'id', 'act_sess_reg_user_fk')->cascadeOnDelete();
+            $table->foreignUuid('activity_team_id')->nullable()->constrained('activity_teams', 'id', 'act_sess_reg_team_fk')->nullOnDelete();
+            $table->foreignUuid('registration_form_id')->nullable()->constrained('registration_forms', 'id', 'act_sess_reg_form_fk')->nullOnDelete();
             $table->unsignedInteger('form_version')->nullable();
             $table->json('form_snapshot')->nullable();
             $table->string('status', 30)->default('pending'); // pending, approved, rejected, waitlisted, cancelled, withdrawn
@@ -268,13 +271,13 @@ return new class extends Migration
 
             // Completion Verification & Output
             $table->boolean('organizer_verified')->default(false);
-            $table->foreignUuid('organizer_verified_by')->nullable()->constrained('users')->nullOnDelete();
+            $table->foreignUuid('organizer_verified_by')->nullable()->constrained('users', 'id', 'act_sess_reg_ver_by_fk')->nullOnDelete();
             $table->timestamp('organizer_verified_at')->nullable();
             $table->boolean('output_submitted')->default(false);
             $table->text('output_notes')->nullable();
 
             // Review & Approval
-            $table->foreignUuid('reviewed_by')->nullable()->constrained('users')->nullOnDelete();
+            $table->foreignUuid('reviewed_by')->nullable()->constrained('users', 'id', 'act_sess_reg_rev_by_fk')->nullOnDelete();
             $table->timestamp('reviewed_at')->nullable();
             $table->text('rejection_reason')->nullable();
 
@@ -286,16 +289,16 @@ return new class extends Migration
             $table->timestamps();
 
             $table->unique(['activity_session_id', 'user_id'], 'unique_session_user_reg');
-            $table->index(['activity_session_id', 'status']);
+            $table->index(['activity_session_id', 'status'], 'act_sess_reg_status_idx');
             $table->index(['activity_session_id', 'completion_status'], 'act_sess_reg_completion_idx');
         });
 
         // 11. Activity Registration Dynamic Answers
         Schema::create('activity_registration_answers', function (Blueprint $table) {
             $table->uuid('id')->primary();
-            $table->foreignUuid('activity_registration_id')->constrained('activity_registrations')->cascadeOnDelete();
-            $table->foreignUuid('activity_session_registration_id')->nullable()->constrained('activity_session_registrations')->cascadeOnDelete();
-            $table->foreignUuid('registration_form_field_id')->nullable()->constrained('registration_form_fields')->nullOnDelete();
+            $table->foreignUuid('activity_registration_id')->constrained('activity_registrations', 'id', 'act_reg_ans_reg_fk')->cascadeOnDelete();
+            $table->foreignUuid('activity_session_registration_id')->nullable()->constrained('activity_session_registrations', 'id', 'act_reg_ans_sess_reg_fk')->cascadeOnDelete();
+            $table->foreignUuid('registration_form_field_id')->nullable()->constrained('registration_form_fields', 'id', 'act_reg_ans_field_fk')->nullOnDelete();
             $table->string('field_key', 100);
             $table->string('field_label');
             $table->string('question_type', 40);
@@ -313,43 +316,43 @@ return new class extends Migration
         // 12. Session-Specific QR Attendance Records
         Schema::create('activity_attendances', function (Blueprint $table) {
             $table->uuid('id')->primary();
-            $table->foreignUuid('activity_id')->constrained('activities')->cascadeOnDelete();
-            $table->foreignUuid('activity_session_id')->constrained('activity_sessions')->cascadeOnDelete();
-            $table->foreignUuid('activity_session_registration_id')->nullable()->constrained('activity_session_registrations')->nullOnDelete();
-            $table->foreignUuid('user_id')->constrained('users')->cascadeOnDelete();
+            $table->foreignUuid('activity_id')->constrained('activities', 'id', 'act_att_act_fk')->cascadeOnDelete();
+            $table->foreignUuid('activity_session_id')->constrained('activity_sessions', 'id', 'act_att_sess_fk')->cascadeOnDelete();
+            $table->foreignUuid('activity_session_registration_id')->nullable()->constrained('activity_session_registrations', 'id', 'act_att_sess_reg_fk')->nullOnDelete();
+            $table->foreignUuid('user_id')->constrained('users', 'id', 'act_att_user_fk')->cascadeOnDelete();
             $table->string('qr_token_hash', 64)->nullable();
             $table->timestamp('check_in_at')->nullable();
             $table->timestamp('check_out_at')->nullable();
             $table->string('check_in_status', 20)->nullable(); // present, late
             $table->unsignedInteger('duration_minutes')->nullable();
-            $table->foreignUuid('checked_in_by')->nullable()->constrained('users')->nullOnDelete();
-            $table->foreignUuid('checked_out_by')->nullable()->constrained('users')->nullOnDelete();
+            $table->foreignUuid('checked_in_by')->nullable()->constrained('users', 'id', 'act_att_in_by_fk')->nullOnDelete();
+            $table->foreignUuid('checked_out_by')->nullable()->constrained('users', 'id', 'act_att_out_by_fk')->nullOnDelete();
             $table->boolean('is_walk_in')->default(false);
             $table->text('notes')->nullable();
             $table->timestamps();
 
             $table->unique(['activity_session_id', 'user_id'], 'unique_activity_session_attendance');
-            $table->index(['activity_id', 'user_id']);
+            $table->index(['activity_id', 'user_id'], 'act_att_act_user_idx');
         });
 
         // 13. Activity Reward Audit & Ledger Link
         Schema::create('activity_rewards', function (Blueprint $table) {
             $table->uuid('id')->primary();
-            $table->foreignUuid('activity_id')->constrained('activities')->cascadeOnDelete();
-            $table->foreignUuid('activity_session_id')->nullable()->constrained('activity_sessions')->cascadeOnDelete();
-            $table->foreignUuid('activity_registration_id')->nullable()->constrained('activity_registrations')->nullOnDelete();
-            $table->foreignUuid('activity_session_registration_id')->nullable()->constrained('activity_session_registrations')->nullOnDelete();
-            $table->foreignUuid('user_id')->constrained('users')->cascadeOnDelete();
+            $table->foreignUuid('activity_id')->constrained('activities', 'id', 'act_rew_act_fk')->cascadeOnDelete();
+            $table->foreignUuid('activity_session_id')->nullable()->constrained('activity_sessions', 'id', 'act_rew_sess_fk')->cascadeOnDelete();
+            $table->foreignUuid('activity_registration_id')->nullable()->constrained('activity_registrations', 'id', 'act_rew_reg_fk')->nullOnDelete();
+            $table->foreignUuid('activity_session_registration_id')->nullable()->constrained('activity_session_registrations', 'id', 'act_rew_sess_reg_fk')->nullOnDelete();
+            $table->foreignUuid('user_id')->constrained('users', 'id', 'act_rew_user_fk')->cascadeOnDelete();
             $table->string('reward_scope', 20)->default('session'); // session, parent
             $table->unsignedInteger('exp_amount')->default(0);
             $table->unsignedInteger('points_amount')->default(0);
-            $table->foreignUuid('xp_transaction_id')->nullable()->constrained('xp_transactions')->nullOnDelete();
-            $table->foreignUuid('point_transaction_id')->nullable()->constrained('point_transactions')->nullOnDelete();
+            $table->foreignUuid('xp_transaction_id')->nullable()->constrained('xp_transactions', 'id', 'act_rew_xp_tx_fk')->nullOnDelete();
+            $table->foreignUuid('point_transaction_id')->nullable()->constrained('point_transactions', 'id', 'act_rew_pt_tx_fk')->nullOnDelete();
             $table->string('idempotency_key')->unique();
-            $table->foreignUuid('awarded_by')->nullable()->constrained('users')->nullOnDelete();
+            $table->foreignUuid('awarded_by')->nullable()->constrained('users', 'id', 'act_rew_by_fk')->nullOnDelete();
             $table->timestamps();
 
-            $table->index(['user_id', 'activity_id']);
+            $table->index(['user_id', 'activity_id'], 'act_rew_user_act_idx');
         });
     }
 
