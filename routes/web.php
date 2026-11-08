@@ -189,6 +189,11 @@ Route::middleware(['auth', 'verified', 'require_password_change'])->group(functi
     });
 
     Route::prefix('announcements')->name('announcements.')->group(function () {
+        // Announcement Engagement: Mentionable Users Search (must precede /{announcement})
+        Route::get('/mentionable-users', [\App\Http\Controllers\AnnouncementCommentController::class, 'searchMentionableUsers'])
+            ->middleware('throttle:60,1')
+            ->name('mentionable-users');
+
         Route::get('/', [\App\Http\Controllers\AnnouncementController::class, 'index'])->name('index');
         Route::get('/{announcement}', [\App\Http\Controllers\AnnouncementController::class, 'show'])->name('show');
         Route::post('/{announcement}/acknowledge', [\App\Http\Controllers\AnnouncementController::class, 'acknowledge'])->name('acknowledge');

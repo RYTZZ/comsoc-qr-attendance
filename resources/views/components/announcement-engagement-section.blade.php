@@ -15,6 +15,7 @@
         reactionsToggle: '{{ route('announcements.reactions.toggle', $announcement) }}',
         commentsIndex: '{{ route('announcements.comments.index', $announcement) }}',
         commentsStore: '{{ route('announcements.comments.store', $announcement) }}',
+        mentionableUsers: '{{ route('announcements.mentionable-users') }}',
     },
     currentUser: {
         id: '{{ $user?->id }}',
@@ -178,14 +179,52 @@
             <x-user-avatar :user="$user" size="md" class="w-10 h-10 rounded-full border border-[#8F3033]/60 shadow-md mt-0.5" />
 
             <!-- Cohesive Comment Input & Submit Action Card -->
-            <div class="flex-1 rounded-2xl bg-slate-900/90 border border-slate-700/80 focus-within:border-[#8F3033] focus-within:ring-1 focus-within:ring-[#8F3033]/50 transition shadow-inner">
+            <div class="relative flex-1 rounded-2xl bg-slate-900/90 border border-slate-700/80 focus-within:border-[#8F3033] focus-within:ring-1 focus-within:ring-[#8F3033]/50 transition shadow-inner">
                 <div class="p-2.5 sm:p-3">
                     <textarea x-ref="mainCommentInput"
                               x-model="newCommentText"
+                              @input="onInputMention($event, 'main')"
+                              @keydown="onKeydownMention($event, 'main')"
                               rows="2"
                               maxlength="2000"
-                              placeholder="Write a comment or share your thoughts... (use @name to mention someone)"
+                              placeholder="Write a comment or share your thoughts... (type @ to mention a member)"
                               class="w-full bg-transparent border-0 p-0 text-xs sm:text-sm text-slate-200 placeholder-slate-500 focus:ring-0 focus:outline-none resize-none leading-relaxed"></textarea>
+                </div>
+
+                <!-- Mention Suggestion Dropdown (Main Composer) -->
+                <div x-show="mentionDropdownOpen && mentionContext === 'main'"
+                     x-cloak
+                     @click.away="closeMentionDropdown()"
+                     class="absolute left-0 bottom-full mb-2 w-72 max-w-[calc(100vw-2rem)] bg-[#172033] border border-slate-700/90 rounded-xl shadow-2xl overflow-hidden z-40 py-1.5 divide-y divide-slate-800/80 backdrop-blur-md">
+                    <div class="px-3 py-1 text-[10px] uppercase font-bold tracking-wider text-slate-400 flex items-center justify-between">
+                        <span>Mention Member</span>
+                        <span class="text-rose-400 font-mono" x-show="mentionQuery" x-text="'@' + mentionQuery"></span>
+                    </div>
+
+                    <div class="max-h-48 overflow-y-auto py-1">
+                        <template x-if="mentionSuggestions.length === 0">
+                            <div class="px-3 py-2 text-xs text-slate-500 italic text-center">
+                                No members found
+                            </div>
+                        </template>
+
+                        <template x-for="(user, idx) in mentionSuggestions" :key="user.id">
+                            <button type="button"
+                                    @click="selectMention(user, 'main')"
+                                    @mouseenter="mentionHighlightedIndex = idx"
+                                    class="w-full text-left px-3 py-1.5 flex items-center gap-2.5 transition text-xs"
+                                    :class="mentionHighlightedIndex === idx ? 'bg-[#560E0F]/60 text-white' : 'text-slate-300 hover:bg-slate-800/70'">
+                                <div class="w-6 h-6 rounded-full bg-[#560E0F] border border-[#8F3033]/60 flex items-center justify-center shrink-0 overflow-hidden text-[9px] font-bold text-white font-brand-display">
+                                    <img :src="user.avatar" :alt="user.name" class="w-full h-full object-cover" x-show="user.avatar" x-on:error="$el.style.display='none'; $el.nextElementSibling.style.display='flex'">
+                                    <span :style="user.avatar ? 'display: none;' : 'display: flex;'" x-text="user.initials"></span>
+                                </div>
+                                <div class="min-w-0 flex-1">
+                                    <div class="font-semibold truncate" x-text="user.name"></div>
+                                    <div class="text-[10px] text-slate-400 font-mono truncate" x-text="'@' + user.handle"></div>
+                                </div>
+                            </button>
+                        </template>
+                    </div>
                 </div>
 
                 <div class="flex items-center justify-between px-3 py-1.5 border-t border-slate-800/80 bg-slate-950/40 rounded-b-2xl">
@@ -317,13 +356,38 @@
                 <div>
                     <template x-if="editingCommentId !== comment.id">
                         <div class="text-xs sm:text-sm text-slate-300 whitespace-pre-line leading-relaxed pl-1"
-                             x-text="comment.content"></div>
+                             x-html="renderFormattedContent(comment.content)"></div>
                     </template>
                     <template x-if="editingCommentId === comment.id">
-                        <div class="space-y-2">
-                            <textarea x-model="editCommentText"
+                        <div class="relative space-y-2">
+                            <textarea x-ref="'editInput_' + comment.id"
+                                      x-model="editCommentText"
+                                      @input="onInputMention($event, 'edit', comment.id)"
+                                      @keydown="onKeydownMention($event, 'edit', comment.id)"
                                       rows="2"
                                       class="w-full bg-slate-950 border border-slate-700 rounded-lg p-2.5 text-xs text-slate-200 focus:border-rose-500 focus:outline-none"></textarea>
+
+                            <!-- Mention Suggestions for Edit -->
+                            <div x-show="mentionDropdownOpen && mentionContext === 'edit' && mentionActiveCommentId === comment.id"
+                                 x-cloak
+                                 @click.away="closeMentionDropdown()"
+                                 class="absolute left-0 bottom-full mb-1 w-64 max-w-[calc(100vw-2rem)] bg-[#172033] border border-slate-700 rounded-xl shadow-2xl overflow-hidden z-40 py-1">
+                                <div class="max-h-40 overflow-y-auto">
+                                    <template x-for="(user, idx) in mentionSuggestions" :key="user.id">
+                                        <button type="button"
+                                                @click="selectMention(user, 'edit', comment.id)"
+                                                class="w-full text-left px-3 py-1.5 flex items-center gap-2 text-xs"
+                                                :class="mentionHighlightedIndex === idx ? 'bg-[#560E0F]/60 text-white' : 'text-slate-300 hover:bg-slate-800'">
+                                            <div class="w-5 h-5 rounded-full bg-[#560E0F] overflow-hidden shrink-0 flex items-center justify-center text-[8px] text-white">
+                                                <img :src="user.avatar" class="w-full h-full object-cover" x-show="user.avatar">
+                                                <span :style="user.avatar ? 'display: none;' : 'display: flex;'" x-text="user.initials"></span>
+                                            </div>
+                                            <span class="truncate" x-text="user.name"></span>
+                                        </button>
+                                    </template>
+                                </div>
+                            </div>
+
                             <div class="flex items-center gap-2 justify-end">
                                 <button type="button" @click="cancelEditing()" class="btn-secondary text-[11px] py-1 px-3">Cancel</button>
                                 <button type="button" @click="saveEdit(comment)" class="btn-primary text-[11px] py-1 px-3">Save</button>
@@ -439,13 +503,39 @@
                             <!-- Reply Content (or edit mode) -->
                             <div>
                                 <template x-if="editingCommentId !== reply.id">
-                                    <div class="text-xs text-slate-300 whitespace-pre-line leading-relaxed" x-text="reply.content"></div>
+                                    <div class="text-xs text-slate-300 whitespace-pre-line leading-relaxed"
+                                         x-html="renderFormattedContent(reply.content)"></div>
                                 </template>
                                 <template x-if="editingCommentId === reply.id">
-                                    <div class="space-y-2">
-                                        <textarea x-model="editCommentText"
+                                    <div class="relative space-y-2">
+                                        <textarea x-ref="'editInput_' + reply.id"
+                                                  x-model="editCommentText"
+                                                  @input="onInputMention($event, 'edit', reply.id)"
+                                                  @keydown="onKeydownMention($event, 'edit', reply.id)"
                                                   rows="2"
                                                   class="w-full bg-slate-950 border border-slate-700 rounded-lg p-2 text-xs text-slate-200 focus:border-rose-500 focus:outline-none"></textarea>
+
+                                        <!-- Mention Suggestions for Edit Reply -->
+                                        <div x-show="mentionDropdownOpen && mentionContext === 'edit' && mentionActiveCommentId === reply.id"
+                                             x-cloak
+                                             @click.away="closeMentionDropdown()"
+                                             class="absolute left-0 bottom-full mb-1 w-64 max-w-[calc(100vw-2rem)] bg-[#172033] border border-slate-700 rounded-xl shadow-2xl overflow-hidden z-40 py-1">
+                                            <div class="max-h-40 overflow-y-auto">
+                                                <template x-for="(user, idx) in mentionSuggestions" :key="user.id">
+                                                    <button type="button"
+                                                            @click="selectMention(user, 'edit', reply.id)"
+                                                            class="w-full text-left px-3 py-1.5 flex items-center gap-2 text-xs"
+                                                            :class="mentionHighlightedIndex === idx ? 'bg-[#560E0F]/60 text-white' : 'text-slate-300 hover:bg-slate-800'">
+                                                        <div class="w-5 h-5 rounded-full bg-[#560E0F] overflow-hidden shrink-0 flex items-center justify-center text-[8px] text-white">
+                                                            <img :src="user.avatar" class="w-full h-full object-cover" x-show="user.avatar">
+                                                            <span :style="user.avatar ? 'display: none;' : 'display: flex;'" x-text="user.initials"></span>
+                                                        </div>
+                                                        <span class="truncate" x-text="user.name"></span>
+                                                    </button>
+                                                </template>
+                                            </div>
+                                        </div>
+
                                         <div class="flex items-center gap-2 justify-end">
                                             <button type="button" @click="cancelEditing()" class="btn-secondary text-[10px] py-1 px-2.5">Cancel</button>
                                             <button type="button" @click="saveEdit(reply, comment)" class="btn-primary text-[10px] py-1 px-2.5">Save</button>
@@ -471,14 +561,50 @@
                     </div>
 
                     <!-- Cohesive Reply Input Card -->
-                    <div class="rounded-xl bg-slate-950 border border-slate-700/80 focus-within:border-[#8F3033] focus-within:ring-1 focus-within:ring-[#8F3033]/50 transition shadow-inner">
+                    <div class="relative rounded-xl bg-slate-950 border border-slate-700/80 focus-within:border-[#8F3033] focus-within:ring-1 focus-within:ring-[#8F3033]/50 transition shadow-inner">
                         <div class="p-2.5">
                             <textarea x-ref="'replyInput_' + comment.id"
                                       x-model="replyText"
+                                      @input="onInputMention($event, 'reply', comment.id)"
+                                      @keydown="onKeydownMention($event, 'reply', comment.id)"
                                       rows="2"
                                       maxlength="2000"
-                                      placeholder="Write your reply..."
+                                      placeholder="Write your reply... (type @ to mention a member)"
                                       class="w-full bg-transparent border-0 p-0 text-xs text-slate-200 placeholder-slate-500 focus:ring-0 focus:outline-none resize-none leading-relaxed"></textarea>
+                        </div>
+
+                        <!-- Mention Suggestion Dropdown (Reply Composer) -->
+                        <div x-show="mentionDropdownOpen && mentionContext === 'reply' && mentionActiveCommentId === comment.id"
+                             x-cloak
+                             @click.away="closeMentionDropdown()"
+                             class="absolute left-0 bottom-full mb-1 w-64 max-w-[calc(100vw-2rem)] bg-[#172033] border border-slate-700/90 rounded-xl shadow-2xl overflow-hidden z-40 py-1 divide-y divide-slate-800/80">
+                            <div class="px-2.5 py-1 text-[9px] uppercase font-bold tracking-wider text-slate-400 flex items-center justify-between">
+                                <span>Mention Member</span>
+                                <span class="text-rose-400 font-mono" x-show="mentionQuery" x-text="'@' + mentionQuery"></span>
+                            </div>
+                            <div class="max-h-40 overflow-y-auto py-0.5">
+                                <template x-if="mentionSuggestions.length === 0">
+                                    <div class="px-3 py-1.5 text-xs text-slate-500 italic text-center">
+                                        No members found
+                                    </div>
+                                </template>
+                                <template x-for="(user, idx) in mentionSuggestions" :key="user.id">
+                                    <button type="button"
+                                            @click="selectMention(user, 'reply', comment.id)"
+                                            @mouseenter="mentionHighlightedIndex = idx"
+                                            class="w-full text-left px-2.5 py-1.5 flex items-center gap-2 transition text-xs"
+                                            :class="mentionHighlightedIndex === idx ? 'bg-[#560E0F]/60 text-white' : 'text-slate-300 hover:bg-slate-800/70'">
+                                        <div class="w-5 h-5 rounded-full bg-[#560E0F] border border-[#8F3033]/60 flex items-center justify-center shrink-0 overflow-hidden text-[8px] font-bold text-white">
+                                            <img :src="user.avatar" class="w-full h-full object-cover" x-show="user.avatar">
+                                            <span :style="user.avatar ? 'display: none;' : 'display: flex;'" x-text="user.initials"></span>
+                                        </div>
+                                        <div class="min-w-0 flex-1">
+                                            <div class="font-semibold truncate text-[11px]" x-text="user.name"></div>
+                                            <div class="text-[9px] text-slate-400 font-mono truncate" x-text="'@' + user.handle"></div>
+                                        </div>
+                                    </button>
+                                </template>
+                            </div>
                         </div>
 
                         <div class="flex items-center justify-between px-3 py-1.5 border-t border-slate-800/80 bg-slate-900/40 rounded-b-xl">

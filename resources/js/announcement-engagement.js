@@ -45,6 +45,16 @@ export default (config) => ({
     reportDetails: '',
     submittingReport: false,
 
+    // Mention state
+    mentionDropdownOpen: false,
+    mentionSuggestions: [],
+    mentionQuery: '',
+    mentionHighlightedIndex: 0,
+    mentionContext: 'main', // 'main' | 'reply' | 'edit'
+    mentionActiveCommentId: null,
+    mentionDebounceTimer: null,
+    cachedMentionUsers: null,
+
     init() {
         this.fetchEngagement();
         this.fetchComments();
@@ -297,6 +307,137 @@ export default (config) => ({
         } catch (e) {
             alert(e.response?.data?.message || 'Moderation action failed.');
         }
+    },
+
+    // Mention handling functions
+    onInputMention(event, context = 'main', commentId = null) {
+        const textarea = event.target;
+        const text = textarea.value;
+        const cursorPos = textarea.selectionStart;
+
+        // Look at text up to current cursor position
+        const textBeforeCursor = text.slice(0, cursorPos);
+        const lastAtMatch = textBeforeCursor.match(/@([a-zA-Z0-9_\.\-]*)$/);
+
+        if (lastAtMatch) {
+            this.mentionContext = context;
+            this.mentionActiveCommentId = commentId;
+            this.mentionQuery = lastAtMatch[1];
+            this.mentionDropdownOpen = true;
+            this.fetchMentionSuggestions(this.mentionQuery);
+        } else {
+            this.closeMentionDropdown();
+        }
+    },
+
+    onKeydownMention(event, context = 'main', commentId = null) {
+        if (!this.mentionDropdownOpen || this.mentionContext !== context) return;
+        if (commentId && this.mentionActiveCommentId !== commentId) return;
+
+        if (event.key === 'ArrowDown') {
+            event.preventDefault();
+            if (this.mentionSuggestions.length > 0) {
+                this.mentionHighlightedIndex = (this.mentionHighlightedIndex + 1) % this.mentionSuggestions.length;
+            }
+        } else if (event.key === 'ArrowUp') {
+            event.preventDefault();
+            if (this.mentionSuggestions.length > 0) {
+                this.mentionHighlightedIndex = (this.mentionHighlightedIndex - 1 + this.mentionSuggestions.length) % this.mentionSuggestions.length;
+            }
+        } else if (event.key === 'Enter' || event.key === 'Tab') {
+            if (this.mentionSuggestions.length > 0 && this.mentionSuggestions[this.mentionHighlightedIndex]) {
+                event.preventDefault();
+                this.selectMention(this.mentionSuggestions[this.mentionHighlightedIndex], context, commentId);
+            }
+        } else if (event.key === 'Escape') {
+            this.closeMentionDropdown();
+        }
+    },
+
+    async fetchMentionSuggestions(query) {
+        clearTimeout(this.mentionDebounceTimer);
+        this.mentionDebounceTimer = setTimeout(async () => {
+            try {
+                const endpoint = this.routes.mentionableUsers || '/announcements/mentionable-users';
+                const res = await window.axios.get(endpoint, {
+                    params: { q: query }
+                });
+                this.mentionSuggestions = res.data.users || [];
+                this.mentionHighlightedIndex = 0;
+            } catch (err) {
+                console.error('Failed to load mention suggestions:', err);
+                this.mentionSuggestions = [];
+            }
+        }, 150);
+    },
+
+    selectMention(user, context = 'main', commentId = null) {
+        let textarea = null;
+        if (context === 'main') {
+            textarea = this.$refs.mainCommentInput;
+        } else if (context === 'reply' && commentId) {
+            textarea = this.$refs['replyInput_' + commentId];
+        } else if (context === 'edit' && commentId) {
+            textarea = this.$refs['editInput_' + commentId];
+        }
+
+        if (!textarea) return;
+
+        const text = textarea.value;
+        const cursorPos = textarea.selectionStart;
+        const textBeforeCursor = text.slice(0, cursorPos);
+        const textAfterCursor = text.slice(cursorPos);
+
+        const lastAtIndex = textBeforeCursor.lastIndexOf('@');
+        if (lastAtIndex === -1) return;
+
+        // Mention format: @[Name](user:UUID)
+        const mentionText = `@[${user.name}](user:${user.id}) `;
+        const newText = textBeforeCursor.slice(0, lastAtIndex) + mentionText + textAfterCursor;
+
+        if (context === 'main') {
+            this.newCommentText = newText;
+        } else if (context === 'reply') {
+            this.replyText = newText;
+        } else if (context === 'edit') {
+            this.editCommentText = newText;
+        }
+
+        this.closeMentionDropdown();
+
+        this.$nextTick(() => {
+            textarea.focus();
+            const newCursorPos = lastAtIndex + mentionText.length;
+            textarea.setSelectionRange(newCursorPos, newCursorPos);
+        });
+    },
+
+    closeMentionDropdown() {
+        this.mentionDropdownOpen = false;
+        this.mentionSuggestions = [];
+        this.mentionQuery = '';
+        this.mentionHighlightedIndex = 0;
+    },
+
+    renderFormattedContent(rawContent) {
+        if (!rawContent) return '';
+
+        // Safely escape HTML to prevent XSS
+        const div = document.createElement('div');
+        div.textContent = rawContent;
+        let escaped = div.innerHTML;
+
+        // Convert @[Name](user:UUID) to styled mention badge
+        escaped = escaped.replace(/@\[([^\]]+)\]\(user:([a-zA-Z0-9\-]+)\)/g, (match, name, userId) => {
+            return `<span class="inline-flex items-center gap-1 font-semibold text-rose-300 bg-rose-500/15 border border-rose-500/30 px-1.5 py-0.5 rounded-md hover:bg-rose-500/25 transition">@${name}</span>`;
+        });
+
+        // Convert standard @username or @handle if any
+        escaped = escaped.replace(/(^|[^a-zA-Z0-9_\/])@([a-zA-Z0-9_\.\-]+)/g, (match, prefix, handle) => {
+            return `${prefix}<span class="inline-flex items-center font-semibold text-rose-300 bg-rose-500/10 border border-rose-500/20 px-1 py-0.2 rounded hover:bg-rose-500/20 transition">@${handle}</span>`;
+        });
+
+        return escaped;
     },
 });
 

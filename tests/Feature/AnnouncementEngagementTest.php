@@ -325,5 +325,36 @@ class AnnouncementEngagementTest extends TestCase
 
         $this->assertSame('active', AnnouncementComment::find($commentId)->status);
     }
+
+    public function test_mentionable_users_search_and_mention_notifications(): void
+    {
+        $sender = $this->createMember('Alice', 'Sender');
+        $receiver = $this->createMember('Charlie', 'Receiver');
+        $receiver->update(['username' => 'charlie_r']);
+        $announcement = $this->createAnnouncement();
+
+        // 1. Search mentionable users
+        $resSearch = $this->actingAs($sender)
+            ->getJson(route('announcements.mentionable-users', ['q' => 'Charlie']))
+            ->assertOk()
+            ->assertJsonStructure(['users']);
+
+        $users = $resSearch->json('users');
+        $this->assertNotEmpty($users);
+        $this->assertSame($receiver->id, $users[0]['id']);
+
+        // 2. Post comment with mention
+        $content = "Hey @[Charlie Receiver](user:{$receiver->id}) check this out!";
+        $resComment = $this->actingAs($sender)
+            ->postJson(route('announcements.comments.store', $announcement), [
+                'content' => $content,
+            ])
+            ->assertCreated();
+
+        $this->assertDatabaseHas('notifications', [
+            'user_id' => $receiver->id,
+            'type' => 'announcement_mention',
+        ]);
+    }
 }
 

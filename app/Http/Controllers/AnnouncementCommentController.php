@@ -15,6 +15,54 @@ use Illuminate\Validation\Rule;
 
 class AnnouncementCommentController extends Controller
 {
+    public function searchMentionableUsers(Request $request): JsonResponse
+    {
+        $viewer = $request->user();
+        if (!$viewer) {
+            return response()->json(['users' => []], 401);
+        }
+
+        $query = trim($request->input('q', ''));
+
+        $usersQuery = User::where('is_active', true)
+            ->whereNull('deleted_at')
+            ->whereNull('suspended_at')
+            ->where('id', '!=', $viewer->id)
+            ->with('student:id,user_id,first_name,last_name');
+
+        if ($query !== '') {
+            $usersQuery->where(function ($q) use ($query) {
+                $q->where('name', 'like', "%{$query}%")
+                    ->orWhere('username', 'like', "%{$query}%")
+                    ->orWhere('nickname', 'like', "%{$query}%")
+                    ->orWhereHas('student', function ($sq) use ($query) {
+                        $sq->where('first_name', 'like', "%{$query}%")
+                            ->orWhere('last_name', 'like', "%{$query}%");
+                    });
+            });
+        }
+
+        $users = $usersQuery->limit(8)->get()->map(function ($u) {
+            $student = $u->student;
+            $displayName = $student ? trim($student->first_name . ' ' . $student->last_name) : $u->name;
+            $handle = $u->username ?: strtolower(preg_replace('/[^a-zA-Z0-9]/', '', $displayName));
+            if (empty($handle)) {
+                $handle = 'user' . substr(str_replace('-', '', $u->id), 0, 6);
+            }
+
+            return [
+                'id' => $u->id,
+                'name' => $displayName,
+                'handle' => $handle,
+                'initials' => strtoupper(substr($displayName, 0, 2)),
+                'avatar' => \App\Services\AvatarService::getUrl($u->avatar_seed, $u->avatar_style ?? 'adventurer'),
+                'role' => $u->role,
+            ];
+        });
+
+        return response()->json(['users' => $users]);
+    }
+
     public function index(Request $request, Announcement $announcement): JsonResponse
     {
         $user = $request->user();
@@ -316,20 +364,38 @@ class AnnouncementCommentController extends Controller
 
     private function handleMentions(string $content, AnnouncementComment $comment, Announcement $announcement, User $sender): void
     {
-        // Extract @mentions e.g. @username or @firstname
         if (!str_contains($content, '@')) {
             return;
         }
 
-        preg_match_all('/@([a-zA-Z0-9_\.\-]+)/', $content, $matches);
-        if (empty($matches[1])) {
+        $mentionedUserIds = [];
+
+        // 1. Match structured mentions: @[Display Name](user:UUID)
+        if (preg_match_all('/@\[([^\]]+)\]\(user:([a-zA-Z0-9\-]+)\)/', $content, $structuredMatches)) {
+            $mentionedUserIds = array_merge($mentionedUserIds, $structuredMatches[2]);
+        }
+
+        // 2. Match plain mentions: @username or @handle
+        if (preg_match_all('/@([a-zA-Z0-9_\.\-]+)/', $content, $plainMatches)) {
+            $plainHandles = array_unique($plainMatches[1]);
+            $usersByUsername = User::whereIn('username', $plainHandles)
+                ->where('is_active', true)
+                ->whereNull('deleted_at')
+                ->whereNull('suspended_at')
+                ->pluck('id')
+                ->all();
+            $mentionedUserIds = array_merge($mentionedUserIds, $usersByUsername);
+        }
+
+        $mentionedUserIds = array_unique(array_filter($mentionedUserIds, fn($id) => $id !== $sender->id));
+        if (empty($mentionedUserIds)) {
             return;
         }
 
-        $usernames = array_unique($matches[1]);
-        $users = User::whereIn('username', $usernames)
-            ->where('id', '!=', $sender->id)
+        $users = User::whereIn('id', $mentionedUserIds)
             ->where('is_active', true)
+            ->whereNull('deleted_at')
+            ->whereNull('suspended_at')
             ->get();
 
         $senderName = $sender->student?->first_name ?? $sender->name;
