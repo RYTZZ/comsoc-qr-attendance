@@ -228,4 +228,60 @@ class MemberSupportTicketController extends Controller
         $fullPath = Storage::disk('local')->path($message->attachment_path);
         return response()->download($fullPath, $message->attachment_name ?: 'attachment');
     }
+
+    /**
+     * Allowed inline-preview types: extension => expected detected MIME types.
+     */
+    public const PREVIEW_TYPES = [
+        'png' => ['image/png'],
+        'jpg' => ['image/jpeg'],
+        'jpeg' => ['image/jpeg'],
+        'webp' => ['image/webp'],
+        'pdf' => ['application/pdf'],
+    ];
+
+    /**
+     * Stream a support attachment inline (no download). Super Administrators only.
+     */
+    public function previewAttachment(Request $request, SupportTicket $ticket, SupportTicketMessage $message)
+    {
+        if (!$request->user()->isSuperAdmin()) {
+            abort(403, 'Only Super Administrators can preview attachments.');
+        }
+
+        // Attachment must belong to the ticket in the URL (prevents IDOR via swapped IDs).
+        if ((string) $message->support_ticket_id !== (string) $ticket->id) {
+            abort(404, 'Attachment not found.');
+        }
+
+        $disk = Storage::disk('local');
+        if (!$message->attachment_path || !$disk->exists($message->attachment_path)) {
+            abort(404, 'Attachment file not found.');
+        }
+
+        $extension = strtolower(pathinfo($message->attachment_path, PATHINFO_EXTENSION));
+        if (!isset(self::PREVIEW_TYPES[$extension])) {
+            abort(415, 'Preview is unavailable for this file type.');
+        }
+
+        // Validate real file content, not just the extension.
+        $fullPath = $disk->path($message->attachment_path);
+        $detected = (new \finfo(FILEINFO_MIME_TYPE))->file($fullPath);
+        if (!in_array($detected, self::PREVIEW_TYPES[$extension], true)) {
+            abort(415, 'Preview is unavailable for this file type.');
+        }
+
+        $headers = [
+            'Content-Type' => $detected,
+            'Content-Disposition' => 'inline; filename="preview.' . $extension . '"',
+            'X-Content-Type-Options' => 'nosniff',
+            'Cache-Control' => 'private, no-store, max-age=0',
+            'X-Frame-Options' => 'SAMEORIGIN',
+        ];
+        if ($detected !== 'application/pdf') {
+            $headers['Content-Security-Policy'] = "default-src 'none'; sandbox";
+        }
+
+        return response()->file($fullPath, $headers);
+    }
 }

@@ -12,7 +12,7 @@ return new class extends Migration
         $this->down();
 
         // 1. Dynamic Registration Forms (Super Admin Exclusive)
-        Schema::create('registration_forms', function (Blueprint $table) {
+        if (! Schema::hasTable('registration_forms')) Schema::create('registration_forms', function (Blueprint $table) {
             $table->uuid('id')->primary();
             $table->string('title');
             $table->string('slug')->unique();
@@ -34,7 +34,7 @@ return new class extends Migration
         });
 
         // 2. Dynamic Registration Form Fields (Questions)
-        Schema::create('registration_form_fields', function (Blueprint $table) {
+        if (! Schema::hasTable('registration_form_fields')) Schema::create('registration_form_fields', function (Blueprint $table) {
             $table->uuid('id')->primary();
             $table->foreignUuid('registration_form_id')->constrained('registration_forms', 'id', 'reg_form_fields_form_fk')->cascadeOnDelete();
             $table->string('field_key', 100);
@@ -52,7 +52,7 @@ return new class extends Migration
         });
 
         // 3. Dynamic Registration Form Options (for dropdown, multiple_choice, checkboxes)
-        Schema::create('registration_form_options', function (Blueprint $table) {
+        if (! Schema::hasTable('registration_form_options')) Schema::create('registration_form_options', function (Blueprint $table) {
             $table->uuid('id')->primary();
             $table->foreignUuid('registration_form_field_id')->constrained('registration_form_fields', 'id', 'reg_form_opts_field_fk')->cascadeOnDelete();
             $table->string('label');
@@ -65,7 +65,7 @@ return new class extends Migration
         });
 
         // 4. Parent Activities / Events (Level 1)
-        Schema::create('activities', function (Blueprint $table) {
+        if (! Schema::hasTable('activities')) Schema::create('activities', function (Blueprint $table) {
             $table->uuid('id')->primary();
             $table->foreignUuid('academic_year_id')->nullable()->constrained('academic_years')->nullOnDelete();
             $table->foreignUuid('event_id')->nullable()->constrained('events')->nullOnDelete();
@@ -133,7 +133,7 @@ return new class extends Migration
         });
 
         // 5. Activity Organizer Assignments
-        Schema::create('activity_organizers', function (Blueprint $table) {
+        if (! Schema::hasTable('activity_organizers')) Schema::create('activity_organizers', function (Blueprint $table) {
             $table->uuid('id')->primary();
             $table->foreignUuid('activity_id')->constrained('activities')->cascadeOnDelete();
             $table->foreignUuid('user_id')->constrained('users')->cascadeOnDelete();
@@ -144,7 +144,7 @@ return new class extends Migration
         });
 
         // 6. Activity Sessions / Components (Level 2)
-        Schema::create('activity_sessions', function (Blueprint $table) {
+        if (! Schema::hasTable('activity_sessions')) Schema::create('activity_sessions', function (Blueprint $table) {
             $table->uuid('id')->primary();
             $table->foreignUuid('activity_id')->constrained('activities')->cascadeOnDelete();
             $table->string('name');
@@ -190,7 +190,7 @@ return new class extends Migration
         });
 
         // 7. Activity Teams (for Hackathons, IDEATHON, Team Competitions)
-        Schema::create('activity_teams', function (Blueprint $table) {
+        if (! Schema::hasTable('activity_teams')) Schema::create('activity_teams', function (Blueprint $table) {
             $table->uuid('id')->primary();
             $table->foreignUuid('activity_id')->constrained('activities')->cascadeOnDelete();
             $table->foreignUuid('captain_user_id')->constrained('users')->cascadeOnDelete();
@@ -209,7 +209,7 @@ return new class extends Migration
         });
 
         // 8. Activity Team Members & Invitations
-        Schema::create('activity_team_members', function (Blueprint $table) {
+        if (! Schema::hasTable('activity_team_members')) Schema::create('activity_team_members', function (Blueprint $table) {
             $table->uuid('id')->primary();
             $table->foreignUuid('activity_team_id')->constrained('activity_teams')->cascadeOnDelete();
             $table->foreignUuid('activity_id')->constrained('activities')->cascadeOnDelete();
@@ -225,7 +225,7 @@ return new class extends Migration
         });
 
         // 9. Parent Activity Registrations
-        Schema::create('activity_registrations', function (Blueprint $table) {
+        if (! Schema::hasTable('activity_registrations')) Schema::create('activity_registrations', function (Blueprint $table) {
             $table->uuid('id')->primary();
             $table->foreignUuid('activity_id')->constrained('activities')->cascadeOnDelete();
             $table->foreignUuid('user_id')->constrained('users')->cascadeOnDelete();
@@ -254,7 +254,7 @@ return new class extends Migration
         });
 
         // 10. Session-Level Registrations & Independent Completion
-        Schema::create('activity_session_registrations', function (Blueprint $table) {
+        if (! Schema::hasTable('activity_session_registrations')) Schema::create('activity_session_registrations', function (Blueprint $table) {
             $table->uuid('id')->primary();
             $table->foreignUuid('activity_id')->constrained('activities', 'id', 'act_sess_reg_act_fk')->cascadeOnDelete();
             $table->foreignUuid('activity_session_id')->constrained('activity_sessions', 'id', 'act_sess_reg_sess_fk')->cascadeOnDelete();
@@ -294,7 +294,7 @@ return new class extends Migration
         });
 
         // 11. Activity Registration Dynamic Answers
-        Schema::create('activity_registration_answers', function (Blueprint $table) {
+        if (! Schema::hasTable('activity_registration_answers')) Schema::create('activity_registration_answers', function (Blueprint $table) {
             $table->uuid('id')->primary();
             $table->foreignUuid('activity_registration_id')->constrained('activity_registrations', 'id', 'act_reg_ans_reg_fk')->cascadeOnDelete();
             $table->foreignUuid('activity_session_registration_id')->nullable()->constrained('activity_session_registrations', 'id', 'act_reg_ans_sess_reg_fk')->cascadeOnDelete();
@@ -314,7 +314,7 @@ return new class extends Migration
         });
 
         // 12. Session-Specific QR Attendance Records
-        Schema::create('activity_attendances', function (Blueprint $table) {
+        if (! Schema::hasTable('activity_attendances')) Schema::create('activity_attendances', function (Blueprint $table) {
             $table->uuid('id')->primary();
             $table->foreignUuid('activity_id')->constrained('activities', 'id', 'act_att_act_fk')->cascadeOnDelete();
             $table->foreignUuid('activity_session_id')->constrained('activity_sessions', 'id', 'act_att_sess_fk')->cascadeOnDelete();
@@ -336,7 +336,7 @@ return new class extends Migration
         });
 
         // 13. Activity Reward Audit & Ledger Link
-        Schema::create('activity_rewards', function (Blueprint $table) {
+        if (! Schema::hasTable('activity_rewards')) Schema::create('activity_rewards', function (Blueprint $table) {
             $table->uuid('id')->primary();
             $table->foreignUuid('activity_id')->constrained('activities', 'id', 'act_rew_act_fk')->cascadeOnDelete();
             $table->foreignUuid('activity_session_id')->nullable()->constrained('activity_sessions', 'id', 'act_rew_sess_fk')->cascadeOnDelete();

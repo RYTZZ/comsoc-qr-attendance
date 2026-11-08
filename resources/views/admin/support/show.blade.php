@@ -110,10 +110,14 @@
 
                         @if($msg->attachment_path)
                         <div class="mt-3 pt-3 border-t border-slate-800">
-                            <a href="{{ route('helpdesk.attachment', $msg) }}" class="inline-flex items-center gap-1.5 text-xs text-[#df747a] hover:underline font-semibold bg-slate-950 px-3 py-1.5 rounded-lg border border-slate-800">
+                            @if(auth()->user()->isSuperAdmin())
+<x-attachment-preview-button :message="$msg" :ticket="$ticket" />
+@else
+<a href="{{ route('helpdesk.attachment', $msg) }}" class="inline-flex items-center gap-1.5 text-xs text-[#df747a] hover:underline font-semibold bg-slate-950 px-3 py-1.5 rounded-lg border border-slate-800">
                                 <i data-lucide="paperclip" class="w-3.5 h-3.5"></i>
                                 <span>Download {{ $msg->attachment_name ?: 'Attachment' }}</span>
                             </a>
+@endif
                         </div>
                         @endif
                     </div>

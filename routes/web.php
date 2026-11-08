@@ -206,6 +206,9 @@ Route::middleware(['auth', 'verified', 'require_password_change'])->group(functi
             ->middleware('throttle:30,1')
             ->name('reply');
         Route::get('/messages/{message}/attachment', [\App\Http\Controllers\MemberSupportTicketController::class, 'downloadAttachment'])->name('attachment');
+        Route::get('/{ticket}/messages/{message}/attachment/preview', [\App\Http\Controllers\MemberSupportTicketController::class, 'previewAttachment'])
+            ->middleware('throttle:60,1')
+            ->name('attachment.preview');
     });
 
     // Project Collaboration & Team Finder
