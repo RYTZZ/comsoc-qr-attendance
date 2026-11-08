@@ -150,6 +150,11 @@ class User extends Authenticatable
         return $this->hasOne(UserProfile::class);
     }
 
+    public function profileCompletionReward(): \Illuminate\Database\Eloquent\Relations\HasOne
+    {
+        return $this->hasOne(ProfileCompletionReward::class);
+    }
+
     public function seasonStats(): HasMany
     {
         return $this->hasMany(MemberSeasonStat::class);

@@ -17,7 +17,7 @@ class RewardEconomyController extends Controller
 {
     public function __construct(private RewardService $rewardService) {}
 
-    public function index(): View
+    public function index(Request $request): View
     {
         $rules = RewardRule::orderBy('activity_type')->get();
         $levels = Level::orderBy('level')->get();
@@ -30,12 +30,57 @@ class RewardEconomyController extends Controller
             ->take(10)
             ->get();
 
+        $completionFilter = (string) $request->query('completion_filter', 'all');
+        $completionSearch = trim((string) $request->query('completion_search', ''));
+
+        $membersQuery = User::with(['profile', 'student', 'skills', 'profileCompletionReward'])
+            ->where('role', 'student')
+            ->orderBy('name');
+
+        if ($completionSearch !== '') {
+            $membersQuery->where(function ($q) use ($completionSearch) {
+                $q->where('name', 'like', "%{$completionSearch}%")
+                    ->orWhere('email', 'like', "%{$completionSearch}%")
+                    ->orWhere('username', 'like', "%{$completionSearch}%");
+            });
+        }
+
+        $completionService = app(\App\Services\ProfileCompletionService::class);
+        $profileCompletionRows = $membersQuery->take(200)->get()->map(function (User $member) use ($completionService) {
+            $eval = $completionService->evaluate($member);
+            $reward = $eval['reward_record'];
+
+            return [
+                'member' => $member,
+                'percentage' => $eval['percentage'],
+                'is_complete' => $eval['is_complete'],
+                'reward_issued' => $eval['reward_issued'],
+                'exp_awarded' => $reward ? $reward->exp_awarded : ($eval['reward_issued'] ? \App\Services\ProfileCompletionService::EXP_REWARD : 0),
+                'points_awarded' => $reward ? $reward->points_awarded : ($eval['reward_issued'] ? \App\Services\ProfileCompletionService::POINTS_REWARD : 0),
+                'awarded_at' => $reward?->awarded_at,
+                'reference_key' => $reward?->reference_key ?? $eval['reference_key'],
+                'xp_transaction_id' => $reward?->xp_transaction_id,
+                'point_transaction_id' => $reward?->point_transaction_id,
+            ];
+        })->filter(function (array $row) use ($completionFilter) {
+            return match ($completionFilter) {
+                'completed' => $row['is_complete'] === true,
+                'incomplete' => $row['is_complete'] === false,
+                'rewarded' => $row['reward_issued'] === true,
+                'unrewarded' => $row['reward_issued'] === false,
+                default => true,
+            };
+        })->values();
+
         return view('admin.economy.index', compact(
             'rules',
             'levels',
             'seasons',
             'activeSeason',
-            'recentXpAdjustments'
+            'recentXpAdjustments',
+            'profileCompletionRows',
+            'completionFilter',
+            'completionSearch'
         ));
     }
 

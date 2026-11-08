@@ -1,4 +1,4 @@
-<!-- Navigation Overlay Backdrop for both Desktop & Mobile -->
+﻿<!-- Navigation Overlay Backdrop for both Desktop & Mobile -->
 <div x-show="drawerOpen"
      x-transition:enter="transition-opacity ease-linear duration-200"
      x-transition:enter-start="opacity-0"
@@ -285,51 +285,3 @@
     </div>
 </aside>
 
-<!-- Mobile Floating Bottom Navigation Bar -->
-<nav aria-label="Mobile Bottom Navigation"
-     x-show="!readerFullscreen"
-     x-transition:enter="transition-all ease-out duration-200"
-     x-transition:enter-start="opacity-0 translate-y-6"
-     x-transition:enter-end="opacity-100 translate-y-0"
-     x-transition:leave="transition-all ease-in duration-150"
-     x-transition:leave-start="opacity-100 translate-y-0"
-     x-transition:leave-end="opacity-0 translate-y-6"
-     class="lg:hidden fixed bottom-3 inset-x-3 sm:inset-x-8 max-w-lg mx-auto z-30 bg-[#172033]/95 backdrop-blur-lg border border-[#334155] rounded-2xl shadow-2xl p-1.5 transition-all duration-300 safe-area-bottom">
-    <div class="grid grid-cols-5 items-center gap-1">
-        <a href="{{ route('dashboard') }}"
-           class="flex flex-col items-center justify-center py-2 px-1 rounded-xl transition-all duration-150 min-h-[48px] {{ request()->routeIs('dashboard') ? 'bg-burgundy-gradient text-white shadow-md' : 'text-[#94A3B8] hover:text-[#F8FAFC] hover:bg-[#1E293B]' }}"
-           aria-label="Home Dashboard">
-            <i data-lucide="home" class="w-5 h-5 shrink-0 {{ request()->routeIs('dashboard') ? 'text-white' : 'text-[#94A3B8]' }}"></i>
-            <span class="text-[10px] font-semibold mt-1 truncate">Home</span>
-        </a>
-
-        <a href="{{ route('member.dynamic_qr') }}"
-           class="flex flex-col items-center justify-center py-2 px-1 rounded-xl transition-all duration-150 min-h-[48px] {{ request()->routeIs('member.dynamic_qr') ? 'bg-burgundy-gradient text-white shadow-md' : 'text-[#94A3B8] hover:text-[#F8FAFC] hover:bg-[#1E293B]' }}"
-           aria-label="QR Pass">
-            <i data-lucide="qr-code" class="w-5 h-5 shrink-0 {{ request()->routeIs('member.dynamic_qr') ? 'text-white' : 'text-[#94A3B8]' }}"></i>
-            <span class="text-[10px] font-semibold mt-1 truncate">QR Pass</span>
-        </a>
-
-        <a href="{{ route('shop.index') }}"
-           class="flex flex-col items-center justify-center py-2 px-1 rounded-xl transition-all duration-150 min-h-[48px] {{ request()->routeIs('shop.*') ? 'bg-burgundy-gradient text-white shadow-md' : 'text-[#94A3B8] hover:text-[#F8FAFC] hover:bg-[#1E293B]' }}"
-           aria-label="Rewards">
-            <i data-lucide="gift" class="w-5 h-5 shrink-0 {{ request()->routeIs('shop.*') ? 'text-white' : 'text-[#94A3B8]' }}"></i>
-            <span class="text-[10px] font-semibold mt-1 truncate">Rewards</span>
-        </a>
-
-        <a href="{{ route('leaderboard.index') }}"
-           class="flex flex-col items-center justify-center py-2 px-1 rounded-xl transition-all duration-150 min-h-[48px] {{ request()->routeIs('leaderboard.*') ? 'bg-burgundy-gradient text-white shadow-md' : 'text-[#94A3B8] hover:text-[#F8FAFC] hover:bg-[#1E293B]' }}"
-           aria-label="Rankings">
-            <i data-lucide="trophy" class="w-5 h-5 shrink-0 {{ request()->routeIs('leaderboard.*') ? 'text-white' : 'text-[#94A3B8]' }}"></i>
-            <span class="text-[10px] font-semibold mt-1 truncate">Rankings</span>
-        </a>
-
-        <button type="button"
-                @click="openDrawer()"
-                class="flex flex-col items-center justify-center py-2 px-1 rounded-xl transition-all duration-150 min-h-[48px] {{ request()->routeIs('settings.*', 'profile.*', 'notifications.*', 'ledger.*', 'missions.*', 'directory.*', 'opportunities.*', 'announcements.*', 'projects.*', 'volunteers.*', 'helpdesk.*', 'admin.*', 'organizer.*') ? 'bg-burgundy-gradient text-white shadow-md' : 'text-[#94A3B8] hover:text-[#F8FAFC] hover:bg-[#1E293B]' }}"
-                aria-label="Open full navigation menu">
-            <i data-lucide="menu" class="w-5 h-5 shrink-0 {{ request()->routeIs('settings.*', 'profile.*', 'notifications.*', 'ledger.*', 'missions.*', 'directory.*', 'opportunities.*', 'announcements.*', 'projects.*', 'volunteers.*', 'helpdesk.*', 'admin.*', 'organizer.*') ? 'text-white' : 'text-[#94A3B8]' }}"></i>
-            <span class="text-[10px] font-semibold mt-1 truncate">Menu</span>
-        </button>
-    </div>
-</nav>

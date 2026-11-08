@@ -235,6 +235,9 @@
                 <!-- Dedicated Signature Status & Action Hub Section -->
                 <x-signature-status-card :signature-status="$signatureStatus" />
 
+                <!-- Profile Completion Progress & Reward Card -->
+                <x-profile-completion-card :completion="$profileCompletion ?? null" />
+
                 <!-- Crimson Obsidian Bento Hero Row: Next Activity/Session Spotlight + Instant QR Pass Preview -->
                 @php
                     $nextActivityReg = isset($myActiveActivityRegistrations) ? $myActiveActivityRegistrations->first() : null;

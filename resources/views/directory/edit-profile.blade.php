@@ -28,6 +28,8 @@
                 </div>
             @endif
 
+            <x-profile-completion-card :completion="$profileCompletion ?? null" />
+
             <form method="POST" action="{{ route('directory.profile.update') }}" class="card bg-[#172033] border border-slate-800 p-6 sm:p-8 rounded-2xl space-y-6">
                 @csrf
                 @method('PUT')

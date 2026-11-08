@@ -277,6 +277,104 @@
                 </div>
 
             </div>
+
+            {{-- Profile Completion Rewards Visibility & Audit Ledger --}}
+            <div class="card bg-[#172033] border border-slate-800 p-6 space-y-4">
+                <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 pb-3 border-b border-slate-800">
+                    <div>
+                        <h2 class="text-base font-bold text-white font-brand-display">Profile Completion Rewards Ledger</h2>
+                        <p class="text-xs text-slate-400">Monitor member profile completion progress and one-time automatic reward issuance (+100 EXP, +50 Points).</p>
+                    </div>
+
+                    <form method="GET" action="{{ route('admin.economy.index') }}" class="flex flex-wrap items-center gap-2">
+                        <input
+                            type="text"
+                            name="completion_search"
+                            value="{{ $completionSearch ?? '' }}"
+                            placeholder="Search member..."
+                            class="input-dark text-xs w-44"
+                        >
+                        <select name="completion_filter" class="input-dark text-xs" onchange="this.form.submit()">
+                            <option value="all" {{ ($completionFilter ?? 'all') === 'all' ? 'selected' : '' }}>All Members</option>
+                            <option value="completed" {{ ($completionFilter ?? '') === 'completed' ? 'selected' : '' }}>Completed Profiles (100%)</option>
+                            <option value="incomplete" {{ ($completionFilter ?? '') === 'incomplete' ? 'selected' : '' }}>Incomplete Profiles (&lt;100%)</option>
+                            <option value="rewarded" {{ ($completionFilter ?? '') === 'rewarded' ? 'selected' : '' }}>Rewarded Members</option>
+                            <option value="unrewarded" {{ ($completionFilter ?? '') === 'unrewarded' ? 'selected' : '' }}>Unrewarded Members</option>
+                        </select>
+                        <button type="submit" class="btn-secondary text-xs py-1.5 px-3">Filter</button>
+                    </form>
+                </div>
+
+                <div class="overflow-x-auto">
+                    <table class="w-full text-left text-xs border-collapse">
+                        <thead>
+                            <tr class="border-b border-slate-800 text-slate-400 text-[10px] uppercase font-mono">
+                                <th class="py-2.5 px-3">Member Name</th>
+                                <th class="py-2.5 px-3 text-center">Profile Completion %</th>
+                                <th class="py-2.5 px-3 text-center">Reward Issuance Status</th>
+                                <th class="py-2.5 px-3 text-right">EXP Awarded</th>
+                                <th class="py-2.5 px-3 text-right">Points Awarded</th>
+                                <th class="py-2.5 px-3">Issuance Date</th>
+                                <th class="py-2.5 px-3">Transaction References</th>
+                            </tr>
+                        </thead>
+                        <tbody class="divide-y divide-slate-800 text-slate-300">
+                            @forelse($profileCompletionRows ?? [] as $row)
+                                <tr class="hover:bg-slate-900/40">
+                                    <td class="py-3 px-3">
+                                        <div class="font-semibold text-white">{{ $row['member']->name }}</div>
+                                        <div class="text-[11px] text-slate-400">{{ $row['member']->email }}</div>
+                                    </td>
+                                    <td class="py-3 px-3 text-center">
+                                        <span class="font-mono font-bold {{ $row['is_complete'] ? 'text-emerald-400' : 'text-amber-400' }}">
+                                            {{ $row['percentage'] }}%
+                                        </span>
+                                    </td>
+                                    <td class="py-3 px-3 text-center">
+                                        @if($row['reward_issued'])
+                                            <span class="px-2 py-0.5 rounded text-[10px] font-bold bg-emerald-500/20 text-emerald-400 border border-emerald-500/30">
+                                                Rewarded
+                                            </span>
+                                        @else
+                                            <span class="px-2 py-0.5 rounded text-[10px] font-bold bg-slate-800 text-slate-400 border border-slate-700">
+                                                Unrewarded
+                                            </span>
+                                        @endif
+                                    </td>
+                                    <td class="py-3 px-3 text-right font-mono font-bold text-[#dfa6a9]">
+                                        {{ $row['reward_issued'] ? '+' . $row['exp_awarded'] . ' EXP' : '0 EXP' }}
+                                    </td>
+                                    <td class="py-3 px-3 text-right font-mono font-bold text-amber-400">
+                                        {{ $row['reward_issued'] ? '+' . $row['points_awarded'] . ' Pts' : '0 Pts' }}
+                                    </td>
+                                    <td class="py-3 px-3 text-slate-400 font-mono text-[11px]">
+                                        {{ $row['awarded_at'] ? $row['awarded_at']->format('M d, Y H:i') : '—' }}
+                                    </td>
+                                    <td class="py-3 px-3 font-mono text-[11px] text-slate-300">
+                                        @if($row['reward_issued'])
+                                            <div>{{ $row['reference_key'] }}</div>
+                                            @if($row['xp_transaction_id'] || $row['point_transaction_id'])
+                                                <div class="text-[10px] text-slate-500">
+                                                    XP: {{ \Illuminate\Support\Str::limit((string) $row['xp_transaction_id'], 8, '') }} |
+                                                    PT: {{ \Illuminate\Support\Str::limit((string) $row['point_transaction_id'], 8, '') }}
+                                                </div>
+                                            @endif
+                                        @else
+                                            <span class="text-slate-500">Pending ({{ $row['reference_key'] }})</span>
+                                        @endif
+                                    </td>
+                                </tr>
+                            @empty
+                                <tr>
+                                    <td colspan="7" class="py-6 text-center text-slate-500">
+                                        No member profile records matched the selected filter.
+                                    </td>
+                                </tr>
+                            @endforelse
+                        </tbody>
+                    </table>
+                </div>
+            </div>
         </div>
     </div>
 </div>

@@ -65,9 +65,24 @@ class AdventurerSetupController extends Controller
             ]);
         });
 
-        return redirect()->route('dashboard')
+        $rewardResult = app(\App\Services\ProfileCompletionService::class)
+            ->evaluateAndAwardIfComplete($user, $request->user());
+
+        $redirect = redirect()->route('dashboard')
             ->with('status', 'Your adventurer identity has been successfully created! Welcome to the COMSOC HUB community.')
             ->with('success', 'Your adventurer identity has been successfully created! Welcome to the COMSOC HUB community.');
+
+        if (! empty($rewardResult['awarded'])) {
+            $redirect->with('profile_completion_rewarded', [
+                'title' => \App\Services\ProfileCompletionService::NOTIFICATION_TITLE,
+                'message' => \App\Services\ProfileCompletionService::NOTIFICATION_MESSAGE,
+                'exp_awarded' => $rewardResult['exp_awarded'],
+                'points_awarded' => $rewardResult['points_awarded'],
+                'reference_key' => $rewardResult['reference_key'] ?? null,
+            ]);
+        }
+
+        return $redirect;
     }
 
     /**

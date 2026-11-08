@@ -39,6 +39,8 @@
                 </div>
             @endif
 
+            <x-profile-completion-card :compact="true" />
+
             <!-- Section 1: Account Information & Preferences -->
             <section class="card bg-[#172033] border border-[#334155] shadow-xl rounded-2xl overflow-hidden">
                 <div class="p-6 border-b border-[#334155]/60 flex items-center justify-between bg-[#172033]/60">

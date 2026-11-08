@@ -117,6 +117,7 @@ class MemberDirectoryController extends Controller
         $profile = $user->profile ?? UserProfile::firstOrCreate(['user_id' => $user->id]);
         $allSkills = Skill::orderBy('name')->get();
         $userSkillIds = $user->skills->pluck('id')->all();
+        $profileCompletion = app(\App\Services\ProfileCompletionService::class)->evaluate($user);
 
         return view('directory.edit-profile', [
             'user' => $user,
@@ -124,6 +125,7 @@ class MemberDirectoryController extends Controller
             'allSkills' => $allSkills,
             'userSkillIds' => $userSkillIds,
             'projectCategories' => self::PROJECT_CATEGORIES,
+            'profileCompletion' => $profileCompletion,
         ]);
     }
 
@@ -184,6 +186,20 @@ class MemberDirectoryController extends Controller
             $user->skills()->detach();
         }
 
-        return redirect()->route('directory.profile.edit')->with('success', 'Your collaborator profile and skills have been updated successfully!');
+        $rewardResult = app(\App\Services\ProfileCompletionService::class)
+            ->evaluateAndAwardIfComplete($user, $request->user());
+
+        $redirect = redirect()->route('directory.profile.edit')->with('success', 'Your collaborator profile and skills have been updated successfully!');
+        if (! empty($rewardResult['awarded'])) {
+            $redirect->with('profile_completion_rewarded', [
+                'title' => \App\Services\ProfileCompletionService::NOTIFICATION_TITLE,
+                'message' => \App\Services\ProfileCompletionService::NOTIFICATION_MESSAGE,
+                'exp_awarded' => $rewardResult['exp_awarded'],
+                'points_awarded' => $rewardResult['points_awarded'],
+                'reference_key' => $rewardResult['reference_key'] ?? null,
+            ]);
+        }
+
+        return $redirect;
     }
 }

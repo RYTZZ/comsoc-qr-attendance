@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="{{ str_replace('_', '-', app()->getLocale()) }}" class="h-full">
     <head>
         <meta charset="utf-8">
@@ -190,7 +190,7 @@
 
         <!-- Mobile Floating 5-Icon Bottom Action Dock (Thumb-Zone Navigation) -->
         @auth
-        <nav class="md:hidden fixed bottom-0 inset-x-0 z-30 bg-[#0B1120]/95 backdrop-blur-xl border-t border-white/10 px-2 py-1.5 shadow-2xl"
+        <nav x-show="!readerFullscreen" class="lg:hidden fixed bottom-0 inset-x-0 z-30 bg-[#0B1120]/95 backdrop-blur-xl border-t border-white/10 px-2 pt-1.5 pb-[calc(0.375rem+env(safe-area-inset-bottom,0px))] shadow-2xl"
              aria-label="Mobile Bottom Dock">
             <div class="grid grid-cols-5 items-center max-w-md mx-auto">
                 <a href="{{ route('dashboard') }}"

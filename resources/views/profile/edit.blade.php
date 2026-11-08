@@ -17,7 +17,7 @@
     <div class="py-8 bg-[#0B1120]">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-6">
 
-            <div class="card bg-[#172033] border border-[#334155] shadow-xl p-6 relative overflow-hidden">
+            <div id="academic-info" class="card bg-[#172033] border border-[#334155] shadow-xl p-6 relative overflow-hidden">
                 <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
                     <div class="flex items-center gap-4">
                         <x-user-avatar :user="$user" size="xl" class="shadow-lg border-2 border-[#8F3033]/60" />
@@ -54,6 +54,8 @@
                 </div>
             </div>
 
+            <x-profile-completion-card :completion="$profileCompletion ?? null" />
+
             <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
 
                 <div class="lg:col-span-2 space-y-6">
@@ -81,7 +83,7 @@
                             @method('patch')
 
                             <!-- Adventurer Avatar Selection Gallery -->
-                            <div class="p-5 rounded-2xl bg-[#0B1120]/80 border border-[#334155] shadow-inner space-y-4">
+                            <div id="avatar-section" class="p-5 rounded-2xl bg-[#0B1120]/80 border border-[#334155] shadow-inner space-y-4">
                                 <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-3 border-b border-[#334155]">
                                     <div class="flex items-center gap-2">
                                         <div class="w-8 h-8 rounded-xl bg-burgundy-deep border border-[#8F3033]/60 flex items-center justify-center text-white text-xs">
@@ -137,7 +139,7 @@
                                 <x-input-error class="mt-1" :messages="$errors->get('avatar_style')" />
                             </div>
 
-                            <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                            <div id="personal-info" class="grid grid-cols-1 sm:grid-cols-3 gap-4">
                                 <div>
                                     <label for="username" class="label text-xs text-[#94A3B8]">
                                         Username (Public Persona) <span class="text-rose-400">*</span>
@@ -163,14 +165,14 @@
                                     <x-input-error class="mt-1" :messages="$errors->get('name')" />
                                 </div>
 
-                                <div>
+                                <div id="contact-info">
                                     <label for="email" class="label text-xs text-[#94A3B8]">Email Address</label>
                                     <input type="email" name="email" id="email" value="{{ old('email', $user->email) }}" class="input text-xs" placeholder="Enter your email address" required>
                                     <x-input-error class="mt-1" :messages="$errors->get('email')" />
                                 </div>
                             </div>
 
-                            <div>
+                            <div id="about-me">
                                 <label for="bio" class="label text-xs text-[#94A3B8]">About / Bio</label>
                                 <textarea name="bio" id="bio" rows="3" class="input text-xs">{{ old('bio', $profile->bio) }}</textarea>
                                 <x-input-error class="mt-1" :messages="$errors->get('bio')" />

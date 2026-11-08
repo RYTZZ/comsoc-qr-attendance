@@ -205,6 +205,7 @@ class MemberDashboardController extends Controller
         $myMissionSubmissions = \App\Models\MissionSubmission::where('user_id', $user->id)->with('mission')->latest()->take(6)->get();
 
         $signatureStatus = app(\App\Services\SignatureVaultService::class)->signatureStatus($user);
+        $profileCompletion = app(\App\Services\ProfileCompletionService::class)->evaluate($user);
 
         $myActiveActivityRegistrations = \App\Models\ActivityRegistration::with(['activity', 'sessionRegistrations.session', 'team'])
             ->where('user_id', $user->id)
@@ -218,6 +219,7 @@ class MemberDashboardController extends Controller
             'user',
             'student',
             'signatureStatus',
+            'profileCompletion',
             'myActiveActivityRegistrations',
             'activeSeason',
             'seasonStat',

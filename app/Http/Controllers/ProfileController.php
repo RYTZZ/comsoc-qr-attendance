@@ -78,12 +78,14 @@ class ProfileController extends Controller
         $skillCategories = \App\Services\ProfileMetadataService::getSkillCategories();
         $interestCategories = \App\Services\ProfileMetadataService::getInterestCategories();
         $signatureStatus = app(\App\Services\SignatureVaultService::class)->signatureStatus($user);
+        $profileCompletion = app(\App\Services\ProfileCompletionService::class)->evaluate($user);
 
         return view('profile.edit', compact(
             'user',
             'profile',
             'student',
             'signatureStatus',
+            'profileCompletion',
             'activeSeason',
             'seasonXp',
             'seasonPoints',
@@ -164,7 +166,21 @@ class ProfileController extends Controller
             $user->skills()->sync($skillIds);
         });
 
-        return Redirect::route('profile.edit')->with('status', 'profile-updated');
+        $rewardResult = app(\App\Services\ProfileCompletionService::class)
+            ->evaluateAndAwardIfComplete($user, $request->user());
+
+        $redirect = Redirect::route('profile.edit')->with('status', 'profile-updated');
+        if (! empty($rewardResult['awarded'])) {
+            $redirect->with('profile_completion_rewarded', [
+                'title' => \App\Services\ProfileCompletionService::NOTIFICATION_TITLE,
+                'message' => \App\Services\ProfileCompletionService::NOTIFICATION_MESSAGE,
+                'exp_awarded' => $rewardResult['exp_awarded'],
+                'points_awarded' => $rewardResult['points_awarded'],
+                'reference_key' => $rewardResult['reference_key'] ?? null,
+            ]);
+        }
+
+        return $redirect;
     }
 
     public function destroy(Request $request): RedirectResponse
