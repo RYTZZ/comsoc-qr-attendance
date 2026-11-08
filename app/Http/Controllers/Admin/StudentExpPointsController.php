@@ -17,6 +17,7 @@ use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Validation\Rule;
 use Illuminate\View\View;
 
 class StudentExpPointsController extends Controller
@@ -41,6 +42,10 @@ class StudentExpPointsController extends Controller
         $selectedUserId = $request->input('user_id');
 
         $studentsQuery = User::whereIn('role', ['member', 'student'])
+            ->whereNull('deleted_at')
+            ->where('is_active', true)
+            ->where('is_eligible', true)
+            ->whereNull('suspended_at')
             ->with(['student', 'seasonStats']);
 
         if (!empty($search)) {
@@ -52,7 +57,7 @@ class StudentExpPointsController extends Controller
                   ->orWhereHas('student', function ($sq) use ($search) {
                       $sq->where('first_name', 'like', "%{$search}%")
                          ->orWhere('last_name', 'like', "%{$search}%")
-                         ->orWhere('student_id', 'like', "%{$search}%");
+                         ->orWhere('student_number', 'like', "%{$search}%");
                   });
             });
         }
@@ -63,7 +68,14 @@ class StudentExpPointsController extends Controller
         $recentTransactions = collect();
 
         if ($selectedUserId) {
-            $selectedStudent = User::with(['student', 'seasonStats'])->find($selectedUserId);
+            $selectedStudent = User::whereIn('role', ['member', 'student'])
+                ->whereNull('deleted_at')
+                ->where('is_active', true)
+                ->where('is_eligible', true)
+                ->whereNull('suspended_at')
+                ->with(['student', 'seasonStats'])
+                ->find($selectedUserId);
+
             if ($selectedStudent) {
                 // Fetch unified transaction history
                 $recentTransactions = XpTransaction::where('user_id', $selectedStudent->id)
@@ -101,7 +113,16 @@ class StudentExpPointsController extends Controller
         }
 
         $validated = $request->validate([
-            'user_id' => ['required', 'exists:users,id'],
+            'user_id' => [
+                'required',
+                Rule::exists('users', 'id')->where(function ($q) {
+                    $q->whereNull('deleted_at')
+                      ->where('is_active', true)
+                      ->where('is_eligible', true)
+                      ->whereNull('suspended_at')
+                      ->whereIn('role', ['member', 'student']);
+                }),
+            ],
             'award_type' => ['required', 'in:award,deduct'],
             'exp_amount' => ['required', 'integer', 'min:0', 'max:50000'],
             'points_amount' => ['required', 'integer', 'min:0', 'max:50000'],
@@ -109,9 +130,20 @@ class StudentExpPointsController extends Controller
             'custom_reason' => ['nullable', 'string', 'max:500'],
             'event_id' => ['nullable', 'exists:events,id'],
             'idempotency_key' => ['required', 'string', 'max:100'],
+        ], [
+            'user_id.exists' => 'The selected student account is invalid, suspended, deactivated, or deleted.',
         ]);
 
-        $targetUser = User::findOrFail($validated['user_id']);
+        $targetUser = User::whereNull('deleted_at')
+            ->where('is_active', true)
+            ->where('is_eligible', true)
+            ->whereNull('suspended_at')
+            ->whereIn('role', ['member', 'student'])
+            ->find($validated['user_id']);
+
+        if (!$targetUser) {
+            return back()->with('error', 'Adjustment rejected: Target student account is deleted, suspended, or ineligible for EXP distribution.');
+        }
 
         if ($targetUser->id === $actor->id) {
             return back()->with('error', 'Conflict of interest: You cannot award or deduct your own EXP or points balance.');
