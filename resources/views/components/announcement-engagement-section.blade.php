@@ -180,7 +180,7 @@
                     <img :src="currentUser.avatar"
                          class="w-full h-full object-cover"
                          :alt="currentUser.name"
-                         @error="$el.style.display='none'; $el.nextElementSibling.style.display='flex'">
+                         x-on:error="$el.style.display='none'; $el.nextElementSibling.style.display='flex'">
                 </template>
                 <div class="w-full h-full flex items-center justify-center bg-[#560E0F] text-white text-xs font-bold font-brand-display"
                      :style="currentUser.avatar ? 'display: none;' : 'display: flex;'">
@@ -257,7 +257,7 @@
                                 <img :src="comment.author.avatar"
                                      class="w-full h-full object-cover"
                                      :alt="comment.author.name"
-                                     @error="$el.style.display='none'; $el.nextElementSibling.style.display='flex'">
+                                     x-on:error="$el.style.display='none'; $el.nextElementSibling.style.display='flex'">
                             </template>
                             <div class="w-full h-full flex items-center justify-center bg-[#560E0F] text-white text-[11px] font-bold font-brand-display"
                                  :style="comment.author.avatar ? 'display: none;' : 'display: flex;'">
@@ -386,7 +386,7 @@
                                             <img :src="reply.author.avatar"
                                                  class="w-full h-full object-cover"
                                                  :alt="reply.author.name"
-                                                 @error="$el.style.display='none'; $el.nextElementSibling.style.display='flex'">
+                                                 x-on:error="$el.style.display='none'; $el.nextElementSibling.style.display='flex'">
                                         </template>
                                         <div class="w-full h-full flex items-center justify-center bg-[#560E0F] text-white text-[9px] font-bold font-brand-display"
                                              :style="reply.author.avatar ? 'display: none;' : 'display: flex;'">
