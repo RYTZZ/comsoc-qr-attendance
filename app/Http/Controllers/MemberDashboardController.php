@@ -17,11 +17,49 @@ use App\Models\SupportTicket;
 use App\Models\VolunteerApplication;
 use App\Models\VolunteerOpportunity;
 use App\Models\XpTransaction;
+use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\View\View;
 
 class MemberDashboardController extends Controller
 {
+    public function home(): RedirectResponse
+    {
+        if (!auth()->check()) {
+            return redirect()->route('login');
+        }
+        return redirect()->route('dashboard');
+    }
+
+    public function dashboard(Request $request): View|RedirectResponse
+    {
+        $user = auth()->user();
+        if (!$user) {
+            return redirect()->route('login');
+        }
+        if (!$user->is_active) {
+            auth('web')->logout();
+            return redirect()->route('login')->withErrors(['email' => 'Your account has been deactivated.']);
+        }
+        if ($user->role === 'kiosk') {
+            if ($user->kiosk) {
+                return redirect()->route('kiosk.attendance', $user->kiosk);
+            }
+            return redirect()->route('kiosk.hub');
+        }
+        if ($user->isStudent() || in_array($user->role, ['event_organizer', 'staff', 'event_staff'], true)) {
+            return $this->index($request);
+        }
+        return redirect()->route('admin.dashboard');
+    }
+
+    public function kioskFallback(): RedirectResponse
+    {
+        return redirect()->route('login')->withErrors([
+            'email' => 'No kiosk terminal is assigned to your account. Please contact the administrator.',
+        ]);
+    }
+
     public function index(Request $request): View
     {
         $user = $request->user();
@@ -168,10 +206,19 @@ class MemberDashboardController extends Controller
 
         $signatureStatus = app(\App\Services\SignatureVaultService::class)->signatureStatus($user);
 
+        $myActiveActivityRegistrations = \App\Models\ActivityRegistration::with(['activity', 'sessionRegistrations.session', 'team'])
+            ->where('user_id', $user->id)
+            ->whereIn('status', ['approved', 'pending', 'waitlisted'])
+            ->whereHas('activity', fn ($q) => $q->whereNotIn('status', ['draft', 'archived', 'completed', 'cancelled']))
+            ->latest()
+            ->take(3)
+            ->get();
+
         return view('dashboard', compact(
             'user',
             'student',
             'signatureStatus',
+            'myActiveActivityRegistrations',
             'activeSeason',
             'seasonStat',
             'spendableExp',

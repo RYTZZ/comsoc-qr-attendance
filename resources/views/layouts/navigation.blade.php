@@ -80,6 +80,16 @@
         <div>
             <p class="px-3 mb-2 text-[10px] font-bold uppercase tracking-widest text-[#94A3B8]">Participation</p>
             <div class="space-y-1">
+                <a href="{{ route('activities.index') }}"
+                   class="flex items-center gap-3 px-3 py-2.5 rounded-xl text-xs font-semibold transition {{ request()->routeIs('activities.index') || request()->routeIs('activities.show') ? 'bg-burgundy-gradient text-white shadow-md' : 'text-[#94A3B8] hover:text-white hover:bg-[#1E293B]' }}">
+                    <i data-lucide="layers" class="w-4 h-4 shrink-0 {{ request()->routeIs('activities.index') || request()->routeIs('activities.show') ? 'text-white' : 'text-[#94A3B8]' }}"></i>
+                    <span>{{ __('COMSOC Activities') }}</span>
+                </a>
+                <a href="{{ route('activities.my-registrations') }}"
+                   class="flex items-center gap-3 px-3 py-2.5 rounded-xl text-xs font-semibold transition {{ request()->routeIs('activities.my-registrations') ? 'bg-burgundy-gradient text-white shadow-md' : 'text-[#94A3B8] hover:text-white hover:bg-[#1E293B]' }}">
+                    <i data-lucide="clipboard-check" class="w-4 h-4 shrink-0 {{ request()->routeIs('activities.my-registrations') ? 'text-white' : 'text-[#94A3B8]' }}"></i>
+                    <span>{{ __('My Registrations') }}</span>
+                </a>
                 <a href="{{ route('events.index') }}"
                    class="flex items-center gap-3 px-3 py-2.5 rounded-xl text-xs font-semibold transition {{ request()->routeIs('events.*') ? 'bg-burgundy-gradient text-white shadow-md' : 'text-[#94A3B8] hover:text-white hover:bg-[#1E293B]' }}">
                     <i data-lucide="calendar" class="w-4 h-4 shrink-0 {{ request()->routeIs('events.*') ? 'text-white' : 'text-[#94A3B8]' }}"></i>
@@ -178,12 +188,22 @@
                     <i data-lucide="scan-line" class="w-4 h-4 shrink-0 text-amber-400"></i>
                     <span>{{ __('Organizer Scanner') }}</span>
                 </a>
+                <a href="{{ route('organizer.activity-scanner') }}"
+                   class="flex items-center gap-3 px-3 py-2.5 rounded-xl text-xs font-semibold transition {{ request()->routeIs('organizer.activity-scanner') ? 'bg-emerald-500/20 text-emerald-300 border border-emerald-500/40' : 'text-emerald-300/90 hover:text-emerald-200 hover:bg-[#1E293B]' }}">
+                    <i data-lucide="qr-code" class="w-4 h-4 shrink-0 text-emerald-400"></i>
+                    <span>{{ __('Activity Session Scanner') }}</span>
+                </a>
+                <a href="{{ route('admin.activities.index') }}"
+                   class="flex items-center gap-3 px-3 py-2.5 rounded-xl text-xs font-semibold transition {{ request()->routeIs('admin.activities.*') ? 'bg-amber-500/20 text-amber-300 border border-amber-500/40' : 'text-amber-300/90 hover:text-amber-200 hover:bg-[#1E293B]' }}">
+                    <i data-lucide="calendar-Check" class="w-4 h-4 shrink-0 text-amber-400"></i>
+                    <span>{{ __('Assigned Activities') }}</span>
+                </a>
             </div>
         </div>
         @endif
 
         <!-- Officer & Admin Console (Authorized Roles) -->
-        @if(Auth::user()->isAdmin() || Auth::user()->isSuperAdmin() || Auth::user()->isStaff() || Auth::user()->isTreasurer())
+        @if(Auth::user()->isAdmin() || Auth::user()->isSuperAdmin() || Auth::user()->isTreasurer() || Auth::user()->isAuditor())
         <div>
             <p class="px-3 mb-2 text-[10px] font-bold uppercase tracking-widest text-amber-400">Administration</p>
             <div class="space-y-1">

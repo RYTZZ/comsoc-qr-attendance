@@ -154,4 +154,25 @@ class EvaluationTemplateController extends Controller
 
         return back()->with('success', "Template '{$evaluation_template->title}' has been {$statusStr}.");
     }
+
+    public function destroy(EvaluationTemplate $evaluation_template): RedirectResponse
+    {
+        if ($evaluation_template->evaluations()->exists() || $evaluation_template->events()->exists()) {
+            $old = ['is_active' => $evaluation_template->is_active];
+            $evaluation_template->update(['is_active' => false]);
+            AuditLogger::log('evaluation.template_deactivated', $evaluation_template, $old, ['is_active' => false], 'Template deactivated instead of deleted to preserve historical event evaluations.');
+
+            return redirect()->route('admin.evaluation-templates.index')
+                ->with('success', "Template '{$evaluation_template->title}' has linked events/evaluations and was safely deactivated.");
+        }
+
+        $old = $evaluation_template->toArray();
+        $title = $evaluation_template->title;
+        $evaluation_template->delete();
+
+        AuditLogger::log('evaluation.template_deleted', null, $old, [], "Evaluation template '{$title}' deleted.");
+
+        return redirect()->route('admin.evaluation-templates.index')
+            ->with('success', "Evaluation template '{$title}' deleted.");
+    }
 }

@@ -8,10 +8,13 @@
     <title>{{ isset($title) ? $title . ' — ' : '' }}ComSoc QR Attendance</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Manrope:wght@600;700;800&family=Space+Grotesk:wght@600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@500;600;700&family=Manrope:wght@600;700;800&family=Space+Grotesk:wght@600;700&display=swap" rel="stylesheet">
     @vite(['resources/css/app.css', 'resources/js/app.js'])
 </head>
-<body class="h-full bg-[#0B1120] text-[#F8FAFC] antialiased font-sans" x-data="{ sidebarOpen: false }">
+<body class="h-full bg-[#0B1120] obsidian-canvas text-[#F8FAFC] antialiased font-sans"
+      x-data="{ sidebarOpen: false, commandOpen: false, commandQuery: '' }"
+      @keydown.window.ctrl.k.prevent="commandOpen = !commandOpen"
+      @keydown.window.meta.k.prevent="commandOpen = !commandOpen">
 
 <div class="flex h-full">
     <div x-show="sidebarOpen"
@@ -87,6 +90,24 @@
             </a>
 
             <div class="pt-4 pb-1">
+                <p class="px-3 text-xs font-semibold text-slate-500 uppercase tracking-wider">Activity Management</p>
+            </div>
+
+            <a href="{{ route('admin.activities.index') }}"
+               class="sidebar-link {{ request()->routeIs('admin.activities.*') ? 'active' : '' }}">
+                <i data-lucide="layers" class="sidebar-link-icon text-brand-400"></i>
+                Multi-Session Activities
+            </a>
+
+            @if(auth()->user()->isSuperAdmin())
+            <a href="{{ route('admin.registration-forms.index') }}"
+               class="sidebar-link {{ request()->routeIs('admin.registration-forms.*') ? 'active' : '' }}">
+                <i data-lucide="file-sliders" class="sidebar-link-icon text-amber-400"></i>
+                Registration Form Builder
+            </a>
+            @endif
+
+            <div class="pt-4 pb-1">
                 <p class="px-3 text-xs font-semibold text-slate-500 uppercase tracking-wider">Events & Attendance</p>
             </div>
 
@@ -132,6 +153,11 @@
                class="sidebar-link {{ request()->routeIs('organizer.scanner*') ? 'active' : '' }}">
                 <i data-lucide="scan-line" class="sidebar-link-icon text-amber-400"></i>
                 Organizer Scanner
+            </a>
+            <a href="{{ route('organizer.activity-scanner') }}"
+               class="sidebar-link {{ request()->routeIs('organizer.activity-scanner*') ? 'active' : '' }}">
+                <i data-lucide="qr-code" class="sidebar-link-icon text-emerald-400"></i>
+                Activity Session Scanner
             </a>
             @endif
 
@@ -309,6 +335,13 @@
             </div>
 
             <div class="flex items-center gap-2 sm:gap-3 ml-auto">
+                <button type="button"
+                        @click="commandOpen = true"
+                        class="hidden sm:inline-flex items-center gap-2 px-3 py-1.5 rounded-xl bg-[#0B1120] border border-slate-700 hover:border-[#8F3033] text-xs text-slate-400 hover:text-white transition">
+                    <i data-lucide="search" class="w-3.5 h-3.5 text-[#df747a]"></i>
+                    <span>Quick Jump...</span>
+                    <kbd class="px-1.5 py-0.5 rounded bg-slate-800 text-[10px] font-mono-tabular text-slate-300 border border-slate-700">Ctrl+K</kbd>
+                </button>
                 <a href="{{ route('dashboard') }}" class="btn-secondary text-[11px] sm:text-xs py-1.5 px-2.5 sm:px-3 flex items-center gap-1.5" title="Return to Member Dashboard">
                     <i data-lucide="layout-grid" class="w-3.5 h-3.5"></i>
                     <span class="hidden sm:inline">Member View</span>
@@ -356,6 +389,56 @@
 
             {{ $slot }}
         </main>
+    </div>
+</div>
+
+<!-- Officer & Admin Global Command Palette Modal (Ctrl+K) -->
+<div x-show="commandOpen"
+     style="display: none;"
+     class="fixed inset-0 z-50 flex items-start justify-center pt-20 px-4 bg-black/75 backdrop-blur-sm"
+     @keydown.escape.window="commandOpen = false"
+     @click.self="commandOpen = false">
+    <div class="w-full max-w-lg rounded-2xl bg-[#111827] border border-[#8F3033]/60 shadow-2xl overflow-hidden">
+        <div class="p-3.5 border-b border-slate-800 flex items-center gap-2.5">
+            <i data-lucide="terminal" class="w-4 h-4 text-[#df747a]"></i>
+            <input type="text"
+                   x-model="commandQuery"
+                   placeholder="Jump to module, scanner, activity, or report..."
+                   class="w-full bg-transparent border-0 text-xs text-white focus:ring-0 placeholder-slate-500">
+            <button type="button" @click="commandOpen = false" class="text-[10px] px-2 py-0.5 rounded bg-slate-800 text-slate-400 hover:text-white">ESC</button>
+        </div>
+        <div class="p-2 max-h-72 overflow-y-auto space-y-1 text-xs">
+            <a href="{{ route('admin.dashboard') }}" class="flex items-center justify-between px-3 py-2 rounded-xl hover:bg-[#1E293B] text-slate-200">
+                <span>Admin & Officer Dashboard</span>
+                <span class="text-[10px] font-mono-tabular text-slate-500">/admin/dashboard</span>
+            </a>
+            <a href="{{ route('admin.activities.index') }}" class="flex items-center justify-between px-3 py-2 rounded-xl hover:bg-[#1E293B] text-slate-200">
+                <span>Multi-Session Activities Management</span>
+                <span class="text-[10px] font-mono-tabular text-slate-500">/admin/activities</span>
+            </a>
+            @if(auth()->user()->isSuperAdmin())
+            <a href="{{ route('admin.registration-forms.index') }}" class="flex items-center justify-between px-3 py-2 rounded-xl hover:bg-[#1E293B] text-amber-300">
+                <span>Dynamic Registration Form Builder (Super Admin)</span>
+                <span class="text-[10px] font-mono-tabular text-slate-500">/admin/registration-forms</span>
+            </a>
+            @endif
+            <a href="{{ route('organizer.activity-scanner') }}" class="flex items-center justify-between px-3 py-2 rounded-xl hover:bg-[#1E293B] text-emerald-300">
+                <span>Multi-Session Activity QR Scanner</span>
+                <span class="text-[10px] font-mono-tabular text-slate-500">/organizer/activity-scanner</span>
+            </a>
+            <a href="{{ route('organizer.scanner') }}" class="flex items-center justify-between px-3 py-2 rounded-xl hover:bg-[#1E293B] text-amber-300">
+                <span>Single-Event Live QR Scanner</span>
+                <span class="text-[10px] font-mono-tabular text-slate-500">/organizer/scanner</span>
+            </a>
+            <a href="{{ route('admin.students.index') }}" class="flex items-center justify-between px-3 py-2 rounded-xl hover:bg-[#1E293B] text-slate-200">
+                <span>Student Masterlist & Profiles</span>
+                <span class="text-[10px] font-mono-tabular text-slate-500">/admin/students</span>
+            </a>
+            <a href="{{ route('admin.economy.index') }}" class="flex items-center justify-between px-3 py-2 rounded-xl hover:bg-[#1E293B] text-slate-200">
+                <span>EXP & Points Reward Economy</span>
+                <span class="text-[10px] font-mono-tabular text-slate-500">/admin/economy</span>
+            </a>
+        </div>
     </div>
 </div>
 

@@ -9,7 +9,7 @@
 
         <link rel="preconnect" href="https://fonts.googleapis.com">
         <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-        <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Manrope:wght@600;700;800&family=Space+Grotesk:wght@600;700&display=swap" rel="stylesheet">
+        <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@500;600;700&family=Manrope:wght@600;700;800&family=Space+Grotesk:wght@600;700&display=swap" rel="stylesheet">
 
         @vite(['resources/css/app.css', 'resources/js/app.js'])
     </head>
@@ -39,12 +39,12 @@
           x-effect="document.body.classList.toggle('overflow-hidden', drawerOpen || readerFullscreen)"
           @reader-fullscreen.window="readerFullscreen = $event.detail"
           @keydown.escape.window="closeDrawer()">
-        <div class="min-h-screen bg-[#0B1120] flex flex-col">
+        <div class="min-h-screen bg-[#0B1120] obsidian-canvas flex flex-col">
             @include('layouts.navigation')
 
             <div class="flex-1 flex flex-col min-w-0 w-full transition-all duration-300 ease-in-out">
 
-                <header class="sticky top-0 z-20 bg-[#172033]/95 backdrop-blur-md border-b border-[#334155] px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between shadow-md">
+                <header class="sticky top-0 z-20 bg-[#111827]/90 backdrop-blur-xl border-b border-white/[0.08] px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between shadow-lg">
                     <div class="flex items-center gap-3">
                         <!-- Recognizable Hamburger Toggle Button for both desktop and mobile -->
                         <button type="button"
@@ -68,10 +68,34 @@
                             </a>
                         </div>
 
-                        <div class="hidden xl:flex items-center gap-2 text-xs text-slate-400 ms-4 ps-4 border-l border-[#334155]">
-                            <span class="inline-block w-2 h-2 rounded-full bg-emerald-400"></span>
-                            <span class="font-medium text-[#94A3B8]">Computing Society of Sorsogon State University – Bulan Campus</span>
-                        </div>
+                        <!-- Desktop Top Quick-Nav Pills -->
+                        <nav class="hidden lg:flex items-center gap-1 ms-4 ps-4 border-l border-white/10" aria-label="Primary Quick Navigation">
+                            <a href="{{ route('dashboard') }}"
+                               class="px-3 py-1.5 rounded-xl text-xs font-semibold flex items-center gap-1.5 transition {{ request()->routeIs('dashboard') ? 'bg-[#560E0F]/50 text-white border border-[#8F3033]/60 shadow' : 'text-slate-400 hover:text-white hover:bg-white/5' }}">
+                                <i data-lucide="layout-dashboard" class="w-3.5 h-3.5 text-[#df747a]"></i>
+                                <span>Dashboard</span>
+                            </a>
+                            <a href="{{ route('activities.index') }}"
+                               class="px-3 py-1.5 rounded-xl text-xs font-semibold flex items-center gap-1.5 transition {{ request()->routeIs('activities.*') ? 'bg-[#560E0F]/50 text-white border border-[#8F3033]/60 shadow' : 'text-slate-400 hover:text-white hover:bg-white/5' }}">
+                                <i data-lucide="layers" class="w-3.5 h-3.5 text-[#df747a]"></i>
+                                <span>Activities</span>
+                            </a>
+                            <a href="{{ route('events.index') }}"
+                               class="px-3 py-1.5 rounded-xl text-xs font-semibold flex items-center gap-1.5 transition {{ request()->routeIs('events.*') ? 'bg-[#560E0F]/50 text-white border border-[#8F3033]/60 shadow' : 'text-slate-400 hover:text-white hover:bg-white/5' }}">
+                                <i data-lucide="calendar" class="w-3.5 h-3.5 text-sky-400"></i>
+                                <span>Events</span>
+                            </a>
+                            <a href="{{ route('missions.index') }}"
+                               class="px-3 py-1.5 rounded-xl text-xs font-semibold flex items-center gap-1.5 transition {{ request()->routeIs('missions.*') || request()->routeIs('shop.*') ? 'bg-[#560E0F]/50 text-white border border-[#8F3033]/60 shadow' : 'text-slate-400 hover:text-white hover:bg-white/5' }}">
+                                <i data-lucide="target" class="w-3.5 h-3.5 text-amber-400"></i>
+                                <span>Quests & Shop</span>
+                            </a>
+                            <a href="{{ route('directory.index') }}"
+                               class="px-3 py-1.5 rounded-xl text-xs font-semibold flex items-center gap-1.5 transition {{ request()->routeIs('directory.*') || request()->routeIs('projects.*') ? 'bg-[#560E0F]/50 text-white border border-[#8F3033]/60 shadow' : 'text-slate-400 hover:text-white hover:bg-white/5' }}">
+                                <i data-lucide="users" class="w-3.5 h-3.5 text-emerald-400"></i>
+                                <span>Community</span>
+                            </a>
+                        </nav>
                     </div>
 
                     <div class="flex items-center gap-2 sm:gap-3">
@@ -122,7 +146,7 @@
                                     {{ __('Active Sessions & Security') }}
                                 </x-dropdown-link>
 
-                                @if(Auth::user()->isAdmin() || Auth::user()->isSuperAdmin() || Auth::user()->isStaff() || Auth::user()->isTreasurer())
+                                @if(Auth::user()->isAdmin() || Auth::user()->isSuperAdmin() || Auth::user()->isTreasurer() || Auth::user()->isAuditor())
                                 <x-dropdown-link :href="route('admin.dashboard')" class="text-amber-300 hover:text-amber-200 hover:bg-[#1E293B] flex items-center gap-2 text-xs py-2.5 font-semibold">
                                     <i data-lucide="shield" class="w-4 h-4 text-amber-400"></i>
                                     {{ __('Officer Dashboard') }}
@@ -164,6 +188,46 @@
             </div>
         </div>
 
+        <!-- Mobile Floating 5-Icon Bottom Action Dock (Thumb-Zone Navigation) -->
+        @auth
+        <nav class="md:hidden fixed bottom-0 inset-x-0 z-30 bg-[#0B1120]/95 backdrop-blur-xl border-t border-white/10 px-2 py-1.5 shadow-2xl"
+             aria-label="Mobile Bottom Dock">
+            <div class="grid grid-cols-5 items-center max-w-md mx-auto">
+                <a href="{{ route('dashboard') }}"
+                   class="flex flex-col items-center justify-center py-1 rounded-xl text-[10px] font-semibold transition {{ request()->routeIs('dashboard') ? 'text-[#df747a]' : 'text-slate-400 hover:text-white' }}">
+                    <i data-lucide="home" class="w-4 h-4 mb-0.5"></i>
+                    <span>Home</span>
+                </a>
+
+                <a href="{{ route('activities.index') }}"
+                   class="flex flex-col items-center justify-center py-1 rounded-xl text-[10px] font-semibold transition {{ request()->routeIs('activities.*') ? 'text-[#df747a]' : 'text-slate-400 hover:text-white' }}">
+                    <i data-lucide="layers" class="w-4 h-4 mb-0.5"></i>
+                    <span>Activities</span>
+                </a>
+
+                <div class="flex flex-col items-center justify-center">
+                    <a href="{{ route('member.dynamic_qr') }}"
+                       class="-mt-5 w-12 h-12 rounded-2xl bg-gradient-to-br from-[#560E0F] to-[#E11D48] text-white shadow-lg shadow-[#8F3033]/50 border border-[#fda4af]/40 flex flex-col items-center justify-center transition transform active:scale-95"
+                       aria-label="Open My QR Pass">
+                        <i data-lucide="qr-code" class="w-5 h-5"></i>
+                        <span class="text-[8px] font-extrabold uppercase tracking-tighter leading-none mt-0.5">MY QR</span>
+                    </a>
+                </div>
+
+                <a href="{{ route('missions.index') }}"
+                   class="flex flex-col items-center justify-center py-1 rounded-xl text-[10px] font-semibold transition {{ request()->routeIs('missions.*') || request()->routeIs('shop.*') ? 'text-[#df747a]' : 'text-slate-400 hover:text-white' }}">
+                    <i data-lucide="target" class="w-4 h-4 mb-0.5"></i>
+                    <span>Quests</span>
+                </a>
+
+                <a href="{{ route('directory.index') }}"
+                   class="flex flex-col items-center justify-center py-1 rounded-xl text-[10px] font-semibold transition {{ request()->routeIs('directory.*') || request()->routeIs('projects.*') ? 'text-[#df747a]' : 'text-slate-400 hover:text-white' }}">
+                    <i data-lucide="users" class="w-4 h-4 mb-0.5"></i>
+                    <span>Community</span>
+                </a>
+            </div>
+        </nav>
+        @endauth
 
         <x-session-security-monitor />
         <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>

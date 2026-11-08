@@ -24,48 +24,25 @@ use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\PublicRegistrationController;
 use Illuminate\Support\Facades\Route;
 
-Route::get('/privacy', function () {
-    return view('privacy');
-})->name('privacy');
-Route::get('/privacy-notice', fn() => redirect()->route('privacy'));
+Route::view('/privacy', 'privacy')->name('privacy');
+Route::redirect('/privacy-notice', '/privacy');
 
-Route::get('/', function () {
-    if (!auth()->check()) {
-        return redirect()->route('login');
-    }
-    return redirect()->route('dashboard');
-})->name('home');
-Route::get('/terms-of-use', fn() => redirect()->route('privacy'))->name('public.terms');
-Route::get('/terms', fn() => redirect()->route('privacy'));
-Route::get('/about', fn() => redirect()->route('home'));
-Route::get('/officers', fn() => redirect()->route('home'));
-Route::get('/activities', fn() => redirect()->route('home'));
-Route::get('/activities/{slug}', fn() => redirect()->route('home'));
-Route::get('/achievements', fn() => redirect()->route('home'));
-Route::get('/gallery', fn() => redirect()->route('home'));
-Route::get('/partners', fn() => redirect()->route('home'));
+Route::get('/', [\App\Http\Controllers\MemberDashboardController::class, 'home'])->name('home');
+Route::redirect('/terms-of-use', '/privacy')->name('public.terms');
+Route::redirect('/terms', '/privacy');
+Route::redirect('/about', '/')->name('public.about');
+Route::redirect('/officers', '/')->name('public.officers');
+Route::get('/activities', [\App\Http\Controllers\MemberActivityController::class, 'index'])->name('activities.index');
+Route::redirect('/achievements', '/')->name('public.achievements');
+Route::redirect('/gallery', '/')->name('public.gallery');
+Route::redirect('/partners', '/')->name('public.partners');
 
-Route::get('/dashboard', function () {
-    $user = auth()->user();
-    if (!$user) return redirect()->route('login');
-    if (!$user->is_active) {
-        auth('web')->logout();
-        return redirect()->route('login')->withErrors(['email' => 'Your account has been deactivated.']);
-    }
-    if ($user->role === 'kiosk') {
-        if ($user->kiosk) {
-            return redirect()->route('kiosk.attendance', $user->kiosk);
-        }
-        return redirect()->route('kiosk.hub');
-    }
-    if ($user->role === 'student') {
-        return app(\App\Http\Controllers\MemberDashboardController::class)->index(request());
-    }
-    return redirect()->route('admin.dashboard');
-})->middleware(['auth'])->name('dashboard');
+Route::get('/dashboard', [\App\Http\Controllers\MemberDashboardController::class, 'dashboard'])
+    ->middleware(['auth'])
+    ->name('dashboard');
 
 Route::get('/register', [PublicRegistrationController::class, 'index'])->name('public.register');
-Route::name('register')->get('/register-alias', fn() => redirect()->route('public.register'));
+Route::redirect('/register-alias', '/register')->name('register');
 Route::post('/register', [PublicRegistrationController::class, 'store'])
     ->middleware('throttle:15,1')
     ->name('public.register.store');
@@ -77,12 +54,10 @@ Route::post('/events/{event}/register', [PublicRegistrationController::class, 's
     ->name('public.register.event.store');
 Route::get('/events/{event}/register/success', [PublicRegistrationController::class, 'success'])->name('public.register.event.success');
 
-Route::get('/register-non-student', function () {
-    return redirect()->route('public.register');
-})->name('public.register.latest');
+Route::redirect('/register-non-student', '/register')->name('public.register.latest');
 
 Route::get('/kiosk/health', [AttendanceKioskController::class, 'healthCheck'])->name('kiosk.health');
-Route::get('/kiosk', fn() => redirect()->route('login')->withErrors(['email' => 'No kiosk terminal is assigned to your account. Please contact the administrator.']))->name('kiosk.hub');
+Route::get('/kiosk', [\App\Http\Controllers\MemberDashboardController::class, 'kioskFallback'])->name('kiosk.hub');
 
 Route::middleware(['auth'])->group(function () {
     Route::get('/onboarding/adventurer', [\App\Http\Controllers\Onboarding\AdventurerSetupController::class, 'show'])->name('onboarding.adventurer');
@@ -146,6 +121,29 @@ Route::middleware(['auth', 'verified', 'require_password_change'])->group(functi
     Route::post('/events/{event}/join', [\App\Http\Controllers\MemberEventController::class, 'register'])->name('events.join');
     Route::get('/events/{event}/evaluation', [\App\Http\Controllers\MemberEvaluationController::class, 'show'])->name('events.evaluation.show');
     Route::post('/events/{event}/evaluation', [\App\Http\Controllers\MemberEvaluationController::class, 'store'])->name('events.evaluation.store');
+
+    // Dynamic Activity Registration & Multi-Session Event System (Student-Facing)
+    Route::prefix('activities')->name('activities.')->group(function () {
+        Route::get('/my-registrations', [\App\Http\Controllers\MemberActivityController::class, 'myRegistrations'])->name('my-registrations');
+        Route::get('/{activity}', [\App\Http\Controllers\MemberActivityController::class, 'show'])->name('show');
+        Route::post('/{activity}/register', [\App\Http\Controllers\MemberActivityController::class, 'register'])
+            ->middleware('throttle:20,1')
+            ->name('register');
+        Route::post('/{activity}/teams', [\App\Http\Controllers\MemberActivityController::class, 'createTeam'])
+            ->middleware('throttle:15,1')
+            ->name('teams.store');
+        Route::post('/teams/{team}/invite', [\App\Http\Controllers\MemberActivityController::class, 'inviteTeamMember'])
+            ->middleware('throttle:30,1')
+            ->name('teams.invite');
+        Route::post('/team-invitations/{membership}/respond', [\App\Http\Controllers\MemberActivityController::class, 'respondTeamInvitation'])
+            ->name('teams.invitations.respond');
+        Route::post('/registrations/{registration}/cancel', [\App\Http\Controllers\MemberActivityController::class, 'cancelRegistration'])
+            ->name('registrations.cancel');
+        Route::post('/session-registrations/{sessionRegistration}/switch', [\App\Http\Controllers\MemberActivityController::class, 'switchSession'])
+            ->name('sessions.switch');
+    });
+    Route::get('/activity-answers/{answer}/download', [\App\Http\Controllers\Admin\ActivityManagementController::class, 'downloadAnswerAttachment'])
+        ->name('activity-answers.download');
 
     Route::get('/tickets', [\App\Http\Controllers\MemberTicketController::class, 'index'])->name('tickets.index');
     Route::get('/tickets/{ticket}', [\App\Http\Controllers\MemberTicketController::class, 'show'])->name('tickets.show');
@@ -257,6 +255,12 @@ Route::middleware(['auth', 'verified', 'require_password_change'])->group(functi
         Route::post('/attendance/correct-missing-timeout', [\App\Http\Controllers\OrganizerScannerController::class, 'correctMissingTimeOut'])
             ->middleware('throttle:30,1')
             ->name('attendance.correct-timeout');
+
+        // Multi-Session Activity QR Scanner
+        Route::get('/activity-scanner', [\App\Http\Controllers\OrganizerActivityScannerController::class, 'index'])->name('activity-scanner');
+        Route::post('/activity-scanner/scan', [\App\Http\Controllers\OrganizerActivityScannerController::class, 'scan'])
+            ->middleware('throttle:120,1')
+            ->name('activity-scanner.scan');
     });
 
     Route::middleware(['role:kiosk,staff,treasurer,admin,super_admin'])->group(function () {
@@ -280,7 +284,34 @@ Route::middleware(['auth', 'verified', 'require_password_change'])->group(functi
         });
     });
 
-    Route::middleware(['role:admin,super_admin,treasurer,president,executive_secretary,auditor'])->prefix('admin')->name('admin.')->group(function () {
+    // Centralized Multi-Session Activity Management (Accessible to Admin roles + Assigned Organizers/Staff)
+    Route::middleware(['role:admin,comsoc_admin,super_admin,treasurer,president,executive_secretary,auditor,event_organizer,staff'])
+        ->prefix('admin/activities')
+        ->name('admin.activities.')
+        ->group(function () {
+            Route::get('/', [\App\Http\Controllers\Admin\ActivityManagementController::class, 'index'])->name('index');
+            Route::get('/create', [\App\Http\Controllers\Admin\ActivityManagementController::class, 'create'])->name('create');
+            Route::post('/', [\App\Http\Controllers\Admin\ActivityManagementController::class, 'store'])->name('store');
+            Route::get('/{activity}', [\App\Http\Controllers\Admin\ActivityManagementController::class, 'show'])->name('show');
+            Route::get('/{activity}/edit', [\App\Http\Controllers\Admin\ActivityManagementController::class, 'edit'])->name('edit');
+            Route::put('/{activity}', [\App\Http\Controllers\Admin\ActivityManagementController::class, 'update'])->name('update');
+            Route::get('/{activity}/export-csv', [\App\Http\Controllers\Admin\ActivityManagementController::class, 'exportRegistrationsCsv'])->name('export-csv');
+
+            // Sessions under Parent Activity
+            Route::post('/{activity}/sessions', [\App\Http\Controllers\Admin\ActivityManagementController::class, 'storeSession'])->name('sessions.store');
+            Route::put('/{activity}/sessions/{session}', [\App\Http\Controllers\Admin\ActivityManagementController::class, 'updateSession'])->name('sessions.update');
+            Route::delete('/{activity}/sessions/{session}', [\App\Http\Controllers\Admin\ActivityManagementController::class, 'destroySession'])->name('sessions.destroy');
+
+            // Registration, Session Registration, Team Review & Completion Verification
+            Route::post('/registrations/{registration}/approve', [\App\Http\Controllers\Admin\ActivityManagementController::class, 'approveRegistration'])->name('registrations.approve');
+            Route::post('/registrations/{registration}/reject', [\App\Http\Controllers\Admin\ActivityManagementController::class, 'rejectRegistration'])->name('registrations.reject');
+            Route::post('/session-registrations/{sessionRegistration}/approve', [\App\Http\Controllers\Admin\ActivityManagementController::class, 'approveSessionRegistration'])->name('session-registrations.approve');
+            Route::post('/session-registrations/{sessionRegistration}/reject', [\App\Http\Controllers\Admin\ActivityManagementController::class, 'rejectSessionRegistration'])->name('session-registrations.reject');
+            Route::post('/session-registrations/{sessionRegistration}/verify', [\App\Http\Controllers\Admin\ActivityManagementController::class, 'verifySessionCompletion'])->name('session-registrations.verify');
+            Route::post('/teams/{team}/review', [\App\Http\Controllers\Admin\ActivityManagementController::class, 'reviewTeam'])->name('teams.review');
+        });
+
+    Route::middleware(['role:admin,comsoc_admin,super_admin,treasurer,president,executive_secretary,auditor'])->prefix('admin')->name('admin.')->group(function () {
 
         Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
 
@@ -320,6 +351,21 @@ Route::middleware(['auth', 'verified', 'require_password_change'])->group(functi
 
             Route::get('audit-logs', [AuditLogController::class, 'index'])->name('audit-logs.index');
             Route::get('audit-logs/{auditLog}', [AuditLogController::class, 'show'])->name('audit-logs.show');
+
+            // Super Admin Exclusive: Dynamic Registration Form Builder
+            Route::prefix('registration-forms')->name('registration-forms.')->group(function () {
+                Route::get('/', [\App\Http\Controllers\Admin\RegistrationFormBuilderController::class, 'index'])->name('index');
+                Route::get('/create', [\App\Http\Controllers\Admin\RegistrationFormBuilderController::class, 'create'])->name('create');
+                Route::post('/', [\App\Http\Controllers\Admin\RegistrationFormBuilderController::class, 'store'])->name('store');
+                Route::get('/{registrationForm}/edit', [\App\Http\Controllers\Admin\RegistrationFormBuilderController::class, 'edit'])->name('edit');
+                Route::put('/{registrationForm}', [\App\Http\Controllers\Admin\RegistrationFormBuilderController::class, 'update'])->name('update');
+                Route::get('/{registrationForm}/preview', [\App\Http\Controllers\Admin\RegistrationFormBuilderController::class, 'preview'])->name('preview');
+                Route::post('/{registrationForm}/publish', [\App\Http\Controllers\Admin\RegistrationFormBuilderController::class, 'publish'])->name('publish');
+                Route::post('/{registrationForm}/archive', [\App\Http\Controllers\Admin\RegistrationFormBuilderController::class, 'archive'])->name('archive');
+                Route::post('/{registrationForm}/duplicate', [\App\Http\Controllers\Admin\RegistrationFormBuilderController::class, 'duplicate'])->name('duplicate');
+                Route::post('/{registrationForm}/assign', [\App\Http\Controllers\Admin\RegistrationFormBuilderController::class, 'assign'])->name('assign');
+                Route::delete('/{registrationForm}', [\App\Http\Controllers\Admin\RegistrationFormBuilderController::class, 'destroy'])->name('destroy');
+            });
 
             // Website Management
             Route::prefix('website')->name('website.')->group(function () {

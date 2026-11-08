@@ -1,4 +1,5 @@
-<x-layouts.admin :title="'Report Incident'">
+<x-app-layout>
+<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
 <div class="page-header">
     <div class="flex items-center gap-3">
         <a href="{{ route('staff.incidents.my') }}" class="btn-secondary btn-sm">← My Reports</a>
@@ -61,4 +62,5 @@
         </div>
     </form>
 </div>
-</x-layouts.admin>
+</div>
+</x-app-layout>

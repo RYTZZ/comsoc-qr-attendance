@@ -52,11 +52,21 @@ class AuthenticatedSessionController extends Controller
             return redirect()->route('kiosk.hub');
         }
 
-        if (in_array($user->role, ['super_admin', 'president', 'executive_secretary', 'admin', 'treasurer', 'staff', 'event_staff', 'auditor'])) {
+        if (in_array($user->role, ['super_admin', 'president', 'executive_secretary', 'admin', 'comsoc_admin', 'treasurer', 'auditor'], true)) {
             return redirect()->intended(route('admin.dashboard'));
         }
 
         return redirect()->intended(route('dashboard'));
+    }
+
+    public function accountAssistance(): View
+    {
+        return view('auth.account-assistance');
+    }
+
+    public function redirectToAccountAssistance(): RedirectResponse
+    {
+        return redirect()->route('account.assistance', [], 301);
     }
 
     public function destroy(Request $request): RedirectResponse

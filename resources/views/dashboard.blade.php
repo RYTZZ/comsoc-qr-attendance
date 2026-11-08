@@ -235,10 +235,104 @@
                 <!-- Dedicated Signature Status & Action Hub Section -->
                 <x-signature-status-card :signature-status="$signatureStatus" />
 
+                <!-- Crimson Obsidian Bento Hero Row: Next Activity/Session Spotlight + Instant QR Pass Preview -->
+                @php
+                    $nextActivityReg = isset($myActiveActivityRegistrations) ? $myActiveActivityRegistrations->first() : null;
+                    $nextUpcomingEvent = $upcomingEvents->first();
+                @endphp
+                <div class="grid grid-cols-1 lg:grid-cols-3 gap-4">
+                    <!-- Left Bento Hero (2/3 width): Happening Now / Next Registered Activity or Event -->
+                    <div class="lg:col-span-2 bento-hero flex flex-col justify-between gap-4">
+                        <div class="space-y-2">
+                            <div class="flex flex-wrap items-center justify-between gap-2">
+                                <span class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-emerald-500/15 border border-emerald-500/30 text-emerald-300 text-[10px] font-bold uppercase tracking-wider">
+                                    <span class="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse"></span>
+                                    {{ $nextActivityReg ? 'Active Multi-Session Pass' : 'Adventurer Mission Deck' }}
+                                </span>
+                                <a href="{{ route('activities.my-registrations') }}" class="text-xs font-semibold text-[#df747a] hover:text-white inline-flex items-center gap-1">
+                                    <span>My Activity Passes</span>
+                                    <i data-lucide="arrow-right" class="w-3.5 h-3.5"></i>
+                                </a>
+                            </div>
+
+                            @if($nextActivityReg && $nextActivityReg->activity)
+                                <h2 class="text-lg sm:text-xl font-extrabold text-white font-brand-display tracking-tight">
+                                    {{ $nextActivityReg->activity->title }}
+                                </h2>
+                                <div class="flex flex-wrap items-center gap-3 text-xs text-slate-300">
+                                    <span class="font-mono-tabular px-2 py-0.5 rounded bg-[#0B1120]/80 border border-white/10 text-[#dfa6a9]">
+                                        {{ $nextActivityReg->ticket_code }}
+                                    </span>
+                                    <span><i data-lucide="map-pin" class="w-3.5 h-3.5 inline text-[#df747a] mr-1"></i>{{ $nextActivityReg->activity->venue ?: 'SorSU Bulan Campus' }}</span>
+                                    <span><i data-lucide="layers" class="w-3.5 h-3.5 inline text-amber-400 mr-1"></i>{{ $nextActivityReg->sessionRegistrations->count() }} Enrolled Session(s)</span>
+                                    @if($nextActivityReg->team)
+                                        <span class="px-2 py-0.5 rounded bg-indigo-500/20 border border-indigo-500/30 text-indigo-300 text-[10px] font-bold">
+                                            Team: {{ $nextActivityReg->team->name }}
+                                        </span>
+                                    @endif
+                                </div>
+                            @elseif($nextUpcomingEvent)
+                                <h2 class="text-lg sm:text-xl font-extrabold text-white font-brand-display tracking-tight">
+                                    {{ $nextUpcomingEvent->name }}
+                                </h2>
+                                <p class="text-xs text-slate-300">
+                                    {{ $nextUpcomingEvent->event_date?->format('F j, Y') }} • {{ $nextUpcomingEvent->venue ?: 'SorSU Bulan Campus' }}
+                                </p>
+                            @else
+                                <h2 class="text-lg sm:text-xl font-extrabold text-white font-brand-display tracking-tight">
+                                    Ready for Your Next COMSOC Activity
+                                </h2>
+                                <p class="text-xs text-slate-300">
+                                    Browse multi-session workshops, IDEATHONs, hackathons, and seminars to earn Season EXP and redeemable Points.
+                                </p>
+                            @endif
+                        </div>
+
+                        <div class="flex flex-wrap items-center gap-2.5 pt-2 border-t border-white/10">
+                            <a href="{{ route('activities.index') }}" class="btn-primary btn-sm text-xs flex items-center gap-1.5">
+                                <i data-lucide="layers" class="w-3.5 h-3.5"></i>
+                                <span>Explore Multi-Session Activities</span>
+                            </a>
+                            <a href="{{ route('events.index') }}" class="btn-secondary btn-sm text-xs flex items-center gap-1.5">
+                                <i data-lucide="calendar" class="w-3.5 h-3.5 text-sky-400"></i>
+                                <span>View Events</span>
+                            </a>
+                        </div>
+                    </div>
+
+                    <!-- Right Bento Card (1/3 width): Instant Attendance QR Pass Preview -->
+                    <div class="bento-card flex flex-col justify-between bg-gradient-to-b from-[#172033]/90 to-[#0B1120] border-[#8F3033]/40">
+                        <div>
+                            <div class="flex items-center justify-between">
+                                <span class="text-[10px] font-bold uppercase tracking-widest text-[#df747a]">Rolling QR Pass</span>
+                                <span class="px-2 py-0.5 rounded-full bg-emerald-500/15 border border-emerald-500/30 text-emerald-300 text-[10px] font-bold">
+                                    60s Dynamic Token
+                                </span>
+                            </div>
+                            <div class="mt-3 p-3 rounded-xl bg-[#0B1120]/90 border border-white/[0.07] flex items-center justify-between">
+                                <div>
+                                    <div class="text-[10px] uppercase text-slate-400">Member Pass ID</div>
+                                    <div class="text-sm font-bold text-white font-mono-tabular">
+                                        {{ $user->member_id ?: $user->username }}
+                                    </div>
+                                </div>
+                                <div class="w-9 h-9 rounded-xl bg-[#560E0F]/40 border border-[#8F3033] flex items-center justify-center text-[#df747a]">
+                                    <i data-lucide="qr-code" class="w-5 h-5"></i>
+                                </div>
+                            </div>
+                        </div>
+
+                        <a href="{{ route('member.dynamic_qr') }}" class="mt-4 btn-primary w-full text-xs flex items-center justify-center gap-2 py-2.5">
+                            <i data-lucide="scan-line" class="w-4 h-4"></i>
+                            <span>Launch Attendance QR Pass</span>
+                        </a>
+                    </div>
+                </div>
+
                 <!-- 4 Concise Summary Metric Cards -->
                 <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
                     <!-- Spendable EXP -->
-                    <div class="card bg-[#172033] border border-[#334155] p-5 shadow-lg">
+                    <div class="bento-card">
                         <div class="flex items-center justify-between">
                             <span class="text-xs font-semibold text-[#94A3B8] uppercase tracking-wider">Spendable EXP</span>
                             <div class="w-8 h-8 rounded-lg bg-amber-500/10 border border-amber-500/20 flex items-center justify-center text-amber-400">
@@ -246,7 +340,7 @@
                             </div>
                         </div>
                         <div class="mt-3 flex items-baseline gap-2">
-                            <span class="text-2xl sm:text-3xl font-extrabold text-amber-400 font-mono">{{ number_format($spendableExp) }}</span>
+                            <span class="text-2xl sm:text-3xl font-extrabold text-amber-400 font-mono-tabular">{{ number_format($spendableExp) }}</span>
                             <span class="text-xs text-slate-400 font-medium">pts</span>
                         </div>
                         <p class="text-[11px] text-[#94A3B8] mt-1.5 flex items-center gap-1">
@@ -255,7 +349,7 @@
                     </div>
 
                     <!-- Lifetime EXP & Level -->
-                    <div class="card bg-[#172033] border border-[#334155] p-5 shadow-lg">
+                    <div class="bento-card">
                         <div class="flex items-center justify-between">
                             <span class="text-xs font-semibold text-[#94A3B8] uppercase tracking-wider">Level & Progression</span>
                             <div class="w-8 h-8 rounded-lg bg-burgundy-deep border border-[#8F3033]/50 flex items-center justify-center text-[#df747a]">
@@ -272,7 +366,7 @@
                     </div>
 
                     <!-- Verified Attendance -->
-                    <div class="card bg-[#172033] border border-[#334155] p-5 shadow-lg">
+                    <div class="bento-card">
                         <div class="flex items-center justify-between">
                             <span class="text-xs font-semibold text-[#94A3B8] uppercase tracking-wider">Attendance Scans</span>
                             <div class="w-8 h-8 rounded-lg bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center text-emerald-400">
@@ -280,14 +374,14 @@
                             </div>
                         </div>
                         <div class="mt-3 flex items-baseline gap-2">
-                            <span class="text-2xl sm:text-3xl font-extrabold text-emerald-400 font-mono">{{ $verifiedAttendanceCount }}</span>
+                            <span class="text-2xl sm:text-3xl font-extrabold text-emerald-400 font-mono-tabular">{{ $verifiedAttendanceCount }}</span>
                             <span class="text-xs text-slate-400 font-medium">events attended</span>
                         </div>
                         <p class="text-[11px] text-slate-400 mt-1.5">Official seminar & activity records</p>
                     </div>
 
                     <!-- Upcoming Events -->
-                    <div class="card bg-[#172033] border border-[#334155] p-5 shadow-lg">
+                    <div class="bento-card">
                         <div class="flex items-center justify-between">
                             <span class="text-xs font-semibold text-[#94A3B8] uppercase tracking-wider">Upcoming Events</span>
                             <div class="w-8 h-8 rounded-lg bg-blue-500/10 border border-blue-500/20 flex items-center justify-center text-blue-400">
@@ -295,7 +389,7 @@
                             </div>
                         </div>
                         <div class="mt-3 flex items-baseline gap-2">
-                            <span class="text-2xl sm:text-3xl font-extrabold text-blue-400 font-mono">{{ $upcomingEvents->count() }}</span>
+                            <span class="text-2xl sm:text-3xl font-extrabold text-blue-400 font-mono-tabular">{{ $upcomingEvents->count() }}</span>
                             <span class="text-xs text-slate-400 font-medium">on schedule</span>
                         </div>
                         <p class="text-[11px] text-slate-400 mt-1.5">Available for attendance & EXP</p>

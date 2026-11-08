@@ -27,26 +27,21 @@ Route::middleware('guest')->group(function () {
     Route::post('login', [AuthenticatedSessionController::class, 'store']);
 
     // Account Assistance (Official COMSOC Communication Channels)
-    Route::get('account-assistance', function () {
-        return view('auth.account-assistance');
-    })->name('account.assistance');
+    Route::get('account-assistance', [AuthenticatedSessionController::class, 'accountAssistance'])
+        ->name('account.assistance');
 
     // Permanent 301 redirects for obsolete password recovery endpoints
-    Route::get('forgot-password', function () {
-        return redirect()->route('account.assistance', [], 301);
-    })->name('password.request');
+    Route::get('forgot-password', [AuthenticatedSessionController::class, 'redirectToAccountAssistance'])
+        ->name('password.request');
 
-    Route::post('forgot-password', function () {
-        return redirect()->route('account.assistance', [], 301);
-    })->name('password.email');
+    Route::post('forgot-password', [AuthenticatedSessionController::class, 'redirectToAccountAssistance'])
+        ->name('password.email');
 
-    Route::get('reset-password/{token}', function () {
-        return redirect()->route('account.assistance', [], 301);
-    })->name('password.reset');
+    Route::get('reset-password/{token}', [AuthenticatedSessionController::class, 'redirectToAccountAssistance'])
+        ->name('password.reset');
 
-    Route::post('reset-password', function () {
-        return redirect()->route('account.assistance', [], 301);
-    })->name('password.store');
+    Route::post('reset-password', [AuthenticatedSessionController::class, 'redirectToAccountAssistance'])
+        ->name('password.store');
 });
 
 Route::middleware('auth')->group(function () {

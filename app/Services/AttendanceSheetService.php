@@ -130,15 +130,42 @@ class AttendanceSheetService
     /** Render the PDF. Returns raw PDF bytes. */
     public function render(Event $event, Collection $rows, Collection $signatures): string
     {
-        $pdf = Pdf::loadView('pdf.attendance-sheet', $this->viewData($event, $rows, $signatures))
-            ->setPaper([0, 0, 612, 936]); // 8.5 x 13 in, as in the DOCX (w:pgSz 12240x18720)
+        $tmpDir = storage_path('framework/cache/dompdf-tmp/' . (string) \Illuminate\Support\Str::uuid());
+        if (!is_dir($tmpDir)) {
+            @mkdir($tmpDir, 0775, true);
+        }
 
-        $pdf->render();
-        $canvas = $pdf->getDomPDF()->getCanvas();
-        $font = $pdf->getDomPDF()->getFontMetrics()->getFont('helvetica');
-        $canvas->page_text(474, 843, '{PAGE_NUM} of {PAGE_COUNT}', $font, 8, [0, 0, 0]);
+        try {
+            $pdf = Pdf::loadView('pdf.attendance-sheet', $this->viewData($event, $rows, $signatures))
+                ->setPaper([0, 0, 612, 936]) // 8.5 x 13 in, as in the DOCX (w:pgSz 12240x18720)
+                ->setOption('tempDir', $tmpDir);
 
-        return $pdf->output();
+            $pdf->render();
+            $canvas = $pdf->getDomPDF()->getCanvas();
+            $font = $pdf->getDomPDF()->getFontMetrics()->getFont('helvetica');
+            $canvas->page_text(474, 843, '{PAGE_NUM} of {PAGE_COUNT}', $font, 8, [0, 0, 0]);
+
+            $output = $pdf->output();
+
+            set_error_handler(static fn () => true);
+            try {
+                unset($canvas, $pdf);
+                gc_collect_cycles();
+            } finally {
+                restore_error_handler();
+            }
+
+            return $output;
+        } finally {
+            if (is_dir($tmpDir)) {
+                foreach (glob($tmpDir . DIRECTORY_SEPARATOR . '*') ?: [] as $file) {
+                    if (is_file($file)) {
+                        @unlink($file);
+                    }
+                }
+                @rmdir($tmpDir);
+            }
+        }
     }
 
     public function latestIssuance(Event $event): ?AttendanceSheetIssuance

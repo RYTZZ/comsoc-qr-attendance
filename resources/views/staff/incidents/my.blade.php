@@ -1,4 +1,5 @@
-<x-layouts.admin :title="'My Incident Reports'">
+<x-app-layout>
+<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
 <div class="page-header">
     <div>
         <h1 class="page-title">My Filed Incident Reports</h1>
@@ -52,4 +53,5 @@
         </div>
     @endif
 </div>
-</x-layouts.admin>
+</div>
+</x-app-layout>

@@ -434,8 +434,8 @@ class User extends Authenticatable
             return true;
         }
 
-        // COMSOC Admin has access to event organizer and staff roles
-        if ($userRole === 'comsoc_admin' && array_intersect(['event_organizer', 'staff', 'event_staff'], $roles)) {
+        // COMSOC Admin has access to admin, event organizer, and staff roles
+        if ($userRole === 'comsoc_admin' && array_intersect(['admin', 'comsoc_admin', 'event_organizer', 'staff', 'event_staff'], $roles)) {
             return true;
         }
 
@@ -538,5 +538,30 @@ class User extends Authenticatable
         }
 
         return null;
+    }
+
+    public function activityRegistrations(): HasMany
+    {
+        return $this->hasMany(ActivityRegistration::class, 'user_id');
+    }
+
+    public function activitySessionRegistrations(): HasMany
+    {
+        return $this->hasMany(ActivitySessionRegistration::class, 'user_id');
+    }
+
+    public function activityTeamMemberships(): HasMany
+    {
+        return $this->hasMany(ActivityTeamMember::class, 'user_id');
+    }
+
+    public function getProfileProgram(): ?string
+    {
+        return $this->student?->program ?? $this->profile?->program ?? null;
+    }
+
+    public function getProfileYearLevel(): ?string
+    {
+        return $this->student?->year_level ?? $this->profile?->year_level ?? null;
     }
 }

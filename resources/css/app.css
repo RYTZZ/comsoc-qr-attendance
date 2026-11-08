@@ -3,7 +3,7 @@
 @tailwind utilities;
 
 @layer base {
-    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Manrope:wght@600;700;800&family=Space+Grotesk:wght@600;700&display=swap');
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@500;600;700&family=Manrope:wght@600;700;800&family=Space+Grotesk:wght@600;700&display=swap');
 
     * {
         font-family: 'Inter', system-ui, -apple-system, sans-serif;
@@ -52,6 +52,23 @@
 
     .font-brand-promo {
         font-family: 'Space Grotesk', sans-serif;
+    }
+
+    .font-mono-tabular {
+        font-family: 'JetBrains Mono', ui-monospace, SFMono-Regular, monospace;
+        font-variant-numeric: tabular-nums;
+    }
+
+    .obsidian-canvas {
+        background-image: radial-gradient(ellipse 80% 50% at 50% -20%, rgba(143, 48, 51, 0.18), rgba(15, 23, 42, 0));
+    }
+
+    .bento-card {
+        @apply bg-slate-900/75 backdrop-blur-xl border border-white/[0.08] rounded-2xl p-5 shadow-2xl transition-all duration-200 hover:border-[#8F3033]/50;
+    }
+
+    .bento-hero {
+        @apply bg-gradient-to-br from-[#560E0F]/45 via-[#111827]/90 to-[#0B1120] backdrop-blur-xl border border-[#8F3033]/50 rounded-2xl p-5 sm:p-6 shadow-2xl;
     }
 
     .card {
