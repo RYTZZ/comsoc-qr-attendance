@@ -391,12 +391,19 @@ class EmailVerificationOtpTest extends TestCase
 
         $this->assertStringContainsString('Verify Your Email Address', $rendered);
         $this->assertStringContainsString('Hello, Juan Dela Cruz!', $rendered);
+        $this->assertStringContainsString('Use the verification code below to verify your COMSOC Hub account.', $rendered);
         $this->assertStringContainsString('456789', $rendered);
-        $this->assertStringContainsString('15 minutes', $rendered);
-        $this->assertStringContainsString('Never share this verification code with anyone', $rendered);
+        $this->assertStringContainsString('Expires in 15 minutes.', $rendered);
+        $this->assertStringContainsString('Never share this code with anyone. COMSOC Hub will never ask for it.', $rendered);
+        $this->assertStringContainsString("If you didn't request this code, simply ignore this email.", $rendered);
         $this->assertStringContainsString('One Community. One Platform. More Possibilities.', $rendered);
-        $this->assertStringContainsString('Computing Society Organization', $rendered);
+        $this->assertStringContainsString('Computing Society Organization – SorSU Bulan Campus', $rendered);
         $this->assertStringContainsString(date('Y'), $rendered);
         $this->assertStringContainsString('COMSOC.png', $rendered);
+
+        // Sender Envelope verification
+        $envelope = $mailable->envelope();
+        $this->assertSame('COMSOC Hub', $envelope->from->name);
+        $this->assertSame('Verify Your COMSOC Hub Email Address', $envelope->subject);
     }
 }

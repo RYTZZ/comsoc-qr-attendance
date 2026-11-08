@@ -36,9 +36,9 @@
         }
         .otp-code-text {
             font-family: 'Courier New', Courier, Consolas, Monaco, monospace !important;
-            font-size: 38px !important;
+            font-size: 34px !important;
             font-weight: 800 !important;
-            letter-spacing: 12px !important;
+            letter-spacing: 8px !important;
             color: #FFFFFF !important;
             line-height: 1.2 !important;
         }
@@ -48,17 +48,20 @@
                 max-width: 100% !important;
             }
             .mobile-content {
-                padding: 24px 20px !important;
+                padding: 20px 16px !important;
             }
             .mobile-header {
-                padding: 20px !important;
+                padding: 16px 16px !important;
             }
             .otp-code-text {
-                font-size: 30px !important;
-                letter-spacing: 8px !important;
+                font-size: 28px !important;
+                letter-spacing: 6px !important;
             }
             .otp-box {
-                padding: 20px 12px !important;
+                padding: 16px 10px !important;
+            }
+            .mobile-footer {
+                padding: 18px 16px 20px 16px !important;
             }
         }
     </style>
@@ -66,35 +69,53 @@
 <body style="margin: 0; padding: 0; background-color: #0B1120; color: #F8FAFC;">
     <!-- Preheader text (preview in email client inbox) -->
     <div style="display: none; font-size: 1px; color: #0B1120; line-height: 1px; max-height: 0px; max-width: 0px; opacity: 0; overflow: hidden; mso-hide: all;">
-        Your six-digit COMSOC Hub email verification code is {{ $otpCode }}. Expires in {{ $expirationMinutes }} minutes.
+        Your COMSOC Hub email verification code is {{ $otpCode }}. Expires in {{ $expirationMinutes }} minutes.
     </div>
 
+    @php
+        // Resolve absolute HTTPS logo URL
+        $configuredUrl = config('app.url');
+        if (empty($configuredUrl) || str_contains($configuredUrl, 'localhost') || str_contains($configuredUrl, '127.0.0.1')) {
+            $baseLogoUrl = 'https://comsochub.tech';
+        } else {
+            $baseLogoUrl = rtrim($configuredUrl, '/');
+            if (!str_starts_with($baseLogoUrl, 'http://') && !str_starts_with($baseLogoUrl, 'https://')) {
+                $baseLogoUrl = 'https://' . $baseLogoUrl;
+            }
+            // Upgrade HTTP to HTTPS for secure email image loading
+            if (str_starts_with($baseLogoUrl, 'http://')) {
+                $baseLogoUrl = 'https://' . substr($baseLogoUrl, 7);
+            }
+        }
+        $logoUrl = $baseLogoUrl . '/images/COMSOC.png';
+    @endphp
+
     <!-- Main Wrapper Table -->
-    <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="background-color: #0B1120; width: 100%; margin: 0; padding: 36px 16px;">
+    <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="background-color: #0B1120; width: 100%; margin: 0; padding: 20px 12px;">
         <tr>
             <td align="center" valign="top">
                 <!-- Inner Container -->
-                <table role="presentation" class="email-container" width="560" cellpadding="0" cellspacing="0" border="0" style="max-width: 560px; width: 100%; background-color: #172033; border: 1px solid #334155; border-radius: 18px; overflow: hidden; box-shadow: 0 20px 40px rgba(0,0,0,0.6);">
+                <table role="presentation" class="email-container" width="520" cellpadding="0" cellspacing="0" border="0" style="max-width: 520px; width: 100%; background-color: #172033; border: 1px solid #334155; border-radius: 16px; overflow: hidden; box-shadow: 0 16px 32px rgba(0,0,0,0.5);">
                     
                     <!-- Top Maroon Accent Strip -->
                     <tr>
-                        <td height="4" style="background: linear-gradient(90deg, #560E0F 0%, #8F3033 50%, #560E0F 100%); line-height: 4px; font-size: 4px;">&nbsp;</td>
+                        <td height="3" style="background: linear-gradient(90deg, #560E0F 0%, #8F3033 50%, #560E0F 100%); line-height: 3px; font-size: 3px;">&nbsp;</td>
                     </tr>
 
-                    <!-- Compact & Elegant Header -->
+                    <!-- Header -->
                     <tr>
-                        <td class="mobile-header" style="background-color: #111A2E; padding: 24px 32px; border-bottom: 1px solid #23314D;">
+                        <td class="mobile-header" style="background-color: #111A2E; padding: 18px 24px; border-bottom: 1px solid #23314D;">
                             <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0">
                                 <tr>
-                                    <td width="48" valign="middle" style="padding-right: 14px;">
-                                        <img src="{{ asset('images/COMSOC.png') }}" width="44" height="44" alt="COMSOC Hub Logo" style="display: block; width: 44px; height: 44px; max-width: 44px; border-radius: 10px; background-color: #0B1120; border: 1px solid #334155; object-fit: contain;" />
+                                    <td width="42" valign="middle" style="padding-right: 12px;">
+                                        <img src="{{ $logoUrl }}" width="40" height="40" alt="COMSOC Hub" style="display: block; width: 40px; height: 40px; max-width: 40px; border-radius: 8px; background-color: #0B1120; border: 1px solid #334155; object-fit: contain; color: #FFFFFF; font-size: 10px;" />
                                     </td>
                                     <td valign="middle">
-                                        <div style="font-size: 10px; font-weight: 700; letter-spacing: 1.5px; text-transform: uppercase; color: #df747a; margin-bottom: 2px;">
-                                            Sorsogon State University &bull; Computing Society
-                                        </div>
-                                        <div style="font-size: 20px; font-weight: 800; color: #FFFFFF; letter-spacing: -0.3px; line-height: 1.2;">
+                                        <div style="font-size: 17px; font-weight: 800; color: #FFFFFF; letter-spacing: -0.2px; line-height: 1.2;">
                                             COMSOC Hub
+                                        </div>
+                                        <div style="font-size: 11px; font-weight: 600; color: #df747a; margin-top: 1px; line-height: 1.2;">
+                                            Sorsogon State University &ndash; Computing Society
                                         </div>
                                     </td>
                                 </tr>
@@ -104,65 +125,51 @@
 
                     <!-- Main Email Body -->
                     <tr>
-                        <td class="mobile-content" style="padding: 36px 32px 32px 32px;">
+                        <td class="mobile-content" style="padding: 24px 24px 20px 24px;">
                             <!-- Heading -->
-                            <h1 style="margin: 0 0 16px 0; font-size: 22px; font-weight: 800; color: #FFFFFF; letter-spacing: -0.4px; line-height: 1.3;">
+                            <h1 style="margin: 0 0 12px 0; font-size: 19px; font-weight: 800; color: #FFFFFF; letter-spacing: -0.3px; line-height: 1.3;">
                                 Verify Your Email Address
                             </h1>
 
                             <!-- Greeting -->
-                            <p style="margin: 0 0 14px 0; font-size: 15px; font-weight: 700; color: #F8FAFC;">
+                            <p style="margin: 0 0 8px 0; font-size: 14px; font-weight: 700; color: #F8FAFC; line-height: 1.4;">
                                 Hello, {{ $studentName }}!
                             </p>
 
-                            <!-- Explanatory Message -->
-                            <p style="margin: 0 0 24px 0; font-size: 14px; line-height: 1.65; color: #CBD5E1;">
-                                Thank you for using COMSOC Hub. Please use the following six-digit verification code to confirm your email address and complete your account verification.
+                            <!-- Instruction -->
+                            <p style="margin: 0 0 18px 0; font-size: 13px; line-height: 1.5; color: #CBD5E1;">
+                                Use the verification code below to verify your COMSOC Hub account.
                             </p>
 
-                            <!-- Verification Code Centerpiece Box -->
-                            <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="margin: 0 0 24px 0;">
+                            <!-- Single Clean Maroon Outline OTP Box -->
+                            <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="margin: 0 0 18px 0;">
                                 <tr>
-                                    <td class="otp-box" align="center" style="background-color: #0B1120; border: 1px solid #8F3033; border-radius: 14px; padding: 26px 16px; text-align: center;">
-                                        <div style="font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 2px; color: #94A3B8; margin-bottom: 10px;">
-                                            Your One-Time Verification Code
-                                        </div>
-                                        <div class="otp-code-text" style="font-family: 'Courier New', Courier, Consolas, Monaco, monospace; font-size: 38px; font-weight: 800; letter-spacing: 12px; color: #FFFFFF; text-align: center; text-indent: 12px;">
+                                    <td class="otp-box" align="center" style="background-color: #0B1120; border: 1.5px solid #8F3033; border-radius: 12px; padding: 18px 14px; text-align: center;">
+                                        <div class="otp-code-text" style="font-family: 'Courier New', Courier, Consolas, Monaco, monospace; font-size: 34px; font-weight: 800; letter-spacing: 8px; color: #FFFFFF; text-align: center; text-indent: 8px; line-height: 1.2;">
                                             {{ $otpCode }}
                                         </div>
-                                        <table role="presentation" align="center" cellpadding="0" cellspacing="0" border="0" style="margin-top: 14px;">
-                                            <tr>
-                                                <td style="background-color: rgba(86, 14, 15, 0.4); border: 1px solid rgba(223, 116, 122, 0.35); border-radius: 20px; padding: 4px 12px;">
-                                                    <span style="font-size: 11px; font-weight: 700; color: #df747a;">
-                                                        &#9201; This code will expire in {{ $expirationMinutes }} minutes.
-                                                    </span>
-                                                </td>
-                                            </tr>
-                                        </table>
+                                        <div style="margin-top: 8px; font-size: 11px; font-weight: 600; color: #df747a;">
+                                            Expires in {{ $expirationMinutes }} minutes.
+                                        </div>
                                     </td>
                                 </tr>
                             </table>
 
-                            <!-- Security Reminder Box -->
-                            <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="margin: 0 0 24px 0;">
-                                <tr>
-                                    <td style="background-color: #1E293B; border-left: 3px solid #8F3033; border-radius: 4px 10px 10px 4px; padding: 12px 16px;">
-                                        <p style="margin: 0; font-size: 12px; line-height: 1.55; color: #94A3B8;">
-                                            <strong style="color: #CBD5E1;">Security Notice:</strong> Never share this verification code with anyone. COMSOC Hub administrators and officers will never ask you to disclose it.
-                                        </p>
-                                    </td>
-                                </tr>
-                            </table>
+                            <!-- Short Security Notice -->
+                            <p style="margin: 0 0 8px 0; font-size: 12px; line-height: 1.5; color: #94A3B8;">
+                                <strong style="color: #CBD5E1;">Security Notice:</strong> Never share this code with anyone. COMSOC Hub will never ask for it.
+                            </p>
 
-                            <p style="margin: 0; font-size: 13px; line-height: 1.6; color: #64748B;">
-                                If you did not initiate this request or register for COMSOC Hub, you can safely ignore this email. No changes will be applied to your account.
+                            <!-- Ignore Disclaimer -->
+                            <p style="margin: 0; font-size: 12px; line-height: 1.5; color: #64748B;">
+                                If you didn't request this code, simply ignore this email.
                             </p>
                         </td>
                     </tr>
 
                     <!-- Divider -->
                     <tr>
-                        <td style="padding: 0 32px;">
+                        <td style="padding: 0 24px;">
                             <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0">
                                 <tr>
                                     <td style="border-top: 1px solid #23314D; height: 1px; line-height: 1px; font-size: 1px;">&nbsp;</td>
@@ -171,18 +178,18 @@
                         </td>
                     </tr>
 
-                    <!-- Email Footer -->
+                    <!-- Complete Footer -->
                     <tr>
-                        <td style="padding: 24px 32px 30px 32px; background-color: #111A2E; text-align: center;">
-                            <div style="font-size: 13px; font-weight: 800; color: #F8FAFC; margin-bottom: 4px; letter-spacing: -0.2px;">
+                        <td class="mobile-footer" style="padding: 18px 24px 22px 24px; background-color: #111A2E; text-align: center;">
+                            <div style="font-size: 13px; font-weight: 800; color: #F8FAFC; margin-bottom: 2px;">
                                 COMSOC Hub
                             </div>
-                            <div style="font-size: 11px; font-weight: 600; color: #df747a; margin-bottom: 6px;">
+                            <div style="font-size: 11px; font-weight: 600; color: #df747a; margin-bottom: 4px;">
                                 One Community. One Platform. More Possibilities.
                             </div>
                             <div style="font-size: 11px; line-height: 1.5; color: #64748B;">
-                                Computing Society Organization &bull; Sorsogon State University &ndash; Bulan Campus<br />
-                                &copy; {{ date('Y') }} COMSOC Hub. All rights reserved.
+                                Computing Society Organization – SorSU Bulan Campus<br />
+                                &copy; {{ date('Y') }}
                             </div>
                         </td>
                     </tr>

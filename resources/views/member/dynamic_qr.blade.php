@@ -61,7 +61,7 @@
                             </select>
                         </div>
                     </div>
-                @elseif(isset($event))
+                @elseif(isset($event) && ($passState ?? '') !== 'ended')
                     <div class="mb-3 px-3 py-1.5 rounded-xl bg-slate-900/80 border border-slate-800 text-center w-full">
                         <span class="text-[10px] uppercase font-bold text-slate-400 tracking-wider block font-mono">Event Attendance Pass</span>
                         <h2 class="text-sm font-bold text-white font-brand-display truncate">{{ $event->name }}</h2>
@@ -71,7 +71,7 @@
                 <div class="mb-4">
                     <span class="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full text-xs font-bold text-white shadow-sm border border-[#8F3033]/50 bg-burgundy-deep">
                         <span class="w-2 h-2 rounded-full bg-[#df747a] animate-ping"></span>
-                        {{ isset($event) ? 'Event Dynamic Attendance Pass' : 'Dynamic Attendance Pass' }}
+                        {{ (isset($event) && ($passState ?? '') !== 'ended') ? 'Event Dynamic Attendance Pass' : 'Dynamic Attendance Pass' }}
                     </span>
                 </div>
 

@@ -103,10 +103,6 @@ class MemberQrCodeController extends Controller
 
                 if ($approvedActivityReg) {
                     $passState = (!$user->is_active || !$user->is_eligible) ? 'revoked' : 'active';
-                } elseif ($endedRegistration) {
-                    $eventRegistration = $endedRegistration;
-                    $event = $endedRegistration->event;
-                    $passState = 'ended';
                 } elseif ($pendingRegistrations->isNotEmpty()) {
                     $eventRegistration = $pendingRegistrations->first();
                     $event = $eventRegistration->event;

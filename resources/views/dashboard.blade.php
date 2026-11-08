@@ -80,6 +80,7 @@
                 </div>
             @endif
 
+            @if(!($signatureStatus['registered'] ?? false))
             <div x-data="{
                 state: @js($signatureStatus['state'] ?? 'required'),
                 init() {
@@ -125,6 +126,7 @@
                     </a>
                 </div>
             </div>
+            @endif
 
             <!-- Responsive Dashboard Tab Bar -->
             <div class="bg-[#172033] p-1.5 rounded-2xl border border-[#334155] shadow-xl overflow-x-auto scrollbar-none">
@@ -235,8 +237,10 @@
                 <!-- Dedicated Signature Status & Action Hub Section -->
                 <x-signature-status-card :signature-status="$signatureStatus" />
 
-                <!-- Profile Completion Progress & Reward Card -->
-                <x-profile-completion-card :completion="$profileCompletion ?? null" />
+                <!-- Profile Completion Card (Displayed only when profile is incomplete) -->
+                @if(!($profileCompletion['is_complete'] ?? false) && !($profileCompletion['reward_issued'] ?? false))
+                    <x-profile-completion-card :completion="$profileCompletion ?? null" />
+                @endif
 
                 <!-- Crimson Obsidian Bento Hero Row: Next Activity/Session Spotlight + Instant QR Pass Preview -->
                 @php
@@ -355,13 +359,11 @@
                     <div class="bento-card">
                         <div class="flex items-center justify-between">
                             <span class="text-xs font-semibold text-[#94A3B8] uppercase tracking-wider">Level & Progression</span>
-                            <div class="w-8 h-8 rounded-lg bg-burgundy-deep border border-[#8F3033]/50 flex items-center justify-center text-[#df747a]">
-                                <i data-lucide="sparkles" class="w-4 h-4"></i>
-                            </div>
+                            <x-level-badge :level="$currentLevel" size="sm" :showLevelNumber="false" />
                         </div>
                         <div class="mt-3 flex items-baseline gap-2">
                             <span class="text-2xl sm:text-3xl font-extrabold text-white font-brand-display">Lvl {{ $currentLevel->level }}</span>
-                            <span class="text-xs text-[#df747a] font-semibold">{{ $currentLevel->title ?? $currentLevel->name }}</span>
+                            <span class="text-xs text-[#df747a] font-semibold truncate">{{ $currentLevel->title ?? $currentLevel->name }}</span>
                         </div>
                         <div class="w-full bg-[#0B1120] rounded-full h-1.5 mt-2.5 overflow-hidden">
                             <div class="bg-gradient-to-r from-[#560E0F] to-[#df747a] h-1.5 rounded-full" style="width: {{ $levelProgress }}%"></div>
@@ -685,19 +687,22 @@
                 <!-- EXP Balance & Level Overview Card -->
                 <div class="card bg-[#172033] border border-[#334155] p-6 shadow-xl">
                     <div class="flex flex-col md:flex-row md:items-center justify-between gap-6">
-                        <div>
-                            <div class="flex items-center gap-2">
-                                <span class="px-2.5 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider bg-burgundy-deep text-[#df747a] border border-[#8F3033]/60">
-                                    Tier: {{ $currentLevel->title ?? $currentLevel->name }}
-                                </span>
-                                <span class="text-xs text-slate-400">Level {{ $currentLevel->level }}</span>
+                        <div class="flex items-center gap-4">
+                            <x-level-badge :level="$currentLevel" size="lg" :showLevelNumber="true" />
+                            <div>
+                                <div class="flex items-center gap-2">
+                                    <span class="px-2.5 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider bg-burgundy-deep text-[#df747a] border border-[#8F3033]/60">
+                                        Tier: {{ $currentLevel->title ?? $currentLevel->name }} ({{ $currentLevel->tier }})
+                                    </span>
+                                    <span class="text-xs text-slate-400">Level {{ $currentLevel->level }}</span>
+                                </div>
+                                <h3 class="text-xl sm:text-2xl font-extrabold text-white font-brand-display mt-1">
+                                    Gamified EXP Economy & Rewards
+                                </h3>
+                                <p class="text-xs text-[#94A3B8] mt-1 max-w-lg leading-relaxed">
+                                    Earn EXP by attending campus activities, participating in workshops, and submitting community challenges. Spend points on official merchandise.
+                                </p>
                             </div>
-                            <h3 class="text-xl sm:text-2xl font-extrabold text-white font-brand-display mt-1">
-                                Gamified EXP Economy & Rewards
-                            </h3>
-                            <p class="text-xs text-[#94A3B8] mt-1 max-w-lg leading-relaxed">
-                                Earn EXP by attending campus activities, participating in workshops, and submitting community challenges. Spend points on official merchandise.
-                            </p>
                         </div>
 
                         <div class="flex items-center gap-4 bg-[#0B1120] border border-[#334155] p-4 rounded-2xl shrink-0">

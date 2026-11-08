@@ -138,4 +138,100 @@ class MemberDashboardTest extends TestCase
         $this->get(route('helpdesk.index'))->assertRedirect('/login');
         $this->get(route('directory.index'))->assertRedirect('/login');
     }
+
+    public function test_profile_completion_card_hidden_when_completed(): void
+    {
+        $user = User::factory()->create([
+            'role' => 'student',
+            'is_active' => true,
+        ]);
+
+        // When incomplete, card should be visible
+        $response1 = $this->actingAs($user)->get('/dashboard');
+        $response1->assertOk();
+        $response1->assertSee('Profile Completion Progress');
+
+        // Mark profile completion reward issued
+        $reward = \App\Models\ProfileCompletionReward::create([
+            'user_id' => $user->id,
+            'source' => 'profile_completion',
+            'reference_key' => 'profile_completion_user_' . $user->id,
+            'exp_awarded' => 100,
+            'points_awarded' => 50,
+            'completion_percentage' => 100,
+            'awarded_at' => now(),
+        ]);
+
+        $response2 = $this->actingAs($user->fresh())->get('/dashboard');
+        $response2->assertOk();
+        $response2->assertDontSee('Profile Completion Progress');
+    }
+
+    public function test_signature_banner_hidden_when_signature_is_registered(): void
+    {
+        $user = User::factory()->create([
+            'role' => 'student',
+            'is_active' => true,
+        ]);
+
+        // When not registered, signature registration banner is rendered
+        $response1 = $this->actingAs($user)->get('/dashboard');
+        $response1->assertOk();
+        $response1->assertSee('Signature Registration Required');
+
+        // Register a valid signature using SignatureVaultService
+        $im = imagecreatetruecolor(300, 100);
+        imagealphablending($im, false);
+        imagesavealpha($im, true);
+        imagefill($im, 0, 0, imagecolorallocatealpha($im, 0, 0, 0, 127));
+        imagesetthickness($im, 4);
+        imageline($im, 10, 10, 290, 90, imagecolorallocate($im, 0, 0, 0));
+        ob_start();
+        imagepng($im);
+        $png = ob_get_clean();
+        $dataUrl = 'data:image/png;base64,' . base64_encode($png);
+
+        app(\App\Services\SignatureVaultService::class)->store($user, $dataUrl, false);
+
+        $response2 = $this->actingAs($user)->get('/dashboard');
+        $response2->assertOk();
+        $response2->assertDontSee('Signature Registration Required');
+    }
+
+    public function test_exp_and_level_synchronization_accurately_reflects_levels(): void
+    {
+        // Seed levels
+        $this->seed(\Database\Seeders\GamificationSeeder::class);
+
+        $user = User::factory()->create([
+            'role' => 'student',
+            'is_active' => true,
+        ]);
+
+        // Add 1000 manual XP and 100 profile completion XP (1,100 total)
+        XpTransaction::create([
+            'user_id' => $user->id,
+            'amount' => 1000,
+            'lifetime_delta' => 1000,
+            'activity_type' => 'manual_distribution',
+            'description' => 'Manual Award',
+        ]);
+
+        XpTransaction::create([
+            'user_id' => $user->id,
+            'amount' => 100,
+            'lifetime_delta' => 100,
+            'activity_type' => 'profile_completion',
+            'description' => 'Profile Completion Reward',
+        ]);
+
+        $this->assertSame(1100, $user->getLifetimeExp());
+
+        $response = $this->actingAs($user)->get('/dashboard');
+        $response->assertOk();
+
+        // 1100 EXP in the new 20-level progression is Level 6 (Digital Engineer, min_xp: 1000, next level min_xp: 1400)
+        $response->assertSee('Lvl 6');
+        $response->assertSee('Digital Engineer');
+    }
 }

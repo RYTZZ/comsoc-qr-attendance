@@ -4,6 +4,7 @@ namespace App\Mail;
 
 use Illuminate\Bus\Queueable;
 use Illuminate\Mail\Mailable;
+use Illuminate\Mail\Mailables\Address;
 use Illuminate\Mail\Mailables\Content;
 use Illuminate\Mail\Mailables\Envelope;
 use Illuminate\Queue\SerializesModels;
@@ -20,7 +21,10 @@ class EmailVerificationOtpMail extends Mailable
 
     public function envelope(): Envelope
     {
+        $fromAddress = config('mail.from.address', env('MAIL_FROM_ADDRESS', 'computingsocietysorsubc@gmail.com'));
+
         return new Envelope(
+            from: new Address($fromAddress, 'COMSOC Hub'),
             subject: 'Verify Your COMSOC Hub Email Address',
         );
     }

@@ -11,16 +11,15 @@ class GamificationSeeder extends Seeder
 {
     public function run(): void
     {
-        $levels = [
-            ['level' => 1, 'title' => 'Novice Explorer', 'min_xp' => 0, 'badge_icon' => 'sparkles'],
-            ['level' => 2, 'title' => 'Tech Apprentice', 'min_xp' => 250, 'badge_icon' => 'code'],
-            ['level' => 3, 'title' => 'Code Vanguard', 'min_xp' => 600, 'badge_icon' => 'cpu'],
-            ['level' => 4, 'title' => 'System Architect', 'min_xp' => 1200, 'badge_icon' => 'terminal'],
-            ['level' => 5, 'title' => 'Master of Algorithms', 'min_xp' => 2000, 'badge_icon' => 'award'],
-        ];
-
-        foreach ($levels as $lvl) {
-            Level::firstOrCreate(['level' => $lvl['level']], $lvl);
+        foreach (Level::CANONICAL_LEVELS as $lvl) {
+            Level::updateOrCreate(
+                ['level' => $lvl['level']],
+                [
+                    'title' => $lvl['title'],
+                    'min_xp' => $lvl['min_xp'],
+                    'badge_icon' => $lvl['badge_icon'],
+                ]
+            );
         }
 
         $activeAy = AcademicYear::active() ?? AcademicYear::first();

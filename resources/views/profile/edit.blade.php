@@ -37,16 +37,20 @@
                         </div>
                     </div>
 
-                    <div class="flex items-center gap-3 bg-[#0B1120] border border-[#334155] p-3 rounded-xl">
-                        <div class="text-center px-3 border-r border-[#334155]">
-                            <span class="block text-[10px] uppercase font-semibold text-[#94A3B8]">Current Level</span>
-                            <span class="text-base font-bold text-white font-brand-display">{{ $currentLevel->level }}</span>
+                    <div class="flex items-center gap-3 bg-[#0B1120] border border-[#334155] p-3 rounded-2xl shadow-md">
+                        <div class="px-2">
+                            <x-level-badge :level="$currentLevel" size="md" :showLevelNumber="true" />
                         </div>
-                        <div class="text-center px-3 border-r border-[#334155]">
+                        <div class="text-left px-3 border-l border-[#334155]">
+                            <span class="block text-[10px] uppercase font-semibold text-[#94A3B8]">Rank & Level</span>
+                            <span class="text-sm font-bold text-white font-brand-display block truncate max-w-[140px]">{{ $currentLevel->title }}</span>
+                            <span class="text-[10px] font-semibold text-[#df747a]">Lvl {{ $currentLevel->level }} ({{ $currentLevel->tier }})</span>
+                        </div>
+                        <div class="text-center px-3 border-l border-[#334155]">
                             <span class="block text-[10px] uppercase font-semibold text-[#94A3B8]">Spendable EXP</span>
                             <span class="text-base font-bold text-amber-400 font-mono">{{ number_format($seasonPoints) }}</span>
                         </div>
-                        <div class="text-center px-3">
+                        <div class="text-center px-3 border-l border-[#334155]">
                             <span class="block text-[10px] uppercase font-semibold text-[#94A3B8]">Lifetime EXP</span>
                             <span class="text-base font-bold text-[#df747a] font-mono">{{ number_format($lifetimeXp) }}</span>
                         </div>
@@ -55,6 +59,9 @@
             </div>
 
             <x-profile-completion-card :completion="$profileCompletion ?? null" />
+
+            <!-- Dedicated 20 Level Badges Collection Interface -->
+            <x-level-collection-grid :lifetimeExp="$lifetimeXp" :currentLevel="$currentLevel" />
 
             <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
 

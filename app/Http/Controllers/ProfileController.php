@@ -45,13 +45,16 @@ class ProfileController extends Controller
         }
 
         $seasonXp = $seasonStat ? $seasonStat->season_xp : 0;
-        $seasonPoints = $seasonStat ? $seasonStat->redeemable_points : 0;
-        $lifetimeXp = (int) XpTransaction::where('user_id', $user->id)->sum('amount');
-        if ($lifetimeXp < $seasonXp) {
-            $lifetimeXp = $seasonXp;
-        }
+        $seasonPoints = $user->getSpendableExp();
+        $lifetimeXp = $user->getLifetimeExp();
 
-        $currentLevel = Level::forXp($seasonXp);
+        $currentLevel = Level::forXp($lifetimeXp);
+        $nextLevel = Level::where('min_xp', '>', $lifetimeXp)->orderBy('min_xp')->first();
+        $levelProgress = 100;
+        if ($nextLevel) {
+            $span = max(1, $nextLevel->min_xp - $currentLevel->min_xp);
+            $levelProgress = min(100, max(0, round((($lifetimeXp - $currentLevel->min_xp) / $span) * 100)));
+        }
 
         $student = $user->student;
         $attendanceHistory = collect();
@@ -91,6 +94,8 @@ class ProfileController extends Controller
             'seasonPoints',
             'lifetimeXp',
             'currentLevel',
+            'nextLevel',
+            'levelProgress',
             'attendanceHistory',
             'xpHistory',
             'pointHistory',

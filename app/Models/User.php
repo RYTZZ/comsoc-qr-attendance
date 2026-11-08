@@ -557,9 +557,15 @@ class User extends Authenticatable implements MustVerifyEmail
 
     public function getLifetimeExp(): int
     {
-        $lifetimeFromDelta = (int) $this->xpTransactions()->sum('lifetime_delta');
-        if ($lifetimeFromDelta > 0) {
-            return $lifetimeFromDelta;
+        // 1. Authoritative: Sum of positive lifetime EXP increments across all XP transactions.
+        // Falls back to `amount` when `lifetime_delta` is null or 0 (legacy or direct amount rows),
+        // but preserves intentional non-lifetime movements (such as 0-delta spendings/expirations).
+        $txSum = (int) $this->xpTransactions()
+            ->selectRaw('COALESCE(SUM(CASE WHEN lifetime_delta IS NOT NULL AND lifetime_delta != 0 THEN lifetime_delta WHEN amount > 0 THEN amount ELSE 0 END), 0) as total')
+            ->value('total');
+
+        if ($txSum > 0) {
+            return $txSum;
         }
 
         $creditTotal = (int) $this->expCredits()->sum('initial_amount');
@@ -567,7 +573,7 @@ class User extends Authenticatable implements MustVerifyEmail
             return $creditTotal;
         }
 
-        return (int) $this->xpTransactions()->sum('amount');
+        return (int) $this->xpTransactions()->where('amount', '>', 0)->sum('amount');
     }
 
     public function getAvatarUrlAttribute(): string

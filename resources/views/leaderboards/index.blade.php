@@ -338,6 +338,14 @@
                                     <x-user-avatar :user="$second" size="lg" class="border-2 border-slate-400 shadow-md" />
                                 </div>
                                 <h3 class="text-sm font-bold text-white truncate font-brand-display">{{ $second->username ? '@' . $second->username : ($second->nickname ?: $second->name) }}</h3>
+                                @php
+                                    $secondExp = (int) ($tab === 'semester' ? ($second->semester_exp ?? 0) : ($second->lifetime_exp ?? 0));
+                                    $secondLvl = \App\Models\Level::forXp($secondExp);
+                                @endphp
+                                <div class="mt-1 flex items-center justify-center gap-1.5">
+                                    <x-level-badge :level="$secondLvl" size="xs" :showLevelNumber="false" />
+                                    <span class="text-[11px] font-semibold text-slate-300">Lvl {{ $secondLvl->level }} &bull; {{ $secondLvl->title }}</span>
+                                </div>
                                 <p class="text-xs font-mono font-bold text-slate-300 mt-1 tabular-nums">
                                     {{ number_format($tab === 'semester' ? $second->semester_exp : $second->lifetime_exp) }} EXP
                                     <span class="sr-only">{{ number_format($tab === 'semester' ? $second->semester_exp : $second->lifetime_exp) }} XP</span>
@@ -358,6 +366,14 @@
                                     <x-user-avatar :user="$first" size="lg" class="w-14 h-14 border-2 border-amber-400 shadow-lg" />
                                 </div>
                                 <h3 class="text-base font-extrabold text-white truncate font-brand-display">{{ $first->username ? '@' . $first->username : ($first->nickname ?: $first->name) }}</h3>
+                                @php
+                                    $firstExp = (int) ($tab === 'semester' ? ($first->semester_exp ?? 0) : ($first->lifetime_exp ?? 0));
+                                    $firstLvl = \App\Models\Level::forXp($firstExp);
+                                @endphp
+                                <div class="mt-1 flex items-center justify-center gap-1.5">
+                                    <x-level-badge :level="$firstLvl" size="xs" :showLevelNumber="false" />
+                                    <span class="text-xs font-bold text-amber-300">Lvl {{ $firstLvl->level }} &bull; {{ $firstLvl->title }}</span>
+                                </div>
                                 <p class="text-sm font-mono font-black text-amber-300 mt-1 tabular-nums">
                                     {{ number_format($tab === 'semester' ? $first->semester_exp : $first->lifetime_exp) }} EXP
                                     <span class="sr-only">{{ number_format($tab === 'semester' ? $first->semester_exp : $first->lifetime_exp) }} XP</span>
@@ -378,6 +394,14 @@
                                     <x-user-avatar :user="$third" size="lg" class="border-2 border-amber-600 shadow-md" />
                                 </div>
                                 <h3 class="text-sm font-bold text-white truncate font-brand-display">{{ $third->username ? '@' . $third->username : ($third->nickname ?: $third->name) }}</h3>
+                                @php
+                                    $thirdExp = (int) ($tab === 'semester' ? ($third->semester_exp ?? 0) : ($third->lifetime_exp ?? 0));
+                                    $thirdLvl = \App\Models\Level::forXp($thirdExp);
+                                @endphp
+                                <div class="mt-1 flex items-center justify-center gap-1.5">
+                                    <x-level-badge :level="$thirdLvl" size="xs" :showLevelNumber="false" />
+                                    <span class="text-[11px] font-semibold text-amber-300">Lvl {{ $thirdLvl->level }} &bull; {{ $thirdLvl->title }}</span>
+                                </div>
                                 <p class="text-xs font-mono font-bold text-amber-300 mt-1 tabular-nums">
                                     {{ number_format($tab === 'semester' ? $third->semester_exp : $third->lifetime_exp) }} EXP
                                     <span class="sr-only">{{ number_format($tab === 'semester' ? $third->semester_exp : $third->lifetime_exp) }} XP</span>
@@ -430,12 +454,24 @@
                                             @endif
                                         </td>
                                         <td class="py-3 px-4">
+                                            @php
+                                                $rowExp = (int) ($tab === 'semester' ? ($row->semester_exp ?? 0) : ($row->lifetime_exp ?? 0));
+                                                $rowLevel = \App\Models\Level::forXp($rowExp);
+                                            @endphp
                                             <div class="flex items-center gap-2.5">
                                                 <x-user-avatar :user="$row" size="xs" class="w-7 h-7 rounded-lg border border-[#8F3033]/60 shadow-sm" />
-                                                <span class="font-bold text-white font-brand-display">{{ $row->username ? '@' . $row->username : ($row->nickname ?: $row->name) }}</span>
-                                                @if($isMe)
-                                                    <span class="px-1.5 py-0.5 rounded text-[9px] font-bold bg-[#560E0F] text-white border border-[#8F3033]">YOU</span>
-                                                @endif
+                                                <x-level-badge :level="$rowLevel" size="xs" :showLevelNumber="false" />
+                                                <div class="flex flex-col min-w-0">
+                                                    <div class="flex items-center gap-1.5">
+                                                        <span class="font-bold text-white font-brand-display truncate">{{ $row->username ? '@' . $row->username : ($row->nickname ?: $row->name) }}</span>
+                                                        @if($isMe)
+                                                            <span class="px-1.5 py-0.5 rounded text-[9px] font-bold bg-[#560E0F] text-white border border-[#8F3033]">YOU</span>
+                                                        @endif
+                                                    </div>
+                                                    <span class="text-[10px] text-slate-400 font-medium truncate">
+                                                        Lvl {{ $rowLevel->level }} &bull; {{ $rowLevel->title }}
+                                                    </span>
+                                                </div>
                                             </div>
                                         </td>
                                         <td class="py-3 px-4 text-right font-mono font-bold text-[#df747a] tabular-nums">
