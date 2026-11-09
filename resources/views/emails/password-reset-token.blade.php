@@ -5,7 +5,7 @@
     <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
     <meta name="color-scheme" content="dark light" />
     <meta name="supported-color-schemes" content="dark light" />
-    <title>Password Reset Token — COMSOC Hub</title>
+    <title>Your COMSOC Hub Password Reset Code</title>
     <!--[if mso]>
     <style type="text/css">
         body, table, td, p, a, span { font-family: Arial, Helvetica, sans-serif !important; }
@@ -34,14 +34,13 @@
             text-decoration: none;
             -ms-interpolation-mode: bicubic;
         }
-        .token-code-text {
+        .reset-code-text {
             font-family: 'Courier New', Courier, Consolas, Monaco, monospace !important;
-            font-size: 24px !important;
+            font-size: 34px !important;
             font-weight: 800 !important;
-            letter-spacing: 2px !important;
+            letter-spacing: 10px !important;
             color: #FFFFFF !important;
-            line-height: 1.3 !important;
-            word-break: break-all !important;
+            line-height: 1.2 !important;
         }
         @media only screen and (max-width: 600px) {
             .email-container {
@@ -49,20 +48,20 @@
                 max-width: 100% !important;
             }
             .mobile-content {
-                padding: 20px 16px !important;
+                padding: 24px 18px !important;
             }
             .mobile-header {
-                padding: 16px 16px !important;
+                padding: 20px 18px 16px 18px !important;
             }
-            .token-code-text {
-                font-size: 20px !important;
-                letter-spacing: 1px !important;
+            .reset-code-text {
+                font-size: 28px !important;
+                letter-spacing: 8px !important;
             }
-            .token-box {
-                padding: 16px 10px !important;
+            .code-box {
+                padding: 18px 12px !important;
             }
             .mobile-footer {
-                padding: 18px 16px 20px 16px !important;
+                padding: 20px 18px !important;
             }
         }
     </style>
@@ -70,7 +69,7 @@
 <body style="margin: 0; padding: 0; background-color: #0B1120; color: #F8FAFC;">
     <!-- Preheader text (preview in email client inbox) -->
     <div style="display: none; font-size: 1px; color: #0B1120; line-height: 1px; max-height: 0px; max-width: 0px; opacity: 0; overflow: hidden; mso-hide: all;">
-        Your COMSOC Hub password reset token is ready. Expires in {{ $expirationMinutes }} minutes.
+        Your COMSOC Hub password reset code is {{ $token }}. Expires in {{ $expirationMinutes }} minutes.
     </div>
 
     @php
@@ -90,102 +89,103 @@
     @endphp
 
     <!-- Main Wrapper Table -->
-    <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="background-color: #0B1120; width: 100%; margin: 0; padding: 20px 12px;">
+    <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="background-color: #0B1120; width: 100%; margin: 0; padding: 24px 12px;">
         <tr>
             <td align="center" valign="top">
                 <!-- Inner Container -->
                 <table role="presentation" class="email-container" width="540" cellpadding="0" cellspacing="0" border="0" style="max-width: 540px; width: 100%; background-color: #172033; border: 1px solid #334155; border-radius: 16px; overflow: hidden; box-shadow: 0 16px 32px rgba(0,0,0,0.5);">
                     
-                    <!-- Top Maroon Accent Strip -->
+                    <!-- Header Section: Upper-Left Logo & Wordmark, followed by PASSWORD RECOVERY, separated by maroon accent line -->
                     <tr>
-                        <td height="5" style="background-color: #560E0F; font-size: 1px; line-height: 5px;">&nbsp;</td>
-                    </tr>
-
-                    <!-- Header with Official Logo & Brand -->
-                    <tr>
-                        <td align="center" class="mobile-header" style="padding: 24px 24px 18px 24px; border-bottom: 1px solid #334155;">
-                            <table role="presentation" cellpadding="0" cellspacing="0" border="0">
+                        <td align="left" class="mobile-header" style="padding: 26px 28px 18px 28px;">
+                            <!-- First Row: Logo & Wordmark horizontally aligned on the upper left -->
+                            <table role="presentation" cellpadding="0" cellspacing="0" border="0" align="left">
                                 <tr>
-                                    <td align="center" style="padding-bottom: 10px;">
-                                        <img src="{{ $logoUrl }}" alt="COMSOC Logo" width="60" height="60" style="width: 60px; height: 60px; display: block; border: 0; margin: 0 auto;" />
+                                    <td valign="middle" style="padding-right: 12px;">
+                                        <img src="{{ $logoUrl }}" alt="COMSOC Logo" width="42" height="42" style="width: 42px; height: 42px; display: block; border: 0;" />
                                     </td>
-                                </tr>
-                                <tr>
-                                    <td align="center">
-                                        <h1 style="margin: 0; font-size: 20px; font-weight: 800; color: #FFFFFF; letter-spacing: 0.5px;">COMSOC HUB</h1>
-                                        <p style="margin: 2px 0 0 0; font-size: 11px; font-weight: 600; color: #df747a; letter-spacing: 1.5px; text-transform: uppercase;">Password Recovery</p>
+                                    <td valign="middle">
+                                        <span style="font-size: 20px; font-weight: 800; color: #FFFFFF; letter-spacing: 0.5px; display: inline-block; line-height: 1;">COMSOC HUB</span>
                                     </td>
                                 </tr>
                             </table>
+
+                            <div style="clear: both;"></div>
+
+                            <!-- Second Row: PASSWORD RECOVERY heading directly underneath the logo and wordmark, left-aligned -->
+                            <div style="margin-top: 14px; text-align: left;">
+                                <span style="font-size: 13px; font-weight: 800; color: #df747a; letter-spacing: 2px; text-transform: uppercase; display: block;">PASSWORD RECOVERY</span>
+                            </div>
                         </td>
                     </tr>
 
-                    <!-- Body Content -->
+                    <!-- Third Row: Thin maroon accent line separating the branding header from main content -->
                     <tr>
-                        <td class="mobile-content" style="padding: 28px 28px 24px 28px;">
-                            <p style="margin: 0 0 14px 0; font-size: 15px; line-height: 1.5; color: #F8FAFC; font-weight: 500;">
-                                Hello <strong style="color: #FFFFFF;">{{ $userName }}</strong>,
+                        <td height="2" style="background-color: #560E0F; font-size: 1px; line-height: 2px; padding: 0;">&nbsp;</td>
+                    </tr>
+
+                    <!-- Main Email Content -->
+                    <tr>
+                        <td class="mobile-content" style="padding: 30px 28px 24px 28px;">
+                            
+                            <!-- Heading: Reset your password -->
+                            <h2 style="margin: 0 0 16px 0; font-size: 20px; font-weight: 700; color: #FFFFFF; letter-spacing: -0.2px;">
+                                Reset your password
+                            </h2>
+
+                            <!-- Greeting & Message -->
+                            <p style="margin: 0 0 12px 0; font-size: 14.5px; line-height: 1.6; color: #F8FAFC;">
+                                Hello, <strong style="color: #FFFFFF;">{{ $userName }}</strong>.
                             </p>
 
-                            <p style="margin: 0 0 20px 0; font-size: 13.5px; line-height: 1.6; color: #94A3B8;">
-                                We received a request to reset the password for your COMSOC Hub account. Use the secure password reset token below to verify your request and set a new password:
+                            <p style="margin: 0 0 12px 0; font-size: 14px; line-height: 1.6; color: #94A3B8;">
+                                We received a request to reset the password associated with your COMSOC Hub account.
                             </p>
 
-                            <!-- Token Display Box -->
-                            <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="margin: 0 0 22px 0;">
-                                <tr>
-                                    <td align="center" class="token-box" style="background-color: #0B1120; border: 2px dashed #8F3033; border-radius: 12px; padding: 20px 16px;">
-                                        <div style="font-size: 11px; font-weight: 700; color: #df747a; text-transform: uppercase; letter-spacing: 1.5px; margin-bottom: 8px;">
-                                            Your Password Reset Token
-                                        </div>
-                                        <div class="token-code-text" style="font-family: monospace; font-size: 22px; font-weight: 800; color: #FFFFFF; user-select: all; -webkit-user-select: all;">
-                                            {{ $token }}
-                                        </div>
-                                        <div style="font-size: 12px; color: #94A3B8; margin-top: 10px;">
-                                            Expires in <strong style="color: #F8FAFC;">{{ $expirationMinutes }} minutes</strong>
-                                        </div>
-                                    </td>
-                                </tr>
-                            </table>
+                            <p style="margin: 0 0 24px 0; font-size: 14px; line-height: 1.6; color: #94A3B8;">
+                                Enter the verification code below on the password recovery page to continue.
+                            </p>
 
-                            <!-- Action Button -->
+                            <!-- Verification Code Container (Centered presentation, prominent, large & bold) -->
                             <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="margin: 0 0 24px 0;">
                                 <tr>
-                                    <td align="center">
-                                        <a href="{{ $verifyUrl }}" target="_blank" style="display: inline-block; background-color: #560E0F; color: #FFFFFF; font-size: 13.5px; font-weight: 700; text-decoration: none; padding: 12px 28px; border-radius: 8px; border: 1px solid #8F3033; box-shadow: 0 4px 12px rgba(86,14,15,0.4);">
-                                            Verify Token &amp; Reset Password
-                                        </a>
+                                    <td align="center" class="code-box" style="background-color: #0B1120; border: 2px dashed #8F3033; border-radius: 12px; padding: 22px 16px;">
+                                        <div style="font-size: 11px; font-weight: 700; color: #df747a; text-transform: uppercase; letter-spacing: 2px; margin-bottom: 10px;">
+                                            YOUR RESET CODE
+                                        </div>
+                                        <div class="reset-code-text" style="font-family: 'Courier New', Courier, Consolas, Monaco, monospace; font-size: 32px; font-weight: 800; letter-spacing: 10px; color: #FFFFFF; user-select: all; -webkit-user-select: all; text-align: center;">
+                                            {{ $token }}
+                                        </div>
+                                        <div style="font-size: 12px; color: #94A3B8; margin-top: 10px; font-weight: 500;">
+                                            Expires in <strong style="color: #F8FAFC;">{{ $expirationMinutes }} minutes</strong>.
+                                        </div>
                                     </td>
                                 </tr>
                             </table>
 
-                            <!-- Instructions -->
-                            <div style="background-color: #0B1120; border-left: 3px solid #df747a; padding: 12px 14px; border-radius: 0 8px 8px 0; margin-bottom: 20px;">
-                                <p style="margin: 0 0 6px 0; font-size: 12px; font-weight: 700; color: #FFFFFF;">
-                                    How to complete your password reset:
+                            <!-- Security Notice (Visually separated) -->
+                            <div style="background-color: #1E293B; border-left: 3px solid #df747a; padding: 14px 16px; border-radius: 0 8px 8px 0; margin-top: 8px; margin-bottom: 4px;">
+                                <p style="margin: 0 0 4px 0; font-size: 12.5px; font-weight: 700; color: #FFFFFF;">
+                                    Didn't request this password reset?
                                 </p>
-                                <ol style="margin: 0; padding-left: 18px; font-size: 12px; line-height: 1.6; color: #94A3B8;">
-                                    <li>Click the button above or navigate to the token verification page.</li>
-                                    <li>Enter your email (<strong style="color: #F8FAFC;">{{ $email }}</strong>) and the reset token.</li>
-                                    <li>Upon verification, create and confirm your new secure password.</li>
-                                </ol>
+                                <p style="margin: 0; font-size: 12px; line-height: 1.5; color: #94A3B8;">
+                                    You can safely ignore this email. Your existing password will remain unchanged unless the reset process is completed successfully.
+                                </p>
                             </div>
-
-                            <!-- Security Notice -->
-                            <p style="margin: 0; font-size: 12px; line-height: 1.5; color: #64748B;">
-                                <strong style="color: #94A3B8;">Security Notice:</strong> If you did not request a password reset, please disregard this email. Your password will remain unchanged and your account remains secure.
-                            </p>
                         </td>
                     </tr>
 
-                    <!-- Footer -->
+                    <!-- Email Footer -->
                     <tr>
-                        <td align="center" class="mobile-footer" style="padding: 20px 24px; background-color: #0B1120; border-top: 1px solid #334155;">
-                            <p style="margin: 0 0 4px 0; font-size: 11px; color: #94A3B8; font-weight: 500;">
-                                Computing Society Organization — Sorsogon State University Bulan Campus
+                        <td align="center" class="mobile-footer" style="padding: 24px 28px; background-color: #0B1120; border-top: 1px solid #334155;">
+                            <p style="margin: 0 0 6px 0; font-size: 12px; font-weight: 700; color: #FFFFFF; letter-spacing: 0.3px;">
+                                One Community. One Platform. More Possibilities.
                             </p>
-                            <p style="margin: 0; font-size: 10px; color: #64748B;">
-                                This is an automated message from COMSOC Hub. Please do not reply directly to this email.
+                            <p style="margin: 0 0 4px 0; font-size: 11.5px; color: #94A3B8; font-weight: 500;">
+                                Computing Society Organization &bull; SorSU Bulan Campus
+                            </p>
+                            <p style="margin: 8px 0 0 0; font-size: 10px; color: #64748B;">
+                                Automated security notification. Please do not reply to this email.
                             </p>
                         </td>
                     </tr>
@@ -196,4 +196,3 @@
     </table>
 </body>
 </html>
-

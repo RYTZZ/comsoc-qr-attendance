@@ -3,19 +3,19 @@
 namespace App\Http\Controllers\Auth;
 
 use App\Http\Controllers\Controller;
-use App\Mail\PasswordResetTokenMail;
 use App\Models\User;
-use App\Support\MailFailureClassifier;
+use App\Services\PasswordResetCodeService;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Log;
-use Illuminate\Support\Facades\Mail;
-use Illuminate\Support\Facades\Password;
-use Illuminate\Support\Str;
 use Illuminate\View\View;
 
 class PasswordResetLinkController extends Controller
 {
+    public function __construct(
+        protected PasswordResetCodeService $codeService
+    ) {}
+
     /**
      * Display the forgot password request view.
      */
@@ -25,14 +25,12 @@ class PasswordResetLinkController extends Controller
     }
 
     /**
-     * Handle an incoming password reset token request.
+     * Handle an incoming password reset code request.
      *
-     * Strict anti-enumeration:
-     * - Returns identical neutral success response whether email exists or not.
-     * - Password broker handles token generation, hashing, expiration, and throttling.
-     * - Dispatches professional COMSOC Hub email with the plain token.
+     * Anti-enumeration protection:
+     * Returns an identical neutral response whether the email is registered or not.
      */
-    public function store(Request $request): RedirectResponse
+    public function store(Request $request): RedirectResponse|JsonResponse
     {
         $request->validate([
             'email' => ['required', 'string', 'email'],
@@ -40,55 +38,41 @@ class PasswordResetLinkController extends Controller
 
         $normalizedEmail = strtolower(trim((string) $request->email));
 
-        // Account lookup by primary email or preferred_email
         $user = User::where('email', $normalizedEmail)
             ->orWhere('preferred_email', $normalizedEmail)
             ->first();
 
-        // If user exists, check broker throttling and generate token
+        $cooldown = 60;
         if ($user) {
-            $broker = Password::broker();
+            $result = $this->codeService->issueAndSend($user, $request->ip(), enforceCooldown: true);
 
-            // Check if broker repository considers this user throttled
-            if ($broker->getRepository()->recentlyCreatedToken($user)) {
+            if (! $result['sent'] && ($result['status'] === 'throttled' || $result['status'] === 'rate_limited')) {
+                if ($request->wantsJson()) {
+                    return response()->json([
+                        'success' => false,
+                        'message' => $result['message'],
+                        'cooldown_seconds' => $result['cooldown_seconds'] ?? 60,
+                    ], 429);
+                }
+
                 return back()->withInput($request->only('email'))
-                    ->withErrors(['email' => __(Password::RESET_THROTTLED)]);
+                    ->withErrors(['email' => $result['message']])
+                    ->with('cooldown_seconds', $result['cooldown_seconds'] ?? 60);
             }
 
-            // Generate cryptographically secure token & store hashed record in password_reset_tokens
-            $token = $broker->getRepository()->create($user);
-
-            // Send branded email with token
-            $correlationId = (string) Str::uuid();
-            try {
-                Mail::to($user->email)->send(
-                    new PasswordResetTokenMail(
-                        userName: $user->name,
-                        token: $token,
-                        email: $user->email,
-                        expirationMinutes: config('auth.passwords.users.expire', 60),
-                    )
-                );
-
-                \App\Services\AuditLogger::log('auth.password_reset_requested', $user, [], [
-                    'email' => $user->email,
-                    'correlation_id' => $correlationId,
-                ]);
-            } catch (\Throwable $e) {
-                Log::error('Password reset email dispatch failed', [
-                    'correlation_id' => $correlationId,
-                    'exception' => get_class($e),
-                    'message' => $e->getMessage(),
-                ]);
-
-                // We still report the generic success message to prevent timing-based enumeration,
-                // unless mail service threw an unrecoverable exception in non-production.
-            }
+            $cooldown = $result['cooldown_seconds'] ?? 60;
         }
 
-        // Generic public confirmation prevents email address enumeration
+        if ($request->wantsJson()) {
+            return response()->json([
+                'success' => true,
+                'message' => 'If an account exists for that email, a 6-character reset code has been sent.',
+                'cooldown_seconds' => $cooldown,
+            ]);
+        }
+
         return redirect()->route('password.verify.show', ['email' => $normalizedEmail])
-            ->with('status', 'If your email address is registered with COMSOC Hub, a 60-minute password reset token has been sent. Please check your inbox.');
+            ->with('status', 'If your email address is registered with COMSOC Hub, a 6-character reset code valid for 15 minutes has been sent to your inbox.')
+            ->with('cooldown_seconds', $cooldown);
     }
 }
-

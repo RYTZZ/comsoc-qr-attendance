@@ -2,7 +2,7 @@
     <div class="mb-4">
         <h2 class="font-brand-display text-xl sm:text-2xl font-bold text-white tracking-tight">Create New Password</h2>
         <p class="text-xs sm:text-sm text-[#94A3B8] mt-1.5 leading-relaxed">
-            Your reset token has been verified. Choose a strong, new password for your account (<strong class="text-white">{{ $email }}</strong>).
+            Your verification code has been confirmed. Choose a strong, new password for your account (<strong class="text-white">{{ $email }}</strong>).
         </p>
     </div>
 
@@ -21,8 +21,6 @@
     <form method="POST" action="{{ route('password.store') }}" class="space-y-4" x-data="{ submitting: false, showPassword: false, showConfirm: false }" @submit="submitting = true">
         @csrf
 
-        <!-- Password Reset Token -->
-        <input type="hidden" name="token" value="{{ $token }}">
         <input type="hidden" name="email" value="{{ $email }}">
 
         <!-- Password -->
@@ -98,7 +96,7 @@
         <p class="text-[#94A3B8]">
             Need to start over?
             <a href="{{ route('password.request') }}" class="text-[#df747a] hover:text-white font-semibold underline transition">
-                Request New Token
+                Request New Code
             </a>
         </p>
 
@@ -107,4 +105,3 @@
         </a>
     </div>
 </x-guest-layout>
-

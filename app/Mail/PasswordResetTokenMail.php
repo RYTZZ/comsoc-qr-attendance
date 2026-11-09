@@ -17,7 +17,7 @@ class PasswordResetTokenMail extends Mailable
         public readonly string $userName,
         public readonly string $token,
         public readonly string $email,
-        public readonly int $expirationMinutes = 60,
+        public readonly int $expirationMinutes = 15,
     ) {}
 
     public function envelope(): Envelope
@@ -26,7 +26,7 @@ class PasswordResetTokenMail extends Mailable
 
         return new Envelope(
             from: new Address($fromAddress, 'COMSOC Hub'),
-            subject: 'Password Reset Token — COMSOC Hub',
+            subject: 'Your COMSOC Hub Password Reset Code',
         );
     }
 
@@ -39,13 +39,12 @@ class PasswordResetTokenMail extends Mailable
                 'token' => $this->token,
                 'email' => $this->email,
                 'expirationMinutes' => $this->expirationMinutes,
-                'verifyUrl' => route('password.verify.show', ['email' => $this->email]),
             ],
         );
     }
 
     /**
-     * Prevent raw reset token from appearing in serialized debug dumps.
+     * Prevent plaintext reset code from appearing in serialized debug dumps.
      */
     public function __debugInfo(): array
     {
@@ -57,4 +56,3 @@ class PasswordResetTokenMail extends Mailable
         ];
     }
 }
-
