@@ -189,7 +189,7 @@
                           @keydown="handleComposerKeydown($event, 'main')"
                           rows="1"
                           maxlength="2000"
-                          placeholder="Write a comment... (Enter to submit, Shift+Enter for new line, @ to mention)"
+                          :placeholder="'Comment as ' + currentUser.name"
                           class="flex-1 min-w-0 bg-transparent border-0 p-0 py-1 text-xs sm:text-sm text-slate-100 placeholder-slate-400 focus:ring-0 focus:outline-none resize-none leading-relaxed min-h-[38px] max-h-32 overflow-y-auto"></textarea>
 
                 <!-- Mention Suggestion Dropdown (Main Composer) -->
@@ -388,7 +388,7 @@
                                       @input="onInputMention($event, 'edit', comment.id); autoResizeTextarea($event.target)"
                                       @keydown="handleComposerKeydown($event, 'edit', comment)"
                                       rows="2"
-                                      placeholder="Edit your comment... (Enter to save, Shift+Enter for new line, Esc to cancel)"
+                                      placeholder="Edit your comment..."
                                       class="w-full bg-slate-950 border border-slate-700 focus:border-[#8F3033] rounded-lg p-2.5 text-xs sm:text-sm text-slate-100 focus:outline-none"></textarea>
 
                             <!-- Mention Suggestions for Edit -->
@@ -600,7 +600,7 @@
                                                   @input="onInputMention($event, 'edit', reply.id); autoResizeTextarea($event.target)"
                                                   @keydown="handleComposerKeydown($event, 'edit', reply)"
                                                   rows="2"
-                                                  placeholder="Edit your reply... (Enter to save, Shift+Enter for new line, Esc to cancel)"
+                                                  placeholder="Edit your reply..."
                                                   class="w-full bg-slate-950 border border-slate-700 focus:border-[#8F3033] rounded-lg p-2 text-xs text-slate-100 focus:outline-none"></textarea>
 
                                         <!-- Mention Suggestions for Edit Reply -->
@@ -708,7 +708,7 @@
                                   @keydown="handleComposerKeydown($event, 'reply', comment)"
                                   rows="1"
                                   maxlength="2000"
-                                  placeholder="Write your reply... (Enter to submit, Shift+Enter for new line, @ to mention)"
+                                  placeholder="Write a reply..."
                                   class="flex-1 min-w-0 bg-transparent border-0 p-0 py-1 text-xs text-slate-100 placeholder-slate-400 focus:ring-0 focus:outline-none resize-none leading-relaxed min-h-[34px] max-h-28 overflow-y-auto"></textarea>
 
                         <!-- Mention Suggestion Dropdown (Reply Composer) -->

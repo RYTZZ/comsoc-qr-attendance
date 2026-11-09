@@ -276,12 +276,20 @@ export default (config) => ({
         this.activeReplyParentId = comment.id;
         this.expandedThreads[comment.id] = true; // Auto-expand thread when replying
 
-        if (targetReply && targetReply.author) {
-            this.replyText = `@${targetReply.author.name} `;
-            if (!this.selectedMentionsByContext.reply) {
-                this.selectedMentionsByContext.reply = {};
-            }
-            this.selectedMentionsByContext.reply[targetReply.author.id] = targetReply.author;
+        // Determine target author to mention: if replying to a specific sub-reply use targetReply, otherwise comment author
+        const targetAuthor = (targetReply && targetReply.author) ? targetReply.author : comment.author;
+
+        // Reset reply mentions for fresh interaction
+        this.selectedMentionsByContext.reply = {};
+
+        if (targetAuthor && targetAuthor.name) {
+            this.replyText = `@${targetAuthor.name} `;
+            this.selectedMentionsByContext.reply[targetAuthor.id] = {
+                id: targetAuthor.id,
+                name: targetAuthor.name,
+                avatar: targetAuthor.avatar,
+                initials: targetAuthor.initials,
+            };
         } else {
             this.replyText = '';
         }
