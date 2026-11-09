@@ -28,18 +28,19 @@
 })"
      class="mt-6 pt-6 border-t border-slate-800 space-y-6">
 
-    <!-- Engagement Summary Bar & Reaction Breakdown -->
-    <div class="flex flex-wrap items-center justify-between gap-3 text-xs text-slate-400">
-        <!-- Reaction icons + count preview -->
+    <!-- Engagement Summary Bar & Reaction Breakdown (Hidden when zero reactions and zero comments) -->
+    <div x-show="totalReactions > 0 || totalComments > 0"
+         x-cloak
+         class="flex items-center justify-between gap-3 text-xs text-slate-400 px-1 py-1">
+        <!-- Reaction icons + count preview (Only displayed when totalReactions > 0) -->
         <div class="flex items-center gap-2">
             <template x-if="totalReactions > 0">
                 <button type="button"
                         @click="showReactorsModal = true"
-                        class="flex items-center gap-1.5 hover:text-white transition group focus:outline-none focus:ring-1 focus:ring-rose-500/50 rounded-full px-2 py-1 bg-slate-900/60 border border-slate-800">
+                        class="flex items-center gap-1.5 hover:text-white transition group focus:outline-none focus:ring-1 focus:ring-rose-500/50 rounded-full px-2 py-0.5 bg-slate-900/60 border border-slate-800">
                     <span class="flex items-center -space-x-1">
                         <template x-for="r in topReactions" :key="r.type">
                             <span class="inline-flex items-center justify-center w-5 h-5 text-sm rounded-full bg-slate-800 border border-slate-700 shadow-sm"
-                                  :title="r.label + ': ' + r.count"
                                   x-text="r.emoji"></span>
                         </template>
                     </span>
@@ -47,23 +48,23 @@
                     <span class="text-slate-500 group-hover:text-slate-400">reactions</span>
                 </button>
             </template>
-            <template x-if="totalReactions === 0">
-                <span class="text-slate-500 italic">Be the first to react</span>
-            </template>
         </div>
 
-        <!-- Comments & Replies Total Count -->
-        <div class="flex items-center gap-3">
-            <span class="flex items-center gap-1.5">
-                <i data-lucide="message-square" class="w-3.5 h-3.5 text-slate-500"></i>
-                <span class="font-medium text-slate-300" x-text="totalComments"></span>
-                <span>comments</span>
-            </span>
+        <!-- Comments Count (Only displayed when totalComments > 0) -->
+        <div>
+            <template x-if="totalComments > 0">
+                <button type="button"
+                        @click="focusMainCommentBox()"
+                        class="flex items-center gap-1.5 text-slate-400 hover:text-white transition focus:outline-none">
+                    <span class="font-medium text-slate-300" x-text="totalComments"></span>
+                    <span x-text="totalComments === 1 ? 'comment' : 'comments'"></span>
+                </button>
+            </template>
         </div>
     </div>
 
-    <!-- Engagement Action Buttons: Reaction Trigger & Quick Scroll to Comment -->
-    <div class="relative flex items-center gap-2 py-2 border-y border-slate-800/80 bg-slate-900/30 rounded-xl px-2 sm:px-4">
+    <!-- Facebook-Style Shared Full-Width Action Container: [ ❤️ React ]  [ 💬 Comment ] -->
+    <div class="relative flex items-center justify-start gap-2 py-1.5 px-2 rounded-2xl border border-slate-800/80 bg-[#172033]/70 backdrop-blur-sm">
         <!-- React Button Container with Hover / Click / Long-Press Picker -->
         <div class="relative" @click.away="pickerOpen = false" @mouseleave="pickerOpen = false">
             <button type="button"
@@ -74,10 +75,10 @@
                     @touchend.passive="cancelLongPress()"
                     @touchcancel.passive="cancelLongPress()"
                     aria-label="React to announcement"
-                    class="flex items-center gap-2 px-3 py-2 rounded-lg text-xs font-semibold transition-all duration-150 select-none cursor-pointer"
+                    class="flex items-center gap-2 px-3 py-1.5 rounded-xl text-xs font-semibold transition-all duration-150 select-none cursor-pointer hover:bg-slate-800/70"
                     :class="userReaction
-                        ? 'bg-rose-500/10 text-rose-300 border border-rose-500/30'
-                        : 'text-slate-300 hover:bg-slate-800/70 hover:text-white'">
+                        ? 'text-rose-400 hover:text-rose-300'
+                        : 'text-slate-300 hover:text-white'">
                 <template x-if="userReaction">
                     <span class="flex items-center gap-1.5">
                         <span class="text-base" x-text="breakdown[userReaction]?.emoji"></span>
@@ -86,7 +87,9 @@
                 </template>
                 <template x-if="!userReaction">
                     <span class="flex items-center gap-1.5">
-                        <i data-lucide="smile-plus" class="w-4 h-4 text-slate-400"></i>
+                        <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4 text-slate-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.3 1.5 4.05 3 5.5l7 7Z"/>
+                        </svg>
                         <span>React</span>
                     </span>
                 </template>
@@ -150,8 +153,10 @@
         <!-- Jump to Comment Button -->
         <button type="button"
                 @click="focusMainCommentBox()"
-                class="flex items-center gap-2 px-3 py-2 rounded-lg text-xs font-semibold text-slate-300 hover:bg-slate-800/70 hover:text-white transition">
-            <i data-lucide="message-circle" class="w-4 h-4 text-slate-400"></i>
+                class="flex items-center gap-2 px-3 py-1.5 rounded-xl text-xs font-semibold text-slate-300 hover:bg-slate-800/70 hover:text-white transition">
+            <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4 text-slate-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M7.9 20A9 9 0 1 0 4 16.1L2 22Z"/>
+            </svg>
             <span>Comment</span>
         </button>
     </div>
