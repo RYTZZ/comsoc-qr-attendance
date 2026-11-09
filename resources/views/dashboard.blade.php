@@ -206,33 +206,37 @@
             <!-- ========================================== -->
             <div x-show="currentTab === 'overview'" x-transition:enter="transition ease-out duration-200" class="space-y-6">
 
-                <!-- Announcements Bulletin (if any) -->
+                <!-- Compact Dismissible Announcements Bulletin (if any) -->
                 @if(isset($filteredAnnouncements) && $filteredAnnouncements->isNotEmpty())
                 @php $topAnn = $filteredAnnouncements->first(); @endphp
-                <div class="p-4 rounded-2xl bg-burgundy-deep border border-[#8F3033]/60 shadow-xl flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-                    <div class="flex items-start sm:items-center gap-3">
-                        <div class="w-9 h-9 rounded-xl bg-burgundy-gradient border border-[#8F3033]/50 flex items-center justify-center text-white flex-shrink-0 shadow-md">
-                            <i data-lucide="megaphone" class="w-4 h-4"></i>
+                <div x-data="{ dismissed: false }" x-show="!dismissed" class="p-3 sm:p-4 rounded-2xl bg-gradient-to-r from-rose-950/40 via-[#172033] to-[#172033] border border-rose-500/30 shadow-lg flex items-center justify-between gap-3">
+                    <div class="flex items-center gap-3 min-w-0">
+                        <div class="w-8 h-8 rounded-xl bg-[#560E0F] border border-[#8F3033]/60 flex items-center justify-center text-white shrink-0 shadow-sm">
+                            <i data-lucide="megaphone" class="w-4 h-4 text-rose-300"></i>
                         </div>
-                        <div>
+                        <div class="min-w-0">
                             <div class="flex items-center gap-2">
-                                <span class="px-2 py-0.5 rounded text-[10px] font-bold uppercase tracking-wider bg-rose-500/20 text-rose-300 border border-rose-500/30">
+                                <span class="px-2 py-0.5 rounded text-[9px] font-bold uppercase tracking-wider bg-rose-500/20 text-rose-300 border border-rose-500/30">
                                     {{ $topAnn->priority }} Notice
                                 </span>
                                 @if(!isset($readReceipts[$topAnn->id]))
-                                <span class="px-2 py-0.5 rounded text-[10px] font-bold uppercase bg-amber-500/20 text-amber-300 border border-amber-500/30">
+                                <span class="px-1.5 py-0.2 rounded text-[9px] font-bold uppercase bg-amber-500/20 text-amber-300 border border-amber-500/30">
                                     Unread
                                 </span>
                                 @endif
-                                <span class="text-xs text-slate-400 font-medium">{{ $topAnn->published_at?->diffForHumans() }}</span>
+                                <span class="text-[11px] text-slate-400 font-medium truncate">{{ $topAnn->published_at?->diffForHumans() }}</span>
                             </div>
-                            <h2 class="text-sm sm:text-base font-bold text-white mt-1">{{ $topAnn->title }}</h2>
-                            <p class="text-xs text-[#94A3B8] line-clamp-1 mt-0.5">{{ Str::limit(strip_tags($topAnn->content), 120) }}</p>
+                            <h2 class="text-xs sm:text-sm font-bold text-white truncate mt-0.5">{{ $topAnn->title }}</h2>
                         </div>
                     </div>
-                    <a href="{{ route('announcements.show', $topAnn) }}" class="btn-secondary text-xs shrink-0 self-start sm:self-center">
-                        Read Notice
-                    </a>
+                    <div class="flex items-center gap-2 shrink-0">
+                        <a href="{{ route('announcements.show', $topAnn) }}" class="btn-secondary text-[11px] py-1 px-3">
+                            Read Notice
+                        </a>
+                        <button type="button" @click="dismissed = true" class="p-1 text-slate-400 hover:text-white rounded-lg transition" title="Dismiss notice">
+                            <i data-lucide="x" class="w-4 h-4"></i>
+                        </button>
+                    </div>
                 </div>
                 @endif
 
@@ -246,239 +250,331 @@
                     <x-profile-completion-card :completion="$profileCompletion ?? null" />
                 @endif
 
-                <!-- Crimson Obsidian Bento Hero Row: Next Activity/Session Spotlight + Instant QR Pass Preview -->
+                <!-- ======================================================== -->
+                <!-- 2-COLUMN ASYMMETRIC BENTO COMMAND CENTER (65% / 35%)     -->
+                <!-- ======================================================== -->
                 @php
                     $nextActivityReg = isset($myActiveActivityRegistrations) ? $myActiveActivityRegistrations->first() : null;
                     $nextUpcomingEvent = $upcomingEvents->first();
                 @endphp
-                <div class="grid grid-cols-1 lg:grid-cols-3 gap-4">
-                    <!-- Left Bento Hero (2/3 width): Happening Now / Next Registered Activity or Event -->
-                    <div class="lg:col-span-2 bento-hero flex flex-col justify-between gap-4">
-                        <div class="space-y-2">
-                            <div class="flex flex-wrap items-center justify-between gap-2">
-                                <span class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-emerald-500/15 border border-emerald-500/30 text-emerald-300 text-[10px] font-bold uppercase tracking-wider">
-                                    <span class="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse"></span>
-                                    {{ $nextActivityReg ? 'Active Multi-Session Pass' : 'Adventurer Mission Deck' }}
-                                </span>
-                                <a href="{{ route('activities.my-registrations') }}" class="text-xs font-semibold text-[#df747a] hover:text-white inline-flex items-center gap-1">
-                                    <span>My Activity Passes</span>
-                                    <i data-lucide="arrow-right" class="w-3.5 h-3.5"></i>
-                                </a>
+                <div class="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
+
+                    <!-- LEFT COLUMN (8 of 12 cols = 66% width on desktop) -->
+                    <div class="lg:col-span-8 space-y-6">
+
+                        <!-- Crimson Obsidian Hero Banner -->
+                        <div class="bento-hero flex flex-col justify-between gap-4 p-5 sm:p-6 rounded-3xl border-[#8F3033]/50">
+                            <div class="space-y-2">
+                                <div class="flex flex-wrap items-center justify-between gap-2">
+                                    <span class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-emerald-500/15 border border-emerald-500/30 text-emerald-300 text-[10px] font-bold uppercase tracking-wider">
+                                        <span class="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse"></span>
+                                        {{ $nextActivityReg ? 'Active Multi-Session Pass' : 'Adventurer Mission Deck' }}
+                                    </span>
+                                    <a href="{{ route('activities.my-registrations') }}" class="text-xs font-semibold text-[#df747a] hover:text-white inline-flex items-center gap-1">
+                                        <span>My Activity Passes</span>
+                                        <i data-lucide="arrow-right" class="w-3.5 h-3.5"></i>
+                                    </a>
+                                </div>
+
+                                @if($nextActivityReg && $nextActivityReg->activity)
+                                    <h2 class="text-lg sm:text-xl font-extrabold text-white font-brand-display tracking-tight">
+                                        {{ $nextActivityReg->activity->title }}
+                                    </h2>
+                                    <div class="flex flex-wrap items-center gap-3 text-xs text-slate-300">
+                                        <span class="font-mono-tabular px-2 py-0.5 rounded bg-[#0B1120]/80 border border-white/10 text-[#dfa6a9]">
+                                            {{ $nextActivityReg->ticket_code }}
+                                        </span>
+                                        <span><i data-lucide="map-pin" class="w-3.5 h-3.5 inline text-[#df747a] mr-1"></i>{{ $nextActivityReg->activity->venue ?: 'SorSU Bulan Campus' }}</span>
+                                        <span><i data-lucide="layers" class="w-3.5 h-3.5 inline text-amber-400 mr-1"></i>{{ $nextActivityReg->sessionRegistrations->count() }} Enrolled Session(s)</span>
+                                        @if($nextActivityReg->team)
+                                            <span class="px-2 py-0.5 rounded bg-indigo-500/20 border border-indigo-500/30 text-indigo-300 text-[10px] font-bold">
+                                                Team: {{ $nextActivityReg->team->name }}
+                                            </span>
+                                        @endif
+                                    </div>
+                                @elseif($nextUpcomingEvent)
+                                    <h2 class="text-lg sm:text-xl font-extrabold text-white font-brand-display tracking-tight">
+                                        {{ $nextUpcomingEvent->name }}
+                                    </h2>
+                                    <p class="text-xs text-slate-300">
+                                        {{ $nextUpcomingEvent->event_date?->format('F j, Y') }} • {{ $nextUpcomingEvent->venue ?: 'SorSU Bulan Campus' }}
+                                    </p>
+                                @else
+                                    <h2 class="text-lg sm:text-xl font-extrabold text-white font-brand-display tracking-tight">
+                                        Ready for Your Next COMSOC Activity
+                                    </h2>
+                                    <p class="text-xs text-slate-300">
+                                        Browse multi-session workshops, IDEATHONs, hackathons, and seminars to earn Season EXP and redeemable Points.
+                                    </p>
+                                @endif
                             </div>
 
-                            @if($nextActivityReg && $nextActivityReg->activity)
-                                <h2 class="text-lg sm:text-xl font-extrabold text-white font-brand-display tracking-tight">
-                                    {{ $nextActivityReg->activity->title }}
-                                </h2>
-                                <div class="flex flex-wrap items-center gap-3 text-xs text-slate-300">
-                                    <span class="font-mono-tabular px-2 py-0.5 rounded bg-[#0B1120]/80 border border-white/10 text-[#dfa6a9]">
-                                        {{ $nextActivityReg->ticket_code }}
-                                    </span>
-                                    <span><i data-lucide="map-pin" class="w-3.5 h-3.5 inline text-[#df747a] mr-1"></i>{{ $nextActivityReg->activity->venue ?: 'SorSU Bulan Campus' }}</span>
-                                    <span><i data-lucide="layers" class="w-3.5 h-3.5 inline text-amber-400 mr-1"></i>{{ $nextActivityReg->sessionRegistrations->count() }} Enrolled Session(s)</span>
-                                    @if($nextActivityReg->team)
-                                        <span class="px-2 py-0.5 rounded bg-indigo-500/20 border border-indigo-500/30 text-indigo-300 text-[10px] font-bold">
-                                            Team: {{ $nextActivityReg->team->name }}
-                                        </span>
-                                    @endif
+                            <div class="flex flex-wrap items-center gap-2.5 pt-3 border-t border-white/10">
+                                <a href="{{ route('activities.index') }}" class="btn-primary btn-sm text-xs flex items-center gap-1.5">
+                                    <i data-lucide="layers" class="w-3.5 h-3.5"></i>
+                                    <span>Explore Multi-Session Activities</span>
+                                </a>
+                                <a href="{{ route('events.index') }}" class="btn-secondary btn-sm text-xs flex items-center gap-1.5">
+                                    <i data-lucide="calendar" class="w-3.5 h-3.5 text-sky-400"></i>
+                                    <span>View Events</span>
+                                </a>
+                            </div>
+                        </div>
+
+                        <!-- 4 Compact Core Metric Cards (2x2 Grid) -->
+                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                            <!-- Spendable EXP -->
+                            <div class="bento-card relative overflow-hidden group hover:border-amber-500/50 transition-all duration-300">
+                                <div class="absolute -top-10 -right-10 w-24 h-24 bg-amber-500/10 rounded-full blur-xl pointer-events-none group-hover:bg-amber-500/20 transition-all"></div>
+                                <div class="flex items-center justify-between">
+                                    <span class="text-xs font-semibold text-[#94A3B8] uppercase tracking-wider">Spendable EXP</span>
+                                    <div class="w-8 h-8 rounded-lg bg-amber-500/10 border border-amber-500/30 flex items-center justify-center text-amber-400 shadow-sm group-hover:scale-110 transition-transform">
+                                        <i data-lucide="coins" class="w-4 h-4"></i>
+                                    </div>
                                 </div>
-                            @elseif($nextUpcomingEvent)
-                                <h2 class="text-lg sm:text-xl font-extrabold text-white font-brand-display tracking-tight">
-                                    {{ $nextUpcomingEvent->name }}
-                                </h2>
-                                <p class="text-xs text-slate-300">
-                                    {{ $nextUpcomingEvent->event_date?->format('F j, Y') }} • {{ $nextUpcomingEvent->venue ?: 'SorSU Bulan Campus' }}
-                                </p>
+                                <div class="mt-3 flex items-baseline gap-2">
+                                    <span class="text-2xl sm:text-3xl font-extrabold text-amber-400 font-mono-tabular tracking-tight">{{ number_format($spendableExp) }}</span>
+                                    <span class="text-xs text-amber-300/80 font-bold uppercase">pts</span>
+                                </div>
+                                <div class="mt-2.5 pt-2 border-t border-white/5 flex items-center justify-between text-[11px] text-[#94A3B8]">
+                                    <span class="truncate">Ready in Reward Shop</span>
+                                    <a href="{{ route('shop.index') }}" class="text-amber-400 hover:text-amber-300 font-bold inline-flex items-center gap-0.5">
+                                        <span>Shop</span>
+                                        <i data-lucide="chevron-right" class="w-3 h-3"></i>
+                                    </a>
+                                </div>
+                            </div>
+
+                            <!-- Lifetime EXP & Level -->
+                            <div class="bento-card relative overflow-hidden group hover:border-rose-500/50 transition-all duration-300">
+                                <div class="absolute -top-10 -right-10 w-24 h-24 bg-rose-500/10 rounded-full blur-xl pointer-events-none group-hover:bg-rose-500/20 transition-all"></div>
+                                <div class="flex items-center justify-between">
+                                    <span class="text-xs font-semibold text-[#94A3B8] uppercase tracking-wider">Level & Progression</span>
+                                    <x-level-badge :level="$currentLevel" size="sm" :showLevelNumber="false" />
+                                </div>
+                                <div class="mt-3 flex items-baseline gap-2">
+                                    <span class="text-2xl sm:text-3xl font-extrabold text-white font-brand-display">Lvl {{ $currentLevel->level }}</span>
+                                    <span class="text-xs text-[#df747a] font-semibold truncate">{{ $currentLevel->title ?? $currentLevel->name }}</span>
+                                </div>
+                                <div class="mt-2.5 space-y-1">
+                                    <div class="w-full bg-[#0B1120] rounded-full h-2 overflow-hidden p-0.5 border border-white/5 shadow-inner">
+                                        <div class="bg-gradient-to-r from-[#560E0F] via-[#8F3033] to-[#df747a] h-full rounded-full transition-all duration-500 shadow-xs" style="width: {{ $levelProgress }}%"></div>
+                                    </div>
+                                    <div class="flex items-center justify-between text-[10px] text-slate-400 font-mono-tabular">
+                                        <span>{{ $levelProgress }}% Progress</span>
+                                        <button type="button" @click="setTab('exp-rewards')" class="text-[#df747a] hover:text-white font-semibold">Details &rarr;</button>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Verified Attendance -->
+                            <div class="bento-card relative overflow-hidden group hover:border-emerald-500/50 transition-all duration-300">
+                                <div class="absolute -top-10 -right-10 w-24 h-24 bg-emerald-500/10 rounded-full blur-xl pointer-events-none group-hover:bg-emerald-500/20 transition-all"></div>
+                                <div class="flex items-center justify-between">
+                                    <span class="text-xs font-semibold text-[#94A3B8] uppercase tracking-wider">Attendance Scans</span>
+                                    <div class="w-8 h-8 rounded-lg bg-emerald-500/10 border border-emerald-500/30 flex items-center justify-center text-emerald-400 shadow-sm group-hover:scale-110 transition-transform">
+                                        <i data-lucide="check-circle-2" class="w-4 h-4"></i>
+                                    </div>
+                                </div>
+                                <div class="mt-3 flex items-baseline gap-2">
+                                    <span class="text-2xl sm:text-3xl font-extrabold text-emerald-400 font-mono-tabular tracking-tight">{{ $verifiedAttendanceCount }}</span>
+                                    <span class="text-xs text-slate-400 font-medium">events attended</span>
+                                </div>
+                                <div class="mt-2.5 pt-2 border-t border-white/5 flex items-center justify-between text-[11px] text-[#94A3B8]">
+                                    <span class="truncate">Verified official scans</span>
+                                    <button type="button" @click="setTab('attendance')" class="text-emerald-400 hover:text-emerald-300 font-bold inline-flex items-center gap-0.5">
+                                        <span>Logs</span>
+                                        <i data-lucide="chevron-right" class="w-3 h-3"></i>
+                                    </button>
+                                </div>
+                            </div>
+
+                            <!-- Upcoming Events -->
+                            <div class="bento-card relative overflow-hidden group hover:border-blue-500/50 transition-all duration-300">
+                                <div class="absolute -top-10 -right-10 w-24 h-24 bg-blue-500/10 rounded-full blur-xl pointer-events-none group-hover:bg-blue-500/20 transition-all"></div>
+                                <div class="flex items-center justify-between">
+                                    <span class="text-xs font-semibold text-[#94A3B8] uppercase tracking-wider">Upcoming Events</span>
+                                    <div class="w-8 h-8 rounded-lg bg-blue-500/10 border border-blue-500/30 flex items-center justify-center text-blue-400 shadow-sm group-hover:scale-110 transition-transform">
+                                        <i data-lucide="calendar" class="w-4 h-4"></i>
+                                    </div>
+                                </div>
+                                <div class="mt-3 flex items-baseline gap-2">
+                                    <span class="text-2xl sm:text-3xl font-extrabold text-blue-400 font-mono-tabular tracking-tight">{{ $upcomingEvents->count() }}</span>
+                                    <span class="text-xs text-slate-400 font-medium">on schedule</span>
+                                </div>
+                                <div class="mt-2.5 pt-2 border-t border-white/5 flex items-center justify-between text-[11px] text-[#94A3B8]">
+                                    <span class="truncate">Active semester calendar</span>
+                                    <a href="{{ route('events.index') }}" class="text-blue-400 hover:text-blue-300 font-bold inline-flex items-center gap-0.5">
+                                        <span>View</span>
+                                        <i data-lucide="chevron-right" class="w-3 h-3"></i>
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Upcoming Scheduled Events Card -->
+                        <div class="card bg-[#172033]/90 border border-[#334155] p-5 shadow-xl space-y-4 rounded-3xl">
+                            <div class="flex items-center justify-between pb-3 border-b border-[#334155]">
+                                <div class="flex items-center gap-2">
+                                    <i data-lucide="calendar" class="w-4 h-4 text-blue-400"></i>
+                                    <h3 class="text-sm font-bold text-white font-brand-display">Upcoming Event</h3>
+                                </div>
+                                @if($upcomingEvents->isNotEmpty())
+                                <button type="button" @click="setTab('attendance')" class="text-xs text-[#df747a] hover:text-white font-semibold transition">
+                                    See All &rarr;
+                                </button>
+                                @endif
+                            </div>
+
+                            @if($upcomingEvents->isNotEmpty())
+                                @php $spotlightEvent = $upcomingEvents->first(); @endphp
+                                <div class="p-4 rounded-2xl bg-[#0B1120] border border-[#334155] space-y-2.5">
+                                    <div class="flex items-start justify-between gap-3">
+                                        <div>
+                                            <span class="px-2 py-0.5 rounded text-[10px] font-bold uppercase bg-blue-500/20 text-blue-300 border border-blue-500/30">Next Up</span>
+                                            <h4 class="text-base font-bold text-white mt-1">{{ $spotlightEvent->name }}</h4>
+                                        </div>
+                                        <span class="text-xs font-semibold text-slate-400 shrink-0">{{ $spotlightEvent->event_date?->format('M j, Y') }}</span>
+                                    </div>
+                                    <p class="text-xs text-[#94A3B8] line-clamp-2">{{ Str::limit(strip_tags($spotlightEvent->description), 140) }}</p>
+                                    <div class="pt-2 flex items-center justify-between text-xs border-t border-[#334155]/60">
+                                        <span class="text-slate-400 flex items-center gap-1">
+                                            <i data-lucide="map-pin" class="w-3.5 h-3.5 text-rose-400"></i>
+                                            <span>{{ $spotlightEvent->venue ?: 'SorSU Bulan Campus' }}</span>
+                                        </span>
+                                        <a href="{{ route('events.show', $spotlightEvent) }}" class="text-[#df747a] hover:text-white font-semibold inline-flex items-center gap-1">
+                                            <span>Event Details</span>
+                                            <i data-lucide="arrow-right" class="w-3 h-3"></i>
+                                        </a>
+                                    </div>
+                                </div>
                             @else
-                                <h2 class="text-lg sm:text-xl font-extrabold text-white font-brand-display tracking-tight">
-                                    Ready for Your Next COMSOC Activity
-                                </h2>
-                                <p class="text-xs text-slate-300">
-                                    Browse multi-session workshops, IDEATHONs, hackathons, and seminars to earn Season EXP and redeemable Points.
-                                </p>
+                                <div class="text-center py-6 px-4 rounded-2xl bg-[#0B1120]/60 border border-dashed border-[#334155] space-y-2">
+                                    <div class="w-10 h-10 rounded-full bg-[#1E293B] border border-[#334155] flex items-center justify-center text-slate-500 mx-auto">
+                                        <i data-lucide="calendar-x" class="w-5 h-5"></i>
+                                    </div>
+                                    <p class="text-xs text-slate-400 font-medium">No upcoming events scheduled right now.</p>
+                                    <a href="{{ route('activities.index') }}" class="btn-secondary btn-sm text-[11px] inline-flex items-center gap-1 mt-1">
+                                        <i data-lucide="compass" class="w-3 h-3"></i>
+                                        <span>Explore Missions</span>
+                                    </a>
+                                </div>
+                            @endif
+                        </div>
+                    </div>
+
+                    <!-- RIGHT SIDEBAR (4 of 12 cols = 33% width on desktop) -->
+                    <div class="lg:col-span-4 space-y-6">
+
+                        <!-- Digital Student Membership QR Pass Card -->
+                        <div class="bento-card relative overflow-hidden flex flex-col justify-between bg-gradient-to-br from-[#1E293B] via-[#111827] to-[#0B1120] border-[#8F3033]/60 shadow-2xl group hover:border-[#df747a]/60 transition-all duration-300 rounded-3xl">
+                            <!-- Holographic ambient background glow -->
+                            <div class="absolute -top-12 -right-12 w-32 h-32 bg-rose-500/10 rounded-full blur-2xl pointer-events-none group-hover:bg-rose-500/20 transition-all duration-500"></div>
+
+                            <div class="relative z-10">
+                                <div class="flex items-center justify-between">
+                                    <div class="flex items-center gap-1.5">
+                                        <span class="w-2 h-2 rounded-full bg-rose-500 animate-ping"></span>
+                                        <span class="text-[10px] font-bold uppercase tracking-widest text-[#df747a]">Rolling QR Pass</span>
+                                    </div>
+                                    <span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-emerald-500/15 border border-emerald-500/30 text-emerald-300 text-[10px] font-bold shadow-xs">
+                                        <span class="w-1.5 h-1.5 rounded-full bg-emerald-400"></span>
+                                        <span>60s Token</span>
+                                    </span>
+                                </div>
+
+                                <!-- Digital Student Pass Card Surface -->
+                                <div class="mt-3.5 p-3.5 rounded-xl bg-gradient-to-r from-[#0B1120] to-[#172033] border border-white/10 flex items-center justify-between shadow-inner group-hover:border-[#8F3033]/40 transition-colors">
+                                    <div class="space-y-0.5">
+                                        <div class="text-[10px] uppercase font-bold tracking-wider text-slate-400">Member Pass ID</div>
+                                        <div class="text-sm font-extrabold text-white font-mono-tabular tracking-wide flex items-center gap-1.5">
+                                            <span>{{ $user->member_id ?: $user->username }}</span>
+                                        </div>
+                                        <div class="text-[10px] text-slate-400 flex items-center gap-1">
+                                            <i data-lucide="shield-check" class="w-3 h-3 text-emerald-400"></i>
+                                            <span>Encrypted & Verified</span>
+                                        </div>
+                                    </div>
+                                    <div class="w-11 h-11 rounded-xl bg-[#560E0F]/50 border border-[#8F3033] flex items-center justify-center text-[#df747a] shadow-lg group-hover:scale-105 group-hover:text-white group-hover:bg-[#8F3033]/60 transition-all">
+                                        <i data-lucide="qr-code" class="w-6 h-6"></i>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <a href="{{ route('member.dynamic_qr') }}" class="relative z-10 mt-4 btn-primary w-full text-xs flex items-center justify-center gap-2 py-2.5 shadow-lg group-hover:shadow-rose-950/40">
+                                <i data-lucide="scan-line" class="w-4 h-4"></i>
+                                <span>Launch Attendance QR Pass</span>
+                                <i data-lucide="arrow-right" class="w-3.5 h-3.5 opacity-70 group-hover:translate-x-0.5 transition-transform"></i>
+                            </a>
+                        </div>
+
+                        <!-- Recent Activity & EXP Ledger Feed -->
+                        <div class="card bg-[#172033]/90 border border-[#334155] p-5 shadow-xl space-y-4 rounded-3xl">
+                            <div class="flex items-center justify-between pb-3 border-b border-[#334155]">
+                                <div class="flex items-center gap-2">
+                                    <i data-lucide="history" class="w-4 h-4 text-amber-400"></i>
+                                    <h3 class="text-sm font-bold text-white font-brand-display">Recent Activity & EXP</h3>
+                                </div>
+                                <button type="button" @click="setTab('exp-rewards')" class="text-xs text-[#df747a] hover:text-white font-semibold transition">
+                                    View Full Ledger &rarr;
+                                </button>
+                            </div>
+
+                            @if(isset($recentXp) && $recentXp->isNotEmpty())
+                                <div class="space-y-2">
+                                    @foreach($recentXp->take(4) as $tx)
+                                        <div class="p-2.5 rounded-xl bg-[#0B1120] border border-[#334155]/60 flex items-center justify-between gap-3 text-xs">
+                                            <div class="min-w-0">
+                                                <div class="font-semibold text-white truncate">{{ $tx->description ?: ucfirst(str_replace('_', ' ', $tx->activity_type)) }}</div>
+                                                <div class="text-[10px] text-slate-500 mt-0.5">{{ $tx->created_at?->diffForHumans() }}</div>
+                                            </div>
+                                            <span class="font-mono-tabular font-bold shrink-0 px-2 py-0.5 rounded text-[11px] {{ $tx->amount >= 0 ? 'bg-emerald-500/15 text-emerald-400 border border-emerald-500/30' : 'bg-rose-500/15 text-rose-400 border border-rose-500/30' }}">
+                                                {{ $tx->amount >= 0 ? "+{$tx->amount}" : $tx->amount }} EXP
+                                            </span>
+                                        </div>
+                                    @endforeach
+                                </div>
+                            @else
+                                <div class="text-center py-6 px-3 text-xs text-slate-400">
+                                    No EXP activity logged yet this season.
+                                </div>
                             @endif
                         </div>
 
-                        <div class="flex flex-wrap items-center gap-2.5 pt-2 border-t border-white/10">
-                            <a href="{{ route('activities.index') }}" class="btn-primary btn-sm text-xs flex items-center gap-1.5">
-                                <i data-lucide="layers" class="w-3.5 h-3.5"></i>
-                                <span>Explore Multi-Session Activities</span>
-                            </a>
-                            <a href="{{ route('events.index') }}" class="btn-secondary btn-sm text-xs flex items-center gap-1.5">
-                                <i data-lucide="calendar" class="w-3.5 h-3.5 text-sky-400"></i>
-                                <span>View Events</span>
-                            </a>
+                        <!-- Quick Utility Shortcuts Drawer -->
+                        <div class="card bg-[#172033]/70 border border-[#334155] p-4 shadow-xl space-y-2.5 rounded-3xl">
+                            <span class="text-[10px] uppercase font-bold tracking-wider text-slate-400 px-1 block">
+                                Quick Navigation:
+                            </span>
+                            <div class="grid grid-cols-2 gap-2 text-xs">
+                                <a href="{{ route('events.index') }}" class="p-2.5 rounded-xl bg-[#0B1120] hover:bg-[#1E293B] border border-[#334155] font-semibold text-slate-300 hover:text-white flex items-center gap-1.5 transition">
+                                    <i data-lucide="calendar" class="w-3.5 h-3.5 text-blue-400 shrink-0"></i>
+                                    <span class="truncate">Events</span>
+                                </a>
+                                <a href="{{ route('shop.index') }}" class="p-2.5 rounded-xl bg-[#0B1120] hover:bg-[#1E293B] border border-[#334155] font-semibold text-slate-300 hover:text-white flex items-center gap-1.5 transition">
+                                    <i data-lucide="gift" class="w-3.5 h-3.5 text-purple-400 shrink-0"></i>
+                                    <span class="truncate">Reward Shop</span>
+                                </a>
+                                <a href="{{ route('projects.index') }}" class="p-2.5 rounded-xl bg-[#0B1120] hover:bg-[#1E293B] border border-[#334155] font-semibold text-slate-300 hover:text-white flex items-center gap-1.5 transition">
+                                    <i data-lucide="folder-git-2" class="w-3.5 h-3.5 text-indigo-400 shrink-0"></i>
+                                    <span class="truncate">Projects</span>
+                                </a>
+                                <a href="{{ route('leaderboard.index') }}" class="p-2.5 rounded-xl bg-[#0B1120] hover:bg-[#1E293B] border border-[#334155] font-semibold text-slate-300 hover:text-white flex items-center gap-1.5 transition">
+                                    <i data-lucide="trophy" class="w-3.5 h-3.5 text-amber-400 shrink-0"></i>
+                                    <span class="truncate">Leaderboard</span>
+                                </a>
+                                <a href="{{ route('volunteers.index') }}" class="p-2.5 rounded-xl bg-[#0B1120] hover:bg-[#1E293B] border border-[#334155] font-semibold text-slate-300 hover:text-white flex items-center gap-1.5 transition">
+                                    <i data-lucide="hand-heart" class="w-3.5 h-3.5 text-emerald-400 shrink-0"></i>
+                                    <span class="truncate">Volunteers</span>
+                                </a>
+                                <a href="{{ route('helpdesk.index') }}" class="p-2.5 rounded-xl bg-[#0B1120] hover:bg-[#1E293B] border border-[#334155] font-semibold text-slate-300 hover:text-white flex items-center gap-1.5 transition">
+                                    <i data-lucide="life-buoy" class="w-3.5 h-3.5 text-rose-400 shrink-0"></i>
+                                    <span class="truncate">Support</span>
+                                </a>
+                            </div>
                         </div>
+
                     </div>
-
-                    <!-- Right Bento Card (1/3 width): Sleek Digital Membership QR Pass -->
-                    <div class="bento-card relative overflow-hidden flex flex-col justify-between bg-gradient-to-br from-[#1E293B] via-[#111827] to-[#0B1120] border-[#8F3033]/60 shadow-2xl group hover:border-[#df747a]/60 transition-all duration-300">
-                        <!-- Holographic ambient background glow -->
-                        <div class="absolute -top-12 -right-12 w-32 h-32 bg-rose-500/10 rounded-full blur-2xl pointer-events-none group-hover:bg-rose-500/20 transition-all duration-500"></div>
-
-                        <div class="relative z-10">
-                            <div class="flex items-center justify-between">
-                                <div class="flex items-center gap-1.5">
-                                    <span class="w-2 h-2 rounded-full bg-rose-500 animate-ping"></span>
-                                    <span class="text-[10px] font-bold uppercase tracking-widest text-[#df747a]">Rolling QR Pass</span>
-                                </div>
-                                <span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-emerald-500/15 border border-emerald-500/30 text-emerald-300 text-[10px] font-bold shadow-xs">
-                                    <span class="w-1.5 h-1.5 rounded-full bg-emerald-400"></span>
-                                    <span>60s Token</span>
-                                </span>
-                            </div>
-
-                            <!-- Digital Student Pass Card Surface -->
-                            <div class="mt-3.5 p-3.5 rounded-xl bg-gradient-to-r from-[#0B1120] to-[#172033] border border-white/10 flex items-center justify-between shadow-inner group-hover:border-[#8F3033]/40 transition-colors">
-                                <div class="space-y-0.5">
-                                    <div class="text-[10px] uppercase font-bold tracking-wider text-slate-400">Member Pass ID</div>
-                                    <div class="text-sm font-extrabold text-white font-mono-tabular tracking-wide flex items-center gap-1.5">
-                                        <span>{{ $user->member_id ?: $user->username }}</span>
-                                    </div>
-                                    <div class="text-[10px] text-slate-400 flex items-center gap-1">
-                                        <i data-lucide="shield-check" class="w-3 h-3 text-emerald-400"></i>
-                                        <span>Encrypted & Verified</span>
-                                    </div>
-                                </div>
-                                <div class="w-11 h-11 rounded-xl bg-[#560E0F]/50 border border-[#8F3033] flex items-center justify-center text-[#df747a] shadow-lg group-hover:scale-105 group-hover:text-white group-hover:bg-[#8F3033]/60 transition-all">
-                                    <i data-lucide="qr-code" class="w-6 h-6"></i>
-                                </div>
-                            </div>
-                        </div>
-
-                        <a href="{{ route('member.dynamic_qr') }}" class="relative z-10 mt-4 btn-primary w-full text-xs flex items-center justify-center gap-2 py-2.5 shadow-lg group-hover:shadow-rose-950/40">
-                            <i data-lucide="scan-line" class="w-4 h-4"></i>
-                            <span>Launch Attendance QR Pass</span>
-                            <i data-lucide="arrow-right" class="w-3.5 h-3.5 opacity-70 group-hover:translate-x-0.5 transition-transform"></i>
-                        </a>
-                    </div>
-                </div>
-
-                <!-- 4 Enhanced Summary Metric Cards with Glowing Micro-Visuals -->
-                <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-                    <!-- Spendable EXP -->
-                    <div class="bento-card relative overflow-hidden group hover:border-amber-500/50 transition-all duration-300">
-                        <div class="absolute -top-10 -right-10 w-24 h-24 bg-amber-500/10 rounded-full blur-xl pointer-events-none group-hover:bg-amber-500/20 transition-all"></div>
-                        <div class="flex items-center justify-between">
-                            <span class="text-xs font-semibold text-[#94A3B8] uppercase tracking-wider">Spendable EXP</span>
-                            <div class="w-8 h-8 rounded-lg bg-amber-500/10 border border-amber-500/30 flex items-center justify-center text-amber-400 shadow-sm group-hover:scale-110 transition-transform">
-                                <i data-lucide="coins" class="w-4 h-4"></i>
-                            </div>
-                        </div>
-                        <div class="mt-3 flex items-baseline gap-2">
-                            <span class="text-2xl sm:text-3xl font-extrabold text-amber-400 font-mono-tabular tracking-tight">{{ number_format($spendableExp) }}</span>
-                            <span class="text-xs text-amber-300/80 font-bold uppercase">pts</span>
-                        </div>
-                        <div class="mt-2.5 pt-2 border-t border-white/5 flex items-center justify-between text-[11px] text-[#94A3B8]">
-                            <span class="truncate">Ready in Reward Shop</span>
-                            <a href="{{ route('shop.index') }}" class="text-amber-400 hover:text-amber-300 font-bold inline-flex items-center gap-0.5">
-                                <span>Shop</span>
-                                <i data-lucide="chevron-right" class="w-3 h-3"></i>
-                            </a>
-                        </div>
-                    </div>
-
-                    <!-- Lifetime EXP & Level -->
-                    <div class="bento-card relative overflow-hidden group hover:border-rose-500/50 transition-all duration-300">
-                        <div class="absolute -top-10 -right-10 w-24 h-24 bg-rose-500/10 rounded-full blur-xl pointer-events-none group-hover:bg-rose-500/20 transition-all"></div>
-                        <div class="flex items-center justify-between">
-                            <span class="text-xs font-semibold text-[#94A3B8] uppercase tracking-wider">Level & Progression</span>
-                            <x-level-badge :level="$currentLevel" size="sm" :showLevelNumber="false" />
-                        </div>
-                        <div class="mt-3 flex items-baseline gap-2">
-                            <span class="text-2xl sm:text-3xl font-extrabold text-white font-brand-display">Lvl {{ $currentLevel->level }}</span>
-                            <span class="text-xs text-[#df747a] font-semibold truncate">{{ $currentLevel->title ?? $currentLevel->name }}</span>
-                        </div>
-                        <div class="mt-2.5 space-y-1">
-                            <div class="w-full bg-[#0B1120] rounded-full h-2 overflow-hidden p-0.5 border border-white/5 shadow-inner">
-                                <div class="bg-gradient-to-r from-[#560E0F] via-[#8F3033] to-[#df747a] h-full rounded-full transition-all duration-500 shadow-xs" style="width: {{ $levelProgress }}%"></div>
-                            </div>
-                            <div class="flex items-center justify-between text-[10px] text-slate-400 font-mono-tabular">
-                                <span>{{ $levelProgress }}% Progress</span>
-                                <button type="button" @click="setTab('exp-rewards')" class="text-[#df747a] hover:text-white font-semibold">Details &rarr;</button>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- Verified Attendance -->
-                    <div class="bento-card relative overflow-hidden group hover:border-emerald-500/50 transition-all duration-300">
-                        <div class="absolute -top-10 -right-10 w-24 h-24 bg-emerald-500/10 rounded-full blur-xl pointer-events-none group-hover:bg-emerald-500/20 transition-all"></div>
-                        <div class="flex items-center justify-between">
-                            <span class="text-xs font-semibold text-[#94A3B8] uppercase tracking-wider">Attendance Scans</span>
-                            <div class="w-8 h-8 rounded-lg bg-emerald-500/10 border border-emerald-500/30 flex items-center justify-center text-emerald-400 shadow-sm group-hover:scale-110 transition-transform">
-                                <i data-lucide="check-circle-2" class="w-4 h-4"></i>
-                            </div>
-                        </div>
-                        <div class="mt-3 flex items-baseline gap-2">
-                            <span class="text-2xl sm:text-3xl font-extrabold text-emerald-400 font-mono-tabular tracking-tight">{{ $verifiedAttendanceCount }}</span>
-                            <span class="text-xs text-slate-400 font-medium">events attended</span>
-                        </div>
-                        <div class="mt-2.5 pt-2 border-t border-white/5 flex items-center justify-between text-[11px] text-[#94A3B8]">
-                            <span class="truncate">Verified official scans</span>
-                            <button type="button" @click="setTab('attendance')" class="text-emerald-400 hover:text-emerald-300 font-bold inline-flex items-center gap-0.5">
-                                <span>Logs</span>
-                                <i data-lucide="chevron-right" class="w-3 h-3"></i>
-                            </button>
-                        </div>
-                    </div>
-
-                    <!-- Upcoming Events -->
-                    <div class="bento-card relative overflow-hidden group hover:border-blue-500/50 transition-all duration-300">
-                        <div class="absolute -top-10 -right-10 w-24 h-24 bg-blue-500/10 rounded-full blur-xl pointer-events-none group-hover:bg-blue-500/20 transition-all"></div>
-                        <div class="flex items-center justify-between">
-                            <span class="text-xs font-semibold text-[#94A3B8] uppercase tracking-wider">Upcoming Events</span>
-                            <div class="w-8 h-8 rounded-lg bg-blue-500/10 border border-blue-500/30 flex items-center justify-center text-blue-400 shadow-sm group-hover:scale-110 transition-transform">
-                                <i data-lucide="calendar" class="w-4 h-4"></i>
-                            </div>
-                        </div>
-                        <div class="mt-3 flex items-baseline gap-2">
-                            <span class="text-2xl sm:text-3xl font-extrabold text-blue-400 font-mono-tabular tracking-tight">{{ $upcomingEvents->count() }}</span>
-                            <span class="text-xs text-slate-400 font-medium">on schedule</span>
-                        </div>
-                        <div class="mt-2.5 pt-2 border-t border-white/5 flex items-center justify-between text-[11px] text-[#94A3B8]">
-                            <span class="truncate">Active semester calendar</span>
-                            <a href="{{ route('events.index') }}" class="text-blue-400 hover:text-blue-300 font-bold inline-flex items-center gap-0.5">
-                                <span>View</span>
-                                <i data-lucide="chevron-right" class="w-3 h-3"></i>
-                            </a>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Streamlined Quick Action Shortcuts Bar (Redundancies removed) -->
-                <div class="p-3 bg-[#172033]/80 rounded-2xl border border-[#334155] shadow-lg flex items-center gap-2 overflow-x-auto scrollbar-none backdrop-blur-sm">
-                    <span class="text-[10px] uppercase font-bold tracking-wider text-slate-400 px-2 whitespace-nowrap flex items-center gap-1.5">
-                        <i data-lucide="compass" class="w-3.5 h-3.5 text-[#df747a]"></i>
-                        <span>Explore:</span>
-                    </span>
-                    <a href="{{ route('events.index') }}" class="px-3 py-1.5 rounded-xl bg-[#0B1120] hover:bg-[#1E293B] border border-[#334155] text-xs font-semibold text-[#F8FAFC] flex items-center gap-1.5 whitespace-nowrap transition">
-                        <i data-lucide="calendar" class="w-3.5 h-3.5 text-blue-400"></i>
-                        <span>Browse Events</span>
-                    </a>
-                    <button type="button" @click="setTab('exp-rewards')" class="px-3 py-1.5 rounded-xl bg-[#0B1120] hover:bg-[#1E293B] border border-[#334155] text-xs font-semibold text-[#F8FAFC] flex items-center gap-1.5 whitespace-nowrap transition">
-                        <i data-lucide="history" class="w-3.5 h-3.5 text-amber-400"></i>
-                        <span>EXP History</span>
-                    </button>
-                    <a href="{{ route('shop.index') }}" class="px-3 py-1.5 rounded-xl bg-[#0B1120] hover:bg-[#1E293B] border border-[#334155] text-xs font-semibold text-[#F8FAFC] flex items-center gap-1.5 whitespace-nowrap transition">
-                        <i data-lucide="gift" class="w-3.5 h-3.5 text-purple-400"></i>
-                        <span>Reward Shop</span>
-                    </a>
-                    <a href="{{ route('projects.index') }}" class="px-3 py-1.5 rounded-xl bg-[#0B1120] hover:bg-[#1E293B] border border-[#334155] text-xs font-semibold text-[#F8FAFC] flex items-center gap-1.5 whitespace-nowrap transition">
-                        <i data-lucide="folder-git-2" class="w-3.5 h-3.5 text-indigo-400"></i>
-                        <span>Projects</span>
-                    </a>
-                    <a href="{{ route('volunteers.index') }}" class="px-3 py-1.5 rounded-xl bg-[#0B1120] hover:bg-[#1E293B] border border-[#334155] text-xs font-semibold text-[#F8FAFC] flex items-center gap-1.5 whitespace-nowrap transition">
-                        <i data-lucide="hand-heart" class="w-3.5 h-3.5 text-emerald-400"></i>
-                        <span>Volunteer Board</span>
-                    </a>
-                    <a href="{{ route('leaderboard.index') }}" class="px-3 py-1.5 rounded-xl bg-[#0B1120] hover:bg-[#1E293B] border border-[#334155] text-xs font-semibold text-[#F8FAFC] flex items-center gap-1.5 whitespace-nowrap transition">
-                        <i data-lucide="trophy" class="w-3.5 h-3.5 text-amber-400"></i>
-                        <span>Leaderboard</span>
-                    </a>
-                    <a href="{{ route('helpdesk.index') }}" class="px-3 py-1.5 rounded-xl bg-[#0B1120] hover:bg-[#1E293B] border border-[#334155] text-xs font-semibold text-[#F8FAFC] flex items-center gap-1.5 whitespace-nowrap transition">
-                        <i data-lucide="life-buoy" class="w-3.5 h-3.5 text-rose-400"></i>
-                        <span>Support</span>
-                    </a>
                 </div>
 
                 <!-- Overview Snapshots: 2 Column Grid -->
