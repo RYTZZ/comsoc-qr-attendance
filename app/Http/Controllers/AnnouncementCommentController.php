@@ -22,27 +22,31 @@ class AnnouncementCommentController extends Controller
             return response()->json(['users' => []], 401);
         }
 
-        $query = trim($request->input('q', ''));
+        $rawQuery = (string) $request->input('q', '');
+        // Strip leading @ or whitespace if user types @name
+        $query = trim(ltrim(trim($rawQuery), '@'));
 
         $usersQuery = User::where('is_active', true)
             ->whereNull('deleted_at')
             ->whereNull('suspended_at')
             ->where('id', '!=', $viewer->id)
-            ->with('student:id,user_id,first_name,last_name');
+            ->with(['student:id,first_name,last_name,program,year_level']);
 
         if ($query !== '') {
-            $usersQuery->where(function ($q) use ($query) {
-                $q->where('name', 'like', "%{$query}%")
-                    ->orWhere('username', 'like', "%{$query}%")
-                    ->orWhere('nickname', 'like', "%{$query}%")
-                    ->orWhereHas('student', function ($sq) use ($query) {
-                        $sq->where('first_name', 'like', "%{$query}%")
-                            ->orWhere('last_name', 'like', "%{$query}%");
+            $lower = strtolower($query);
+            $usersQuery->where(function ($q) use ($lower) {
+                $q->whereRaw('LOWER(name) LIKE ?', ["%{$lower}%"])
+                    ->orWhereRaw('LOWER(username) LIKE ?', ["%{$lower}%"])
+                    ->orWhereRaw('LOWER(nickname) LIKE ?', ["%{$lower}%"])
+                    ->orWhereHas('student', function ($sq) use ($lower) {
+                        $sq->whereRaw('LOWER(first_name) LIKE ?', ["%{$lower}%"])
+                            ->orWhereRaw('LOWER(last_name) LIKE ?', ["%{$lower}%"])
+                            ->orWhereRaw('LOWER(student_number) LIKE ?', ["%{$lower}%"]);
                     });
             });
         }
 
-        $users = $usersQuery->limit(8)->get()->map(function ($u) {
+        $users = $usersQuery->limit(20)->get()->map(function ($u) {
             $student = $u->student;
             $displayName = $student ? trim($student->first_name . ' ' . $student->last_name) : $u->name;
             $handle = $u->username ?: strtolower(preg_replace('/[^a-zA-Z0-9]/', '', $displayName));
@@ -53,10 +57,12 @@ class AnnouncementCommentController extends Controller
             return [
                 'id' => $u->id,
                 'name' => $displayName,
-                'handle' => $handle,
+                'handle' => ltrim($handle, '@'),
                 'initials' => strtoupper(substr($displayName, 0, 2)),
                 'avatar' => \App\Services\AvatarService::getUrl($u->avatar_seed, $u->avatar_style ?? 'adventurer'),
                 'role' => $u->role,
+                'program' => $student?->program,
+                'year_level' => $student?->year_level,
             ];
         });
 
@@ -77,8 +83,8 @@ class AnnouncementCommentController extends Controller
                 }
             })
             ->with([
-                'user:id,name,role,avatar_seed,avatar_style',
-                'user.student:user_id,first_name,last_name',
+                'user:id,name,role,student_id,avatar_seed,avatar_style',
+                'user.student:id,first_name,last_name',
                 'replies' => function ($q) use ($user) {
                     $q->where(function ($query) use ($user) {
                         $query->where('status', AnnouncementComment::STATUS_ACTIVE);
@@ -86,8 +92,8 @@ class AnnouncementCommentController extends Controller
                             $query->orWhere('status', AnnouncementComment::STATUS_HIDDEN);
                         }
                     })->with([
-                        'user:id,name,role,avatar_seed,avatar_style',
-                        'user.student:user_id,first_name,last_name',
+                        'user:id,name,role,student_id,avatar_seed,avatar_style',
+                        'user.student:id,first_name,last_name',
                     ])->oldest('created_at');
                 },
             ])
@@ -145,7 +151,7 @@ class AnnouncementCommentController extends Controller
             'status' => AnnouncementComment::STATUS_ACTIVE,
         ]);
 
-        $comment->load(['user:id,name,role,avatar_seed,avatar_style', 'user.student:user_id,first_name,last_name']);
+        $comment->load(['user:id,name,role,student_id,avatar_seed,avatar_style', 'user.student:id,first_name,last_name']);
 
         // Audit log
         AuditLogger::log(

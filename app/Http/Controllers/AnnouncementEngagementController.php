@@ -46,7 +46,7 @@ class AnnouncementEngagementController extends Controller
 
         // Recent reactors list (for modal/breakdown view, up to 20 users)
         $recentReactors = AnnouncementReaction::where('announcement_id', $announcement->id)
-            ->with(['user:id,name,role,avatar_seed,avatar_style', 'user.student:user_id,first_name,last_name'])
+            ->with(['user:id,name,role,student_id,avatar_seed,avatar_style', 'user.student:id,first_name,last_name'])
             ->latest('updated_at')
             ->limit(20)
             ->get()

@@ -344,13 +344,18 @@ export default (config) => ({
             this.mentionQuery = lastAtMatch[1];
             this.mentionDropdownOpen = true;
 
-            // If we have cached users and query is short, show immediately while fetching fresh
+            // If we have cached users, filter locally for immediate feedback while fresh query executes
             if (this.cachedMentionUsers && this.cachedMentionUsers.length > 0) {
                 const q = this.mentionQuery.toLowerCase();
-                this.mentionSuggestions = this.cachedMentionUsers.filter(u =>
-                    u.name.toLowerCase().includes(q) || u.handle.toLowerCase().includes(q)
+                const filtered = this.cachedMentionUsers.filter(u =>
+                    (u.name && u.name.toLowerCase().includes(q)) ||
+                    (u.handle && u.handle.toLowerCase().includes(q)) ||
+                    (u.program && u.program.toLowerCase().includes(q))
                 );
-                this.mentionHighlightedIndex = 0;
+                if (filtered.length > 0) {
+                    this.mentionSuggestions = filtered;
+                    this.mentionHighlightedIndex = 0;
+                }
             }
 
             this.fetchMentionSuggestions(this.mentionQuery);
