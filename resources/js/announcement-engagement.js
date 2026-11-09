@@ -55,9 +55,16 @@ export default (config) => ({
     mentionDebounceTimer: null,
     cachedMentionUsers: null,
 
+    autoResizeTextarea(el) {
+        if (!el) return;
+        el.style.height = 'auto';
+        el.style.height = Math.min(el.scrollHeight, 128) + 'px';
+    },
+
     init() {
         this.fetchEngagement();
         this.fetchComments();
+        this.prefetchMentionUsers();
 
         this.$nextTick(() => {
             if (window.lucide && typeof window.lucide.createIcons === 'function') {
@@ -309,6 +316,18 @@ export default (config) => ({
         }
     },
 
+    async prefetchMentionUsers() {
+        try {
+            const endpoint = this.routes.mentionableUsers || '/announcements/mentionable-users';
+            const res = await window.axios.get(endpoint, { params: { q: '' } });
+            if (res.data?.users) {
+                this.cachedMentionUsers = res.data.users;
+            }
+        } catch (e) {
+            // Silently ignore prefetch failure
+        }
+    },
+
     // Mention handling functions
     onInputMention(event, context = 'main', commentId = null) {
         const textarea = event.target;
@@ -324,6 +343,16 @@ export default (config) => ({
             this.mentionActiveCommentId = commentId;
             this.mentionQuery = lastAtMatch[1];
             this.mentionDropdownOpen = true;
+
+            // If we have cached users and query is short, show immediately while fetching fresh
+            if (this.cachedMentionUsers && this.cachedMentionUsers.length > 0) {
+                const q = this.mentionQuery.toLowerCase();
+                this.mentionSuggestions = this.cachedMentionUsers.filter(u =>
+                    u.name.toLowerCase().includes(q) || u.handle.toLowerCase().includes(q)
+                );
+                this.mentionHighlightedIndex = 0;
+            }
+
             this.fetchMentionSuggestions(this.mentionQuery);
         } else {
             this.closeMentionDropdown();
@@ -363,12 +392,17 @@ export default (config) => ({
                     params: { q: query }
                 });
                 this.mentionSuggestions = res.data.users || [];
+                if (!this.cachedMentionUsers && !query) {
+                    this.cachedMentionUsers = this.mentionSuggestions;
+                }
                 this.mentionHighlightedIndex = 0;
             } catch (err) {
                 console.error('Failed to load mention suggestions:', err);
-                this.mentionSuggestions = [];
+                if (!this.cachedMentionUsers) {
+                    this.mentionSuggestions = [];
+                }
             }
-        }, 150);
+        }, 120);
     },
 
     selectMention(user, context = 'main', commentId = null) {
@@ -409,6 +443,7 @@ export default (config) => ({
             textarea.focus();
             const newCursorPos = lastAtIndex + mentionText.length;
             textarea.setSelectionRange(newCursorPos, newCursorPos);
+            this.autoResizeTextarea(textarea);
         });
     },
 

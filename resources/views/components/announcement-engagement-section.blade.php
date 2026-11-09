@@ -174,52 +174,55 @@
             </h3>
         </div>
 
-        <div class="flex items-start gap-3">
-            <!-- Student Avatar (Server-rendered using COMSOC Hub Avatar System) -->
-            <x-user-avatar :user="$user" size="md" class="w-10 h-10 rounded-full border border-[#8F3033]/60 shadow-md mt-0.5" />
+        <!-- Unified Comment Composer: [USER AVATAR] [ Write a comment... ] [Send] -->
+        <div class="relative flex items-center gap-2.5 sm:gap-3">
+            <!-- Student Avatar -->
+            <x-user-avatar :user="$user" size="md" class="w-10 h-10 rounded-full border border-[#8F3033]/60 shadow-md shrink-0 self-center" />
 
-            <!-- Cohesive Comment Input & Submit Action Card -->
-            <div class="relative flex-1 rounded-2xl bg-slate-900/90 border border-slate-700/80 focus-within:border-[#8F3033] focus-within:ring-1 focus-within:ring-[#8F3033]/50 transition shadow-inner">
-                <div class="p-2.5 sm:p-3">
-                    <textarea x-ref="mainCommentInput"
-                              x-model="newCommentText"
-                              @input="onInputMention($event, 'main')"
-                              @keydown="onKeydownMention($event, 'main')"
-                              rows="2"
-                              maxlength="2000"
-                              placeholder="Write a comment or share your thoughts... (type @ to mention a member)"
-                              class="w-full bg-transparent border-0 p-0 text-xs sm:text-sm text-slate-200 placeholder-slate-500 focus:ring-0 focus:outline-none resize-none leading-relaxed"></textarea>
-                </div>
+            <!-- Unified Input Container -->
+            <div class="relative flex-1 min-w-0 flex items-center gap-2 rounded-2xl bg-[#0B1120] border border-[#334155] focus-within:border-[#8F3033] focus-within:ring-2 focus-within:ring-[#8F3033]/40 transition p-1.5 pl-3 sm:pl-3.5 shadow-inner">
+                <!-- Auto-expanding Textarea -->
+                <textarea x-ref="mainCommentInput"
+                          x-model="newCommentText"
+                          @input="onInputMention($event, 'main'); autoResizeTextarea($event.target)"
+                          @keydown="onKeydownMention($event, 'main')"
+                          rows="1"
+                          maxlength="2000"
+                          placeholder="Write a comment... (type @ to mention a member)"
+                          class="flex-1 min-w-0 bg-transparent border-0 p-0 py-1 text-xs sm:text-sm text-slate-100 placeholder-slate-400 focus:ring-0 focus:outline-none resize-none leading-relaxed min-h-[38px] max-h-32 overflow-y-auto"></textarea>
 
                 <!-- Mention Suggestion Dropdown (Main Composer) -->
                 <div x-show="mentionDropdownOpen && mentionContext === 'main'"
                      x-cloak
                      @click.away="closeMentionDropdown()"
-                     class="absolute left-0 bottom-full mb-2 w-72 max-w-[calc(100vw-2rem)] bg-[#172033] border border-slate-700/90 rounded-xl shadow-2xl overflow-hidden z-40 py-1.5 divide-y divide-slate-800/80 backdrop-blur-md">
-                    <div class="px-3 py-1 text-[10px] uppercase font-bold tracking-wider text-slate-400 flex items-center justify-between">
+                     class="absolute left-0 bottom-full mb-2 w-80 max-w-[calc(100vw-2rem)] bg-[#0B1120] border border-[#334155] rounded-xl shadow-2xl overflow-hidden z-50 py-1 divide-y divide-slate-800/80 backdrop-blur-md">
+                    <div class="px-3 py-1.5 text-[10px] uppercase font-bold tracking-wider text-slate-400 flex items-center justify-between bg-slate-900/60">
                         <span>Mention Member</span>
-                        <span class="text-rose-400 font-mono" x-show="mentionQuery" x-text="'@' + mentionQuery"></span>
+                        <span class="text-rose-400 font-mono text-[11px]" x-show="mentionQuery" x-text="'@' + mentionQuery"></span>
                     </div>
 
-                    <div class="max-h-48 overflow-y-auto py-1">
+                    <div class="max-h-52 overflow-y-auto py-1">
                         <template x-if="mentionSuggestions.length === 0">
-                            <div class="px-3 py-2 text-xs text-slate-500 italic text-center">
+                            <div class="px-3 py-3 text-xs text-slate-400 italic text-center">
                                 No members found
                             </div>
                         </template>
 
                         <template x-for="(user, idx) in mentionSuggestions" :key="user.id">
                             <button type="button"
-                                    @click="selectMention(user, 'main')"
+                                    @mousedown.prevent="selectMention(user, 'main')"
                                     @mouseenter="mentionHighlightedIndex = idx"
-                                    class="w-full text-left px-3 py-1.5 flex items-center gap-2.5 transition text-xs"
-                                    :class="mentionHighlightedIndex === idx ? 'bg-[#560E0F]/60 text-white' : 'text-slate-300 hover:bg-slate-800/70'">
-                                <div class="w-6 h-6 rounded-full bg-[#560E0F] border border-[#8F3033]/60 flex items-center justify-center shrink-0 overflow-hidden text-[9px] font-bold text-white font-brand-display">
+                                    class="w-full text-left px-3 py-2 flex items-center gap-2.5 transition text-xs cursor-pointer select-none"
+                                    :class="mentionHighlightedIndex === idx ? 'bg-gradient-to-r from-[#560E0F] to-[#8F3033]/80 text-white' : 'text-slate-200 hover:bg-slate-800/80'">
+                                <div class="w-7 h-7 rounded-full bg-[#560E0F] border border-[#8F3033]/60 flex items-center justify-center shrink-0 overflow-hidden text-[10px] font-bold text-white font-brand-display shadow-sm">
                                     <img :src="user.avatar" :alt="user.name" class="w-full h-full object-cover" x-show="user.avatar" x-on:error="$el.style.display='none'; $el.nextElementSibling.style.display='flex'">
                                     <span :style="user.avatar ? 'display: none;' : 'display: flex;'" x-text="user.initials"></span>
                                 </div>
                                 <div class="min-w-0 flex-1">
-                                    <div class="font-semibold truncate" x-text="user.name"></div>
+                                    <div class="font-semibold truncate text-slate-100 flex items-center gap-1.5">
+                                        <span x-text="user.name"></span>
+                                        <span x-show="user.role && user.role !== 'student'" class="text-[9px] uppercase tracking-wider px-1.5 py-0.2 rounded bg-amber-500/20 text-amber-300 font-mono" x-text="user.role"></span>
+                                    </div>
                                     <div class="text-[10px] text-slate-400 font-mono truncate" x-text="'@' + user.handle"></div>
                                 </div>
                             </button>
@@ -227,27 +230,28 @@
                     </div>
                 </div>
 
-                <div class="flex items-center justify-between px-3 py-1.5 border-t border-slate-800/80 bg-slate-950/40 rounded-b-2xl">
-                    <span class="text-[11px] text-slate-500 font-mono" x-text="newCommentText.length + '/2000'"></span>
-
-                    <!-- Fixed Dimension, Non-Shrinking Send Button (40x40px, Maroon Gradient, Direct SVG Send Icon) -->
-                    <button type="button"
-                            @click="submitMainComment()"
-                            :disabled="submitting || !newCommentText.trim()"
-                            aria-label="Send comment"
-                            title="Send comment"
-                            class="w-9 h-9 min-w-[36px] min-h-[36px] sm:w-10 sm:h-10 sm:min-w-[40px] sm:min-h-[40px] shrink-0 rounded-xl bg-gradient-to-r from-[#560E0F] to-[#8F3033] hover:from-[#6d1416] hover:to-[#a2383c] border border-[#8F3033]/60 shadow-md shadow-[#560E0F]/40 flex items-center justify-center text-white focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-[#8F3033] focus-visible:ring-offset-[#0B1120] transition-all duration-150 disabled:opacity-40 disabled:cursor-not-allowed active:scale-95">
-                        <svg x-show="!submitting" xmlns="http://www.w3.org/2000/svg" class="w-4 h-4 sm:w-5 sm:h-5 text-white" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
-                            <path d="m22 2-7 20-4-9-9-4Z"/>
-                            <path d="M22 2 11 13"/>
-                        </svg>
-                        <svg x-show="submitting" x-cloak class="animate-spin w-4 h-4 sm:w-5 sm:h-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                            <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
-                            <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8H4z"></path>
-                        </svg>
-                    </button>
-                </div>
+                <!-- Submit Button: Visible Lucide Send SVG Icon + 'Send' text label -->
+                <button type="button"
+                        @click="submitMainComment()"
+                        :disabled="submitting || !newCommentText.trim()"
+                        aria-label="Send comment"
+                        title="Send comment"
+                        class="h-9 px-3.5 sm:px-4 shrink-0 rounded-xl bg-gradient-to-r from-[#560E0F] to-[#8F3033] hover:from-[#6d1416] hover:to-[#a2383c] border border-[#8F3033]/60 shadow-md shadow-[#560E0F]/40 flex items-center justify-center gap-1.5 text-white font-semibold text-xs sm:text-sm focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-[#8F3033] focus-visible:ring-offset-[#0B1120] transition-all duration-150 disabled:opacity-40 disabled:cursor-not-allowed active:scale-95 cursor-pointer">
+                    <!-- Lucide Send Icon -->
+                    <svg x-show="!submitting" xmlns="http://www.w3.org/2000/svg" class="w-4 h-4 text-white shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                        <line x1="22" y1="2" x2="11" y2="13"></line>
+                        <polygon points="22 2 15 22 11 13 2 9 22 2"></polygon>
+                    </svg>
+                    <!-- Loading Spinner -->
+                    <svg x-show="submitting" x-cloak class="animate-spin w-4 h-4 text-white shrink-0" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                        <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                        <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8H4z"></path>
+                    </svg>
+                    <span x-text="submitting ? 'Sending...' : 'Send'">Send</span>
+                </button>
             </div>
+        </div>
+    </div>
         </div>
     </div>
 
@@ -375,7 +379,7 @@
                                 <div class="max-h-40 overflow-y-auto">
                                     <template x-for="(user, idx) in mentionSuggestions" :key="user.id">
                                         <button type="button"
-                                                @click="selectMention(user, 'edit', comment.id)"
+                                                @mousedown.prevent="selectMention(user, 'edit', comment.id)"
                                                 class="w-full text-left px-3 py-1.5 flex items-center gap-2 text-xs"
                                                 :class="mentionHighlightedIndex === idx ? 'bg-[#560E0F]/60 text-white' : 'text-slate-300 hover:bg-slate-800'">
                                             <div class="w-5 h-5 rounded-full bg-[#560E0F] overflow-hidden shrink-0 flex items-center justify-center text-[8px] text-white">
@@ -523,7 +527,7 @@
                                             <div class="max-h-40 overflow-y-auto">
                                                 <template x-for="(user, idx) in mentionSuggestions" :key="user.id">
                                                     <button type="button"
-                                                            @click="selectMention(user, 'edit', reply.id)"
+                                                            @mousedown.prevent="selectMention(user, 'edit', reply.id)"
                                                             class="w-full text-left px-3 py-1.5 flex items-center gap-2 text-xs"
                                                             :class="mentionHighlightedIndex === idx ? 'bg-[#560E0F]/60 text-white' : 'text-slate-300 hover:bg-slate-800'">
                                                         <div class="w-5 h-5 rounded-full bg-[#560E0F] overflow-hidden shrink-0 flex items-center justify-center text-[8px] text-white">
@@ -560,46 +564,48 @@
                         <span>Replying to <strong class="text-white" x-text="comment.author.name"></strong></span>
                     </div>
 
-                    <!-- Cohesive Reply Input Card -->
-                    <div class="relative rounded-xl bg-slate-950 border border-slate-700/80 focus-within:border-[#8F3033] focus-within:ring-1 focus-within:ring-[#8F3033]/50 transition shadow-inner">
-                        <div class="p-2.5">
-                            <textarea x-ref="'replyInput_' + comment.id"
-                                      x-model="replyText"
-                                      @input="onInputMention($event, 'reply', comment.id)"
-                                      @keydown="onKeydownMention($event, 'reply', comment.id)"
-                                      rows="2"
-                                      maxlength="2000"
-                                      placeholder="Write your reply... (type @ to mention a member)"
-                                      class="w-full bg-transparent border-0 p-0 text-xs text-slate-200 placeholder-slate-500 focus:ring-0 focus:outline-none resize-none leading-relaxed"></textarea>
-                        </div>
+                    <!-- Cohesive Reply Input Card: [USER AVATAR] [ Write a reply... ] [Send] -->
+                    <div class="relative flex items-center gap-2 rounded-xl bg-[#0B1120] border border-[#334155] focus-within:border-[#8F3033] focus-within:ring-2 focus-within:ring-[#8F3033]/40 transition p-1.5 pl-3 shadow-inner">
+                        <!-- Auto-expanding Textarea -->
+                        <textarea x-ref="'replyInput_' + comment.id"
+                                  x-model="replyText"
+                                  @input="onInputMention($event, 'reply', comment.id); autoResizeTextarea($event.target)"
+                                  @keydown="onKeydownMention($event, 'reply', comment.id)"
+                                  rows="1"
+                                  maxlength="2000"
+                                  placeholder="Write your reply... (type @ to mention a member)"
+                                  class="flex-1 min-w-0 bg-transparent border-0 p-0 py-1 text-xs text-slate-100 placeholder-slate-400 focus:ring-0 focus:outline-none resize-none leading-relaxed min-h-[34px] max-h-28 overflow-y-auto"></textarea>
 
                         <!-- Mention Suggestion Dropdown (Reply Composer) -->
                         <div x-show="mentionDropdownOpen && mentionContext === 'reply' && mentionActiveCommentId === comment.id"
                              x-cloak
                              @click.away="closeMentionDropdown()"
-                             class="absolute left-0 bottom-full mb-1 w-64 max-w-[calc(100vw-2rem)] bg-[#172033] border border-slate-700/90 rounded-xl shadow-2xl overflow-hidden z-40 py-1 divide-y divide-slate-800/80">
-                            <div class="px-2.5 py-1 text-[9px] uppercase font-bold tracking-wider text-slate-400 flex items-center justify-between">
+                             class="absolute left-0 bottom-full mb-1 w-72 max-w-[calc(100vw-2rem)] bg-[#0B1120] border border-[#334155] rounded-xl shadow-2xl overflow-hidden z-50 py-1 divide-y divide-slate-800/80">
+                            <div class="px-2.5 py-1 text-[9px] uppercase font-bold tracking-wider text-slate-400 flex items-center justify-between bg-slate-900/60">
                                 <span>Mention Member</span>
-                                <span class="text-rose-400 font-mono" x-show="mentionQuery" x-text="'@' + mentionQuery"></span>
+                                <span class="text-rose-400 font-mono text-[10px]" x-show="mentionQuery" x-text="'@' + mentionQuery"></span>
                             </div>
-                            <div class="max-h-40 overflow-y-auto py-0.5">
+                            <div class="max-h-44 overflow-y-auto py-0.5">
                                 <template x-if="mentionSuggestions.length === 0">
-                                    <div class="px-3 py-1.5 text-xs text-slate-500 italic text-center">
+                                    <div class="px-3 py-2 text-xs text-slate-400 italic text-center">
                                         No members found
                                     </div>
                                 </template>
                                 <template x-for="(user, idx) in mentionSuggestions" :key="user.id">
                                     <button type="button"
-                                            @click="selectMention(user, 'reply', comment.id)"
+                                            @mousedown.prevent="selectMention(user, 'reply', comment.id)"
                                             @mouseenter="mentionHighlightedIndex = idx"
-                                            class="w-full text-left px-2.5 py-1.5 flex items-center gap-2 transition text-xs"
-                                            :class="mentionHighlightedIndex === idx ? 'bg-[#560E0F]/60 text-white' : 'text-slate-300 hover:bg-slate-800/70'">
-                                        <div class="w-5 h-5 rounded-full bg-[#560E0F] border border-[#8F3033]/60 flex items-center justify-center shrink-0 overflow-hidden text-[8px] font-bold text-white">
+                                            class="w-full text-left px-2.5 py-1.5 flex items-center gap-2 transition text-xs cursor-pointer select-none"
+                                            :class="mentionHighlightedIndex === idx ? 'bg-gradient-to-r from-[#560E0F] to-[#8F3033]/80 text-white' : 'text-slate-200 hover:bg-slate-800/80'">
+                                        <div class="w-6 h-6 rounded-full bg-[#560E0F] border border-[#8F3033]/60 flex items-center justify-center shrink-0 overflow-hidden text-[9px] font-bold text-white">
                                             <img :src="user.avatar" class="w-full h-full object-cover" x-show="user.avatar">
                                             <span :style="user.avatar ? 'display: none;' : 'display: flex;'" x-text="user.initials"></span>
                                         </div>
                                         <div class="min-w-0 flex-1">
-                                            <div class="font-semibold truncate text-[11px]" x-text="user.name"></div>
+                                            <div class="font-semibold truncate text-[11px] text-slate-100 flex items-center gap-1">
+                                                <span x-text="user.name"></span>
+                                                <span x-show="user.role && user.role !== 'student'" class="text-[8px] uppercase tracking-wider px-1 rounded bg-amber-500/20 text-amber-300 font-mono" x-text="user.role"></span>
+                                            </div>
                                             <div class="text-[9px] text-slate-400 font-mono truncate" x-text="'@' + user.handle"></div>
                                         </div>
                                     </button>
@@ -607,30 +613,29 @@
                             </div>
                         </div>
 
-                        <div class="flex items-center justify-between px-3 py-1.5 border-t border-slate-800/80 bg-slate-900/40 rounded-b-xl">
-                            <span class="text-[10px] text-slate-500 font-mono" x-text="replyText.length + '/2000'"></span>
-                            <div class="flex items-center gap-2">
-                                <button type="button"
-                                        @click="cancelReply()"
-                                        class="px-2.5 py-1 rounded-lg text-xs font-semibold text-slate-300 hover:bg-slate-800 hover:text-white transition">
-                                    Cancel
-                                </button>
-                                <button type="button"
-                                        @click="submitReply(comment)"
-                                        :disabled="submittingReply || !replyText.trim()"
-                                        aria-label="Send reply"
-                                        title="Send reply"
-                                        class="w-8 h-8 min-w-[32px] min-h-[32px] shrink-0 rounded-lg bg-gradient-to-r from-[#560E0F] to-[#8F3033] hover:from-[#6d1416] hover:to-[#a2383c] border border-[#8F3033]/60 shadow flex items-center justify-center text-white focus:outline-none focus-visible:ring-2 focus-visible:ring-[#8F3033] transition-all disabled:opacity-40 disabled:cursor-not-allowed active:scale-95">
-                                    <svg x-show="!submittingReply" xmlns="http://www.w3.org/2000/svg" class="w-4 h-4 text-white" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
-                                        <path d="m22 2-7 20-4-9-9-4Z"/>
-                                        <path d="M22 2 11 13"/>
-                                    </svg>
-                                    <svg x-show="submittingReply" x-cloak class="animate-spin w-4 h-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                                        <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
-                                        <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8H4z"></path>
-                                    </svg>
-                                </button>
-                            </div>
+                        <!-- Action Buttons -->
+                        <div class="flex items-center gap-1.5 shrink-0">
+                            <button type="button"
+                                    @click="cancelReply()"
+                                    class="px-2 py-1 rounded-lg text-xs font-semibold text-slate-300 hover:bg-slate-800 hover:text-white transition">
+                                Cancel
+                            </button>
+                            <button type="button"
+                                    @click="submitReply(comment)"
+                                    :disabled="submittingReply || !replyText.trim()"
+                                    aria-label="Send reply"
+                                    title="Send reply"
+                                    class="h-8 px-3 shrink-0 rounded-lg bg-gradient-to-r from-[#560E0F] to-[#8F3033] hover:from-[#6d1416] hover:to-[#a2383c] border border-[#8F3033]/60 shadow flex items-center justify-center gap-1 text-white font-semibold text-xs focus:outline-none focus-visible:ring-2 focus-visible:ring-[#8F3033] transition-all disabled:opacity-40 disabled:cursor-not-allowed active:scale-95 cursor-pointer">
+                                <svg x-show="!submittingReply" xmlns="http://www.w3.org/2000/svg" class="w-3.5 h-3.5 text-white shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                                    <line x1="22" y1="2" x2="11" y2="13"></line>
+                                    <polygon points="22 2 15 22 11 13 2 9 22 2"></polygon>
+                                </svg>
+                                <svg x-show="submittingReply" x-cloak class="animate-spin w-3.5 h-3.5 text-white shrink-0" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                                    <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                                    <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8H4z"></path>
+                                </svg>
+                                <span x-text="submittingReply ? 'Sending...' : 'Reply'">Reply</span>
+                            </button>
                         </div>
                     </div>
                 </div>
