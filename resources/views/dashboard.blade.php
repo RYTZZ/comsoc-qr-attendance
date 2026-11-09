@@ -549,27 +549,27 @@
                             <div class="grid grid-cols-2 gap-2 text-xs">
                                 <a href="{{ route('events.index') }}" class="p-2.5 rounded-xl bg-[#0B1120] hover:bg-[#1E293B] border border-[#334155] font-semibold text-slate-300 hover:text-white flex items-center gap-1.5 transition">
                                     <i data-lucide="calendar" class="w-3.5 h-3.5 text-blue-400 shrink-0"></i>
-                                    <span class="truncate">Events</span>
+                                    <span class="truncate">Browse Events</span>
                                 </a>
+                                <button type="button" @click="setTab('exp-rewards')" class="p-2.5 rounded-xl bg-[#0B1120] hover:bg-[#1E293B] border border-[#334155] font-semibold text-slate-300 hover:text-white flex items-center gap-1.5 transition text-left">
+                                    <i data-lucide="history" class="w-3.5 h-3.5 text-amber-400 shrink-0"></i>
+                                    <span class="truncate">EXP History</span>
+                                </button>
                                 <a href="{{ route('shop.index') }}" class="p-2.5 rounded-xl bg-[#0B1120] hover:bg-[#1E293B] border border-[#334155] font-semibold text-slate-300 hover:text-white flex items-center gap-1.5 transition">
                                     <i data-lucide="gift" class="w-3.5 h-3.5 text-purple-400 shrink-0"></i>
-                                    <span class="truncate">Reward Shop</span>
+                                    <span class="truncate">Browse Rewards</span>
                                 </a>
                                 <a href="{{ route('projects.index') }}" class="p-2.5 rounded-xl bg-[#0B1120] hover:bg-[#1E293B] border border-[#334155] font-semibold text-slate-300 hover:text-white flex items-center gap-1.5 transition">
                                     <i data-lucide="folder-git-2" class="w-3.5 h-3.5 text-indigo-400 shrink-0"></i>
-                                    <span class="truncate">Projects</span>
-                                </a>
-                                <a href="{{ route('leaderboard.index') }}" class="p-2.5 rounded-xl bg-[#0B1120] hover:bg-[#1E293B] border border-[#334155] font-semibold text-slate-300 hover:text-white flex items-center gap-1.5 transition">
-                                    <i data-lucide="trophy" class="w-3.5 h-3.5 text-amber-400 shrink-0"></i>
-                                    <span class="truncate">Leaderboard</span>
+                                    <span class="truncate">Explore Projects</span>
                                 </a>
                                 <a href="{{ route('volunteers.index') }}" class="p-2.5 rounded-xl bg-[#0B1120] hover:bg-[#1E293B] border border-[#334155] font-semibold text-slate-300 hover:text-white flex items-center gap-1.5 transition">
                                     <i data-lucide="hand-heart" class="w-3.5 h-3.5 text-emerald-400 shrink-0"></i>
-                                    <span class="truncate">Volunteers</span>
+                                    <span class="truncate">Volunteer Board</span>
                                 </a>
                                 <a href="{{ route('helpdesk.index') }}" class="p-2.5 rounded-xl bg-[#0B1120] hover:bg-[#1E293B] border border-[#334155] font-semibold text-slate-300 hover:text-white flex items-center gap-1.5 transition">
                                     <i data-lucide="life-buoy" class="w-3.5 h-3.5 text-rose-400 shrink-0"></i>
-                                    <span class="truncate">Support</span>
+                                    <span class="truncate">Submit Support Request</span>
                                 </a>
                             </div>
                         </div>
