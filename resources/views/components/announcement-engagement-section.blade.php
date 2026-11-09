@@ -65,11 +65,14 @@
 
     <!-- Facebook-Style Shared Full-Width Action Container: [ ❤️ React ]  [ 💬 Comment ] -->
     <div class="relative flex items-center justify-start gap-2 py-1.5 px-2 rounded-2xl border border-slate-800/80 bg-[#172033]/70 backdrop-blur-sm">
-        <!-- React Button Container with Hover / Click / Long-Press Picker -->
-        <div class="relative" @click.away="pickerOpen = false" @mouseleave="pickerOpen = false">
+        <!-- React Button Container with Hover / Click / Long-Press Picker (with 250ms persistence bridge) -->
+        <div class="relative"
+             x-data="{ closeTimer: null }"
+             @click.away="pickerOpen = false"
+             @mouseenter="if (closeTimer) { clearTimeout(closeTimer); closeTimer = null; } pickerOpen = true"
+             @mouseleave="closeTimer = setTimeout(() => { pickerOpen = false; }, 250)">
             <button type="button"
                     @click="handleReactClick($event, () => pickerOpen = !pickerOpen)"
-                    @mouseenter="pickerOpen = true"
                     @touchstart.passive="startLongPress($event, () => pickerOpen = true)"
                     @touchmove.passive="moveLongPress($event)"
                     @touchend.passive="cancelLongPress()"
@@ -98,6 +101,7 @@
             <!-- Interactive Reaction Picker (6 reactions: Love, Like, Haha, Wow, Sad, Angry) - Clean Icons Only -->
             <div x-show="pickerOpen"
                  x-cloak
+                 @mouseenter="if (closeTimer) { clearTimeout(closeTimer); closeTimer = null; }"
                  x-transition:enter="transition ease-out duration-150 transform"
                  x-transition:enter-start="opacity-0 translate-y-2 scale-95"
                  x-transition:enter-end="opacity-100 translate-y-0 scale-100"
@@ -105,6 +109,8 @@
                  x-transition:leave-start="opacity-100 translate-y-0 scale-100"
                  x-transition:leave-end="opacity-0 translate-y-2 scale-95"
                  class="absolute left-0 bottom-full mb-2 z-30 p-1.5 bg-[#1E293B] border border-slate-700/80 rounded-2xl shadow-2xl flex items-center gap-1 backdrop-blur-md">
+                <!-- Invisible bridge preventing cursor drop between button and popup -->
+                <div class="absolute left-0 -bottom-2.5 w-full h-2.5"></div>
 
                 <button type="button"
                         @click="pickerOpen = false; toggleReaction('love')"
@@ -426,11 +432,14 @@
 
                 <!-- Comment Actions: React, Reply button & Expand replies toggle -->
                 <div class="flex items-center gap-3 pt-1 text-xs">
-                    <!-- Comment React Button with Hover / Click / Long-Press Reaction Picker -->
-                    <div class="relative" x-data="{ pickerOpen: false }" @click.away="pickerOpen = false" @mouseleave="pickerOpen = false">
+                    <!-- Comment React Button with Hover / Click / Long-Press Reaction Picker (with 250ms persistence bridge) -->
+                    <div class="relative"
+                         x-data="{ pickerOpen: false, closeTimer: null }"
+                         @click.away="pickerOpen = false"
+                         @mouseenter="if (closeTimer) { clearTimeout(closeTimer); closeTimer = null; } pickerOpen = true"
+                         @mouseleave="closeTimer = setTimeout(() => { pickerOpen = false; }, 250)">
                         <button type="button"
                                 @click="handleReactClick($event, () => pickerOpen = !pickerOpen)"
-                                @mouseenter="pickerOpen = true"
                                 @touchstart.passive="startLongPress($event, () => pickerOpen = true)"
                                 @touchmove.passive="moveLongPress($event)"
                                 @touchend.passive="cancelLongPress()"
@@ -447,6 +456,7 @@
                         <!-- Reaction Picker Dropdown - Clean Icons Only -->
                         <div x-show="pickerOpen"
                              x-cloak
+                             @mouseenter="if (closeTimer) { clearTimeout(closeTimer); closeTimer = null; }"
                              x-transition:enter="transition ease-out duration-150 transform"
                              x-transition:enter-start="opacity-0 translate-y-2 scale-95"
                              x-transition:enter-end="opacity-100 translate-y-0 scale-100"
@@ -454,6 +464,9 @@
                              x-transition:leave-start="opacity-100 translate-y-0 scale-100"
                              x-transition:leave-end="opacity-0 translate-y-2 scale-95"
                              class="absolute left-0 bottom-full mb-1.5 z-30 p-1.5 bg-[#1E293B] border border-slate-700/80 rounded-2xl shadow-2xl flex items-center gap-1 backdrop-blur-md">
+                            <!-- Invisible bridge preventing cursor drop between button and popup -->
+                            <div class="absolute left-0 -bottom-2 w-full h-2"></div>
+
                             <template x-for="r in commentReactionTypes" :key="r.key">
                                 <button type="button"
                                         @click="pickerOpen = false; toggleCommentReaction(comment, r.key)"
@@ -637,12 +650,15 @@
                                         </div>
                                     </div>
                                 </template>
-                                <!-- Reply Actions: React & Action menu -->
+                                <!-- Reply Actions: React & Action menu (with 250ms persistence bridge) -->
                                 <div class="flex items-center gap-2 pt-1 text-[11px]">
-                                    <div class="relative" x-data="{ replyPickerOpen: false }" @click.away="replyPickerOpen = false" @mouseleave="replyPickerOpen = false">
+                                    <div class="relative"
+                                         x-data="{ replyPickerOpen: false, closeTimer: null }"
+                                         @click.away="replyPickerOpen = false"
+                                         @mouseenter="if (closeTimer) { clearTimeout(closeTimer); closeTimer = null; } replyPickerOpen = true"
+                                         @mouseleave="closeTimer = setTimeout(() => { replyPickerOpen = false; }, 250)">
                                         <button type="button"
                                                 @click="handleReactClick($event, () => replyPickerOpen = !replyPickerOpen)"
-                                                @mouseenter="replyPickerOpen = true"
                                                 @touchstart.passive="startLongPress($event, () => replyPickerOpen = true)"
                                                 @touchmove.passive="moveLongPress($event)"
                                                 @touchend.passive="cancelLongPress()"
@@ -659,6 +675,7 @@
                                         <!-- Reply Reaction Picker - Clean Icons Only -->
                                         <div x-show="replyPickerOpen"
                                              x-cloak
+                                             @mouseenter="if (closeTimer) { clearTimeout(closeTimer); closeTimer = null; }"
                                              x-transition:enter="transition ease-out duration-150 transform"
                                              x-transition:enter-start="opacity-0 translate-y-2 scale-95"
                                              x-transition:enter-end="opacity-100 translate-y-0 scale-100"
@@ -666,6 +683,9 @@
                                              x-transition:leave-start="opacity-100 translate-y-0 scale-100"
                                              x-transition:leave-end="opacity-0 translate-y-2 scale-95"
                                              class="absolute left-0 bottom-full mb-1.5 z-30 p-1.5 bg-[#1E293B] border border-slate-700/80 rounded-2xl shadow-2xl flex items-center gap-1 backdrop-blur-md">
+                                            <!-- Invisible bridge preventing cursor drop between button and popup -->
+                                            <div class="absolute left-0 -bottom-2 w-full h-2"></div>
+
                                             <template x-for="r in commentReactionTypes" :key="r.key">
                                                 <button type="button"
                                                         @click="replyPickerOpen = false; toggleCommentReaction(reply, r.key)"
