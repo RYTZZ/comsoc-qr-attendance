@@ -311,8 +311,14 @@
                     <div class="relative" x-data="{ menuOpen: false }" @click.away="menuOpen = false">
                         <button type="button"
                                 @click="menuOpen = !menuOpen"
-                                class="p-1 rounded text-slate-500 hover:text-slate-300 hover:bg-slate-800 transition focus:outline-none">
-                            <i data-lucide="more-horizontal" class="w-4 h-4"></i>
+                                aria-label="Comment actions"
+                                title="Comment options"
+                                class="w-7 h-7 flex items-center justify-center rounded-lg text-slate-400 hover:text-white hover:bg-slate-800 transition focus:outline-none focus:ring-1 focus:ring-slate-700">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4 pointer-events-none" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <circle cx="12" cy="12" r="1.5"></circle>
+                                <circle cx="19" cy="12" r="1.5"></circle>
+                                <circle cx="5" cy="12" r="1.5"></circle>
+                            </svg>
                         </button>
                         <div x-show="menuOpen"
                              x-cloak
@@ -321,7 +327,10 @@
                                 <button type="button"
                                         @click="menuOpen = false; startEditing(comment)"
                                         class="w-full text-left px-3 py-1.5 text-slate-300 hover:bg-slate-700 hover:text-white flex items-center gap-2">
-                                    <i data-lucide="pencil" class="w-3.5 h-3.5 text-slate-400"></i>
+                                    <svg xmlns="http://www.w3.org/2000/svg" class="w-3.5 h-3.5 text-slate-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                        <path d="M17 3a2.85 2.83 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5Z"></path>
+                                        <path d="m15 5 4 4"></path>
+                                    </svg>
                                     <span>Edit</span>
                                 </button>
                             </template>
@@ -329,7 +338,13 @@
                                 <button type="button"
                                         @click="menuOpen = false; openDeleteModal(comment)"
                                         class="w-full text-left px-3 py-1.5 text-rose-400 hover:bg-rose-950/30 flex items-center gap-2">
-                                    <i data-lucide="trash-2" class="w-3.5 h-3.5"></i>
+                                    <svg xmlns="http://www.w3.org/2000/svg" class="w-3.5 h-3.5 text-rose-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                        <path d="M3 6h18"></path>
+                                        <path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"></path>
+                                        <path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"></path>
+                                        <line x1="10" x2="10" y1="11" y2="17"></line>
+                                        <line x1="14" x2="14" y1="11" y2="17"></line>
+                                    </svg>
                                     <span>Delete</span>
                                 </button>
                             </template>
@@ -337,7 +352,10 @@
                                 <button type="button"
                                         @click="menuOpen = false; openReportModal(comment)"
                                         class="w-full text-left px-3 py-1.5 text-amber-400 hover:bg-amber-950/30 flex items-center gap-2">
-                                    <i data-lucide="flag" class="w-3.5 h-3.5"></i>
+                                    <svg xmlns="http://www.w3.org/2000/svg" class="w-3.5 h-3.5 text-amber-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                        <path d="M4 15s1-1 4-1 5 2 8 2 4-1 4-1V3s-1 1-4 1-5-2-8-2-4 1-4 1z"></path>
+                                        <line x1="4" x2="4" y1="22" y2="15"></line>
+                                    </svg>
                                     <span>Report</span>
                                 </button>
                             </template>
@@ -346,7 +364,9 @@
                                 <button type="button"
                                         @click="menuOpen = false; moderateComment(comment, comment.status === 'hidden' ? 'unhide' : 'hide')"
                                         class="w-full text-left px-3 py-1.5 text-slate-300 hover:bg-slate-700 flex items-center gap-2">
-                                    <i data-lucide="shield" class="w-3.5 h-3.5 text-slate-400"></i>
+                                    <svg xmlns="http://www.w3.org/2000/svg" class="w-3.5 h-3.5 text-slate-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                        <path d="M20 13c0 5-3.5 7.5-7.66 8.95a1 1 0 0 1-.67-.01C7.5 20.5 4 18 4 13V6a1 1 0 0 1 1-1c2 0 4.5-1.2 6.24-2.72a1.17 1.17 0 0 1 1.52 0C14.51 3.81 17 5 19 5a1 1 0 0 1 1 1z"></path>
+                                    </svg>
                                     <span x-text="comment.status === 'hidden' ? 'Unhide' : 'Hide'"></span>
                                 </button>
                             </template>
@@ -467,8 +487,14 @@
                                 <div class="relative" x-data="{ replyMenu: false }" @click.away="replyMenu = false">
                                     <button type="button"
                                             @click="replyMenu = !replyMenu"
-                                            class="p-0.5 rounded text-slate-500 hover:text-slate-300 transition">
-                                        <i data-lucide="more-horizontal" class="w-3.5 h-3.5"></i>
+                                            aria-label="Reply actions"
+                                            title="Reply options"
+                                            class="w-6 h-6 flex items-center justify-center rounded text-slate-500 hover:text-white hover:bg-slate-800 transition focus:outline-none">
+                                        <svg xmlns="http://www.w3.org/2000/svg" class="w-3.5 h-3.5 pointer-events-none" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                            <circle cx="12" cy="12" r="1.5"></circle>
+                                            <circle cx="19" cy="12" r="1.5"></circle>
+                                            <circle cx="5" cy="12" r="1.5"></circle>
+                                        </svg>
                                     </button>
                                     <div x-show="replyMenu"
                                          x-cloak
@@ -477,7 +503,10 @@
                                             <button type="button"
                                                     @click="replyMenu = false; startEditing(reply)"
                                                     class="w-full text-left px-3 py-1 text-slate-300 hover:bg-slate-700 hover:text-white flex items-center gap-1.5">
-                                                <i data-lucide="pencil" class="w-3.5 h-3.5 text-slate-400"></i>
+                                                <svg xmlns="http://www.w3.org/2000/svg" class="w-3.5 h-3.5 text-slate-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                                    <path d="M17 3a2.85 2.83 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5Z"></path>
+                                                    <path d="m15 5 4 4"></path>
+                                                </svg>
                                                 <span>Edit</span>
                                             </button>
                                         </template>
@@ -485,7 +514,13 @@
                                             <button type="button"
                                                     @click="replyMenu = false; openDeleteModal(reply, comment)"
                                                     class="w-full text-left px-3 py-1 text-rose-400 hover:bg-rose-950/30 flex items-center gap-1.5">
-                                                <i data-lucide="trash-2" class="w-3.5 h-3.5"></i>
+                                                <svg xmlns="http://www.w3.org/2000/svg" class="w-3.5 h-3.5 text-rose-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                                    <path d="M3 6h18"></path>
+                                                    <path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"></path>
+                                                    <path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"></path>
+                                                    <line x1="10" x2="10" y1="11" y2="17"></line>
+                                                    <line x1="14" x2="14" y1="11" y2="17"></line>
+                                                </svg>
                                                 <span>Delete</span>
                                             </button>
                                         </template>
@@ -493,7 +528,10 @@
                                             <button type="button"
                                                     @click="replyMenu = false; openReportModal(reply)"
                                                     class="w-full text-left px-3 py-1 text-amber-400 hover:bg-amber-950/30 flex items-center gap-1.5">
-                                                <i data-lucide="flag" class="w-3 h-3"></i>
+                                                <svg xmlns="http://www.w3.org/2000/svg" class="w-3 h-3 text-amber-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                                    <path d="M4 15s1-1 4-1 5 2 8 2 4-1 4-1V3s-1 1-4 1-5-2-8-2-4 1-4 1z"></path>
+                                                    <line x1="4" x2="4" y1="22" y2="15"></line>
+                                                </svg>
                                                 <span>Report</span>
                                             </button>
                                         </template>
@@ -501,7 +539,9 @@
                                             <button type="button"
                                                     @click="replyMenu = false; moderateComment(reply, reply.status === 'hidden' ? 'unhide' : 'hide', comment)"
                                                     class="w-full text-left px-3 py-1 text-slate-300 hover:bg-slate-700 flex items-center gap-1.5">
-                                                <i data-lucide="shield" class="w-3 h-3 text-slate-400"></i>
+                                                <svg xmlns="http://www.w3.org/2000/svg" class="w-3 h-3 text-slate-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                                    <path d="M20 13c0 5-3.5 7.5-7.66 8.95a1 1 0 0 1-.67-.01C7.5 20.5 4 18 4 13V6a1 1 0 0 1 1-1c2 0 4.5-1.2 6.24-2.72a1.17 1.17 0 0 1 1.52 0C14.51 3.81 17 5 19 5a1 1 0 0 1 1 1z"></path>
+                                                </svg>
                                                 <span x-text="reply.status === 'hidden' ? 'Unhide' : 'Hide'"></span>
                                             </button>
                                         </template>

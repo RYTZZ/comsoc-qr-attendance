@@ -13,6 +13,10 @@ window.Alpine = Alpine;
 window.Html5Qrcode = Html5Qrcode;
 window.createIcons = createIcons;
 window.lucideIcons = icons;
+window.lucide = {
+    createIcons: (options = {}) => createIcons({ icons, ...options }),
+    icons
+};
 window.SignaturePad = SignaturePad;
 
 document.addEventListener('DOMContentLoaded', () => {
