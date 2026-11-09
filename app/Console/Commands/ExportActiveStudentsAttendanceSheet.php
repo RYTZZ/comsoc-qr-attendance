@@ -107,9 +107,24 @@ class ExportActiveStudentsAttendanceSheet extends Command
 
         $asset = fn (string $f) => 'data:image/png;base64,' . base64_encode(file_get_contents(resource_path("pdf-assets/sca017/{$f}")));
 
+        // Preserve all 40 original template entry positions, including sequence numbers 1 to 40
+        $totalTemplateEntries = 40;
+        $templateRows = $rows->all();
+        for ($i = count($templateRows); $i < $totalTemplateEntries; $i++) {
+            $templateRows[] = [
+                'name' => '',
+                'position' => '',
+                'course' => '',
+                'contact' => '',
+                'signature' => null,
+                'has_attendee' => false,
+            ];
+        }
+
         $templateData = [
             'info' => $activityInfo,
-            'rows' => $rows,
+            'rows' => $templateRows,
+            'padTo' => 40,
             'logoLeft' => $asset('logo-left.png'),
             'logoRight' => $asset('logo-right.png'),
             'banner' => $asset('footer-banner.png'),
@@ -129,7 +144,7 @@ class ExportActiveStudentsAttendanceSheet extends Command
 
         $canvas = $pdf->getDomPDF()->getCanvas();
         $font = $pdf->getDomPDF()->getFontMetrics()->getFont('helvetica');
-        $canvas->page_text(474, 843, '{PAGE_NUM} of {PAGE_COUNT}', $font, 8, [0, 0, 0]);
+        $canvas->page_text(505, 846, '{PAGE_NUM} of {PAGE_COUNT}', $font, 8, [0, 0, 0]);
 
         $pdfBytes = $pdf->output();
 
