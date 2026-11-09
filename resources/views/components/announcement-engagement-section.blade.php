@@ -64,12 +64,17 @@
 
     <!-- Engagement Action Buttons: Reaction Trigger & Quick Scroll to Comment -->
     <div class="relative flex items-center gap-2 py-2 border-y border-slate-800/80 bg-slate-900/30 rounded-xl px-2 sm:px-4">
-        <!-- React Button Container with Hover / Click Picker -->
-        <div class="relative" @click.away="pickerOpen = false">
+        <!-- React Button Container with Hover / Click / Long-Press Picker -->
+        <div class="relative" @click.away="pickerOpen = false" @mouseleave="pickerOpen = false">
             <button type="button"
-                    @click="pickerOpen = !pickerOpen"
+                    @click="handleReactClick($event, () => pickerOpen = !pickerOpen)"
                     @mouseenter="pickerOpen = true"
-                    class="flex items-center gap-2 px-3 py-2 rounded-lg text-xs font-semibold transition-all duration-150"
+                    @touchstart.passive="startLongPress($event, () => pickerOpen = true)"
+                    @touchmove.passive="moveLongPress($event)"
+                    @touchend.passive="cancelLongPress()"
+                    @touchcancel.passive="cancelLongPress()"
+                    aria-label="React to announcement"
+                    class="flex items-center gap-2 px-3 py-2 rounded-lg text-xs font-semibold transition-all duration-150 select-none cursor-pointer"
                     :class="userReaction
                         ? 'bg-rose-500/10 text-rose-300 border border-rose-500/30'
                         : 'text-slate-300 hover:bg-slate-800/70 hover:text-white'">
@@ -87,7 +92,7 @@
                 </template>
             </button>
 
-            <!-- Interactive Reaction Picker (6 reactions: Like, Love, Haha, Wow, Celebrate, Support) -->
+            <!-- Interactive Reaction Picker (6 reactions: Love, Like, Haha, Wow, Sad, Angry) - Clean Icons Only -->
             <div x-show="pickerOpen"
                  x-cloak
                  x-transition:enter="transition ease-out duration-150 transform"
@@ -99,57 +104,45 @@
                  class="absolute left-0 bottom-full mb-2 z-30 p-1.5 bg-[#1E293B] border border-slate-700/80 rounded-2xl shadow-2xl flex items-center gap-1 backdrop-blur-md">
 
                 <button type="button"
-                        @click="toggleReaction('like')"
-                        title="Like — General appreciation or acknowledgment"
-                        class="p-2 sm:px-2.5 sm:py-1.5 rounded-xl hover:bg-slate-700/60 transition-transform active:scale-90 hover:scale-125 flex flex-col items-center gap-0.5 group focus:outline-none"
-                        :class="userReaction === 'like' ? 'bg-rose-500/20 ring-1 ring-rose-500/50' : ''">
-                    <span class="text-2xl leading-none">👍</span>
-                    <span class="text-[9px] font-bold text-slate-400 group-hover:text-white hidden sm:block">Like</span>
-                </button>
-
-                <button type="button"
-                        @click="toggleReaction('love')"
-                        title="Love — Strong appreciation or support"
-                        class="p-2 sm:px-2.5 sm:py-1.5 rounded-xl hover:bg-slate-700/60 transition-transform active:scale-90 hover:scale-125 flex flex-col items-center gap-0.5 group focus:outline-none"
+                        @click="pickerOpen = false; toggleReaction('love')"
+                        class="p-2 sm:px-2.5 sm:py-2 rounded-xl hover:bg-slate-700/60 transition-transform active:scale-90 hover:scale-125 flex items-center justify-center group focus:outline-none cursor-pointer select-none"
                         :class="userReaction === 'love' ? 'bg-rose-500/20 ring-1 ring-rose-500/50' : ''">
                     <span class="text-2xl leading-none">❤️</span>
-                    <span class="text-[9px] font-bold text-slate-400 group-hover:text-white hidden sm:block">Love</span>
                 </button>
 
                 <button type="button"
-                        @click="toggleReaction('haha')"
-                        title="Haha — Humor or amusement"
-                        class="p-2 sm:px-2.5 sm:py-1.5 rounded-xl hover:bg-slate-700/60 transition-transform active:scale-90 hover:scale-125 flex flex-col items-center gap-0.5 group focus:outline-none"
+                        @click="pickerOpen = false; toggleReaction('like')"
+                        class="p-2 sm:px-2.5 sm:py-2 rounded-xl hover:bg-slate-700/60 transition-transform active:scale-90 hover:scale-125 flex items-center justify-center group focus:outline-none cursor-pointer select-none"
+                        :class="userReaction === 'like' ? 'bg-rose-500/20 ring-1 ring-rose-500/50' : ''">
+                    <span class="text-2xl leading-none">👍</span>
+                </button>
+
+                <button type="button"
+                        @click="pickerOpen = false; toggleReaction('haha')"
+                        class="p-2 sm:px-2.5 sm:py-2 rounded-xl hover:bg-slate-700/60 transition-transform active:scale-90 hover:scale-125 flex items-center justify-center group focus:outline-none cursor-pointer select-none"
                         :class="userReaction === 'haha' ? 'bg-rose-500/20 ring-1 ring-rose-500/50' : ''">
                     <span class="text-2xl leading-none">😂</span>
-                    <span class="text-[9px] font-bold text-slate-400 group-hover:text-white hidden sm:block">Haha</span>
                 </button>
 
                 <button type="button"
-                        @click="toggleReaction('wow')"
-                        title="Wow — Surprise or excitement"
-                        class="p-2 sm:px-2.5 sm:py-1.5 rounded-xl hover:bg-slate-700/60 transition-transform active:scale-90 hover:scale-125 flex flex-col items-center gap-0.5 group focus:outline-none"
+                        @click="pickerOpen = false; toggleReaction('wow')"
+                        class="p-2 sm:px-2.5 sm:py-2 rounded-xl hover:bg-slate-700/60 transition-transform active:scale-90 hover:scale-125 flex items-center justify-center group focus:outline-none cursor-pointer select-none"
                         :class="userReaction === 'wow' ? 'bg-rose-500/20 ring-1 ring-rose-500/50' : ''">
                     <span class="text-2xl leading-none">😮</span>
-                    <span class="text-[9px] font-bold text-slate-400 group-hover:text-white hidden sm:block">Wow</span>
                 </button>
 
                 <button type="button"
-                        @click="toggleReaction('celebrate')"
-                        title="Celebrate — Congratulations or celebration"
-                        class="p-2 sm:px-2.5 sm:py-1.5 rounded-xl hover:bg-slate-700/60 transition-transform active:scale-90 hover:scale-125 flex flex-col items-center gap-0.5 group focus:outline-none"
-                        :class="userReaction === 'celebrate' ? 'bg-rose-500/20 ring-1 ring-rose-500/50' : ''">
-                    <span class="text-2xl leading-none">🎉</span>
-                    <span class="text-[9px] font-bold text-slate-400 group-hover:text-white hidden sm:block">Celebrate</span>
+                        @click="pickerOpen = false; toggleReaction('sad')"
+                        class="p-2 sm:px-2.5 sm:py-2 rounded-xl hover:bg-slate-700/60 transition-transform active:scale-90 hover:scale-125 flex items-center justify-center group focus:outline-none cursor-pointer select-none"
+                        :class="userReaction === 'sad' ? 'bg-rose-500/20 ring-1 ring-rose-500/50' : ''">
+                    <span class="text-2xl leading-none">😢</span>
                 </button>
 
                 <button type="button"
-                        @click="toggleReaction('support')"
-                        title="Support — Gratitude or encouragement"
-                        class="p-2 sm:px-2.5 sm:py-1.5 rounded-xl hover:bg-slate-700/60 transition-transform active:scale-90 hover:scale-125 flex flex-col items-center gap-0.5 group focus:outline-none"
-                        :class="userReaction === 'support' ? 'bg-rose-500/20 ring-1 ring-rose-500/50' : ''">
-                    <span class="text-2xl leading-none">🙏</span>
-                    <span class="text-[9px] font-bold text-slate-400 group-hover:text-white hidden sm:block">Support</span>
+                        @click="pickerOpen = false; toggleReaction('angry')"
+                        class="p-2 sm:px-2.5 sm:py-2 rounded-xl hover:bg-slate-700/60 transition-transform active:scale-90 hover:scale-125 flex items-center justify-center group focus:outline-none cursor-pointer select-none"
+                        :class="userReaction === 'angry' ? 'bg-rose-500/20 ring-1 ring-rose-500/50' : ''">
+                    <span class="text-2xl leading-none">😡</span>
                 </button>
             </div>
         </div>
@@ -428,11 +421,16 @@
 
                 <!-- Comment Actions: React, Reply button & Expand replies toggle -->
                 <div class="flex items-center gap-3 pt-1 text-xs">
-                    <!-- Comment React Button with Hover/Click Reaction Picker -->
-                    <div class="relative" x-data="{ pickerOpen: false }" @click.away="pickerOpen = false">
+                    <!-- Comment React Button with Hover / Click / Long-Press Reaction Picker -->
+                    <div class="relative" x-data="{ pickerOpen: false }" @click.away="pickerOpen = false" @mouseleave="pickerOpen = false">
                         <button type="button"
-                                @click="pickerOpen = !pickerOpen"
-                                class="font-semibold flex items-center gap-1.5 transition rounded px-1.5 py-0.5 hover:bg-slate-800"
+                                @click="handleReactClick($event, () => pickerOpen = !pickerOpen)"
+                                @mouseenter="pickerOpen = true"
+                                @touchstart.passive="startLongPress($event, () => pickerOpen = true)"
+                                @touchmove.passive="moveLongPress($event)"
+                                @touchend.passive="cancelLongPress()"
+                                @touchcancel.passive="cancelLongPress()"
+                                class="font-semibold flex items-center gap-1.5 transition rounded px-1.5 py-0.5 hover:bg-slate-800 select-none cursor-pointer"
                                 :class="comment.user_reaction ? 'text-rose-400 hover:text-rose-300' : 'text-slate-400 hover:text-white'">
                             <span x-text="getCommentReactionDisplay(comment).emoji"></span>
                             <span x-text="getCommentReactionDisplay(comment).label"></span>
@@ -441,7 +439,7 @@
                             </template>
                         </button>
 
-                        <!-- Reaction Picker Dropdown -->
+                        <!-- Reaction Picker Dropdown - Clean Icons Only -->
                         <div x-show="pickerOpen"
                              x-cloak
                              x-transition:enter="transition ease-out duration-150 transform"
@@ -454,11 +452,9 @@
                             <template x-for="r in commentReactionTypes" :key="r.key">
                                 <button type="button"
                                         @click="pickerOpen = false; toggleCommentReaction(comment, r.key)"
-                                        :title="r.label + ' — ' + r.purpose"
-                                        class="p-1.5 sm:px-2 rounded-xl hover:bg-slate-700/60 transition-transform active:scale-90 hover:scale-125 flex flex-col items-center gap-0.5 group focus:outline-none"
+                                        class="p-1.5 sm:px-2 rounded-xl hover:bg-slate-700/60 transition-transform active:scale-90 hover:scale-125 flex items-center justify-center group focus:outline-none cursor-pointer select-none"
                                         :class="comment.user_reaction === r.key ? 'bg-rose-500/20 ring-1 ring-rose-500/50' : ''">
                                     <span class="text-xl leading-none" x-text="r.emoji"></span>
-                                    <span class="text-[9px] font-bold text-slate-400 group-hover:text-white hidden sm:block" x-text="r.label"></span>
                                 </button>
                             </template>
                         </div>
@@ -638,10 +634,15 @@
                                 </template>
                                 <!-- Reply Actions: React & Action menu -->
                                 <div class="flex items-center gap-2 pt-1 text-[11px]">
-                                    <div class="relative" x-data="{ replyPickerOpen: false }" @click.away="replyPickerOpen = false">
+                                    <div class="relative" x-data="{ replyPickerOpen: false }" @click.away="replyPickerOpen = false" @mouseleave="replyPickerOpen = false">
                                         <button type="button"
-                                                @click="replyPickerOpen = !replyPickerOpen"
-                                                class="font-semibold flex items-center gap-1 transition rounded px-1.5 py-0.5 hover:bg-slate-800"
+                                                @click="handleReactClick($event, () => replyPickerOpen = !replyPickerOpen)"
+                                                @mouseenter="replyPickerOpen = true"
+                                                @touchstart.passive="startLongPress($event, () => replyPickerOpen = true)"
+                                                @touchmove.passive="moveLongPress($event)"
+                                                @touchend.passive="cancelLongPress()"
+                                                @touchcancel.passive="cancelLongPress()"
+                                                class="font-semibold flex items-center gap-1 transition rounded px-1.5 py-0.5 hover:bg-slate-800 select-none cursor-pointer"
                                                 :class="reply.user_reaction ? 'text-rose-400 hover:text-rose-300' : 'text-slate-400 hover:text-white'">
                                             <span x-text="getCommentReactionDisplay(reply).emoji"></span>
                                             <span x-text="getCommentReactionDisplay(reply).label"></span>
@@ -650,7 +651,7 @@
                                             </template>
                                         </button>
 
-                                        <!-- Reply Reaction Picker -->
+                                        <!-- Reply Reaction Picker - Clean Icons Only -->
                                         <div x-show="replyPickerOpen"
                                              x-cloak
                                              x-transition:enter="transition ease-out duration-150 transform"
@@ -663,11 +664,9 @@
                                             <template x-for="r in commentReactionTypes" :key="r.key">
                                                 <button type="button"
                                                         @click="replyPickerOpen = false; toggleCommentReaction(reply, r.key)"
-                                                        :title="r.label + ' — ' + r.purpose"
-                                                        class="p-1.5 sm:px-2 rounded-xl hover:bg-slate-700/60 transition-transform active:scale-90 hover:scale-125 flex flex-col items-center gap-0.5 group focus:outline-none"
+                                                        class="p-1.5 sm:px-2 rounded-xl hover:bg-slate-700/60 transition-transform active:scale-90 hover:scale-125 flex items-center justify-center group focus:outline-none cursor-pointer select-none"
                                                         :class="reply.user_reaction === r.key ? 'bg-rose-500/20 ring-1 ring-rose-500/50' : ''">
                                                     <span class="text-xl leading-none" x-text="r.emoji"></span>
-                                                    <span class="text-[9px] font-bold text-slate-400 group-hover:text-white hidden sm:block" x-text="r.label"></span>
                                                 </button>
                                             </template>
                                         </div>

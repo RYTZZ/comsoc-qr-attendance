@@ -11,10 +11,12 @@ export default (config) => ({
     userReaction: null,
     totalReactions: 0,
     breakdown: {
-        like: { type: 'like', emoji: '👍', label: 'Like', count: 0 },
         love: { type: 'love', emoji: '❤️', label: 'Love', count: 0 },
+        like: { type: 'like', emoji: '👍', label: 'Like', count: 0 },
         haha: { type: 'haha', emoji: '😂', label: 'Haha', count: 0 },
         wow: { type: 'wow', emoji: '😮', label: 'Wow', count: 0 },
+        sad: { type: 'sad', emoji: '😢', label: 'Sad', count: 0 },
+        angry: { type: 'angry', emoji: '😡', label: 'Angry', count: 0 },
         celebrate: { type: 'celebrate', emoji: '🎉', label: 'Celebrate', count: 0 },
         support: { type: 'support', emoji: '🙏', label: 'Support', count: 0 },
     },
@@ -74,14 +76,69 @@ export default (config) => ({
         el.style.height = Math.min(el.scrollHeight, 128) + 'px';
     },
 
-    // Comment Reaction Types Definition
+    // Long-press handler helper
+    longPressTimer: null,
+    longPressTouchStart: null,
+    isLongPressTriggered: false,
+
+    startLongPress(event, callback) {
+        this.isLongPressTriggered = false;
+        const touch = event.touches ? event.touches[0] : event;
+        this.longPressTouchStart = { x: touch.clientX, y: touch.clientY };
+
+        if (this.longPressTimer) {
+            clearTimeout(this.longPressTimer);
+        }
+
+        this.longPressTimer = setTimeout(() => {
+            this.isLongPressTriggered = true;
+            if (typeof callback === 'function') {
+                callback();
+            }
+        }, 450);
+    },
+
+    moveLongPress(event) {
+        if (!this.longPressTouchStart || !this.longPressTimer) return;
+        const touch = event.touches ? event.touches[0] : event;
+        const dx = Math.abs(touch.clientX - this.longPressTouchStart.x);
+        const dy = Math.abs(touch.clientY - this.longPressTouchStart.y);
+
+        // Cancel if finger moved more than 10px (normal scrolling)
+        if (dx > 10 || dy > 10) {
+            this.cancelLongPress();
+        }
+    },
+
+    cancelLongPress() {
+        if (this.longPressTimer) {
+            clearTimeout(this.longPressTimer);
+            this.longPressTimer = null;
+        }
+        this.longPressTouchStart = null;
+    },
+
+    handleReactClick(event, onToggle) {
+        // If a long press was triggered, prevent the following click event from toggling off
+        if (this.isLongPressTriggered) {
+            this.isLongPressTriggered = false;
+            event.preventDefault();
+            event.stopPropagation();
+            return;
+        }
+        if (typeof onToggle === 'function') {
+            onToggle();
+        }
+    },
+
+    // Comment Reaction Types Definition (Love, Like, Haha, Wow, Sad, Angry)
     commentReactionTypes: [
-        { key: 'love', emoji: '❤️', label: 'Love', purpose: 'Strong appreciation or support' },
-        { key: 'like', emoji: '👍', label: 'Like', purpose: 'General appreciation or acknowledgment' },
-        { key: 'haha', emoji: '😂', label: 'Haha', purpose: 'Humor or amusement' },
-        { key: 'wow', emoji: '😮', label: 'Wow', purpose: 'Surprise or excitement' },
-        { key: 'sad', emoji: '😢', label: 'Sad', purpose: 'Sympathy or sadness' },
-        { key: 'angry', emoji: '😡', label: 'Angry', purpose: 'Frustration or disapproval' },
+        { key: 'love', emoji: '❤️', label: 'Love' },
+        { key: 'like', emoji: '👍', label: 'Like' },
+        { key: 'haha', emoji: '😂', label: 'Haha' },
+        { key: 'wow', emoji: '😮', label: 'Wow' },
+        { key: 'sad', emoji: '😢', label: 'Sad' },
+        { key: 'angry', emoji: '😡', label: 'Angry' },
     ],
 
     getCommentReactionDisplay(comment) {

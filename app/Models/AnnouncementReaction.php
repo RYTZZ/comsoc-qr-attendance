@@ -12,17 +12,17 @@ class AnnouncementReaction extends Model
     use HasFactory, HasUuids;
 
     public const TYPES = [
-        'like' => [
-            'key' => 'like',
-            'emoji' => '👍',
-            'label' => 'Like',
-            'purpose' => 'General appreciation or acknowledgment',
-        ],
         'love' => [
             'key' => 'love',
             'emoji' => '❤️',
             'label' => 'Love',
             'purpose' => 'Strong appreciation or support',
+        ],
+        'like' => [
+            'key' => 'like',
+            'emoji' => '👍',
+            'label' => 'Like',
+            'purpose' => 'General appreciation or acknowledgment',
         ],
         'haha' => [
             'key' => 'haha',
@@ -36,6 +36,19 @@ class AnnouncementReaction extends Model
             'label' => 'Wow',
             'purpose' => 'Surprise or excitement',
         ],
+        'sad' => [
+            'key' => 'sad',
+            'emoji' => '😢',
+            'label' => 'Sad',
+            'purpose' => 'Sympathy or sadness',
+        ],
+        'angry' => [
+            'key' => 'angry',
+            'emoji' => '😡',
+            'label' => 'Angry',
+            'purpose' => 'Frustration or disapproval',
+        ],
+        // Preserved for legacy database records
         'celebrate' => [
             'key' => 'celebrate',
             'emoji' => '🎉',
