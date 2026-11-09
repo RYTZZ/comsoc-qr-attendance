@@ -817,7 +817,7 @@
                 <button type="button"
                         @click="confirmDelete()"
                         :disabled="isDeleting"
-                        class="h-8 px-4 rounded-xl bg-gradient-to-r from-rose-700 to-rose-600 hover:from-rose-800 hover:to-rose-700 text-white font-semibold text-xs shadow-md shadow-rose-900/30 flex items-center gap-1.5 transition disabled:opacity-50">
+                        class="h-8 px-4 rounded-xl bg-gradient-to-r from-[#560E0F] to-[#8F3033] hover:from-[#6d1416] hover:to-[#a2383c] border border-[#8F3033]/60 text-white font-semibold text-xs shadow-md shadow-[#560E0F]/40 flex items-center gap-1.5 transition disabled:opacity-50 active:scale-95 cursor-pointer">
                     <svg x-show="isDeleting" x-cloak class="animate-spin w-3.5 h-3.5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
                         <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
                         <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8H4z"></path>
