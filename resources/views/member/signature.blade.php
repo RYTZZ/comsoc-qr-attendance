@@ -78,17 +78,43 @@
                 </template>
 
                 <div x-show="canDraw" x-cloak>
-                    <label for="signature-canvas" class="block text-xs font-semibold text-slate-300 mb-2">
-                        <span x-text="replacing ? 'Draw your new signature' : 'Draw your signature'"></span>
-                        <span class="font-normal text-[#94A3B8]">(mouse, touch or stylus)</span>
-                    </label>
-                    <div class="rounded-xl bg-white border-2 border-dashed border-[#334155] overflow-hidden">
-                        <canvas id="signature-canvas" x-ref="canvas" role="img" aria-label="Signature drawing area"
-                                class="w-full block" style="height: 220px; touch-action: none;"></canvas>
+                    <div class="flex items-center justify-between mb-2">
+                        <label for="signature-canvas" class="block text-xs font-semibold text-slate-300">
+                            <span x-text="replacing ? 'Draw your new signature' : 'Draw your signature'"></span>
+                            <span class="font-normal text-[#94A3B8]">(mouse, touch or stylus)</span>
+                        </label>
+
+                        <!-- Ink Selector -->
+                        <div class="flex items-center gap-1.5 bg-[#0B1120] p-1 rounded-lg border border-[#334155]">
+                            <button type="button" @click="setPenColor('#000000')"
+                                    class="w-5 h-5 rounded-md bg-black border transition"
+                                    :class="penColor === '#000000' ? 'border-[#df747a] ring-1 ring-[#df747a]' : 'border-slate-700'"
+                                    title="Black Ink"></button>
+                            <button type="button" @click="setPenColor('#1e3a8a')"
+                                    class="w-5 h-5 rounded-md bg-blue-900 border transition"
+                                    :class="penColor === '#1e3a8a' ? 'border-[#df747a] ring-1 ring-[#df747a]' : 'border-slate-700'"
+                                    title="Deep Navy Ink"></button>
+                        </div>
                     </div>
 
-                    <div class="flex flex-wrap gap-2 mt-3">
-                        <button type="button" id="signature-clear-btn" class="btn-secondary text-xs" @click="clear()" :disabled="busy">Clear</button>
+                    <div class="rounded-xl bg-white border-2 border-dashed border-[#334155] overflow-hidden relative">
+                        <canvas id="signature-canvas" x-ref="canvas" role="img" aria-label="Signature drawing area"
+                                class="w-full block" style="height: 220px; touch-action: none;"></canvas>
+                        
+                        <div x-show="strokeCount === 0" class="absolute inset-0 pointer-events-none flex items-center justify-center text-slate-300 text-xs font-medium">
+                            <span class="bg-slate-100/80 px-3 py-1.5 rounded-full border border-slate-200 shadow-xs">Sign within this box</span>
+                        </div>
+                    </div>
+
+                    <div class="flex flex-wrap items-center justify-between gap-2 mt-3">
+                        <div class="flex items-center gap-2">
+                            <button type="button" id="signature-clear-btn" class="btn-secondary text-xs" @click="clear()" :disabled="busy">Clear</button>
+                            <span x-show="strokeCount > 0" class="text-[11px] text-emerald-400 font-medium flex items-center gap-1">
+                                <span class="w-1.5 h-1.5 rounded-full bg-emerald-400"></span>
+                                <span>Stroke captured</span>
+                            </span>
+                        </div>
+                        <span class="text-[11px] text-[#94A3B8]">Touchscreens & Apple Pencil / S-Pen supported</span>
                     </div>
 
                     <div class="mt-4 space-y-3" x-show="!registered">

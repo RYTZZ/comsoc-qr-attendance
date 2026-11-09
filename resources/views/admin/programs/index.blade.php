@@ -17,7 +17,59 @@
     </div>
 </div>
 
-<div class="card overflow-hidden">
+<div class="card overflow-hidden" x-data="{
+    search: '',
+    statusFilter: 'all',
+    matches(name, abbr, active) {
+        const q = this.search.trim().toLowerCase();
+        const matchesQuery = !q || name.toLowerCase().includes(q) || abbr.toLowerCase().includes(q);
+        const matchesStatus = this.statusFilter === 'all' || 
+            (this.statusFilter === 'active' && active) || 
+            (this.statusFilter === 'inactive' && !active);
+        return matchesQuery && matchesStatus;
+    }
+}">
+    <!-- Filter and Search Toolbar -->
+    <div class="p-3 sm:p-4 bg-slate-950/40 border-b border-slate-800/80 flex flex-col sm:flex-row items-center justify-between gap-3">
+        <!-- Instant Search Input -->
+        <div class="relative w-full sm:w-72">
+            <svg class="w-4 h-4 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2 pointer-events-none" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
+            </svg>
+            <input type="text"
+                   x-model="search"
+                   placeholder="Filter programs or code..."
+                   class="w-full bg-slate-900 border border-slate-800 focus:border-[#cc7478] focus:ring-1 focus:ring-[#cc7478] rounded-xl pl-9 pr-8 py-1.5 text-xs text-white placeholder-slate-500 outline-none transition">
+            <button type="button" x-show="search.length > 0" @click="search = ''" class="absolute right-2.5 top-1/2 -translate-y-1/2 text-slate-500 hover:text-slate-300">
+                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+                </svg>
+            </button>
+        </div>
+
+        <!-- Status Filter Tabs -->
+        <div class="flex items-center gap-1 bg-slate-900 p-1 rounded-xl border border-slate-800/80 text-xs w-full sm:w-auto">
+            <button type="button"
+                    @click="statusFilter = 'all'"
+                    class="px-2.5 py-1 rounded-lg font-medium transition"
+                    :class="statusFilter === 'all' ? 'bg-[#560E0F] text-white font-semibold shadow-xs' : 'text-slate-400 hover:text-white'">
+                All ({{ $programs->count() }})
+            </button>
+            <button type="button"
+                    @click="statusFilter = 'active'"
+                    class="px-2.5 py-1 rounded-lg font-medium transition"
+                    :class="statusFilter === 'active' ? 'bg-emerald-950 text-emerald-300 font-semibold border border-emerald-500/30' : 'text-slate-400 hover:text-white'">
+                Active ({{ $programs->where('is_active', true)->count() }})
+            </button>
+            <button type="button"
+                    @click="statusFilter = 'inactive'"
+                    class="px-2.5 py-1 rounded-lg font-medium transition"
+                    :class="statusFilter === 'inactive' ? 'bg-slate-800 text-slate-200 font-semibold border border-slate-700' : 'text-slate-400 hover:text-white'">
+                Inactive ({{ $programs->where('is_active', false)->count() }})
+            </button>
+        </div>
+    </div>
+
     <div class="overflow-x-auto">
         <table class="w-full text-left text-xs">
             <thead class="bg-slate-950/60 text-slate-400 border-b border-slate-800">
@@ -33,6 +85,7 @@
             <tbody class="divide-y divide-slate-800/60">
                 @forelse($programs as $prog)
                     <tr class="hover:bg-slate-800/30 transition"
+                        x-show="matches('{{ addslashes($prog->name) }}', '{{ addslashes($prog->abbreviation) }}', {{ $prog->is_active ? 'true' : 'false' }})"
                         x-data="{
                             isEditing: false,
                             progName: '{{ addslashes($prog->name) }}',

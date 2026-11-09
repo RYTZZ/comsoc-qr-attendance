@@ -18,21 +18,38 @@ export default (config) => ({
     success: '',
     previewUrl: null,
     ratio: 1,
+    penColor: '#000000',
+    strokeCount: 0,
     _onResize: null,
 
     init() {
         const canvas = this.$refs.canvas;
         this.pad = new SignaturePad(canvas, {
-            penColor: '#000000',
+            penColor: this.penColor,
             backgroundColor: 'rgba(0,0,0,0)', // transparent so the PDF cell shows through
             minWidth: 0.8,
-            maxWidth: 2.4,
+            maxWidth: 2.6,
+            velocityFilterWeight: 0.7, // Quadratic Bézier curve interpolation for smooth strokes
         });
+
+        // Track strokes for UI feedback
+        this.pad.addEventListener('endStroke', () => {
+            this.strokeCount++;
+            this.error = '';
+        });
+
         this._onResize = () => this.resizeCanvas();
         window.addEventListener('resize', this._onResize);
         window.addEventListener('orientationchange', this._onResize);
         this.$nextTick(() => this.resizeCanvas());
         if (this.registered) this.refreshPreview();
+    },
+
+    setPenColor(color) {
+        this.penColor = color;
+        if (this.pad) {
+            this.pad.penColor = color;
+        }
     },
 
     destroy() {
@@ -56,6 +73,7 @@ export default (config) => ({
 
     clear() {
         this.pad.clear();
+        this.strokeCount = 0;
         this.error = '';
     },
 

@@ -1,5 +1,5 @@
 <x-app-layout>
-    <div class="min-h-screen bg-[#0B1120] text-[#F8FAFC] p-4 sm:p-6 lg:p-8"
+    <div class="min-h-screen bg-[#0B1120] text-[#F8FAFC] p-4 sm:p-6 lg:p-8 relative"
          x-data="organizerScanner({
              scanUrl: '{{ route('organizer.scanner.scan') }}',
              csrfToken: '{{ csrf_token() }}',
@@ -7,6 +7,14 @@
              sessionId: '{{ $activeSession?->id }}'
          })"
          x-init="initScanner()">
+
+        <!-- Screen Edge Glow for Rapid Verification Feedback -->
+        <div class="fixed inset-0 pointer-events-none transition-all duration-300 z-50"
+             :class="{
+                 'ring-8 ring-emerald-500/80 shadow-[inset_0_0_80px_rgba(16,185,129,0.35)]': edgeFlash === 'Accepted',
+                 'ring-8 ring-amber-500/80 shadow-[inset_0_0_80px_rgba(245,158,11,0.35)]': edgeFlash === 'Duplicate' || edgeFlash === 'Expired',
+                 'ring-8 ring-rose-500/80 shadow-[inset_0_0_80px_rgba(244,63,94,0.35)]': edgeFlash && edgeFlash !== 'Accepted' && edgeFlash !== 'Duplicate' && edgeFlash !== 'Expired'
+             }"></div>
 
         <div class="max-w-4xl mx-auto space-y-4">
             <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-4 border-b border-[#334155]">
@@ -79,10 +87,18 @@
                                 <i data-lucide="camera" class="w-4 h-4 text-[#df747a]"></i>
                                 <span class="text-xs font-bold text-white tracking-tight font-brand-display">Live Scanner Feed</span>
                             </div>
-                            <button type="button" @click="toggleCamera()" class="text-xs text-[#df747a] hover:text-white transition flex items-center gap-1 font-semibold">
-                                <i data-lucide="switch-camera" class="w-3.5 h-3.5"></i>
-                                <span x-text="cameraActive ? 'Stop Camera' : 'Start Camera'">Start Camera</span>
-                            </button>
+                            <div class="flex items-center gap-3">
+                                <button type="button" @click="soundEnabled = !soundEnabled"
+                                        class="text-xs transition flex items-center gap-1.5 font-semibold px-2.5 py-1 rounded-lg border"
+                                        :class="soundEnabled ? 'text-emerald-400 bg-emerald-950/30 border-emerald-500/30' : 'text-slate-400 bg-slate-900 border-slate-800'">
+                                    <i :data-lucide="soundEnabled ? 'volume-2' : 'volume-x'" class="w-3.5 h-3.5"></i>
+                                    <span x-text="soundEnabled ? 'Sound On' : 'Muted'">Sound On</span>
+                                </button>
+                                <button type="button" @click="toggleCamera()" class="text-xs text-[#df747a] hover:text-white transition flex items-center gap-1 font-semibold">
+                                    <i data-lucide="switch-camera" class="w-3.5 h-3.5"></i>
+                                    <span x-text="cameraActive ? 'Stop Camera' : 'Start Camera'">Start Camera</span>
+                                </button>
+                            </div>
                         </div>
 
                         <div class="relative w-full aspect-square sm:aspect-4/3 bg-black rounded-2xl overflow-hidden border-2 border-[#334155] flex items-center justify-center">
@@ -249,10 +265,70 @@
                 lastResult: null,
                 scanLog: [],
                 manualTokenInput: '',
+                soundEnabled: true,
+                edgeFlash: null,
+                audioCtx: null,
 
                 initScanner() {
                     if (window.lucideIcons) window.createIcons({ icons: window.lucideIcons });
                     this.startCamera();
+                },
+
+                playFeedbackAudio(type) {
+                    if (!this.soundEnabled) return;
+                    try {
+                        const AudioContext = window.AudioContext || window.webkitAudioContext;
+                        if (!AudioContext) return;
+                        const ctx = this.audioCtx || (this.audioCtx = new AudioContext());
+                        if (ctx.state === 'suspended') {
+                            ctx.resume();
+                        }
+
+                        const now = ctx.currentTime;
+                        if (type === 'Accepted') {
+                            // Bright rising harmonic chime (C5 -> E5 -> G5)
+                            [523.25, 659.25, 783.99].forEach((freq, idx) => {
+                                const osc = ctx.createOscillator();
+                                const gain = ctx.createGain();
+                                osc.type = 'sine';
+                                osc.frequency.setValueAtTime(freq, now + idx * 0.08);
+                                gain.gain.setValueAtTime(0.18, now + idx * 0.08);
+                                gain.gain.exponentialRampToValueAtTime(0.001, now + idx * 0.08 + 0.28);
+                                osc.connect(gain);
+                                gain.connect(ctx.destination);
+                                osc.start(now + idx * 0.08);
+                                osc.stop(now + idx * 0.08 + 0.28);
+                            });
+                        } else if (type === 'Duplicate' || type === 'Expired') {
+                            // Warm double warning tone (440Hz -> 330Hz)
+                            [440, 330].forEach((freq, idx) => {
+                                const osc = ctx.createOscillator();
+                                const gain = ctx.createGain();
+                                osc.type = 'triangle';
+                                osc.frequency.setValueAtTime(freq, now + idx * 0.12);
+                                gain.gain.setValueAtTime(0.18, now + idx * 0.12);
+                                gain.gain.exponentialRampToValueAtTime(0.001, now + idx * 0.12 + 0.18);
+                                osc.connect(gain);
+                                gain.connect(ctx.destination);
+                                osc.start(now + idx * 0.12);
+                                osc.stop(now + idx * 0.12 + 0.18);
+                            });
+                        } else {
+                            // Subtle low alert buzzer (220Hz)
+                            const osc = ctx.createOscillator();
+                            const gain = ctx.createGain();
+                            osc.type = 'sawtooth';
+                            osc.frequency.setValueAtTime(220, now);
+                            gain.gain.setValueAtTime(0.12, now);
+                            gain.gain.exponentialRampToValueAtTime(0.001, now + 0.3);
+                            osc.connect(gain);
+                            gain.connect(ctx.destination);
+                            osc.start(now);
+                            osc.stop(now + 0.3);
+                        }
+                    } catch (e) {
+                        // Browser audio policy error ignored
+                    }
                 },
 
                 async submitManualToken() {
@@ -334,6 +410,9 @@
 
                         const data = await response.json();
                         this.lastResult = data;
+                        this.edgeFlash = data.result_type;
+                        this.playFeedbackAudio(data.result_type);
+                        setTimeout(() => { this.edgeFlash = null; }, 900);
 
                         this.scanLog.unshift({
                             name: data.member ? data.member.name : 'Unknown Scan',
@@ -350,6 +429,9 @@
                             result_type: 'Network Error',
                             message: 'Network transmission failure. Check internet connection.'
                         };
+                        this.edgeFlash = 'Network Error';
+                        this.playFeedbackAudio('Error');
+                        setTimeout(() => { this.edgeFlash = null; }, 900);
                     } finally {
                         if (window.lucideIcons) window.createIcons({ icons: window.lucideIcons });
                         setTimeout(() => {

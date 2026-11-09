@@ -77,6 +77,8 @@
                 if (cleanChar !== '' && index < 5) {
                     this.$refs['box' + (index + 1)]?.focus();
                 }
+
+                this.checkAutoSubmit();
             },
 
             handleKeydown(index, event) {
@@ -110,10 +112,22 @@
                 for (let i = 0; i < chars.length && (startIndex + i) < 6; i++) {
                     this.digits[startIndex + i] = chars[i];
                 }
-                const focusIdx = Math.min(5, startIndex + chars.length);
+                const focusIdx = Math.min(5, startIndex + chars.length - 1);
                 this.$nextTick(() => {
-                    this.$refs['box' + focusIdx]?.focus();
+                    this.$refs['box' + Math.min(5, startIndex + chars.length)]?.focus();
+                    this.checkAutoSubmit();
                 });
+            },
+
+            checkAutoSubmit() {
+                if (this.combinedCode.length === 6 && !this.submitting) {
+                    // Micro-delay gives instant tactile feedback before auto-submitting
+                    setTimeout(() => {
+                        if (this.combinedCode.length === 6 && !this.submitting) {
+                            this.$refs.verifyForm?.requestSubmit();
+                        }
+                    }, 180);
+                }
             },
 
             handleSubmit(event) {
@@ -169,7 +183,7 @@
          class="space-y-5">
 
         <!-- Form: Six-Box Input with Auto-Advance, Paste, and Auto-Uppercase -->
-        <form method="POST" action="{{ route('password.verify.submit') }}" @submit="handleSubmit($event)" class="space-y-5">
+        <form x-ref="verifyForm" method="POST" action="{{ route('password.verify.submit') }}" @submit="handleSubmit($event)" class="space-y-5">
             @csrf
             <input type="hidden" name="email" value="{{ $email }}">
             <input type="hidden" name="code" :value="combinedCode">
@@ -196,7 +210,8 @@
                             autocapitalize="characters"
                             spellcheck="false"
                             aria-label="Verification code character {{ $i + 1 }} of 6"
-                            class="w-full h-12 sm:h-14 text-center font-mono text-xl sm:text-2xl font-extrabold uppercase rounded-xl bg-[#0B1120] border border-[#334155] text-white focus:border-[#df747a] focus:ring-2 focus:ring-[#8F3033]/50 focus:outline-none transition-all select-all shadow-inner"
+                            class="w-full h-12 sm:h-14 text-center font-mono text-xl sm:text-2xl font-extrabold uppercase rounded-xl bg-[#0B1120] border text-white transition-all select-all shadow-inner focus:outline-none"
+                            :class="combinedCode.length === 6 ? 'border-emerald-500/60 ring-2 ring-emerald-500/30' : 'border-[#334155] focus:border-[#df747a] focus:ring-2 focus:ring-[#8F3033]/50'"
                             required
                         />
                     @endfor
