@@ -40,10 +40,21 @@ class UserSessionController extends Controller
         $user = $request->user();
         $sessionId = $request->session()->getId();
         $sessionIdHash = hash('sha256', $sessionId);
+        $storedSessionHash = $request->session()->get('current_session_hash');
 
         // Verification: Is this session active and valid?
-        $isValidSession = ($user->active_session_hash === null || $user->active_session_hash === $sessionIdHash);
-        $userSession = UserSession::where('session_id_hash', $sessionIdHash)->first();
+        $isValidSession = ($user->active_session_hash === null)
+            || ($user->active_session_hash === $sessionIdHash)
+            || ($storedSessionHash && $user->active_session_hash === $storedSessionHash);
+
+        $userSession = UserSession::where('session_id_hash', $sessionIdHash)
+            ->orWhere(function ($q) use ($storedSessionHash) {
+                if ($storedSessionHash) {
+                    $q->where('session_id_hash', $storedSessionHash);
+                }
+            })
+            ->first();
+
         if ($userSession && $userSession->isRevoked()) {
             $isValidSession = false;
         }

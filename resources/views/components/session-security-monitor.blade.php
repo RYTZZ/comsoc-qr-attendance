@@ -180,10 +180,16 @@
                     }
                 } catch (e) {}
 
-                // Initialize last activity timestamp in localStorage if not set
-                if (!localStorage.getItem('comsoc_last_activity')) {
+                // Initialize or refresh last activity timestamp in localStorage.
+                // A freshly loaded authenticated page proves current user activity;
+                // if localStorage has a missing or stale timestamp from a prior session/day,
+                // reset it to Date.now() to prevent false immediate inactivity timeouts upon login.
+                const lastActivityStr = localStorage.getItem('comsoc_last_activity');
+                const parsedLast = lastActivityStr ? parseInt(lastActivityStr, 10) : 0;
+                if (!parsedLast || (Date.now() - parsedLast >= this.INACTIVITY_TIMEOUT_MS)) {
                     localStorage.setItem('comsoc_last_activity', Date.now().toString());
                 }
+                localStorage.removeItem('comsoc_session_replaced');
 
                 // Register meaningful user activity listeners
                 this.bindActivityListeners();

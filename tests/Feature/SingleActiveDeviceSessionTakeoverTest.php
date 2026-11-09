@@ -355,4 +355,37 @@ class SingleActiveDeviceSessionTakeoverTest extends TestCase
         $user->refresh();
         $this->assertEquals('Original Name', $user->name);
     }
+
+    public function test_poll_alerts_succeeds_when_stored_session_hash_matches(): void
+    {
+        $user = User::factory()->create([
+            'role' => 'student',
+            'password' => bcrypt('password123'),
+        ]);
+
+        $sessionIdHash = hash('sha256', 'stored-active-session-id');
+        $user->update(['active_session_hash' => $sessionIdHash]);
+
+        UserSession::create([
+            'user_id' => $user->id,
+            'session_id_hash' => $sessionIdHash,
+            'device_type' => 'Desktop',
+            'platform' => 'Windows 10/11',
+            'browser' => 'Chrome',
+            'device_signature' => 'sig_chrome',
+            'first_authenticated_at' => now(),
+            'last_active_at' => now(),
+            'revoked_at' => null,
+        ]);
+
+        $response = $this->withSession(['current_session_hash' => $sessionIdHash])
+            ->actingAs($user)
+            ->getJson(route('profile.sessions.poll'));
+
+        $response->assertOk();
+        $response->assertJson([
+            'valid' => true,
+            'session_replaced' => false,
+        ]);
+    }
 }

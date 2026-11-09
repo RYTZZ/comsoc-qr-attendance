@@ -101,7 +101,7 @@
                 @endif
 
                 <!-- Log In Form -->
-                <form method="POST" action="{{ route('login') }}" class="space-y-4">
+                <form method="POST" action="{{ route('login') }}" class="space-y-4" onsubmit="try { localStorage.removeItem('comsoc_session_replaced'); localStorage.setItem('comsoc_last_activity', Date.now().toString()); } catch (e) {}">
                     @csrf
 
                     <!-- Email, Student Number, or Username -->
