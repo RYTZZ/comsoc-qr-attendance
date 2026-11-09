@@ -28,143 +28,132 @@
 })"
      class="mt-6 pt-6 border-t border-slate-800 space-y-6">
 
-    <!-- Engagement Summary Bar & Reaction Breakdown (Hidden when zero reactions and zero comments) -->
-    <div x-show="totalReactions > 0 || totalComments > 0"
-         x-cloak
-         class="flex items-center justify-between gap-3 text-xs text-slate-400 px-1 py-1">
-        <!-- Reaction icons + count preview (Only displayed when totalReactions > 0) -->
-        <div class="flex items-center gap-2">
+    <!-- Facebook-Style Action Bar: Left Action Buttons [React (count)] [Comment (count)] | Right Overlapping Reaction Badges [👍❤️] -->
+    <div class="relative flex items-center justify-between py-1.5 px-3 rounded-2xl border border-slate-800/80 bg-[#172033]/70 backdrop-blur-sm">
+        <!-- Left Side: Interactive Action Buttons with Counts -->
+        <div class="flex items-center gap-4 sm:gap-6">
+            <!-- React Button Container with Hover / Click / Long-Press Picker (with 250ms persistence bridge) -->
+            <div class="relative"
+                 x-data="{ closeTimer: null }"
+                 @click.away="pickerOpen = false"
+                 @mouseenter="if (closeTimer) { clearTimeout(closeTimer); closeTimer = null; } pickerOpen = true"
+                 @mouseleave="closeTimer = setTimeout(() => { pickerOpen = false; }, 250)">
+                <button type="button"
+                        @click="handleReactClick($event, () => pickerOpen = !pickerOpen)"
+                        @touchstart.passive="startLongPress($event, () => pickerOpen = true)"
+                        @touchmove.passive="moveLongPress($event)"
+                        @touchend.passive="cancelLongPress()"
+                        @touchcancel.passive="cancelLongPress()"
+                        aria-label="React to announcement"
+                        class="flex items-center gap-1.5 py-1 px-1.5 rounded-lg text-xs font-semibold transition-all duration-150 select-none cursor-pointer hover:text-white"
+                        :class="userReaction
+                            ? 'text-rose-400 hover:text-rose-300'
+                            : 'text-slate-400 hover:text-white'">
+                    <template x-if="userReaction">
+                        <span class="flex items-center gap-1.5">
+                            <span class="text-base leading-none" x-text="breakdown[userReaction]?.emoji"></span>
+                            <span class="capitalize" x-text="breakdown[userReaction]?.label"></span>
+                        </span>
+                    </template>
+                    <template x-if="!userReaction">
+                        <span class="flex items-center gap-1.5">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4 text-slate-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <path d="M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.3 1.5 4.05 3 5.5l7 7Z"/>
+                            </svg>
+                            <span>React</span>
+                        </span>
+                    </template>
+                    <template x-if="totalReactions > 0">
+                        <span class="font-bold text-slate-300 ml-0.5" x-text="totalReactions"></span>
+                    </template>
+                </button>
+
+                <!-- Interactive Reaction Picker (6 reactions: Love, Like, Haha, Wow, Sad, Angry) - Clean Icons Only -->
+                <div x-show="pickerOpen"
+                     x-cloak
+                     @mouseenter="if (closeTimer) { clearTimeout(closeTimer); closeTimer = null; }"
+                     x-transition:enter="transition ease-out duration-150 transform"
+                     x-transition:enter-start="opacity-0 translate-y-2 scale-95"
+                     x-transition:enter-end="opacity-100 translate-y-0 scale-100"
+                     x-transition:leave="transition ease-in duration-100 transform"
+                     x-transition:leave-start="opacity-100 translate-y-0 scale-100"
+                     x-transition:leave-end="opacity-0 translate-y-2 scale-95"
+                     class="absolute left-0 bottom-full mb-2 z-30 p-1.5 bg-[#1E293B] border border-slate-700/80 rounded-2xl shadow-2xl flex items-center gap-1 backdrop-blur-md">
+                    <!-- Invisible bridge preventing cursor drop between button and popup -->
+                    <div class="absolute left-0 -bottom-2.5 w-full h-2.5"></div>
+
+                    <button type="button"
+                            @click="pickerOpen = false; toggleReaction('love')"
+                            class="p-2 sm:px-2.5 sm:py-2 rounded-xl hover:bg-slate-700/60 transition-transform active:scale-90 hover:scale-125 flex items-center justify-center group focus:outline-none cursor-pointer select-none"
+                            :class="userReaction === 'love' ? 'bg-rose-500/20 ring-1 ring-rose-500/50' : ''">
+                        <span class="text-2xl leading-none">❤️</span>
+                    </button>
+
+                    <button type="button"
+                            @click="pickerOpen = false; toggleReaction('like')"
+                            class="p-2 sm:px-2.5 sm:py-2 rounded-xl hover:bg-slate-700/60 transition-transform active:scale-90 hover:scale-125 flex items-center justify-center group focus:outline-none cursor-pointer select-none"
+                            :class="userReaction === 'like' ? 'bg-rose-500/20 ring-1 ring-rose-500/50' : ''">
+                        <span class="text-2xl leading-none">👍</span>
+                    </button>
+
+                    <button type="button"
+                            @click="pickerOpen = false; toggleReaction('haha')"
+                            class="p-2 sm:px-2.5 sm:py-2 rounded-xl hover:bg-slate-700/60 transition-transform active:scale-90 hover:scale-125 flex items-center justify-center group focus:outline-none cursor-pointer select-none"
+                            :class="userReaction === 'haha' ? 'bg-rose-500/20 ring-1 ring-rose-500/50' : ''">
+                        <span class="text-2xl leading-none">😂</span>
+                    </button>
+
+                    <button type="button"
+                            @click="pickerOpen = false; toggleReaction('wow')"
+                            class="p-2 sm:px-2.5 sm:py-2 rounded-xl hover:bg-slate-700/60 transition-transform active:scale-90 hover:scale-125 flex items-center justify-center group focus:outline-none cursor-pointer select-none"
+                            :class="userReaction === 'wow' ? 'bg-rose-500/20 ring-1 ring-rose-500/50' : ''">
+                        <span class="text-2xl leading-none">😮</span>
+                    </button>
+
+                    <button type="button"
+                            @click="pickerOpen = false; toggleReaction('sad')"
+                            class="p-2 sm:px-2.5 sm:py-2 rounded-xl hover:bg-slate-700/60 transition-transform active:scale-90 hover:scale-125 flex items-center justify-center group focus:outline-none cursor-pointer select-none"
+                            :class="userReaction === 'sad' ? 'bg-rose-500/20 ring-1 ring-rose-500/50' : ''">
+                        <span class="text-2xl leading-none">😢</span>
+                    </button>
+
+                    <button type="button"
+                            @click="pickerOpen = false; toggleReaction('angry')"
+                            class="p-2 sm:px-2.5 sm:py-2 rounded-xl hover:bg-slate-700/60 transition-transform active:scale-90 hover:scale-125 flex items-center justify-center group focus:outline-none cursor-pointer select-none"
+                            :class="userReaction === 'angry' ? 'bg-rose-500/20 ring-1 ring-rose-500/50' : ''">
+                        <span class="text-2xl leading-none">😡</span>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Comment Action Button with Count -->
+            <button type="button"
+                    @click="focusMainCommentBox()"
+                    class="flex items-center gap-1.5 py-1 px-1.5 rounded-lg text-xs font-semibold text-slate-400 hover:text-white transition">
+                <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4 text-slate-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M7.9 20A9 9 0 1 0 4 16.1L2 22Z"/>
+                </svg>
+                <span>Comment</span>
+                <template x-if="totalComments > 0">
+                    <span class="font-bold text-slate-300 ml-0.5" x-text="totalComments"></span>
+                </template>
+            </button>
+        </div>
+
+        <!-- Right Side: Overlapping Reaction Badges (Facebook-style 👍❤️) -->
+        <div>
             <template x-if="totalReactions > 0">
                 <button type="button"
                         @click="showReactorsModal = true"
-                        class="flex items-center gap-1.5 hover:text-white transition group focus:outline-none focus:ring-1 focus:ring-rose-500/50 rounded-full px-2 py-0.5 bg-slate-900/60 border border-slate-800">
-                    <span class="flex items-center -space-x-1">
-                        <template x-for="r in topReactions" :key="r.type">
-                            <span class="inline-flex items-center justify-center w-5 h-5 text-sm rounded-full bg-slate-800 border border-slate-700 shadow-sm"
-                                  x-text="r.emoji"></span>
-                        </template>
-                    </span>
-                    <span class="font-bold text-slate-300 ml-1" x-text="totalReactions"></span>
-                    <span class="text-slate-500 group-hover:text-slate-400">reactions</span>
+                        title="View reactions"
+                        class="flex items-center -space-x-1.5 hover:opacity-85 transition focus:outline-none cursor-pointer select-none py-0.5">
+                    <template x-for="r in topReactions" :key="r.type">
+                        <span class="inline-flex items-center justify-center w-5 h-5 text-xs rounded-full bg-slate-800 border-2 border-[#172033] shadow-sm transform hover:scale-110 transition-transform"
+                              x-text="r.emoji"></span>
+                    </template>
                 </button>
             </template>
         </div>
-
-        <!-- Comments Count (Only displayed when totalComments > 0) -->
-        <div>
-            <template x-if="totalComments > 0">
-                <button type="button"
-                        @click="focusMainCommentBox()"
-                        class="flex items-center gap-1.5 text-slate-400 hover:text-white transition focus:outline-none">
-                    <span class="font-medium text-slate-300" x-text="totalComments"></span>
-                    <span x-text="totalComments === 1 ? 'comment' : 'comments'"></span>
-                </button>
-            </template>
-        </div>
-    </div>
-
-    <!-- Facebook-Style Shared Full-Width Action Container: [ ❤️ React ]  [ 💬 Comment ] -->
-    <div class="relative flex items-center justify-start gap-2 py-1.5 px-2 rounded-2xl border border-slate-800/80 bg-[#172033]/70 backdrop-blur-sm">
-        <!-- React Button Container with Hover / Click / Long-Press Picker (with 250ms persistence bridge) -->
-        <div class="relative"
-             x-data="{ closeTimer: null }"
-             @click.away="pickerOpen = false"
-             @mouseenter="if (closeTimer) { clearTimeout(closeTimer); closeTimer = null; } pickerOpen = true"
-             @mouseleave="closeTimer = setTimeout(() => { pickerOpen = false; }, 250)">
-            <button type="button"
-                    @click="handleReactClick($event, () => pickerOpen = !pickerOpen)"
-                    @touchstart.passive="startLongPress($event, () => pickerOpen = true)"
-                    @touchmove.passive="moveLongPress($event)"
-                    @touchend.passive="cancelLongPress()"
-                    @touchcancel.passive="cancelLongPress()"
-                    aria-label="React to announcement"
-                    class="flex items-center gap-2 px-3 py-1.5 rounded-xl text-xs font-semibold transition-all duration-150 select-none cursor-pointer hover:bg-slate-800/70"
-                    :class="userReaction
-                        ? 'text-rose-400 hover:text-rose-300'
-                        : 'text-slate-300 hover:text-white'">
-                <template x-if="userReaction">
-                    <span class="flex items-center gap-1.5">
-                        <span class="text-base" x-text="breakdown[userReaction]?.emoji"></span>
-                        <span class="capitalize" x-text="breakdown[userReaction]?.label"></span>
-                    </span>
-                </template>
-                <template x-if="!userReaction">
-                    <span class="flex items-center gap-1.5">
-                        <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4 text-slate-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                            <path d="M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.3 1.5 4.05 3 5.5l7 7Z"/>
-                        </svg>
-                        <span>React</span>
-                    </span>
-                </template>
-            </button>
-
-            <!-- Interactive Reaction Picker (6 reactions: Love, Like, Haha, Wow, Sad, Angry) - Clean Icons Only -->
-            <div x-show="pickerOpen"
-                 x-cloak
-                 @mouseenter="if (closeTimer) { clearTimeout(closeTimer); closeTimer = null; }"
-                 x-transition:enter="transition ease-out duration-150 transform"
-                 x-transition:enter-start="opacity-0 translate-y-2 scale-95"
-                 x-transition:enter-end="opacity-100 translate-y-0 scale-100"
-                 x-transition:leave="transition ease-in duration-100 transform"
-                 x-transition:leave-start="opacity-100 translate-y-0 scale-100"
-                 x-transition:leave-end="opacity-0 translate-y-2 scale-95"
-                 class="absolute left-0 bottom-full mb-2 z-30 p-1.5 bg-[#1E293B] border border-slate-700/80 rounded-2xl shadow-2xl flex items-center gap-1 backdrop-blur-md">
-                <!-- Invisible bridge preventing cursor drop between button and popup -->
-                <div class="absolute left-0 -bottom-2.5 w-full h-2.5"></div>
-
-                <button type="button"
-                        @click="pickerOpen = false; toggleReaction('love')"
-                        class="p-2 sm:px-2.5 sm:py-2 rounded-xl hover:bg-slate-700/60 transition-transform active:scale-90 hover:scale-125 flex items-center justify-center group focus:outline-none cursor-pointer select-none"
-                        :class="userReaction === 'love' ? 'bg-rose-500/20 ring-1 ring-rose-500/50' : ''">
-                    <span class="text-2xl leading-none">❤️</span>
-                </button>
-
-                <button type="button"
-                        @click="pickerOpen = false; toggleReaction('like')"
-                        class="p-2 sm:px-2.5 sm:py-2 rounded-xl hover:bg-slate-700/60 transition-transform active:scale-90 hover:scale-125 flex items-center justify-center group focus:outline-none cursor-pointer select-none"
-                        :class="userReaction === 'like' ? 'bg-rose-500/20 ring-1 ring-rose-500/50' : ''">
-                    <span class="text-2xl leading-none">👍</span>
-                </button>
-
-                <button type="button"
-                        @click="pickerOpen = false; toggleReaction('haha')"
-                        class="p-2 sm:px-2.5 sm:py-2 rounded-xl hover:bg-slate-700/60 transition-transform active:scale-90 hover:scale-125 flex items-center justify-center group focus:outline-none cursor-pointer select-none"
-                        :class="userReaction === 'haha' ? 'bg-rose-500/20 ring-1 ring-rose-500/50' : ''">
-                    <span class="text-2xl leading-none">😂</span>
-                </button>
-
-                <button type="button"
-                        @click="pickerOpen = false; toggleReaction('wow')"
-                        class="p-2 sm:px-2.5 sm:py-2 rounded-xl hover:bg-slate-700/60 transition-transform active:scale-90 hover:scale-125 flex items-center justify-center group focus:outline-none cursor-pointer select-none"
-                        :class="userReaction === 'wow' ? 'bg-rose-500/20 ring-1 ring-rose-500/50' : ''">
-                    <span class="text-2xl leading-none">😮</span>
-                </button>
-
-                <button type="button"
-                        @click="pickerOpen = false; toggleReaction('sad')"
-                        class="p-2 sm:px-2.5 sm:py-2 rounded-xl hover:bg-slate-700/60 transition-transform active:scale-90 hover:scale-125 flex items-center justify-center group focus:outline-none cursor-pointer select-none"
-                        :class="userReaction === 'sad' ? 'bg-rose-500/20 ring-1 ring-rose-500/50' : ''">
-                    <span class="text-2xl leading-none">😢</span>
-                </button>
-
-                <button type="button"
-                        @click="pickerOpen = false; toggleReaction('angry')"
-                        class="p-2 sm:px-2.5 sm:py-2 rounded-xl hover:bg-slate-700/60 transition-transform active:scale-90 hover:scale-125 flex items-center justify-center group focus:outline-none cursor-pointer select-none"
-                        :class="userReaction === 'angry' ? 'bg-rose-500/20 ring-1 ring-rose-500/50' : ''">
-                    <span class="text-2xl leading-none">😡</span>
-                </button>
-            </div>
-        </div>
-
-        <!-- Jump to Comment Button -->
-        <button type="button"
-                @click="focusMainCommentBox()"
-                class="flex items-center gap-2 px-3 py-1.5 rounded-xl text-xs font-semibold text-slate-300 hover:bg-slate-800/70 hover:text-white transition">
-            <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4 text-slate-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                <path d="M7.9 20A9 9 0 1 0 4 16.1L2 22Z"/>
-            </svg>
-            <span>Comment</span>
-        </button>
     </div>
 
     <!-- Main Comment Composer -->
