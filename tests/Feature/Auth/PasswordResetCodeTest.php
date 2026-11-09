@@ -352,6 +352,6 @@ class PasswordResetCodeTest extends TestCase
         $this->assertStringContainsString('A7K9P2', $html);
         $this->assertStringContainsString('YOUR RESET CODE', $html);
         $this->assertStringContainsString('Expires in 15 minutes', $html);
-        $this->assertStringContainsString('One Community. One Platform. More Possibilities.', $html);
+        $this->assertStringContainsString('Innovating Today for a Better Community.', $html);
     }
 }

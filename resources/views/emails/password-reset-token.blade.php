@@ -179,7 +179,7 @@
                     <tr>
                         <td align="center" class="mobile-footer" style="padding: 24px 28px; background-color: #0B1120; border-top: 1px solid #334155;">
                             <p style="margin: 0 0 6px 0; font-size: 12px; font-weight: 700; color: #FFFFFF; letter-spacing: 0.3px;">
-                                One Community. One Platform. More Possibilities.
+                                Innovating Today for a Better Community.
                             </p>
                             <p style="margin: 0 0 4px 0; font-size: 11.5px; color: #94A3B8; font-weight: 500;">
                                 Computing Society Organization &bull; SorSU Bulan Campus
