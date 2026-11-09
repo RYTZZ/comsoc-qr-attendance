@@ -133,8 +133,12 @@ class ExportActiveStudentsAttendanceSheet extends Command
 
         $pdfBytes = $pdf->output();
 
-        $outputPath = $this->option('output') ?: storage_path('app/COMSOC_Hub_Active_Students_Attendance_Sheet.pdf');
+        $outputPath = $this->option('output') ?: storage_path('app/COMSOC_Hub_Attendance_Sheet_Corrected.pdf');
         file_put_contents($outputPath, $pdfBytes);
+
+        // Also copy to public directory for easy access
+        $publicPath = public_path('COMSOC_Hub_Attendance_Sheet_Corrected.pdf');
+        file_put_contents($publicPath, $pdfBytes);
 
         $this->info("AT-010: PDF generated successfully.");
         $this->info("AT-011: Print validation: legal format (8.5x13 in), header/footer banners intact.");
