@@ -213,6 +213,9 @@ Route::middleware(['auth', 'verified', 'require_password_change'])->group(functi
             ->name('comments.update');
         Route::delete('/comments/{comment}', [\App\Http\Controllers\AnnouncementCommentController::class, 'destroy'])
             ->name('comments.destroy');
+        Route::post('/comments/{comment}/reactions', [\App\Http\Controllers\AnnouncementCommentController::class, 'toggleReaction'])
+            ->middleware('throttle:60,1')
+            ->name('comments.reactions.toggle');
         Route::post('/comments/{comment}/report', [\App\Http\Controllers\AnnouncementCommentController::class, 'report'])
             ->middleware('throttle:15,1')
             ->name('comments.report');

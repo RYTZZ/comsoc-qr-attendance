@@ -1,4 +1,4 @@
-@props(['announcement', 'reactionsConfig'])
+@props(['announcement', 'reactionsConfig', 'commentReactionsConfig'])
 
 @php
     $user = auth()->user();
@@ -15,6 +15,7 @@
         reactionsToggle: '{{ route('announcements.reactions.toggle', $announcement) }}',
         commentsIndex: '{{ route('announcements.comments.index', $announcement) }}',
         commentsStore: '{{ route('announcements.comments.store', $announcement) }}',
+        commentReactionToggleBase: '{{ url('/announcements/comments') }}',
         mentionableUsers: '{{ route('announcements.mentionable-users') }}',
     },
     currentUser: {
@@ -425,8 +426,45 @@
                     </template>
                 </div>
 
-                <!-- Comment Actions: Reply button & Expand replies toggle -->
+                <!-- Comment Actions: React, Reply button & Expand replies toggle -->
                 <div class="flex items-center gap-3 pt-1 text-xs">
+                    <!-- Comment React Button with Hover/Click Reaction Picker -->
+                    <div class="relative" x-data="{ pickerOpen: false }" @click.away="pickerOpen = false">
+                        <button type="button"
+                                @click="pickerOpen = !pickerOpen"
+                                class="font-semibold flex items-center gap-1.5 transition rounded px-1.5 py-0.5 hover:bg-slate-800"
+                                :class="comment.user_reaction ? 'text-rose-400 hover:text-rose-300' : 'text-slate-400 hover:text-white'">
+                            <span x-text="getCommentReactionDisplay(comment).emoji"></span>
+                            <span x-text="getCommentReactionDisplay(comment).label"></span>
+                            <template x-if="comment.total_reactions > 0">
+                                <span class="text-[11px] font-bold text-slate-300 ml-0.5" x-text="comment.total_reactions"></span>
+                            </template>
+                        </button>
+
+                        <!-- Reaction Picker Dropdown -->
+                        <div x-show="pickerOpen"
+                             x-cloak
+                             x-transition:enter="transition ease-out duration-150 transform"
+                             x-transition:enter-start="opacity-0 translate-y-2 scale-95"
+                             x-transition:enter-end="opacity-100 translate-y-0 scale-100"
+                             x-transition:leave="transition ease-in duration-100 transform"
+                             x-transition:leave-start="opacity-100 translate-y-0 scale-100"
+                             x-transition:leave-end="opacity-0 translate-y-2 scale-95"
+                             class="absolute left-0 bottom-full mb-1.5 z-30 p-1.5 bg-[#1E293B] border border-slate-700/80 rounded-2xl shadow-2xl flex items-center gap-1 backdrop-blur-md">
+                            <template x-for="r in commentReactionTypes" :key="r.key">
+                                <button type="button"
+                                        @click="pickerOpen = false; toggleCommentReaction(comment, r.key)"
+                                        :title="r.label + ' — ' + r.purpose"
+                                        class="p-1.5 sm:px-2 rounded-xl hover:bg-slate-700/60 transition-transform active:scale-90 hover:scale-125 flex flex-col items-center gap-0.5 group focus:outline-none"
+                                        :class="comment.user_reaction === r.key ? 'bg-rose-500/20 ring-1 ring-rose-500/50' : ''">
+                                    <span class="text-xl leading-none" x-text="r.emoji"></span>
+                                    <span class="text-[9px] font-bold text-slate-400 group-hover:text-white hidden sm:block" x-text="r.label"></span>
+                                </button>
+                            </template>
+                        </div>
+                    </div>
+
+                    <!-- Reply Action Button -->
                     <button type="button"
                             @click="openReplyBox(comment)"
                             class="font-semibold text-slate-400 hover:text-white flex items-center gap-1.5 transition">
@@ -598,6 +636,51 @@
                                         </div>
                                     </div>
                                 </template>
+                                <!-- Reply Actions: React & Action menu -->
+                                <div class="flex items-center gap-2 pt-1 text-[11px]">
+                                    <div class="relative" x-data="{ replyPickerOpen: false }" @click.away="replyPickerOpen = false">
+                                        <button type="button"
+                                                @click="replyPickerOpen = !replyPickerOpen"
+                                                class="font-semibold flex items-center gap-1 transition rounded px-1.5 py-0.5 hover:bg-slate-800"
+                                                :class="reply.user_reaction ? 'text-rose-400 hover:text-rose-300' : 'text-slate-400 hover:text-white'">
+                                            <span x-text="getCommentReactionDisplay(reply).emoji"></span>
+                                            <span x-text="getCommentReactionDisplay(reply).label"></span>
+                                            <template x-if="reply.total_reactions > 0">
+                                                <span class="text-[10px] font-bold text-slate-300 ml-0.5" x-text="reply.total_reactions"></span>
+                                            </template>
+                                        </button>
+
+                                        <!-- Reply Reaction Picker -->
+                                        <div x-show="replyPickerOpen"
+                                             x-cloak
+                                             x-transition:enter="transition ease-out duration-150 transform"
+                                             x-transition:enter-start="opacity-0 translate-y-2 scale-95"
+                                             x-transition:enter-end="opacity-100 translate-y-0 scale-100"
+                                             x-transition:leave="transition ease-in duration-100 transform"
+                                             x-transition:leave-start="opacity-100 translate-y-0 scale-100"
+                                             x-transition:leave-end="opacity-0 translate-y-2 scale-95"
+                                             class="absolute left-0 bottom-full mb-1.5 z-30 p-1.5 bg-[#1E293B] border border-slate-700/80 rounded-2xl shadow-2xl flex items-center gap-1 backdrop-blur-md">
+                                            <template x-for="r in commentReactionTypes" :key="r.key">
+                                                <button type="button"
+                                                        @click="replyPickerOpen = false; toggleCommentReaction(reply, r.key)"
+                                                        :title="r.label + ' — ' + r.purpose"
+                                                        class="p-1.5 sm:px-2 rounded-xl hover:bg-slate-700/60 transition-transform active:scale-90 hover:scale-125 flex flex-col items-center gap-0.5 group focus:outline-none"
+                                                        :class="reply.user_reaction === r.key ? 'bg-rose-500/20 ring-1 ring-rose-500/50' : ''">
+                                                    <span class="text-xl leading-none" x-text="r.emoji"></span>
+                                                    <span class="text-[9px] font-bold text-slate-400 group-hover:text-white hidden sm:block" x-text="r.label"></span>
+                                                </button>
+                                            </template>
+                                        </div>
+                                    </div>
+
+                                    <!-- Reply to user trigger (tags parent) -->
+                                    <button type="button"
+                                            @click="openReplyBox(comment, reply)"
+                                            class="font-semibold text-slate-400 hover:text-white flex items-center gap-1 transition">
+                                        <i data-lucide="reply" class="w-3 h-3"></i>
+                                        <span>Reply</span>
+                                    </button>
+                                </div>
                             </div>
 
                         </div>

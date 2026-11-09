@@ -4,12 +4,14 @@ namespace App\Http\Controllers;
 
 use App\Models\Announcement;
 use App\Models\AnnouncementComment;
+use App\Models\AnnouncementCommentReaction;
 use App\Models\AnnouncementCommentReport;
 use App\Models\User;
 use App\Services\AuditLogger;
 use App\Services\NotificationService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Validation\Rule;
 
@@ -85,6 +87,8 @@ class AnnouncementCommentController extends Controller
             ->with([
                 'user:id,name,role,student_id,avatar_seed,avatar_style',
                 'user.student:id,first_name,last_name',
+                'reactions.user:id,name,role,student_id,avatar_seed,avatar_style',
+                'reactions.user.student:id,first_name,last_name',
                 'replies' => function ($q) use ($user) {
                     $q->where(function ($query) use ($user) {
                         $query->where('status', AnnouncementComment::STATUS_ACTIVE);
@@ -94,6 +98,8 @@ class AnnouncementCommentController extends Controller
                     })->with([
                         'user:id,name,role,student_id,avatar_seed,avatar_style',
                         'user.student:id,first_name,last_name',
+                        'reactions.user:id,name,role,student_id,avatar_seed,avatar_style',
+                        'reactions.user.student:id,first_name,last_name',
                     ])->oldest('created_at');
                 },
             ])
@@ -229,7 +235,7 @@ class AnnouncementCommentController extends Controller
         return response()->json([
             'success' => true,
             'message' => 'Updated successfully.',
-            'comment' => $this->formatComment($comment->fresh(['user', 'user.student']), $user),
+            'comment' => $this->formatComment($comment->fresh(['user', 'user.student', 'reactions.user', 'reactions.user.student']), $user),
         ]);
     }
 
@@ -299,6 +305,107 @@ class AnnouncementCommentController extends Controller
         ]);
     }
 
+    public function toggleReaction(Request $request, AnnouncementComment $comment): JsonResponse
+    {
+        $user = $request->user();
+        if (!$user) {
+            return response()->json(['message' => 'Unauthenticated.'], 401);
+        }
+
+        // Validate comment status
+        if ($comment->status === AnnouncementComment::STATUS_HIDDEN && !$user->isAdmin()) {
+            return response()->json(['message' => 'Cannot react to a hidden comment.'], 403);
+        }
+
+        $validated = $request->validate([
+            'reaction_type' => ['required', 'string', Rule::in(AnnouncementCommentReaction::allowedTypes())],
+        ]);
+
+        $reactionType = $validated['reaction_type'];
+
+        $existing = AnnouncementCommentReaction::where('comment_id', $comment->id)
+            ->where('user_id', $user->id)
+            ->first();
+
+        $action = 'added';
+        $userReaction = $reactionType;
+
+        if ($existing) {
+            if ($existing->reaction_type === $reactionType) {
+                // Toggle off
+                $existing->delete();
+                $action = 'removed';
+                $userReaction = null;
+            } else {
+                // Change reaction
+                $existing->update(['reaction_type' => $reactionType]);
+                $action = 'changed';
+                $userReaction = $reactionType;
+            }
+        } else {
+            // Create new reaction
+            AnnouncementCommentReaction::create([
+                'comment_id' => $comment->id,
+                'user_id' => $user->id,
+                'reaction_type' => $reactionType,
+            ]);
+            $action = 'added';
+            $userReaction = $reactionType;
+
+            // Notify comment author if different
+            if ($comment->user_id && $comment->user_id !== $user->id) {
+                $emoji = AnnouncementCommentReaction::getEmoji($reactionType);
+                $userName = $user->student?->first_name ?? $user->name;
+                $targetType = $comment->isReply() ? 'reply' : 'comment';
+                NotificationService::send(
+                    $comment->user_id,
+                    'announcement_comment_reaction',
+                    'New Reaction on Your Comment',
+                    "{$userName} reacted {$emoji} to your {$targetType}",
+                    route('announcements.show', $comment->announcement_id)
+                );
+            }
+        }
+
+        // Recalculate reaction stats for this comment
+        $reactionCounts = AnnouncementCommentReaction::where('comment_id', $comment->id)
+            ->select('reaction_type', DB::raw('count(*) as count'))
+            ->groupBy('reaction_type')
+            ->pluck('count', 'reaction_type')
+            ->toArray();
+
+        $totalReactions = array_sum($reactionCounts);
+
+        $reactors = AnnouncementCommentReaction::where('comment_id', $comment->id)
+            ->with(['user:id,name,role,student_id', 'user.student:id,first_name,last_name'])
+            ->latest('updated_at')
+            ->limit(10)
+            ->get()
+            ->map(function ($cr) {
+                $rUser = $cr->user;
+                $rStudent = $rUser?->student;
+                $rName = $rStudent ? trim($rStudent->first_name . ' ' . $rStudent->last_name) : ($rUser?->name ?? 'Member');
+                return [
+                    'user_id' => $cr->user_id,
+                    'name' => $rName,
+                    'reaction_type' => $cr->reaction_type,
+                    'emoji' => AnnouncementCommentReaction::getEmoji($cr->reaction_type),
+                    'label' => AnnouncementCommentReaction::getLabel($cr->reaction_type),
+                ];
+            })
+            ->all();
+
+        return response()->json([
+            'success' => true,
+            'action' => $action,
+            'comment_id' => $comment->id,
+            'user_reaction' => $userReaction,
+            'total_reactions' => $totalReactions,
+            'reaction_counts' => $reactionCounts,
+            'reactors' => $reactors,
+        ]);
+    }
+
     public function moderate(Request $request, AnnouncementComment $comment): JsonResponse
     {
         $user = $request->user();
@@ -330,7 +437,7 @@ class AnnouncementCommentController extends Controller
         return response()->json([
             'success' => true,
             'message' => $message,
-            'comment' => $this->formatComment($comment->fresh(['user', 'user.student']), $user),
+            'comment' => $this->formatComment($comment->fresh(['user', 'user.student', 'reactions.user', 'reactions.user.student']), $user),
         ]);
     }
 
@@ -349,6 +456,35 @@ class AnnouncementCommentController extends Controller
         if ($comment->relationLoaded('replies')) {
             $replies = $comment->replies->map(fn($r) => $this->formatComment($r, $viewer))->all();
         }
+
+        // Reactions calculation
+        $userReaction = null;
+        $reactionCounts = [];
+        $reactors = [];
+
+        if ($comment->relationLoaded('reactions')) {
+            $commentReactions = $comment->reactions;
+            foreach ($commentReactions as $cr) {
+                $reactionCounts[$cr->reaction_type] = ($reactionCounts[$cr->reaction_type] ?? 0) + 1;
+                if ($viewer && $cr->user_id === $viewer->id) {
+                    $userReaction = $cr->reaction_type;
+                }
+            }
+            $reactors = $commentReactions->take(10)->map(function ($cr) {
+                $rUser = $cr->user;
+                $rStudent = $rUser?->student;
+                $rName = $rStudent ? trim($rStudent->first_name . ' ' . $rStudent->last_name) : ($rUser?->name ?? 'Member');
+                return [
+                    'user_id' => $cr->user_id,
+                    'name' => $rName,
+                    'reaction_type' => $cr->reaction_type,
+                    'emoji' => AnnouncementCommentReaction::getEmoji($cr->reaction_type),
+                    'label' => AnnouncementCommentReaction::getLabel($cr->reaction_type),
+                ];
+            })->all();
+        }
+
+        $totalReactions = array_sum($reactionCounts);
 
         return [
             'id' => $comment->id,
@@ -370,6 +506,10 @@ class AnnouncementCommentController extends Controller
             'can_delete' => $viewer ? ($viewer->id === $comment->user_id || $viewer->isAdmin()) : false,
             'can_moderate' => $viewer ? $viewer->isAdmin() : false,
             'can_report' => $viewer ? ($viewer->id !== $comment->user_id) : false,
+            'user_reaction' => $userReaction,
+            'total_reactions' => $totalReactions,
+            'reaction_counts' => $reactionCounts,
+            'reactors' => $reactors,
             'replies_count' => count($replies),
             'replies' => $replies,
         ];

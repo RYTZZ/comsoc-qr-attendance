@@ -61,6 +61,11 @@ class AnnouncementComment extends Model
         return $this->hasMany(AnnouncementCommentReport::class, 'comment_id');
     }
 
+    public function reactions(): HasMany
+    {
+        return $this->hasMany(AnnouncementCommentReaction::class, 'comment_id');
+    }
+
     public function isReply(): bool
     {
         return !is_null($this->parent_id);

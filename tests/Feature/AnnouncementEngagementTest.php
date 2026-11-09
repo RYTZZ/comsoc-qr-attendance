@@ -356,5 +356,111 @@ class AnnouncementEngagementTest extends TestCase
             'type' => 'announcement_mention',
         ]);
     }
+
+    public function test_comment_and_reply_reactions_workflow(): void
+    {
+        $userA = $this->createMember('ReactUser', 'Alpha');
+        $userB = $this->createMember('ReactUser', 'Beta');
+        $announcement = $this->createAnnouncement();
+
+        // 1. Post a main comment
+        $resComment = $this->actingAs($userA)
+            ->postJson(route('announcements.comments.store', $announcement), [
+                'content' => 'First comment to react to',
+            ])
+            ->assertCreated();
+
+        $commentId = $resComment->json('comment.id');
+
+        // 2. React to comment with 'love'
+        $this->actingAs($userB)
+            ->postJson(route('announcements.comments.reactions.toggle', $commentId), [
+                'reaction_type' => 'love',
+            ])
+            ->assertOk()
+            ->assertJson([
+                'success' => true,
+                'action' => 'added',
+                'user_reaction' => 'love',
+                'total_reactions' => 1,
+            ]);
+
+        $this->assertSame(1, \App\Models\AnnouncementCommentReaction::where('comment_id', $commentId)->count());
+
+        // 3. User B switches reaction to 'haha'
+        $this->actingAs($userB)
+            ->postJson(route('announcements.comments.reactions.toggle', $commentId), [
+                'reaction_type' => 'haha',
+            ])
+            ->assertOk()
+            ->assertJson([
+                'success' => true,
+                'action' => 'changed',
+                'user_reaction' => 'haha',
+                'total_reactions' => 1,
+            ]);
+
+        $this->assertSame('haha', \App\Models\AnnouncementCommentReaction::where('comment_id', $commentId)->value('reaction_type'));
+
+        // 4. User A also reacts with 'like'
+        $this->actingAs($userA)
+            ->postJson(route('announcements.comments.reactions.toggle', $commentId), [
+                'reaction_type' => 'like',
+            ])
+            ->assertOk()
+            ->assertJson([
+                'success' => true,
+                'action' => 'added',
+                'user_reaction' => 'like',
+                'total_reactions' => 2,
+            ]);
+
+        // 5. Verify reactions are independent of announcement post reactions
+        $this->assertSame(0, AnnouncementReaction::where('announcement_id', $announcement->id)->count());
+
+        // 6. User B removes reaction by clicking 'haha' again
+        $this->actingAs($userB)
+            ->postJson(route('announcements.comments.reactions.toggle', $commentId), [
+                'reaction_type' => 'haha',
+            ])
+            ->assertOk()
+            ->assertJson([
+                'success' => true,
+                'action' => 'removed',
+                'user_reaction' => null,
+                'total_reactions' => 1,
+            ]);
+
+        // 7. Test reaction on a reply
+        $resReply = $this->actingAs($userB)
+            ->postJson(route('announcements.comments.store', $announcement), [
+                'parent_id' => $commentId,
+                'content' => 'Replying to comment',
+            ])
+            ->assertCreated();
+
+        $replyId = $resReply->json('comment.id');
+
+        $this->actingAs($userA)
+            ->postJson(route('announcements.comments.reactions.toggle', $replyId), [
+                'reaction_type' => 'wow',
+            ])
+            ->assertOk()
+            ->assertJson([
+                'success' => true,
+                'action' => 'added',
+                'user_reaction' => 'wow',
+                'total_reactions' => 1,
+            ]);
+
+        $this->assertSame(1, \App\Models\AnnouncementCommentReaction::where('comment_id', $replyId)->count());
+
+        // 8. Reject invalid reaction type
+        $this->actingAs($userA)
+            ->postJson(route('announcements.comments.reactions.toggle', $replyId), [
+                'reaction_type' => 'invalid_emoji',
+            ])
+            ->assertUnprocessable();
+    }
 }
 

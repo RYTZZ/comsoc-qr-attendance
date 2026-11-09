@@ -74,6 +74,71 @@ export default (config) => ({
         el.style.height = Math.min(el.scrollHeight, 128) + 'px';
     },
 
+    // Comment Reaction Types Definition
+    commentReactionTypes: [
+        { key: 'love', emoji: '❤️', label: 'Love', purpose: 'Strong appreciation or support' },
+        { key: 'like', emoji: '👍', label: 'Like', purpose: 'General appreciation or acknowledgment' },
+        { key: 'haha', emoji: '😂', label: 'Haha', purpose: 'Humor or amusement' },
+        { key: 'wow', emoji: '😮', label: 'Wow', purpose: 'Surprise or excitement' },
+        { key: 'sad', emoji: '😢', label: 'Sad', purpose: 'Sympathy or sadness' },
+        { key: 'angry', emoji: '😡', label: 'Angry', purpose: 'Frustration or disapproval' },
+    ],
+
+    getCommentReactionDisplay(comment) {
+        if (!comment.user_reaction) {
+            return { emoji: '❤️', label: 'React' };
+        }
+        const match = this.commentReactionTypes.find(r => r.key === comment.user_reaction);
+        return {
+            emoji: match ? match.emoji : '❤️',
+            label: match ? match.label : 'React'
+        };
+    },
+
+    async toggleCommentReaction(comment, reactionType) {
+        const prevUserReaction = comment.user_reaction;
+        const prevTotalReactions = comment.total_reactions || 0;
+        const prevCounts = { ...(comment.reaction_counts || {}) };
+
+        // Optimistic UI update
+        if (comment.user_reaction === reactionType) {
+            // Unreact
+            comment.user_reaction = null;
+            comment.total_reactions = Math.max(0, prevTotalReactions - 1);
+            if (prevCounts[reactionType]) {
+                prevCounts[reactionType] = Math.max(0, prevCounts[reactionType] - 1);
+            }
+        } else {
+            // New reaction or changed reaction
+            if (comment.user_reaction && prevCounts[comment.user_reaction]) {
+                prevCounts[comment.user_reaction] = Math.max(0, prevCounts[comment.user_reaction] - 1);
+            } else {
+                comment.total_reactions = prevTotalReactions + 1;
+            }
+            comment.user_reaction = reactionType;
+            prevCounts[reactionType] = (prevCounts[reactionType] || 0) + 1;
+        }
+        comment.reaction_counts = prevCounts;
+
+        try {
+            const url = `${this.routes.commentReactionToggleBase}/${comment.id}/reactions`;
+            const res = await window.axios.post(url, { reaction_type: reactionType });
+            if (res.data.success) {
+                comment.user_reaction = res.data.user_reaction;
+                comment.total_reactions = res.data.total_reactions;
+                comment.reaction_counts = res.data.reaction_counts;
+                comment.reactors = res.data.reactors || [];
+            }
+        } catch (e) {
+            console.error('Failed to toggle comment reaction:', e);
+            // Rollback optimistic state
+            comment.user_reaction = prevUserReaction;
+            comment.total_reactions = prevTotalReactions;
+            comment.reaction_counts = prevCounts;
+            alert(e.response?.data?.message || 'Failed to submit reaction.');
+        }
+    },
+
     init() {
         this.fetchEngagement();
         this.fetchComments();
@@ -207,13 +272,27 @@ export default (config) => ({
         });
     },
 
-    openReplyBox(comment) {
+    openReplyBox(comment, targetReply = null) {
         this.activeReplyParentId = comment.id;
-        this.replyText = '';
         this.expandedThreads[comment.id] = true; // Auto-expand thread when replying
+
+        if (targetReply && targetReply.author) {
+            this.replyText = `@${targetReply.author.name} `;
+            if (!this.selectedMentionsByContext.reply) {
+                this.selectedMentionsByContext.reply = {};
+            }
+            this.selectedMentionsByContext.reply[targetReply.author.id] = targetReply.author;
+        } else {
+            this.replyText = '';
+        }
+
         this.$nextTick(() => {
             const input = this.$refs['replyInput_' + comment.id];
-            if (input) input.focus();
+            if (input) {
+                input.focus();
+                input.setSelectionRange(this.replyText.length, this.replyText.length);
+                this.autoResizeTextarea(input);
+            }
             if (window.lucide && typeof window.lucide.createIcons === 'function') {
                 window.lucide.createIcons();
             }
