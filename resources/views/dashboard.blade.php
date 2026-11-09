@@ -311,56 +311,76 @@
                         </div>
                     </div>
 
-                    <!-- Right Bento Card (1/3 width): Instant Attendance QR Pass Preview -->
-                    <div class="bento-card flex flex-col justify-between bg-gradient-to-b from-[#172033]/90 to-[#0B1120] border-[#8F3033]/40">
-                        <div>
+                    <!-- Right Bento Card (1/3 width): Sleek Digital Membership QR Pass -->
+                    <div class="bento-card relative overflow-hidden flex flex-col justify-between bg-gradient-to-br from-[#1E293B] via-[#111827] to-[#0B1120] border-[#8F3033]/60 shadow-2xl group hover:border-[#df747a]/60 transition-all duration-300">
+                        <!-- Holographic ambient background glow -->
+                        <div class="absolute -top-12 -right-12 w-32 h-32 bg-rose-500/10 rounded-full blur-2xl pointer-events-none group-hover:bg-rose-500/20 transition-all duration-500"></div>
+
+                        <div class="relative z-10">
                             <div class="flex items-center justify-between">
-                                <span class="text-[10px] font-bold uppercase tracking-widest text-[#df747a]">Rolling QR Pass</span>
-                                <span class="px-2 py-0.5 rounded-full bg-emerald-500/15 border border-emerald-500/30 text-emerald-300 text-[10px] font-bold">
-                                    60s Dynamic Token
+                                <div class="flex items-center gap-1.5">
+                                    <span class="w-2 h-2 rounded-full bg-rose-500 animate-ping"></span>
+                                    <span class="text-[10px] font-bold uppercase tracking-widest text-[#df747a]">Rolling QR Pass</span>
+                                </div>
+                                <span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-emerald-500/15 border border-emerald-500/30 text-emerald-300 text-[10px] font-bold shadow-xs">
+                                    <span class="w-1.5 h-1.5 rounded-full bg-emerald-400"></span>
+                                    <span>60s Token</span>
                                 </span>
                             </div>
-                            <div class="mt-3 p-3 rounded-xl bg-[#0B1120]/90 border border-white/[0.07] flex items-center justify-between">
-                                <div>
-                                    <div class="text-[10px] uppercase text-slate-400">Member Pass ID</div>
-                                    <div class="text-sm font-bold text-white font-mono-tabular">
-                                        {{ $user->member_id ?: $user->username }}
+
+                            <!-- Digital Student Pass Card Surface -->
+                            <div class="mt-3.5 p-3.5 rounded-xl bg-gradient-to-r from-[#0B1120] to-[#172033] border border-white/10 flex items-center justify-between shadow-inner group-hover:border-[#8F3033]/40 transition-colors">
+                                <div class="space-y-0.5">
+                                    <div class="text-[10px] uppercase font-bold tracking-wider text-slate-400">Member Pass ID</div>
+                                    <div class="text-sm font-extrabold text-white font-mono-tabular tracking-wide flex items-center gap-1.5">
+                                        <span>{{ $user->member_id ?: $user->username }}</span>
+                                    </div>
+                                    <div class="text-[10px] text-slate-400 flex items-center gap-1">
+                                        <i data-lucide="shield-check" class="w-3 h-3 text-emerald-400"></i>
+                                        <span>Encrypted & Verified</span>
                                     </div>
                                 </div>
-                                <div class="w-9 h-9 rounded-xl bg-[#560E0F]/40 border border-[#8F3033] flex items-center justify-center text-[#df747a]">
-                                    <i data-lucide="qr-code" class="w-5 h-5"></i>
+                                <div class="w-11 h-11 rounded-xl bg-[#560E0F]/50 border border-[#8F3033] flex items-center justify-center text-[#df747a] shadow-lg group-hover:scale-105 group-hover:text-white group-hover:bg-[#8F3033]/60 transition-all">
+                                    <i data-lucide="qr-code" class="w-6 h-6"></i>
                                 </div>
                             </div>
                         </div>
 
-                        <a href="{{ route('member.dynamic_qr') }}" class="mt-4 btn-primary w-full text-xs flex items-center justify-center gap-2 py-2.5">
+                        <a href="{{ route('member.dynamic_qr') }}" class="relative z-10 mt-4 btn-primary w-full text-xs flex items-center justify-center gap-2 py-2.5 shadow-lg group-hover:shadow-rose-950/40">
                             <i data-lucide="scan-line" class="w-4 h-4"></i>
                             <span>Launch Attendance QR Pass</span>
+                            <i data-lucide="arrow-right" class="w-3.5 h-3.5 opacity-70 group-hover:translate-x-0.5 transition-transform"></i>
                         </a>
                     </div>
                 </div>
 
-                <!-- 4 Concise Summary Metric Cards -->
+                <!-- 4 Enhanced Summary Metric Cards with Glowing Micro-Visuals -->
                 <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
                     <!-- Spendable EXP -->
-                    <div class="bento-card">
+                    <div class="bento-card relative overflow-hidden group hover:border-amber-500/50 transition-all duration-300">
+                        <div class="absolute -top-10 -right-10 w-24 h-24 bg-amber-500/10 rounded-full blur-xl pointer-events-none group-hover:bg-amber-500/20 transition-all"></div>
                         <div class="flex items-center justify-between">
                             <span class="text-xs font-semibold text-[#94A3B8] uppercase tracking-wider">Spendable EXP</span>
-                            <div class="w-8 h-8 rounded-lg bg-amber-500/10 border border-amber-500/20 flex items-center justify-center text-amber-400">
+                            <div class="w-8 h-8 rounded-lg bg-amber-500/10 border border-amber-500/30 flex items-center justify-center text-amber-400 shadow-sm group-hover:scale-110 transition-transform">
                                 <i data-lucide="coins" class="w-4 h-4"></i>
                             </div>
                         </div>
                         <div class="mt-3 flex items-baseline gap-2">
-                            <span class="text-2xl sm:text-3xl font-extrabold text-amber-400 font-mono-tabular">{{ number_format($spendableExp) }}</span>
-                            <span class="text-xs text-slate-400 font-medium">pts</span>
+                            <span class="text-2xl sm:text-3xl font-extrabold text-amber-400 font-mono-tabular tracking-tight">{{ number_format($spendableExp) }}</span>
+                            <span class="text-xs text-amber-300/80 font-bold uppercase">pts</span>
                         </div>
-                        <p class="text-[11px] text-[#94A3B8] mt-1.5 flex items-center gap-1">
-                            <span>Ready to redeem in Reward Shop</span>
-                        </p>
+                        <div class="mt-2.5 pt-2 border-t border-white/5 flex items-center justify-between text-[11px] text-[#94A3B8]">
+                            <span class="truncate">Ready in Reward Shop</span>
+                            <a href="{{ route('shop.index') }}" class="text-amber-400 hover:text-amber-300 font-bold inline-flex items-center gap-0.5">
+                                <span>Shop</span>
+                                <i data-lucide="chevron-right" class="w-3 h-3"></i>
+                            </a>
+                        </div>
                     </div>
 
                     <!-- Lifetime EXP & Level -->
-                    <div class="bento-card">
+                    <div class="bento-card relative overflow-hidden group hover:border-rose-500/50 transition-all duration-300">
+                        <div class="absolute -top-10 -right-10 w-24 h-24 bg-rose-500/10 rounded-full blur-xl pointer-events-none group-hover:bg-rose-500/20 transition-all"></div>
                         <div class="flex items-center justify-between">
                             <span class="text-xs font-semibold text-[#94A3B8] uppercase tracking-wider">Level & Progression</span>
                             <x-level-badge :level="$currentLevel" size="sm" :showLevelNumber="false" />
@@ -369,49 +389,68 @@
                             <span class="text-2xl sm:text-3xl font-extrabold text-white font-brand-display">Lvl {{ $currentLevel->level }}</span>
                             <span class="text-xs text-[#df747a] font-semibold truncate">{{ $currentLevel->title ?? $currentLevel->name }}</span>
                         </div>
-                        <div class="w-full bg-[#0B1120] rounded-full h-1.5 mt-2.5 overflow-hidden">
-                            <div class="bg-gradient-to-r from-[#560E0F] to-[#df747a] h-1.5 rounded-full" style="width: {{ $levelProgress }}%"></div>
+                        <div class="mt-2.5 space-y-1">
+                            <div class="w-full bg-[#0B1120] rounded-full h-2 overflow-hidden p-0.5 border border-white/5 shadow-inner">
+                                <div class="bg-gradient-to-r from-[#560E0F] via-[#8F3033] to-[#df747a] h-full rounded-full transition-all duration-500 shadow-xs" style="width: {{ $levelProgress }}%"></div>
+                            </div>
+                            <div class="flex items-center justify-between text-[10px] text-slate-400 font-mono-tabular">
+                                <span>{{ $levelProgress }}% Progress</span>
+                                <button type="button" @click="setTab('exp-rewards')" class="text-[#df747a] hover:text-white font-semibold">Details &rarr;</button>
+                            </div>
                         </div>
                     </div>
 
                     <!-- Verified Attendance -->
-                    <div class="bento-card">
+                    <div class="bento-card relative overflow-hidden group hover:border-emerald-500/50 transition-all duration-300">
+                        <div class="absolute -top-10 -right-10 w-24 h-24 bg-emerald-500/10 rounded-full blur-xl pointer-events-none group-hover:bg-emerald-500/20 transition-all"></div>
                         <div class="flex items-center justify-between">
                             <span class="text-xs font-semibold text-[#94A3B8] uppercase tracking-wider">Attendance Scans</span>
-                            <div class="w-8 h-8 rounded-lg bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center text-emerald-400">
+                            <div class="w-8 h-8 rounded-lg bg-emerald-500/10 border border-emerald-500/30 flex items-center justify-center text-emerald-400 shadow-sm group-hover:scale-110 transition-transform">
                                 <i data-lucide="check-circle-2" class="w-4 h-4"></i>
                             </div>
                         </div>
                         <div class="mt-3 flex items-baseline gap-2">
-                            <span class="text-2xl sm:text-3xl font-extrabold text-emerald-400 font-mono-tabular">{{ $verifiedAttendanceCount }}</span>
+                            <span class="text-2xl sm:text-3xl font-extrabold text-emerald-400 font-mono-tabular tracking-tight">{{ $verifiedAttendanceCount }}</span>
                             <span class="text-xs text-slate-400 font-medium">events attended</span>
                         </div>
-                        <p class="text-[11px] text-slate-400 mt-1.5">Official seminar & activity records</p>
+                        <div class="mt-2.5 pt-2 border-t border-white/5 flex items-center justify-between text-[11px] text-[#94A3B8]">
+                            <span class="truncate">Verified official scans</span>
+                            <button type="button" @click="setTab('attendance')" class="text-emerald-400 hover:text-emerald-300 font-bold inline-flex items-center gap-0.5">
+                                <span>Logs</span>
+                                <i data-lucide="chevron-right" class="w-3 h-3"></i>
+                            </button>
+                        </div>
                     </div>
 
                     <!-- Upcoming Events -->
-                    <div class="bento-card">
+                    <div class="bento-card relative overflow-hidden group hover:border-blue-500/50 transition-all duration-300">
+                        <div class="absolute -top-10 -right-10 w-24 h-24 bg-blue-500/10 rounded-full blur-xl pointer-events-none group-hover:bg-blue-500/20 transition-all"></div>
                         <div class="flex items-center justify-between">
                             <span class="text-xs font-semibold text-[#94A3B8] uppercase tracking-wider">Upcoming Events</span>
-                            <div class="w-8 h-8 rounded-lg bg-blue-500/10 border border-blue-500/20 flex items-center justify-center text-blue-400">
+                            <div class="w-8 h-8 rounded-lg bg-blue-500/10 border border-blue-500/30 flex items-center justify-center text-blue-400 shadow-sm group-hover:scale-110 transition-transform">
                                 <i data-lucide="calendar" class="w-4 h-4"></i>
                             </div>
                         </div>
                         <div class="mt-3 flex items-baseline gap-2">
-                            <span class="text-2xl sm:text-3xl font-extrabold text-blue-400 font-mono-tabular">{{ $upcomingEvents->count() }}</span>
+                            <span class="text-2xl sm:text-3xl font-extrabold text-blue-400 font-mono-tabular tracking-tight">{{ $upcomingEvents->count() }}</span>
                             <span class="text-xs text-slate-400 font-medium">on schedule</span>
                         </div>
-                        <p class="text-[11px] text-slate-400 mt-1.5">Available for attendance & EXP</p>
+                        <div class="mt-2.5 pt-2 border-t border-white/5 flex items-center justify-between text-[11px] text-[#94A3B8]">
+                            <span class="truncate">Active semester calendar</span>
+                            <a href="{{ route('events.index') }}" class="text-blue-400 hover:text-blue-300 font-bold inline-flex items-center gap-0.5">
+                                <span>View</span>
+                                <i data-lucide="chevron-right" class="w-3 h-3"></i>
+                            </a>
+                        </div>
                     </div>
                 </div>
 
-                <!-- Quick Action Shortcuts Bar -->
-                <div class="p-3.5 bg-[#172033] rounded-2xl border border-[#334155] shadow-lg flex items-center gap-2 overflow-x-auto scrollbar-none">
-                    <span class="text-[10px] uppercase font-bold tracking-wider text-[#94A3B8] px-2 whitespace-nowrap">Quick Links:</span>
-                    <a href="{{ route('member.dynamic_qr') }}" class="px-3 py-1.5 rounded-xl bg-[#0B1120] hover:bg-[#1E293B] border border-[#334155] text-xs font-semibold text-[#F8FAFC] flex items-center gap-1.5 whitespace-nowrap transition">
-                        <i data-lucide="qr-code" class="w-3.5 h-3.5 text-[#df747a]"></i>
-                        <span>Show My QR</span>
-                    </a>
+                <!-- Streamlined Quick Action Shortcuts Bar (Redundancies removed) -->
+                <div class="p-3 bg-[#172033]/80 rounded-2xl border border-[#334155] shadow-lg flex items-center gap-2 overflow-x-auto scrollbar-none backdrop-blur-sm">
+                    <span class="text-[10px] uppercase font-bold tracking-wider text-slate-400 px-2 whitespace-nowrap flex items-center gap-1.5">
+                        <i data-lucide="compass" class="w-3.5 h-3.5 text-[#df747a]"></i>
+                        <span>Explore:</span>
+                    </span>
                     <a href="{{ route('events.index') }}" class="px-3 py-1.5 rounded-xl bg-[#0B1120] hover:bg-[#1E293B] border border-[#334155] text-xs font-semibold text-[#F8FAFC] flex items-center gap-1.5 whitespace-nowrap transition">
                         <i data-lucide="calendar" class="w-3.5 h-3.5 text-blue-400"></i>
                         <span>Browse Events</span>
@@ -422,15 +461,11 @@
                     </button>
                     <a href="{{ route('shop.index') }}" class="px-3 py-1.5 rounded-xl bg-[#0B1120] hover:bg-[#1E293B] border border-[#334155] text-xs font-semibold text-[#F8FAFC] flex items-center gap-1.5 whitespace-nowrap transition">
                         <i data-lucide="gift" class="w-3.5 h-3.5 text-purple-400"></i>
-                        <span>Browse Rewards</span>
-                    </a>
-                    <a href="{{ route('helpdesk.index') }}" class="px-3 py-1.5 rounded-xl bg-[#0B1120] hover:bg-[#1E293B] border border-[#334155] text-xs font-semibold text-[#F8FAFC] flex items-center gap-1.5 whitespace-nowrap transition">
-                        <i data-lucide="life-buoy" class="w-3.5 h-3.5 text-rose-400"></i>
-                        <span>Submit Support Request</span>
+                        <span>Reward Shop</span>
                     </a>
                     <a href="{{ route('projects.index') }}" class="px-3 py-1.5 rounded-xl bg-[#0B1120] hover:bg-[#1E293B] border border-[#334155] text-xs font-semibold text-[#F8FAFC] flex items-center gap-1.5 whitespace-nowrap transition">
                         <i data-lucide="folder-git-2" class="w-3.5 h-3.5 text-indigo-400"></i>
-                        <span>Explore Projects</span>
+                        <span>Projects</span>
                     </a>
                     <a href="{{ route('volunteers.index') }}" class="px-3 py-1.5 rounded-xl bg-[#0B1120] hover:bg-[#1E293B] border border-[#334155] text-xs font-semibold text-[#F8FAFC] flex items-center gap-1.5 whitespace-nowrap transition">
                         <i data-lucide="hand-heart" class="w-3.5 h-3.5 text-emerald-400"></i>
@@ -439,6 +474,10 @@
                     <a href="{{ route('leaderboard.index') }}" class="px-3 py-1.5 rounded-xl bg-[#0B1120] hover:bg-[#1E293B] border border-[#334155] text-xs font-semibold text-[#F8FAFC] flex items-center gap-1.5 whitespace-nowrap transition">
                         <i data-lucide="trophy" class="w-3.5 h-3.5 text-amber-400"></i>
                         <span>Leaderboard</span>
+                    </a>
+                    <a href="{{ route('helpdesk.index') }}" class="px-3 py-1.5 rounded-xl bg-[#0B1120] hover:bg-[#1E293B] border border-[#334155] text-xs font-semibold text-[#F8FAFC] flex items-center gap-1.5 whitespace-nowrap transition">
+                        <i data-lucide="life-buoy" class="w-3.5 h-3.5 text-rose-400"></i>
+                        <span>Support</span>
                     </a>
                 </div>
 
