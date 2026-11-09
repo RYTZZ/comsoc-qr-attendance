@@ -446,8 +446,20 @@
                                 @touchcancel.passive="cancelLongPress()"
                                 class="font-semibold flex items-center gap-1.5 transition rounded px-1.5 py-0.5 hover:bg-slate-800 select-none cursor-pointer"
                                 :class="comment.user_reaction ? 'text-rose-400 hover:text-rose-300' : 'text-slate-400 hover:text-white'">
-                            <span x-text="getCommentReactionDisplay(comment).emoji"></span>
-                            <span x-text="getCommentReactionDisplay(comment).label"></span>
+                            <template x-if="comment.user_reaction">
+                                <span class="flex items-center gap-1.5">
+                                    <span x-text="getCommentReactionDisplay(comment).emoji"></span>
+                                    <span class="capitalize" x-text="getCommentReactionDisplay(comment).label"></span>
+                                </span>
+                            </template>
+                            <template x-if="!comment.user_reaction">
+                                <span class="flex items-center gap-1.5">
+                                    <svg xmlns="http://www.w3.org/2000/svg" class="w-3.5 h-3.5 text-slate-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                        <path d="M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.3 1.5 4.05 3 5.5l7 7Z"/>
+                                    </svg>
+                                    <span>React</span>
+                                </span>
+                            </template>
                             <template x-if="comment.total_reactions > 0">
                                 <span class="text-[11px] font-bold text-slate-300 ml-0.5" x-text="comment.total_reactions"></span>
                             </template>
@@ -665,8 +677,20 @@
                                                 @touchcancel.passive="cancelLongPress()"
                                                 class="font-semibold flex items-center gap-1 transition rounded px-1.5 py-0.5 hover:bg-slate-800 select-none cursor-pointer"
                                                 :class="reply.user_reaction ? 'text-rose-400 hover:text-rose-300' : 'text-slate-400 hover:text-white'">
-                                            <span x-text="getCommentReactionDisplay(reply).emoji"></span>
-                                            <span x-text="getCommentReactionDisplay(reply).label"></span>
+                                            <template x-if="reply.user_reaction">
+                                                <span class="flex items-center gap-1">
+                                                    <span x-text="getCommentReactionDisplay(reply).emoji"></span>
+                                                    <span class="capitalize" x-text="getCommentReactionDisplay(reply).label"></span>
+                                                </span>
+                                            </template>
+                                            <template x-if="!reply.user_reaction">
+                                                <span class="flex items-center gap-1">
+                                                    <svg xmlns="http://www.w3.org/2000/svg" class="w-3 h-3 text-slate-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                                        <path d="M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.3 1.5 4.05 3 5.5l7 7Z"/>
+                                                    </svg>
+                                                    <span>React</span>
+                                                </span>
+                                            </template>
                                             <template x-if="reply.total_reactions > 0">
                                                 <span class="text-[10px] font-bold text-slate-300 ml-0.5" x-text="reply.total_reactions"></span>
                                             </template>
