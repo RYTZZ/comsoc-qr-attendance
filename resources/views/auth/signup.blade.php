@@ -60,60 +60,35 @@
         }
     </style>
 </head>
-<body class="min-h-screen bg-[#0B1120] text-[#F8FAFC] font-sans antialiased selection:bg-[#560E0F] selection:text-white flex flex-col md:flex-row relative overflow-x-hidden">
+<body class="min-h-screen bg-[#0B1120] text-[#F8FAFC] font-sans antialiased selection:bg-[#560E0F] selection:text-white flex flex-col justify-between relative overflow-x-hidden p-4 sm:p-6 lg:p-8">
 
     <!-- Ambient Background Decoration -->
     <x-public-auth-bg />
 
-    <!-- ======================================================== -->
-    <!-- LEFT BRANDING PANEL (Approx. 41.6% width on desktop)     -->
-    <!-- ======================================================== -->
-    <aside class="auth-branding-aside w-full md:w-5/12 flex flex-col items-center justify-between p-8 sm:p-12 lg:p-16 border-b md:border-b-0 md:border-r border-slate-800/80 select-none bg-gradient-to-b from-[#111827]/90 via-[#0B1120] to-[#0B1120] backdrop-blur-md relative z-10 shrink-0">
+    <!-- Top Minimal Header / Navigation Pill -->
+    <header class="w-full max-w-4xl mx-auto flex items-center justify-between py-2 relative z-10">
+        <a href="{{ url('/') }}" class="inline-flex items-center gap-2.5 group focus:outline-none">
+            <div class="w-8 h-8 rounded-xl bg-slate-900 border border-slate-800 flex items-center justify-center p-1 group-hover:border-[#8F3033]/60 transition">
+                <img src="{{ asset('images/COMSOC.png') }}" alt="COMSOC" class="w-full h-full object-contain">
+            </div>
+            <span class="font-brand-display text-xs sm:text-sm font-bold text-white tracking-wide group-hover:text-rose-300 transition">
+                COMSOC Hub
+            </span>
+        </a>
 
-        <!-- Top ambient micro-pill -->
-        <div class="w-full flex items-center justify-center md:justify-start">
-            <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-rose-500/10 border border-rose-500/20 text-[#df747a] text-[10px] font-bold uppercase tracking-wider shadow-xs">
-                <span class="w-1.5 h-1.5 rounded-full bg-rose-400 animate-pulse"></span>
-                <span>Student Onboarding</span>
+        <div class="flex items-center gap-2">
+            <a href="{{ route('login') }}" class="text-xs text-slate-400 hover:text-white transition font-medium hidden sm:inline-block">
+                Already registered? <span class="text-rose-400 font-semibold underline ml-1">Log In</span>
+            </a>
+            <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-slate-900/80 border border-slate-800 text-slate-400 text-[10px] font-mono">
+                <span class="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse"></span>
+                <span>V 2.5.1</span>
             </span>
         </div>
+    </header>
 
-        <div class="w-full max-w-sm mx-auto flex flex-col items-center text-center my-auto py-8">
-            <!-- 1. The official COMSOC Logo with ambient glow -->
-            <div class="relative group mb-6">
-                <div class="absolute -inset-4 bg-gradient-to-r from-[#560E0F]/40 to-rose-600/20 rounded-full blur-xl opacity-60 group-hover:opacity-100 transition duration-500 pointer-events-none"></div>
-                <div class="w-28 h-28 sm:w-32 sm:h-32 lg:w-36 lg:h-36 relative flex items-center justify-center">
-                    <img src="{{ asset('images/COMSOC.png') }}" alt="Computing Society Logo" class="w-full h-full object-contain drop-shadow-2xl">
-                </div>
-            </div>
-
-            <!-- 2. COMPUTING SOCIETY ORGANIZATION -->
-            <p class="font-brand-accent text-xs font-bold text-[#df747a] tracking-widest uppercase mb-1">
-                COMPUTING SOCIETY ORGANIZATION
-            </p>
-
-            <!-- 3. QR Attendance (bold and prominent product title) -->
-            <h1 class="font-brand-display text-3xl sm:text-4xl font-black text-white tracking-tight">
-                QR Attendance
-            </h1>
-
-            <!-- 4. Tagline: Innovating Today for a Better Community. -->
-            <p class="text-xs sm:text-sm text-slate-400 mt-2 font-medium max-w-[280px]">
-                Innovating Today for a Better Community.
-            </p>
-        </div>
-
-        <!-- 5. Subtle Footer Credentials -->
-        <div class="w-full max-w-xs text-center border-t border-slate-800/80 pt-4 font-mono text-[11px] text-slate-500 flex items-center justify-between">
-            <span>ComSoc Attendance System</span>
-            <span class="text-[#df747a] font-bold">V 2.5.1</span>
-        </div>
-    </aside>
-
-    <!-- ======================================================== -->
-    <!-- RIGHT AUTHENTICATION PANEL (Approx. 58.3% width on desktop)-->
-    <!-- ======================================================== -->
-    <main class="auth-content-main w-full md:w-7/12 flex-1 flex flex-col justify-start sm:justify-center items-center p-4 sm:p-8 lg:p-12 relative z-10 overflow-y-auto"
+    <!-- Center Stage Wizard Container (Linear / Vercel style) -->
+    <main class="w-full max-w-3xl mx-auto my-auto relative z-10 py-6 sm:py-8"
           x-data="{
               step: {{ $errors->hasAny(['signature', 'signature_consent']) ? 4 : ($errors->hasAny(['password', 'password_confirmation', 'terms']) ? 3 : ($errors->hasAny(['username', 'avatar_seed', 'avatar_style']) ? 2 : 1)) }},
               steps: [
@@ -523,35 +498,36 @@
 
         <div class="w-full max-w-2xl mx-auto my-auto py-4 sm:py-6">
 
-            <div class="card shadow-2xl border border-slate-800/80 bg-[#172033]/90 backdrop-blur-xl p-4 sm:p-6 md:p-8 rounded-3xl">
-                <!-- Heading -->
-                <div class="mb-5 flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-slate-800/80 pb-4">
-                    <div>
-                        <h2 class="font-brand-display text-2xl sm:text-3xl font-extrabold text-white tracking-tight">
-                            Sign Up
-                        </h2>
-                        <p class="text-xs text-slate-400 mt-0.5">
-                            Student Registration: Create your student account to track attendance.
-                        </p>
+            <div class="card shadow-2xl border border-slate-800/80 bg-[#172033]/90 backdrop-blur-2xl p-5 sm:p-8 md:p-10 rounded-3xl">
+                <!-- Centered Top Brand Badge & Heading -->
+                <div class="text-center mb-6 space-y-2 border-b border-slate-800/80 pb-5">
+                    <div class="inline-flex items-center justify-center p-2.5 rounded-2xl bg-gradient-to-b from-[#1E293B] to-[#0B1120] border border-slate-800 shadow-xl relative group mx-auto mb-1">
+                        <div class="absolute -inset-2 bg-rose-500/20 rounded-2xl blur-lg opacity-40 group-hover:opacity-75 transition duration-500"></div>
+                        <img src="{{ asset('images/COMSOC.png') }}" alt="Computing Society Logo" class="w-12 h-12 object-contain relative z-10 drop-shadow-md">
                     </div>
-                    <div class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-slate-900 border border-slate-800 text-xs font-mono self-start sm:self-center">
-                        <span class="text-slate-400">Step</span>
-                        <span class="font-bold text-rose-400" x-text="step"></span>
-                        <span class="text-slate-600">/</span>
-                        <span class="text-slate-400" x-text="totalSteps"></span>
+                    <div>
+                        <p class="font-brand-accent text-[10px] font-bold text-[#df747a] tracking-widest uppercase">
+                            Computing Society Organization
+                        </p>
+                        <h1 class="font-brand-display text-2xl sm:text-3xl font-black text-white tracking-tight mt-0.5">
+                            Student Registration
+                        </h1>
+                        <p class="text-xs text-slate-400 font-medium max-w-md mx-auto">
+                            Create your official student account to track attendance, earn Season EXP, and unlock rewards.
+                        </p>
                     </div>
                 </div>
 
                 <!-- Registration Progress Navigation -->
                 <nav aria-label="Registration Progress" class="mb-6">
                     <!-- Progress bar rail -->
-                    <div class="w-full bg-slate-900/80 border border-slate-800 rounded-full h-2 overflow-hidden mb-3 p-0.5">
+                    <div class="w-full bg-slate-900/80 border border-slate-800 rounded-full h-2 overflow-hidden mb-3.5 p-0.5">
                         <div class="bg-gradient-to-r from-[#560E0F] via-[#8F3033] to-[#df747a] h-full rounded-full transition-all duration-300 shadow-sm"
                              :style="'width: ' + ((step / totalSteps) * 100) + '%'"></div>
                     </div>
 
-                    <!-- Step Cards (Segmented View) -->
-                    <ol class="grid grid-cols-2 sm:grid-cols-4 gap-2">
+                    <!-- Step Cards (Generous 4-Column Grid View) -->
+                    <ol class="grid grid-cols-2 sm:grid-cols-4 gap-2.5">
                         @php
                             $wizardSteps = [
                                 ['number' => 1, 'title' => 'Student Information'],
@@ -562,7 +538,7 @@
                             $stepCount = count($wizardSteps);
                         @endphp
                         @foreach($wizardSteps as $ws)
-                            <li class="flex items-center gap-2 p-2 rounded-xl border transition-all text-xs"
+                            <li class="flex items-center gap-2 p-2.5 rounded-xl border transition-all text-xs"
                                 :class="step === {{ $ws['number'] }} ? 'bg-[#560E0F]/20 border-rose-500/50 text-white shadow-xs' : (step > {{ $ws['number'] }} ? 'bg-slate-900/40 border-slate-800 text-slate-400' : 'bg-slate-900/20 border-slate-800/40 text-slate-500')">
                                 <span class="w-5 h-5 rounded-lg flex items-center justify-center font-bold text-[10px] shrink-0"
                                       :class="step === {{ $ws['number'] }} ? 'bg-[#560E0F] text-white shadow' : (step > {{ $ws['number'] }} ? 'bg-emerald-500/20 text-emerald-400 border border-emerald-500/30' : 'bg-slate-800 text-slate-400')">
@@ -1279,8 +1255,8 @@
                     </div>
 
                     <!-- Bottom Navigation: Log In Link -->
-                    <div class="text-center pt-4 border-t border-[#334155] mt-6">
-                        <p class="text-xs text-[#94A3B8]">
+                    <div class="text-center pt-4 border-t border-slate-800/80 mt-6">
+                        <p class="text-xs text-slate-400">
                             Already have an account?
                             <a href="{{ route('login') }}" class="text-[#df747a] hover:text-white font-semibold underline transition">
                                 Log In to Account
@@ -1292,6 +1268,13 @@
 
         </div>
     </main>
+
+    <!-- Clean Bottom Minimal Footer -->
+    <footer class="w-full max-w-4xl mx-auto py-3 text-center text-xs text-slate-500 font-mono relative z-10 flex flex-col sm:flex-row items-center justify-between gap-1 border-t border-slate-800/60">
+        <span>ComSoc Attendance System</span>
+        <span>Innovating Today for a Better Community</span>
+        <span>Developer: Rytzz G. Grieta</span>
+    </footer>
 
 </body>
 </html>
