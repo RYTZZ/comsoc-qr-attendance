@@ -18,38 +18,188 @@
     </div>
     @endif
 
-    <div x-data="resetCodeVerifier({
+    <div x-data="{
             email: '{{ addslashes($email ?? '') }}',
-            initialCooldown: {{ (int) (session('cooldown_seconds') ?? $cooldown_seconds ?? 0) }},
-            resendUrl: '{{ route('password.email') }}',
-            csrfToken: '{{ csrf_token() }}'
-         })"
+            digits: ['', '', '', '', '', ''],
+            submitting: false,
+            resending: false,
+            cooldown: {{ (int) (session('cooldown_seconds') ?? $cooldown_seconds ?? 0) }},
+            expiresInSeconds: 900,
+            allowedChars: '23456789ABCDEFGHJKLMNPQRSTUVWXYZ',
+
+            init() {
+                this.$nextTick(() => {
+                    this.$refs.box0?.focus();
+                });
+
+                if (this.cooldown > 0) {
+                    const cdInterval = setInterval(() => {
+                        if (this.cooldown > 0) {
+                            this.cooldown--;
+                        } else {
+                            clearInterval(cdInterval);
+                        }
+                    }, 1000);
+                }
+
+                const expInterval = setInterval(() => {
+                    if (this.expiresInSeconds > 0) {
+                        this.expiresInSeconds--;
+                    } else {
+                        clearInterval(expInterval);
+                    }
+                }, 1000);
+            },
+
+            get combinedCode() {
+                return this.digits.join('').toUpperCase();
+            },
+
+            formatExpiration() {
+                const m = Math.floor(this.expiresInSeconds / 60);
+                const s = this.expiresInSeconds % 60;
+                return `${m}:${s < 10 ? '0' : ''}${s}`;
+            },
+
+            handleInput(index, event) {
+                const raw = (event.target.value || '').toUpperCase();
+                const filtered = raw.split('').filter(c => this.allowedChars.includes(c));
+
+                if (filtered.length > 1) {
+                    this.fillFromText(filtered.join(''), index);
+                    return;
+                }
+
+                const cleanChar = filtered[0] || '';
+                this.digits[index] = cleanChar;
+                event.target.value = cleanChar;
+
+                if (cleanChar !== '' && index < 5) {
+                    this.$refs['box' + (index + 1)]?.focus();
+                }
+            },
+
+            handleKeydown(index, event) {
+                if (event.key === 'Backspace') {
+                    if (this.digits[index] === '' && index > 0) {
+                        this.digits[index - 1] = '';
+                        this.$refs['box' + (index - 1)]?.focus();
+                    } else {
+                        this.digits[index] = '';
+                    }
+                } else if (event.key === 'ArrowLeft' && index > 0) {
+                    event.preventDefault();
+                    this.$refs['box' + (index - 1)]?.focus();
+                } else if (event.key === 'ArrowRight' && index < 5) {
+                    event.preventDefault();
+                    this.$refs['box' + (index + 1)]?.focus();
+                }
+            },
+
+            handlePaste(event) {
+                event.preventDefault();
+                const pasted = (event.clipboardData || window.clipboardData).getData('text') || '';
+                const filtered = pasted.toUpperCase().split('').filter(c => this.allowedChars.includes(c)).join('').slice(0, 6);
+                if (filtered.length > 0) {
+                    this.fillFromText(filtered, 0);
+                }
+            },
+
+            fillFromText(text, startIndex = 0) {
+                const chars = text.split('');
+                for (let i = 0; i < chars.length && (startIndex + i) < 6; i++) {
+                    this.digits[startIndex + i] = chars[i];
+                }
+                const focusIdx = Math.min(5, startIndex + chars.length);
+                this.$nextTick(() => {
+                    this.$refs['box' + focusIdx]?.focus();
+                });
+            },
+
+            handleSubmit(event) {
+                if (this.combinedCode.length !== 6 || this.submitting) {
+                    event.preventDefault();
+                    return;
+                }
+                this.submitting = true;
+            },
+
+            async resendCode() {
+                if (this.cooldown > 0 || this.resending) return;
+                this.resending = true;
+
+                try {
+                    const response = await fetch('{{ route('password.email') }}', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'Accept': 'application/json',
+                            'X-CSRF-TOKEN': '{{ csrf_token() }}',
+                        },
+                        body: JSON.stringify({ email: this.email }),
+                    });
+
+                    const data = await response.json();
+                    if (response.ok) {
+                        this.cooldown = data.cooldown_seconds || 60;
+                        this.expiresInSeconds = 900;
+                        this.digits = ['', '', '', '', '', ''];
+                        this.$refs.box0?.focus();
+
+                        const cdInterval = setInterval(() => {
+                            if (this.cooldown > 0) {
+                                this.cooldown--;
+                            } else {
+                                clearInterval(cdInterval);
+                            }
+                        }, 1000);
+                    } else {
+                        alert(data.message || 'Unable to resend reset code.');
+                        if (data.cooldown_seconds) {
+                            this.cooldown = data.cooldown_seconds;
+                        }
+                    }
+                } catch (e) {
+                    alert('Network error while requesting a new reset code. Please try again.');
+                } finally {
+                    this.resending = false;
+                }
+            }
+         }"
          class="space-y-5">
 
         <!-- Form: Six-Box Input with Auto-Advance, Paste, and Auto-Uppercase -->
         <form method="POST" action="{{ route('password.verify.submit') }}" @submit="handleSubmit($event)" class="space-y-5">
             @csrf
             <input type="hidden" name="email" value="{{ $email }}">
-            <input type="hidden" name="code" :value="fullCode">
+            <input type="hidden" name="code" :value="combinedCode">
 
             <!-- 6 Individual Input Boxes -->
             <div>
-                <label class="label text-center mb-3">Verification Code <span class="text-rose-400">*</span></label>
+                <label for="reset-digit-0" class="block text-xs font-semibold uppercase tracking-wider text-[#94A3B8] text-center mb-3">
+                    Verification Code <span class="text-rose-400">*</span>
+                </label>
                 
-                <div class="flex items-center justify-between gap-2 sm:gap-2.5 max-w-sm mx-auto" @paste="handlePaste($event)">
-                    <template x-for="(digit, idx) in digits" :key="idx">
-                        <input type="text"
-                               maxlength="1"
-                               x-ref="'box' + idx"
-                               :value="digits[idx]"
-                               @input="handleInput($event, idx)"
-                               @keydown="handleKeydown($event, idx)"
-                               class="w-11 h-13 sm:w-12 sm:h-14 text-center font-mono text-xl sm:text-2xl font-extrabold uppercase rounded-xl bg-[#0B1120] border border-[#334155] text-white focus:border-[#8F3033] focus:ring-2 focus:ring-[#560E0F] transition-all select-all shadow-inner"
-                               autocomplete="off"
-                               autocapitalize="characters"
-                               spellcheck="false"
-                               required />
-                    </template>
+                <div class="grid grid-cols-6 gap-2 sm:gap-2.5 max-w-xs sm:max-w-sm mx-auto" @paste="handlePaste($event)">
+                    @for ($i = 0; $i < 6; $i++)
+                        <input
+                            type="text"
+                            id="reset-digit-{{ $i }}"
+                            x-ref="box{{ $i }}"
+                            name="digits[{{ $i }}]"
+                            inputmode="text"
+                            maxlength="1"
+                            x-model="digits[{{ $i }}]"
+                            @input="handleInput({{ $i }}, $event)"
+                            @keydown="handleKeydown({{ $i }}, $event)"
+                            autocomplete="{{ $i === 0 ? 'one-time-code' : 'off' }}"
+                            autocapitalize="characters"
+                            spellcheck="false"
+                            aria-label="Verification code character {{ $i + 1 }} of 6"
+                            class="w-full h-12 sm:h-14 text-center font-mono text-xl sm:text-2xl font-extrabold uppercase rounded-xl bg-[#0B1120] border border-[#334155] text-white focus:border-[#df747a] focus:ring-2 focus:ring-[#8F3033]/50 focus:outline-none transition-all select-all shadow-inner"
+                            required
+                        />
+                    @endfor
                 </div>
 
                 <p class="text-center text-[11px] text-[#94A3B8] mt-2.5">
@@ -82,11 +232,11 @@
                 </div>
             </div>
 
-            <!-- Submit Button -->
+            <!-- Submit Button (Enabled ONLY when full 6 valid characters entered) -->
             <div class="pt-1">
                 <button type="submit" 
                         class="btn-primary w-full justify-center py-3 shadow-xl disabled:opacity-50 disabled:cursor-not-allowed text-xs sm:text-sm font-semibold tracking-wide flex items-center gap-2" 
-                        :disabled="submitting || fullCode.length !== 6">
+                        :disabled="submitting || combinedCode.length !== 6">
                     <span x-show="!submitting" class="flex items-center gap-2">
                         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
@@ -117,146 +267,4 @@
             </a>
         </div>
     </div>
-
-    <script>
-        function resetCodeVerifier(config) {
-            return {
-                email: config.email,
-                digits: ['', '', '', '', '', ''],
-                submitting: false,
-                resending: false,
-                cooldown: config.initialCooldown || 0,
-                expiresInSeconds: 900, // 15 minutes
-                allowedChars: '23456789ABCDEFGHJKLMNPQRSTUVWXYZ',
-
-                init() {
-                    this.$nextTick(() => {
-                        this.focusBox(0);
-                    });
-
-                    // Cooldown countdown timer
-                    if (this.cooldown > 0) {
-                        const cdInterval = setInterval(() => {
-                            if (this.cooldown > 0) {
-                                this.cooldown--;
-                            } else {
-                                clearInterval(cdInterval);
-                            }
-                        }, 1000);
-                    }
-
-                    // 15-minute expiration timer
-                    const expInterval = setInterval(() => {
-                        if (this.expiresInSeconds > 0) {
-                            this.expiresInSeconds--;
-                        } else {
-                            clearInterval(expInterval);
-                        }
-                    }, 1000);
-                },
-
-                get fullCode() {
-                    return this.digits.join('').toUpperCase();
-                },
-
-                formatExpiration() {
-                    const m = Math.floor(this.expiresInSeconds / 60);
-                    const s = this.expiresInSeconds % 60;
-                    return `${m}:${s < 10 ? '0' : ''}${s}`;
-                },
-
-                focusBox(index) {
-                    const ref = this.$refs['box' + index];
-                    if (ref) ref.focus();
-                },
-
-                handleInput(event, index) {
-                    const rawVal = event.target.value.toUpperCase();
-                    // Filter to only allowed alphanumeric characters
-                    const cleanChar = rawVal.split('').filter(c => this.allowedChars.includes(c)).pop() || '';
-                    
-                    this.digits[index] = cleanChar;
-                    event.target.value = cleanChar;
-
-                    if (cleanChar && index < 5) {
-                        this.focusBox(index + 1);
-                    }
-                },
-
-                handleKeydown(event, index) {
-                    if (event.key === 'Backspace' && !this.digits[index] && index > 0) {
-                        this.digits[index - 1] = '';
-                        this.focusBox(index - 1);
-                    } else if (event.key === 'ArrowLeft' && index > 0) {
-                        this.focusBox(index - 1);
-                    } else if (event.key === 'ArrowRight' && index < 5) {
-                        this.focusBox(index + 1);
-                    }
-                },
-
-                handlePaste(event) {
-                    event.preventDefault();
-                    const pasteData = (event.clipboardData || window.clipboardData).getData('text').toUpperCase().trim();
-                    const filteredChars = pasteData.split('').filter(c => this.allowedChars.includes(c));
-
-                    for (let i = 0; i < 6; i++) {
-                        this.digits[i] = filteredChars[i] || '';
-                    }
-
-                    const nextIndex = Math.min(5, filteredChars.length);
-                    this.focusBox(nextIndex);
-                },
-
-                handleSubmit(event) {
-                    if (this.fullCode.length !== 6) {
-                        event.preventDefault();
-                        return;
-                    }
-                    this.submitting = true;
-                },
-
-                async resendCode() {
-                    if (this.cooldown > 0 || this.resending) return;
-                    this.resending = true;
-
-                    try {
-                        const response = await fetch(config.resendUrl, {
-                            method: 'POST',
-                            headers: {
-                                'Content-Type': 'application/json',
-                                'Accept': 'application/json',
-                                'X-CSRF-TOKEN': config.csrfToken,
-                            },
-                            body: JSON.stringify({ email: this.email }),
-                        });
-
-                        const data = await response.json();
-                        if (response.ok) {
-                            this.cooldown = data.cooldown_seconds || 60;
-                            this.expiresInSeconds = 900; // Reset 15-minute countdown
-                            this.digits = ['', '', '', '', '', ''];
-                            this.focusBox(0);
-
-                            const cdInterval = setInterval(() => {
-                                if (this.cooldown > 0) {
-                                    this.cooldown--;
-                                } else {
-                                    clearInterval(cdInterval);
-                                }
-                            }, 1000);
-                        } else {
-                            alert(data.message || 'Unable to resend reset code.');
-                            if (data.cooldown_seconds) {
-                                this.cooldown = data.cooldown_seconds;
-                            }
-                        }
-                    } catch (e) {
-                        alert('Network error while requesting a new reset code. Please try again.');
-                    } finally {
-                        this.resending = false;
-                    }
-                }
-            };
-        }
-    </script>
 </x-guest-layout>
