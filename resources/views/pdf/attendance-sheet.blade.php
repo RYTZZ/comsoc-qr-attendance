@@ -61,8 +61,12 @@
 
 <table class="sheet">
     <colgroup>
-        <col style="width:25.4pt"><col style="width:144.6pt"><col style="width:89.9pt">
-        <col style="width:88pt"><col style="width:72pt"><col style="width:84pt">
+        <col style="width:25.7pt">
+        <col style="width:147.2pt">
+        <col style="width:87.7pt">
+        <col style="width:87.7pt">
+        <col style="width:69.5pt">
+        <col style="width:86.2pt">
     </colgroup>
     <thead>
         <tr>
