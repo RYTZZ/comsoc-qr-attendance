@@ -90,7 +90,7 @@
                            name="email"
                            id="email"
                            value="{{ old('email') }}"
-                           placeholder="e.g. 21-00123 or student@sorsu.edu.ph"
+                           placeholder="Enter your student number, email, or username"
                            class="input bg-slate-900/60 border-slate-800 focus:border-[#8F3033] focus:ring-[#8F3033]/40 rounded-xl"
                            required
                            autofocus
