@@ -26,10 +26,12 @@
 
     <!-- Top Minimal Navigation -->
     <header class="relative z-10 w-full px-6 py-5 flex items-center justify-between max-w-7xl mx-auto">
-        <a href="{{ route('login') }}" class="group flex items-center gap-2.5 transition-transform duration-200 hover:scale-[1.02]">
-            <img src="{{ asset('images/comsoc-logo.png') }}" alt="COMSOC Hub Logo" class="w-8 h-8 rounded-lg object-contain shadow-md shadow-black/40">
-            <span class="font-bold tracking-tight text-white text-base group-hover:text-slate-200 transition-colors">
-                COMSOC <span class="text-[#df747a]">HUB</span>
+        <a href="{{ route('login') }}" class="inline-flex items-center gap-2.5 transition opacity-90 hover:opacity-100">
+            <div class="w-8 h-8 rounded-lg bg-[#172033] border border-slate-700/60 p-1 flex items-center justify-center">
+                <img src="{{ asset('images/COMSOC.png') }}" alt="COMSOC" class="w-full h-full object-contain">
+            </div>
+            <span class="font-bold tracking-tight text-white text-base">
+                COMSOC <span class="text-[#df747a]">Hub</span>
             </span>
         </a>
 
@@ -49,8 +51,8 @@
             <div class="flex justify-center mb-6">
                 <div class="relative">
                     <div class="absolute inset-0 rounded-2xl bg-gradient-to-tr from-[#8F3033] to-[#df747a] blur-xl opacity-40 animate-pulse"></div>
-                    <div class="relative w-14 h-14 rounded-2xl bg-[#172033] border border-slate-700/70 p-2.5 flex items-center justify-center shadow-2xl">
-                        <img src="{{ asset('images/comsoc-logo.png') }}" alt="COMSOC Logo" class="w-full h-full object-contain">
+                    <div class="relative w-14 h-14 rounded-2xl bg-[#172033] border border-slate-700/70 p-2 flex items-center justify-center shadow-2xl">
+                        <img src="{{ asset('images/COMSOC.png') }}" alt="Computing Society Logo" class="w-full h-full object-contain relative z-10 drop-shadow-md">
                     </div>
                 </div>
             </div>
