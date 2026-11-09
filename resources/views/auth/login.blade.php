@@ -160,14 +160,18 @@
                         @enderror
                     </div>
 
-                    <!-- Remember Me Checkbox -->
-                    <div class="flex items-center pt-1">
+                    <!-- Remember Me & Forgot Password Row -->
+                    <div class="flex items-center justify-between pt-1">
                         <label class="inline-flex items-center gap-2 text-xs sm:text-sm text-[#94A3B8] hover:text-slate-300 cursor-pointer select-none transition-colors">
                             <input type="checkbox"
                                    name="remember"
                                    class="w-4 h-4 rounded bg-[#0B1120] border-[#334155] text-[#560E0F] focus:ring-[#8F3033] transition">
                             <span>Remember me</span>
                         </label>
+
+                        <a href="{{ route('password.request') }}" class="text-xs text-[#df747a] hover:text-white font-medium underline transition-colors">
+                            Forgot Password?
+                        </a>
                     </div>
 
                     <!-- Submit Button -->

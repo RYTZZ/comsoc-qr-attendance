@@ -31,17 +31,30 @@ Route::middleware('guest')->group(function () {
     Route::get('account-assistance', [AuthenticatedSessionController::class, 'accountAssistance'])
         ->name('account.assistance');
 
-    // Permanent 301 redirects for obsolete password recovery endpoints
-    Route::get('forgot-password', [AuthenticatedSessionController::class, 'redirectToAccountAssistance'])
+    // Secure Forgot Password & Email Reset Token Routes
+    Route::get('forgot-password', [\App\Http\Controllers\Auth\PasswordResetLinkController::class, 'create'])
         ->name('password.request');
 
-    Route::post('forgot-password', [AuthenticatedSessionController::class, 'redirectToAccountAssistance'])
+    Route::post('forgot-password', [\App\Http\Controllers\Auth\PasswordResetLinkController::class, 'store'])
+        ->middleware('throttle:6,1')
         ->name('password.email');
 
-    Route::get('reset-password/{token}', [AuthenticatedSessionController::class, 'redirectToAccountAssistance'])
-        ->name('password.reset');
+    Route::get('verify-reset-token', [\App\Http\Controllers\Auth\NewPasswordController::class, 'showVerify'])
+        ->name('password.verify.show');
 
-    Route::post('reset-password', [AuthenticatedSessionController::class, 'redirectToAccountAssistance'])
+    Route::post('verify-reset-token', [\App\Http\Controllers\Auth\NewPasswordController::class, 'verifyToken'])
+        ->middleware('throttle:10,1')
+        ->name('password.verify.submit');
+
+    Route::get('reset-password', [\App\Http\Controllers\Auth\NewPasswordController::class, 'create'])
+        ->name('password.reset.form');
+
+    Route::get('reset-password/{token}', function (string $token) {
+        return redirect()->route('password.verify.show', ['token' => $token]);
+    })->name('password.reset');
+
+    Route::post('reset-password', [\App\Http\Controllers\Auth\NewPasswordController::class, 'store'])
+        ->middleware('throttle:10,1')
         ->name('password.store');
 });
 

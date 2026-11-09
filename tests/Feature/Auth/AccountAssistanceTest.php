@@ -24,7 +24,7 @@ class AccountAssistanceTest extends TestCase
         $response->assertSee('mailto:computingsocietysorsubc@gmail.com', false);
     }
 
-    public function test_login_screen_links_to_account_assistance_and_omits_forgot_password(): void
+    public function test_login_screen_links_to_account_assistance_and_forgot_password(): void
     {
         $response = $this->get('/login');
 
@@ -32,25 +32,14 @@ class AccountAssistanceTest extends TestCase
         $response->assertSee(route('account.assistance'));
         $response->assertSee('Having trouble accessing your account?');
         $response->assertSee('Get Help');
-        $response->assertDontSee('Forgot password?');
+        $response->assertSee(route('password.request'));
+        $response->assertSee('Forgot Password?');
     }
 
-    public function test_legacy_forgot_password_and_reset_endpoints_redirect_to_account_assistance(): void
+    public function test_account_assistance_page_is_accessible(): void
     {
-        $this->get('/forgot-password')
-            ->assertRedirect(route('account.assistance'));
-
-        $this->post('/forgot-password', ['email' => 'user@example.com'])
-            ->assertRedirect(route('account.assistance'));
-
-        $this->get('/reset-password/sample-token')
-            ->assertRedirect(route('account.assistance'));
-
-        $this->post('/reset-password', [
-            'token' => 'sample-token',
-            'email' => 'user@example.com',
-            'password' => 'newpassword123',
-            'password_confirmation' => 'newpassword123',
-        ])->assertRedirect(route('account.assistance'));
+        $this->get('/account-assistance')
+            ->assertStatus(200)
+            ->assertSee('Need Help Accessing Your Account?');
     }
 }
