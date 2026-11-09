@@ -62,3 +62,4 @@ class PasswordResetCode extends Model
         return ! $this->isExpired() && ! $this->isConsumed() && ! $this->isInvalidated();
     }
 }
+
