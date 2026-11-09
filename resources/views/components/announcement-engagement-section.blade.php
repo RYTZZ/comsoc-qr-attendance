@@ -252,8 +252,6 @@
             </div>
         </div>
     </div>
-        </div>
-    </div>
 
     <!-- Comments List & Threads -->
     <div class="space-y-4 pt-2">
