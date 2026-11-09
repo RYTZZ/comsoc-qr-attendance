@@ -17,42 +17,56 @@
     <div class="py-8 bg-[#0B1120]">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-6">
 
-            <div id="academic-info" class="card bg-[#172033] border border-[#334155] shadow-xl p-6 relative overflow-hidden">
-                <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-                    <div class="flex items-center gap-4">
-                        <x-user-avatar :user="$user" size="xl" class="shadow-lg border-2 border-[#8F3033]/60" />
+            <div id="academic-info" class="card bg-gradient-to-r from-[#172033]/90 via-[#111827] to-[#0B1120] border border-slate-800/80 shadow-2xl p-6 sm:p-7 rounded-3xl relative overflow-hidden">
+                <!-- Ambient background glow -->
+                <div class="absolute -top-12 -right-12 w-48 h-48 bg-rose-500/10 rounded-full blur-3xl pointer-events-none"></div>
+
+                <div class="flex flex-col lg:flex-row lg:items-center justify-between gap-6 relative z-10">
+                    <div class="flex items-center gap-4 sm:gap-5">
+                        <div class="relative group">
+                            <x-user-avatar :user="$user" size="xl" class="shadow-2xl border-2 border-[#8F3033]/70 group-hover:border-[#df747a] transition-all" />
+                            <a href="#avatar-section" class="absolute -bottom-1 -right-1 w-6 h-6 rounded-full bg-[#560E0F] border border-[#df747a] flex items-center justify-center text-white text-[10px] shadow hover:scale-110 transition">
+                                <i data-lucide="edit-3" class="w-3 h-3 text-white"></i>
+                            </a>
+                        </div>
                         <div>
-                            <div class="flex items-center gap-2">
-                                <h2 class="text-lg font-bold text-white font-brand-display">{{ $user->name }}</h2>
-                                <span class="px-2 py-0.5 rounded text-[10px] font-bold bg-[#560E0F] text-[#df747a] border border-[#8F3033]">
+                            <div class="flex flex-wrap items-center gap-2">
+                                <h2 class="text-xl sm:text-2xl font-extrabold text-white font-brand-display tracking-tight">{{ $user->name }}</h2>
+                                <span class="px-2.5 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider bg-rose-500/15 text-rose-300 border border-rose-500/30">
                                     {{ strtoupper($user->role) }}
                                 </span>
                             </div>
-                            <p class="text-xs text-[#94A3B8] mt-0.5">
+                            <p class="text-xs sm:text-sm text-slate-300 mt-1 font-medium">
                                 {{ $student ? "{$student->program} • {$student->year_level} (Block {$student->block})" : 'Executive / Administrative Officer Account' }}
                             </p>
-                            <p class="text-[11px] font-mono text-slate-500 mt-0.5">
-                                {{ $user->member_id ? "Member ID: {$user->member_id}" : (auth()->user()?->isSuperAdmin() ? ($student ? "Student ID: {$student->student_number}" : "Account: {$user->email}") : "Account: {$user->email}") }}
-                            </p>
+                            <div class="flex items-center gap-3 text-xs text-slate-400 font-mono mt-1.5">
+                                <span>{{ $user->member_id ? "ID: {$user->member_id}" : (auth()->user()?->isSuperAdmin() ? ($student ? "Student ID: {$student->student_number}" : "Account: {$user->email}") : "Account: {$user->email}") }}</span>
+                                @if($user->username)
+                                <span class="text-slate-500">•</span>
+                                <span class="text-rose-400/90 font-semibold">{{ '@' . $user->username }}</span>
+                                @endif
+                            </div>
                         </div>
                     </div>
 
-                    <div class="flex items-center gap-3 bg-[#0B1120] border border-[#334155] p-3 rounded-2xl shadow-md">
-                        <div class="px-2">
+                    <div class="flex flex-wrap items-center gap-2 sm:gap-3 bg-[#0B1120]/90 border border-slate-800/80 p-3 sm:p-4 rounded-2xl shadow-inner">
+                        <div class="px-2 flex items-center">
                             <x-level-badge :level="$currentLevel" size="md" :showLevelNumber="true" />
                         </div>
-                        <div class="text-left px-3 border-l border-[#334155]">
-                            <span class="block text-[10px] uppercase font-semibold text-[#94A3B8]">Rank & Level</span>
+                        <div class="text-left px-3 border-l border-slate-800">
+                            <span class="block text-[10px] uppercase font-bold tracking-wider text-slate-400">Rank & Level</span>
                             <span class="text-sm font-bold text-white font-brand-display block truncate max-w-[140px]">{{ $currentLevel->title }}</span>
                             <span class="text-[10px] font-semibold text-[#df747a]">Lvl {{ $currentLevel->level }} ({{ $currentLevel->tier }})</span>
                         </div>
-                        <div class="text-center px-3 border-l border-[#334155]">
-                            <span class="block text-[10px] uppercase font-semibold text-[#94A3B8]">Spendable EXP</span>
-                            <span class="text-base font-bold text-amber-400 font-mono">{{ number_format($seasonPoints) }}</span>
+                        <div class="text-center px-3 border-l border-slate-800">
+                            <span class="block text-[10px] uppercase font-bold tracking-wider text-slate-400">Spendable</span>
+                            <span class="text-base font-extrabold text-amber-400 font-mono-tabular">{{ number_format($seasonPoints) }}</span>
+                            <span class="text-[10px] text-slate-500 block font-sans">pts</span>
                         </div>
-                        <div class="text-center px-3 border-l border-[#334155]">
-                            <span class="block text-[10px] uppercase font-semibold text-[#94A3B8]">Lifetime EXP</span>
-                            <span class="text-base font-bold text-[#df747a] font-mono">{{ number_format($lifetimeXp) }}</span>
+                        <div class="text-center px-3 border-l border-slate-800">
+                            <span class="block text-[10px] uppercase font-bold tracking-wider text-slate-400">Lifetime</span>
+                            <span class="text-base font-extrabold text-[#df747a] font-mono-tabular">{{ number_format($lifetimeXp) }}</span>
+                            <span class="text-[10px] text-slate-500 block font-sans">EXP</span>
                         </div>
                     </div>
                 </div>

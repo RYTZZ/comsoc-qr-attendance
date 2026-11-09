@@ -68,40 +68,45 @@
     <!-- ======================================================== -->
     <!-- LEFT BRANDING PANEL (Approx. 41.6% width on desktop)     -->
     <!-- ======================================================== -->
-    <aside class="auth-branding-aside w-full md:w-5/12 flex flex-col items-center justify-center p-8 sm:p-12 lg:p-16 border-b md:border-b-0 md:border-r border-[#334155] select-none bg-[#0B1120]/70 backdrop-blur-sm relative z-10 shrink-0">
+    <aside class="auth-branding-aside w-full md:w-5/12 flex flex-col items-center justify-between p-8 sm:p-12 lg:p-16 border-b md:border-b-0 md:border-r border-slate-800/80 select-none bg-gradient-to-b from-[#111827]/90 via-[#0B1120] to-[#0B1120] backdrop-blur-md relative z-10 shrink-0">
 
-        <div class="w-full max-w-sm mx-auto flex flex-col items-center text-center">
-            
-            <!-- 1. The official COMSOC Logo (static, preserving aspect ratio, no container box) -->
-            <div class="w-28 h-28 sm:w-32 sm:h-32 lg:w-40 lg:h-40 mx-auto mb-5 flex items-center justify-center">
-                <img src="{{ asset('images/COMSOC.png') }}" alt="Computing Society Logo" class="w-full h-full object-contain">
+        <!-- Top ambient micro-pill -->
+        <div class="w-full flex items-center justify-center md:justify-start">
+            <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-rose-500/10 border border-rose-500/20 text-[#df747a] text-[10px] font-bold uppercase tracking-wider shadow-xs">
+                <span class="w-1.5 h-1.5 rounded-full bg-rose-400 animate-pulse"></span>
+                <span>Student Onboarding</span>
+            </span>
+        </div>
+
+        <div class="w-full max-w-sm mx-auto flex flex-col items-center text-center my-auto py-8">
+            <!-- 1. The official COMSOC Logo with ambient glow -->
+            <div class="relative group mb-6">
+                <div class="absolute -inset-4 bg-gradient-to-r from-[#560E0F]/40 to-rose-600/20 rounded-full blur-xl opacity-60 group-hover:opacity-100 transition duration-500 pointer-events-none"></div>
+                <div class="w-28 h-28 sm:w-32 sm:h-32 lg:w-36 lg:h-36 relative flex items-center justify-center">
+                    <img src="{{ asset('images/COMSOC.png') }}" alt="Computing Society Logo" class="w-full h-full object-contain drop-shadow-2xl">
+                </div>
             </div>
 
             <!-- 2. COMPUTING SOCIETY ORGANIZATION -->
-            <p class="font-brand-accent text-xs sm:text-sm font-bold text-[#df747a] tracking-widest uppercase mb-1">
+            <p class="font-brand-accent text-xs font-bold text-[#df747a] tracking-widest uppercase mb-1">
                 COMPUTING SOCIETY ORGANIZATION
             </p>
 
             <!-- 3. QR Attendance (bold and prominent product title) -->
-            <h1 class="font-brand-display text-3xl sm:text-4xl lg:text-5xl font-black text-white tracking-tight mt-1">
+            <h1 class="font-brand-display text-3xl sm:text-4xl font-black text-white tracking-tight">
                 QR Attendance
             </h1>
 
             <!-- 4. Tagline: Innovating Today for a Better Community. -->
-            <p class="text-xs sm:text-sm text-[#94A3B8] mt-2 font-medium">
+            <p class="text-xs sm:text-sm text-slate-400 mt-2 font-medium max-w-[280px]">
                 Innovating Today for a Better Community.
             </p>
+        </div>
 
-            <!-- 5. Compact row: ComSoc Attendance System & V 2.5.1 -->
-            <div class="flex items-center justify-between w-full max-w-[280px] sm:max-w-[320px] mx-auto text-xs sm:text-sm font-bold text-slate-300 mt-4 pt-3 border-t border-[#334155]/60 font-mono">
-                <span>ComSoc Attendance System</span>
-                <span class="text-[#df747a]">V 2.5.1</span>
-            </div>
-
-            <!-- 6. Developer: Rytzz G. Grieta -->
-            <p class="text-xs sm:text-sm font-semibold text-slate-400 mt-2">
-                Developer: Rytzz G. Grieta
-            </p>
+        <!-- 5. Subtle Footer Credentials -->
+        <div class="w-full max-w-xs text-center border-t border-slate-800/80 pt-4 font-mono text-[11px] text-slate-500 flex items-center justify-between">
+            <span>ComSoc Attendance System</span>
+            <span class="text-[#df747a] font-bold">V 2.5.1</span>
         </div>
     </aside>
 
@@ -518,42 +523,35 @@
 
         <div class="w-full max-w-2xl mx-auto my-auto py-4 sm:py-6">
 
-            <div class="card shadow-2xl border border-slate-800/80 bg-[#172033]/95 backdrop-blur-md p-4 sm:p-6 md:p-8">
+            <div class="card shadow-2xl border border-slate-800/80 bg-[#172033]/90 backdrop-blur-xl p-4 sm:p-6 md:p-8 rounded-3xl">
                 <!-- Heading -->
-                <div class="mb-5">
-                    <h2 class="font-brand-display text-2xl sm:text-3xl font-extrabold text-white tracking-tight">
-                        Sign Up
-                    </h2>
-                    <p class="text-xs sm:text-sm text-[#94A3B8] mt-1">
-                        Student Registration: Create your student account to track attendance, earn EXP, and unlock rewards.
-                    </p>
+                <div class="mb-5 flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-slate-800/80 pb-4">
+                    <div>
+                        <h2 class="font-brand-display text-2xl sm:text-3xl font-extrabold text-white tracking-tight">
+                            Sign Up
+                        </h2>
+                        <p class="text-xs text-slate-400 mt-0.5">
+                            Student Registration: Create your student account to track attendance.
+                        </p>
+                    </div>
+                    <div class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-slate-900 border border-slate-800 text-xs font-mono self-start sm:self-center">
+                        <span class="text-slate-400">Step</span>
+                        <span class="font-bold text-rose-400" x-text="step"></span>
+                        <span class="text-slate-600">/</span>
+                        <span class="text-slate-400" x-text="totalSteps"></span>
+                    </div>
                 </div>
 
                 <!-- Registration Progress Navigation -->
-                <nav aria-label="Registration Progress" class="mb-5">
-                    <!-- Mobile Compact Progress Indicator (< 640px) -->
-                    <div class="sm:hidden p-3 rounded-2xl bg-slate-900/60 border border-slate-800 shadow-sm space-y-2.5">
-                        <div class="flex items-center justify-between text-xs">
-                            <span class="text-[11px] font-mono uppercase tracking-wider text-slate-400 font-semibold"
-                                  x-text="'STEP ' + step + ' OF ' + totalSteps"></span>
-                            <span class="font-bold text-white text-xs font-mono"
-                                  x-text="step + ' / ' + totalSteps"></span>
-                        </div>
-                        <div class="flex items-center gap-2">
-                            <span class="w-6 h-6 rounded-lg bg-[#560E0F] text-white flex items-center justify-center font-bold text-xs shrink-0 shadow-sm"
-                                  x-text="step"></span>
-                            <span class="text-xs font-semibold text-white truncate"
-                                  x-text="currentStepConfig.title"></span>
-                        </div>
-                        <!-- Progress bar rail -->
-                        <div class="w-full bg-slate-800 rounded-full h-1.5 overflow-hidden">
-                            <div class="bg-gradient-to-r from-[#560E0F] to-[#df747a] h-1.5 rounded-full transition-all duration-300"
-                                 :style="'width: ' + ((step / totalSteps) * 100) + '%'"></div>
-                        </div>
+                <nav aria-label="Registration Progress" class="mb-6">
+                    <!-- Progress bar rail -->
+                    <div class="w-full bg-slate-900/80 border border-slate-800 rounded-full h-2 overflow-hidden mb-3 p-0.5">
+                        <div class="bg-gradient-to-r from-[#560E0F] via-[#8F3033] to-[#df747a] h-full rounded-full transition-all duration-300 shadow-sm"
+                             :style="'width: ' + ((step / totalSteps) * 100) + '%'"></div>
                     </div>
 
-                    <!-- Desktop / Tablet Grid Progress Navigation (>= 640px) -->
-                    <ol class="hidden sm:grid sm:grid-cols-4 gap-2">
+                    <!-- Step Cards (Segmented View) -->
+                    <ol class="grid grid-cols-2 sm:grid-cols-4 gap-2">
                         @php
                             $wizardSteps = [
                                 ['number' => 1, 'title' => 'Student Information'],
@@ -564,12 +562,12 @@
                             $stepCount = count($wizardSteps);
                         @endphp
                         @foreach($wizardSteps as $ws)
-                            <li class="flex items-start gap-2.5 p-2.5 rounded-xl border transition min-h-[58px]"
-                                :class="step === {{ $ws['number'] }} ? 'bg-[#560E0F]/20 border-[#560E0F] text-white shadow-sm' : 'bg-slate-900/40 border-slate-800 text-slate-400'">
-                                <span class="w-6 h-6 rounded-lg flex items-center justify-center font-bold text-xs shrink-0 mt-0.5"
-                                      :class="step === {{ $ws['number'] }} ? 'bg-[#560E0F] text-white shadow' : (step > {{ $ws['number'] }} ? 'bg-emerald-500/20 text-emerald-400 border border-emerald-500/40' : 'bg-slate-800 text-slate-400')">
+                            <li class="flex items-center gap-2 p-2 rounded-xl border transition-all text-xs"
+                                :class="step === {{ $ws['number'] }} ? 'bg-[#560E0F]/20 border-rose-500/50 text-white shadow-xs' : (step > {{ $ws['number'] }} ? 'bg-slate-900/40 border-slate-800 text-slate-400' : 'bg-slate-900/20 border-slate-800/40 text-slate-500')">
+                                <span class="w-5 h-5 rounded-lg flex items-center justify-center font-bold text-[10px] shrink-0"
+                                      :class="step === {{ $ws['number'] }} ? 'bg-[#560E0F] text-white shadow' : (step > {{ $ws['number'] }} ? 'bg-emerald-500/20 text-emerald-400 border border-emerald-500/30' : 'bg-slate-800 text-slate-400')">
                                     <template x-if="step > {{ $ws['number'] }}">
-                                        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"/>
                                         </svg>
                                     </template>
@@ -577,10 +575,10 @@
                                         <span>{{ $ws['number'] }}</span>
                                     </template>
                                 </span>
-                                <div class="min-w-0 flex-1">
-                                    <p class="text-[9px] font-mono uppercase tracking-wider text-slate-400 leading-tight">STEP {{ $ws['number'] }} OF {{ $stepCount }}</p>
-                                    <p class="text-xs font-semibold leading-snug mt-0.5 break-words"
-                                       :class="step === {{ $ws['number'] }} ? 'text-white' : 'text-slate-300'">{{ $ws['title'] }}</p>
+                                <div class="min-w-0 flex-1 truncate">
+                                    <span class="sr-only">STEP {{ $ws['number'] }} OF {{ $stepCount }}</span>
+                                    <span class="font-semibold text-[11px] truncate block"
+                                          :class="step === {{ $ws['number'] }} ? 'text-white' : 'text-slate-400'">{{ $ws['title'] }}</span>
                                 </div>
                             </li>
                         @endforeach
