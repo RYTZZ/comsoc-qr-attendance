@@ -122,6 +122,8 @@ class AnnouncementCommentController extends Controller
 
         $validated = $request->validate([
             'content' => ['required', 'string', 'min:1', 'max:2000'],
+            'mentioned_user_ids' => ['nullable', 'array'],
+            'mentioned_user_ids.*' => ['uuid', 'exists:users,id'],
             'parent_id' => [
                 'nullable',
                 Rule::exists('announcement_comments', 'id')->where(function ($query) use ($announcement) {
@@ -187,8 +189,8 @@ class AnnouncementCommentController extends Controller
             }
         }
 
-        // Check for mentions: @Username or @"Full Name"
-        $this->handleMentions($cleanContent, $comment, $announcement, $user);
+        // Check for mentions: direct mentioned_user_ids, @Username or @"Full Name"
+        $this->handleMentions($cleanContent, $comment, $announcement, $user, $validated['mentioned_user_ids'] ?? []);
 
         return response()->json([
             'success' => true,
@@ -208,6 +210,8 @@ class AnnouncementCommentController extends Controller
 
         $validated = $request->validate([
             'content' => ['required', 'string', 'min:1', 'max:2000'],
+            'mentioned_user_ids' => ['nullable', 'array'],
+            'mentioned_user_ids.*' => ['uuid', 'exists:users,id'],
         ]);
 
         $cleanContent = trim(strip_tags($validated['content']));
@@ -216,6 +220,9 @@ class AnnouncementCommentController extends Controller
         }
 
         $comment->update(['content' => $cleanContent]);
+
+        // Process mentions on edit as well
+        $this->handleMentions($cleanContent, $comment, $comment->announcement, $user, $validated['mentioned_user_ids'] ?? []);
 
         AuditLogger::log('announcement.comment.updated', $comment);
 
@@ -368,20 +375,16 @@ class AnnouncementCommentController extends Controller
         ];
     }
 
-    private function handleMentions(string $content, AnnouncementComment $comment, Announcement $announcement, User $sender): void
+    private function handleMentions(string $content, AnnouncementComment $comment, Announcement $announcement, User $sender, array $explicitUserIds = []): void
     {
-        if (!str_contains($content, '@')) {
-            return;
-        }
-
-        $mentionedUserIds = [];
+        $mentionedUserIds = is_array($explicitUserIds) ? $explicitUserIds : [];
 
         // 1. Match structured mentions: @[Display Name](user:UUID)
         if (preg_match_all('/@\[([^\]]+)\]\(user:([a-zA-Z0-9\-]+)\)/', $content, $structuredMatches)) {
             $mentionedUserIds = array_merge($mentionedUserIds, $structuredMatches[2]);
         }
 
-        // 2. Match plain mentions: @username or @handle
+        // 2. Match plain mentions: @username or @handle or @"Full Name"
         if (preg_match_all('/@([a-zA-Z0-9_\.\-]+)/', $content, $plainMatches)) {
             $plainHandles = array_unique($plainMatches[1]);
             $usersByUsername = User::whereIn('username', $plainHandles)
@@ -393,7 +396,7 @@ class AnnouncementCommentController extends Controller
             $mentionedUserIds = array_merge($mentionedUserIds, $usersByUsername);
         }
 
-        $mentionedUserIds = array_unique(array_filter($mentionedUserIds, fn($id) => $id !== $sender->id));
+        $mentionedUserIds = array_unique(array_filter($mentionedUserIds, fn($id) => !empty($id) && $id !== $sender->id));
         if (empty($mentionedUserIds)) {
             return;
         }

@@ -54,6 +54,12 @@ export default (config) => ({
     mentionActiveCommentId: null,
     mentionDebounceTimer: null,
     cachedMentionUsers: null,
+    // Track explicitly selected mention objects: { [userId]: userObject }
+    selectedMentionsByContext: {
+        main: {},
+        reply: {},
+        edit: {},
+    },
 
     autoResizeTextarea(el) {
         if (!el) return;
@@ -136,19 +142,41 @@ export default (config) => ({
         }
     },
 
+    buildPayloadContent(rawText, context = 'main') {
+        let content = rawText;
+        const selected = this.selectedMentionsByContext[context] || {};
+        const mentionedIds = [];
+
+        // For each user selected in this context, convert @Name to structured format if present in text
+        for (const [userId, user] of Object.entries(selected)) {
+            const escapedName = user.name.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+            const regex = new RegExp(`@${escapedName}\\b`, 'g');
+            if (regex.test(content)) {
+                content = content.replace(regex, `@[${user.name}](user:${user.id})`);
+                mentionedIds.push(userId);
+            }
+        }
+
+        return { content, mentioned_user_ids: mentionedIds };
+    },
+
     async submitMainComment() {
         const text = this.newCommentText.trim();
         if (!text) return;
 
+        const payload = this.buildPayloadContent(text, 'main');
+
         this.submitting = true;
         try {
             const res = await window.axios.post(this.routes.commentsStore, {
-                content: text,
+                content: payload.content,
+                mentioned_user_ids: payload.mentioned_user_ids,
             });
 
             if (res.data.success) {
                 this.comments.unshift(res.data.comment);
                 this.newCommentText = '';
+                this.selectedMentionsByContext.main = {};
                 this.totalComments++;
                 this.$nextTick(() => {
                     if (window.lucide && typeof window.lucide.createIcons === 'function') {
@@ -188,17 +216,21 @@ export default (config) => ({
     cancelReply() {
         this.activeReplyParentId = null;
         this.replyText = '';
+        this.selectedMentionsByContext.reply = {};
     },
 
     async submitReply(parentComment) {
         const text = this.replyText.trim();
         if (!text) return;
 
+        const payload = this.buildPayloadContent(text, 'reply');
+
         this.submittingReply = true;
         try {
             const res = await window.axios.post(this.routes.commentsStore, {
                 parent_id: parentComment.id,
-                content: text,
+                content: payload.content,
+                mentioned_user_ids: payload.mentioned_user_ids,
             });
 
             if (res.data.success) {
@@ -223,21 +255,27 @@ export default (config) => ({
 
     startEditing(comment) {
         this.editingCommentId = comment.id;
-        this.editCommentText = comment.content;
+        // Strip raw syntax for user editing: @[Name](user:UUID) -> @Name
+        this.editCommentText = (comment.content || '').replace(/@\[([^\]]+)\]\(user:[a-zA-Z0-9\-]+\)/g, '@$1');
+        this.selectedMentionsByContext.edit = {};
     },
 
     cancelEditing() {
         this.editingCommentId = null;
         this.editCommentText = '';
+        this.selectedMentionsByContext.edit = {};
     },
 
     async saveEdit(comment, parentComment = null) {
         const text = this.editCommentText.trim();
         if (!text) return;
 
+        const payload = this.buildPayloadContent(text, 'edit');
+
         try {
             const res = await window.axios.put(`/announcements/comments/${comment.id}`, {
-                content: text,
+                content: payload.content,
+                mentioned_user_ids: payload.mentioned_user_ids,
             });
 
             if (res.data.success) {
@@ -430,9 +468,15 @@ export default (config) => ({
         const lastAtIndex = textBeforeCursor.lastIndexOf('@');
         if (lastAtIndex === -1) return;
 
-        // Mention format: @[Name](user:UUID)
-        const mentionText = `@[${user.name}](user:${user.id}) `;
+        // Clean, readable mention text: @Name (no ugly UUID or markdown brackets in the composer!)
+        const mentionText = `@${user.name} `;
         const newText = textBeforeCursor.slice(0, lastAtIndex) + mentionText + textAfterCursor;
+
+        // Register selected user for this context
+        if (!this.selectedMentionsByContext[context]) {
+            this.selectedMentionsByContext[context] = {};
+        }
+        this.selectedMentionsByContext[context][user.id] = user;
 
         if (context === 'main') {
             this.newCommentText = newText;
