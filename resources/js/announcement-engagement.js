@@ -37,6 +37,13 @@ export default (config) => ({
     // Editing state
     editingCommentId: null,
     editCommentText: '',
+    savingEdit: false,
+
+    // Delete confirmation modal state
+    showDeleteModal: false,
+    deletingCommentTarget: null,
+    deletingParentCommentTarget: null,
+    isDeleting: false,
 
     // Reporting state
     showReportModal: false,
@@ -266,12 +273,54 @@ export default (config) => ({
         this.selectedMentionsByContext.edit = {};
     },
 
+    openDeleteModal(comment, parentComment = null) {
+        this.deletingCommentTarget = comment;
+        this.deletingParentCommentTarget = parentComment;
+        this.showDeleteModal = true;
+    },
+
+    closeDeleteModal() {
+        this.showDeleteModal = false;
+        this.deletingCommentTarget = null;
+        this.deletingParentCommentTarget = null;
+        this.isDeleting = false;
+    },
+
+    async confirmDelete() {
+        const comment = this.deletingCommentTarget;
+        if (!comment) return;
+
+        const parentComment = this.deletingParentCommentTarget;
+        const isReply = !!comment.parent_id;
+
+        this.isDeleting = true;
+        try {
+            const res = await window.axios.delete(`/announcements/comments/${comment.id}`);
+            if (res.data.success) {
+                if (isReply && parentComment) {
+                    parentComment.replies = parentComment.replies.filter(r => r.id !== comment.id);
+                    parentComment.replies_count = Math.max(0, parentComment.replies_count - 1);
+                    this.totalComments = Math.max(0, this.totalComments - 1);
+                } else {
+                    const deletedCount = 1 + (comment.replies_count || 0);
+                    this.comments = this.comments.filter(c => c.id !== comment.id);
+                    this.totalComments = Math.max(0, this.totalComments - deletedCount);
+                }
+                this.closeDeleteModal();
+            }
+        } catch (e) {
+            alert(e.response?.data?.message || 'Failed to delete comment.');
+            this.isDeleting = false;
+        }
+    },
+
     async saveEdit(comment, parentComment = null) {
         const text = this.editCommentText.trim();
         if (!text) return;
 
         const payload = this.buildPayloadContent(text, 'edit');
 
+        this.savingEdit = true;
         try {
             const res = await window.axios.put(`/announcements/comments/${comment.id}`, {
                 content: payload.content,
@@ -285,32 +334,8 @@ export default (config) => ({
             }
         } catch (e) {
             alert(e.response?.data?.message || 'Failed to update comment.');
-        }
-    },
-
-    async deleteComment(comment, parentComment = null) {
-        const isReply = !!comment.parent_id;
-        const confirmMsg = isReply
-            ? 'Are you sure you want to delete this reply?'
-            : 'Are you sure you want to delete this comment? Its replies will also be removed.';
-
-        if (!confirm(confirmMsg)) return;
-
-        try {
-            const res = await window.axios.delete(`/announcements/comments/${comment.id}`);
-            if (res.data.success) {
-                if (isReply && parentComment) {
-                    parentComment.replies = parentComment.replies.filter(r => r.id !== comment.id);
-                    parentComment.replies_count = Math.max(0, parentComment.replies_count - 1);
-                    this.totalComments = Math.max(0, this.totalComments - 1);
-                } else {
-                    const deletedCount = 1 + (comment.replies_count || 0);
-                    this.comments = this.comments.filter(c => c.id !== comment.id);
-                    this.totalComments = Math.max(0, this.totalComments - deletedCount);
-                }
-            }
-        } catch (e) {
-            alert(e.response?.data?.message || 'Failed to delete comment.');
+        } finally {
+            this.savingEdit = false;
         }
     },
 
@@ -403,26 +428,83 @@ export default (config) => ({
     },
 
     onKeydownMention(event, context = 'main', commentId = null) {
-        if (!this.mentionDropdownOpen || this.mentionContext !== context) return;
-        if (commentId && this.mentionActiveCommentId !== commentId) return;
+        if (!this.mentionDropdownOpen || this.mentionContext !== context) return false;
+        if (commentId && this.mentionActiveCommentId !== commentId) return false;
 
         if (event.key === 'ArrowDown') {
             event.preventDefault();
             if (this.mentionSuggestions.length > 0) {
                 this.mentionHighlightedIndex = (this.mentionHighlightedIndex + 1) % this.mentionSuggestions.length;
             }
+            return true;
         } else if (event.key === 'ArrowUp') {
             event.preventDefault();
             if (this.mentionSuggestions.length > 0) {
                 this.mentionHighlightedIndex = (this.mentionHighlightedIndex - 1 + this.mentionSuggestions.length) % this.mentionSuggestions.length;
             }
+            return true;
         } else if (event.key === 'Enter' || event.key === 'Tab') {
             if (this.mentionSuggestions.length > 0 && this.mentionSuggestions[this.mentionHighlightedIndex]) {
                 event.preventDefault();
                 this.selectMention(this.mentionSuggestions[this.mentionHighlightedIndex], context, commentId);
+                return true;
             }
         } else if (event.key === 'Escape') {
+            event.preventDefault();
             this.closeMentionDropdown();
+            return true;
+        }
+
+        return false;
+    },
+
+    handleComposerKeydown(event, context = 'main', comment = null) {
+        // If IME is composing (e.g. CJK/accented input), let it finish
+        if (event.isComposing || event.keyCode === 229) return;
+
+        // If mention dropdown is open, pass event to mention handler
+        if (this.mentionDropdownOpen && this.mentionContext === context) {
+            const handled = this.onKeydownMention(event, context, comment ? comment.id : null);
+            if (handled) return;
+        }
+
+        // Escape: cancel editing or replying
+        if (event.key === 'Escape') {
+            event.preventDefault();
+            if (context === 'edit') {
+                this.cancelEditing();
+            } else if (context === 'reply') {
+                this.cancelReply();
+            }
+            return;
+        }
+
+        // Enter key: Submit (Enter or Ctrl+Enter / Cmd+Enter)
+        if (event.key === 'Enter') {
+            // Shift + Enter: Allow natural newline insertion and auto-expand
+            if (event.shiftKey) {
+                this.$nextTick(() => {
+                    this.autoResizeTextarea(event.target);
+                });
+                return;
+            }
+
+            // Plain Enter or Ctrl+Enter: Submit
+            event.preventDefault();
+
+            if (context === 'main') {
+                if (!this.submitting && this.newCommentText.trim()) {
+                    this.submitMainComment();
+                }
+            } else if (context === 'reply' && comment) {
+                if (!this.submittingReply && this.replyText.trim()) {
+                    this.submitReply(comment);
+                }
+            } else if (context === 'edit' && comment) {
+                if (!this.savingEdit && this.editCommentText.trim()) {
+                    this.saveEdit(comment);
+                }
+            }
         }
     },
 

@@ -185,10 +185,10 @@
                 <textarea x-ref="mainCommentInput"
                           x-model="newCommentText"
                           @input="onInputMention($event, 'main'); autoResizeTextarea($event.target)"
-                          @keydown="onKeydownMention($event, 'main')"
+                          @keydown="handleComposerKeydown($event, 'main')"
                           rows="1"
                           maxlength="2000"
-                          placeholder="Write a comment... (type @ to mention a member)"
+                          placeholder="Write a comment... (Enter to submit, Shift+Enter for new line, @ to mention)"
                           class="flex-1 min-w-0 bg-transparent border-0 p-0 py-1 text-xs sm:text-sm text-slate-100 placeholder-slate-400 focus:ring-0 focus:outline-none resize-none leading-relaxed min-h-[38px] max-h-32 overflow-y-auto"></textarea>
 
                 <!-- Mention Suggestion Dropdown (Main Composer) -->
@@ -321,13 +321,13 @@
                                 <button type="button"
                                         @click="menuOpen = false; startEditing(comment)"
                                         class="w-full text-left px-3 py-1.5 text-slate-300 hover:bg-slate-700 hover:text-white flex items-center gap-2">
-                                    <i data-lucide="edit-3" class="w-3.5 h-3.5 text-slate-400"></i>
+                                    <i data-lucide="pencil" class="w-3.5 h-3.5 text-slate-400"></i>
                                     <span>Edit</span>
                                 </button>
                             </template>
                             <template x-if="comment.can_delete">
                                 <button type="button"
-                                        @click="menuOpen = false; deleteComment(comment)"
+                                        @click="menuOpen = false; openDeleteModal(comment)"
                                         class="w-full text-left px-3 py-1.5 text-rose-400 hover:bg-rose-950/30 flex items-center gap-2">
                                     <i data-lucide="trash-2" class="w-3.5 h-3.5"></i>
                                     <span>Delete</span>
@@ -364,10 +364,11 @@
                         <div class="relative space-y-2">
                             <textarea x-ref="'editInput_' + comment.id"
                                       x-model="editCommentText"
-                                      @input="onInputMention($event, 'edit', comment.id)"
-                                      @keydown="onKeydownMention($event, 'edit', comment.id)"
+                                      @input="onInputMention($event, 'edit', comment.id); autoResizeTextarea($event.target)"
+                                      @keydown="handleComposerKeydown($event, 'edit', comment)"
                                       rows="2"
-                                      class="w-full bg-slate-950 border border-slate-700 rounded-lg p-2.5 text-xs text-slate-200 focus:border-rose-500 focus:outline-none"></textarea>
+                                      placeholder="Edit your comment... (Enter to save, Shift+Enter for new line, Esc to cancel)"
+                                      class="w-full bg-slate-950 border border-slate-700 focus:border-[#8F3033] rounded-lg p-2.5 text-xs sm:text-sm text-slate-100 focus:outline-none"></textarea>
 
                             <!-- Mention Suggestions for Edit -->
                             <div x-show="mentionDropdownOpen && mentionContext === 'edit' && mentionActiveCommentId === comment.id"
@@ -391,8 +392,14 @@
                             </div>
 
                             <div class="flex items-center gap-2 justify-end">
-                                <button type="button" @click="cancelEditing()" class="btn-secondary text-[11px] py-1 px-3">Cancel</button>
-                                <button type="button" @click="saveEdit(comment)" class="btn-primary text-[11px] py-1 px-3">Save</button>
+                                <button type="button" @click="cancelEditing()" :disabled="savingEdit" class="btn-secondary text-[11px] py-1 px-3">Cancel</button>
+                                <button type="button" @click="saveEdit(comment)" :disabled="savingEdit || !editCommentText.trim()" class="btn-primary text-[11px] py-1 px-3 flex items-center gap-1.5">
+                                    <svg x-show="savingEdit" x-cloak class="animate-spin w-3 h-3 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                                        <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                                        <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8H4z"></path>
+                                    </svg>
+                                    <span x-text="savingEdit ? 'Saving...' : 'Save Changes'">Save Changes</span>
+                                </button>
                             </div>
                         </div>
                     </template>
@@ -469,16 +476,16 @@
                                         <template x-if="reply.can_edit">
                                             <button type="button"
                                                     @click="replyMenu = false; startEditing(reply)"
-                                                    class="w-full text-left px-3 py-1 text-slate-300 hover:bg-slate-700 flex items-center gap-1.5">
-                                                <i data-lucide="edit-3" class="w-3 h-3 text-slate-400"></i>
+                                                    class="w-full text-left px-3 py-1 text-slate-300 hover:bg-slate-700 hover:text-white flex items-center gap-1.5">
+                                                <i data-lucide="pencil" class="w-3.5 h-3.5 text-slate-400"></i>
                                                 <span>Edit</span>
                                             </button>
                                         </template>
                                         <template x-if="reply.can_delete">
                                             <button type="button"
-                                                    @click="replyMenu = false; deleteComment(reply, comment)"
+                                                    @click="replyMenu = false; openDeleteModal(reply, comment)"
                                                     class="w-full text-left px-3 py-1 text-rose-400 hover:bg-rose-950/30 flex items-center gap-1.5">
-                                                <i data-lucide="trash-2" class="w-3 h-3"></i>
+                                                <i data-lucide="trash-2" class="w-3.5 h-3.5"></i>
                                                 <span>Delete</span>
                                             </button>
                                         </template>
@@ -512,10 +519,11 @@
                                     <div class="relative space-y-2">
                                         <textarea x-ref="'editInput_' + reply.id"
                                                   x-model="editCommentText"
-                                                  @input="onInputMention($event, 'edit', reply.id)"
-                                                  @keydown="onKeydownMention($event, 'edit', reply.id)"
+                                                  @input="onInputMention($event, 'edit', reply.id); autoResizeTextarea($event.target)"
+                                                  @keydown="handleComposerKeydown($event, 'edit', reply)"
                                                   rows="2"
-                                                  class="w-full bg-slate-950 border border-slate-700 rounded-lg p-2 text-xs text-slate-200 focus:border-rose-500 focus:outline-none"></textarea>
+                                                  placeholder="Edit your reply... (Enter to save, Shift+Enter for new line, Esc to cancel)"
+                                                  class="w-full bg-slate-950 border border-slate-700 focus:border-[#8F3033] rounded-lg p-2 text-xs text-slate-100 focus:outline-none"></textarea>
 
                                         <!-- Mention Suggestions for Edit Reply -->
                                         <div x-show="mentionDropdownOpen && mentionContext === 'edit' && mentionActiveCommentId === reply.id"
@@ -539,8 +547,14 @@
                                         </div>
 
                                         <div class="flex items-center gap-2 justify-end">
-                                            <button type="button" @click="cancelEditing()" class="btn-secondary text-[10px] py-1 px-2.5">Cancel</button>
-                                            <button type="button" @click="saveEdit(reply, comment)" class="btn-primary text-[10px] py-1 px-2.5">Save</button>
+                                            <button type="button" @click="cancelEditing()" :disabled="savingEdit" class="btn-secondary text-[10px] py-1 px-2.5">Cancel</button>
+                                            <button type="button" @click="saveEdit(reply, comment)" :disabled="savingEdit || !editCommentText.trim()" class="btn-primary text-[10px] py-1 px-2.5 flex items-center gap-1.5">
+                                                <svg x-show="savingEdit" x-cloak class="animate-spin w-3 h-3 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                                                    <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                                                    <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8H4z"></path>
+                                                </svg>
+                                                <span x-text="savingEdit ? 'Saving...' : 'Save Changes'">Save Changes</span>
+                                            </button>
                                         </div>
                                     </div>
                                 </template>
@@ -568,10 +582,10 @@
                         <textarea x-ref="'replyInput_' + comment.id"
                                   x-model="replyText"
                                   @input="onInputMention($event, 'reply', comment.id); autoResizeTextarea($event.target)"
-                                  @keydown="onKeydownMention($event, 'reply', comment.id)"
+                                  @keydown="handleComposerKeydown($event, 'reply', comment)"
                                   rows="1"
                                   maxlength="2000"
-                                  placeholder="Write your reply... (type @ to mention a member)"
+                                  placeholder="Write your reply... (Enter to submit, Shift+Enter for new line, @ to mention)"
                                   class="flex-1 min-w-0 bg-transparent border-0 p-0 py-1 text-xs text-slate-100 placeholder-slate-400 focus:ring-0 focus:outline-none resize-none leading-relaxed min-h-[34px] max-h-28 overflow-y-auto"></textarea>
 
                         <!-- Mention Suggestion Dropdown (Reply Composer) -->
@@ -730,6 +744,46 @@
             <div class="flex items-center justify-end gap-2 pt-2">
                 <button type="button" @click="showReportModal = false" class="btn-secondary text-xs py-1.5 px-3">Cancel</button>
                 <button type="button" @click="submitReport()" :disabled="submittingReport" class="btn-primary text-xs py-1.5 px-4 bg-amber-600 hover:bg-amber-500 border-amber-600">Submit Report</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal: Delete Comment Confirmation Dialog -->
+    <div x-show="showDeleteModal"
+         x-cloak
+         class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/75 backdrop-blur-sm"
+         @keydown.escape.window="closeDeleteModal()">
+        <div class="bg-[#172033] border border-rose-900/40 rounded-2xl max-w-sm w-full shadow-2xl p-5 space-y-4 animate-in fade-in zoom-in-95 duration-150"
+             @click.away="closeDeleteModal()">
+            <div class="flex items-start gap-3">
+                <div class="w-9 h-9 rounded-full bg-rose-500/20 border border-rose-500/40 flex items-center justify-center shrink-0 text-rose-400">
+                    <i data-lucide="trash-2" class="w-5 h-5"></i>
+                </div>
+                <div>
+                    <h3 class="text-sm font-bold text-white font-brand-display">Delete Comment?</h3>
+                    <p class="text-xs text-slate-400 mt-1 leading-relaxed">
+                        Are you sure you want to delete this comment? This action cannot be undone.
+                    </p>
+                </div>
+            </div>
+
+            <div class="flex items-center justify-end gap-2.5 pt-2">
+                <button type="button"
+                        @click="closeDeleteModal()"
+                        :disabled="isDeleting"
+                        class="btn-secondary text-xs py-1.5 px-3.5">
+                    Cancel
+                </button>
+                <button type="button"
+                        @click="confirmDelete()"
+                        :disabled="isDeleting"
+                        class="h-8 px-4 rounded-xl bg-gradient-to-r from-rose-700 to-rose-600 hover:from-rose-800 hover:to-rose-700 text-white font-semibold text-xs shadow-md shadow-rose-900/30 flex items-center gap-1.5 transition disabled:opacity-50">
+                    <svg x-show="isDeleting" x-cloak class="animate-spin w-3.5 h-3.5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                        <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                        <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8H4z"></path>
+                    </svg>
+                    <span x-text="isDeleting ? 'Deleting...' : 'Delete Comment'">Delete Comment</span>
+                </button>
             </div>
         </div>
     </div>
