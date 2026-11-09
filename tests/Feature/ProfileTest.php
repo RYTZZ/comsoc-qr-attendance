@@ -380,6 +380,7 @@ class ProfileTest extends TestCase
     public function test_successful_update_persists_after_refresh_and_relogin(): void
     {
         $user = User::factory()->create([
+            'email' => 'persisted@example.com',
             'password' => bcrypt('password123'),
         ]);
 
