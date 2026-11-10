@@ -555,9 +555,7 @@ export default (config) => ({
             if (this.cachedMentionUsers && this.cachedMentionUsers.length > 0) {
                 const q = this.mentionQuery.toLowerCase();
                 const filtered = this.cachedMentionUsers.filter(u =>
-                    (u.name && u.name.toLowerCase().includes(q)) ||
-                    (u.handle && u.handle.toLowerCase().includes(q)) ||
-                    (u.program && u.program.toLowerCase().includes(q))
+                    (u.name && u.name.toLowerCase().includes(q))
                 );
                 if (filtered.length > 0) {
                     this.mentionSuggestions = filtered;

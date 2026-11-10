@@ -42,8 +42,7 @@ class AnnouncementCommentController extends Controller
                     ->orWhereRaw('LOWER(nickname) LIKE ?', ["%{$lower}%"])
                     ->orWhereHas('student', function ($sq) use ($lower) {
                         $sq->whereRaw('LOWER(first_name) LIKE ?', ["%{$lower}%"])
-                            ->orWhereRaw('LOWER(last_name) LIKE ?', ["%{$lower}%"])
-                            ->orWhereRaw('LOWER(student_number) LIKE ?', ["%{$lower}%"]);
+                            ->orWhereRaw('LOWER(last_name) LIKE ?', ["%{$lower}%"]);
                     });
             });
         }
@@ -51,20 +50,13 @@ class AnnouncementCommentController extends Controller
         $users = $usersQuery->limit(20)->get()->map(function ($u) {
             $student = $u->student;
             $displayName = $student ? trim($student->first_name . ' ' . $student->last_name) : $u->name;
-            $handle = $u->username ?: strtolower(preg_replace('/[^a-zA-Z0-9]/', '', $displayName));
-            if (empty($handle)) {
-                $handle = 'user' . substr(str_replace('-', '', $u->id), 0, 6);
-            }
 
             return [
                 'id' => $u->id,
                 'name' => $displayName,
-                'handle' => ltrim($handle, '@'),
                 'initials' => strtoupper(substr($displayName, 0, 2)),
                 'avatar' => \App\Services\AvatarService::getUrl($u->avatar_seed, $u->avatar_style ?? 'adventurer'),
                 'role' => $u->role,
-                'program' => $student?->program,
-                'year_level' => $student?->year_level,
             ];
         });
 

@@ -343,6 +343,17 @@ class AnnouncementEngagementTest extends TestCase
         $this->assertNotEmpty($users);
         $this->assertSame($receiver->id, $users[0]['id']);
 
+        // Verify student number or sensitive attributes are NOT exposed in mentionable users API
+        foreach ($users as $userPayload) {
+            $this->assertArrayNotHasKey('student_number', $userPayload);
+            $this->assertArrayNotHasKey('handle', $userPayload);
+            $this->assertArrayNotHasKey('program', $userPayload);
+            $this->assertArrayNotHasKey('year_level', $userPayload);
+            $this->assertArrayHasKey('id', $userPayload);
+            $this->assertArrayHasKey('name', $userPayload);
+            $this->assertArrayHasKey('avatar', $userPayload);
+        }
+
         // 2. Post comment with mention
         $content = "Hey @[Charlie Receiver](user:{$receiver->id}) check this out!";
         $resComment = $this->actingAs($sender)

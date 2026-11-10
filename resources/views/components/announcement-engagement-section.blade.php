@@ -217,7 +217,6 @@
                                         <span x-text="user.name"></span>
                                         <span x-show="user.role && user.role !== 'student'" class="text-[9px] uppercase tracking-wider px-1.5 py-0.2 rounded bg-amber-500/20 text-amber-300 font-mono" x-text="user.role"></span>
                                     </div>
-                                    <div class="text-[10px] text-slate-400 font-mono truncate" x-text="'@' + user.handle"></div>
                                 </div>
                             </button>
                         </template>
@@ -778,7 +777,6 @@
                                                 <span x-text="user.name"></span>
                                                 <span x-show="user.role && user.role !== 'student'" class="text-[8px] uppercase tracking-wider px-1 rounded bg-amber-500/20 text-amber-300 font-mono" x-text="user.role"></span>
                                             </div>
-                                            <div class="text-[9px] text-slate-400 font-mono truncate" x-text="'@' + user.handle"></div>
                                         </div>
                                     </button>
                                 </template>
