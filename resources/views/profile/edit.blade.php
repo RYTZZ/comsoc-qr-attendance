@@ -162,8 +162,9 @@
                                 <!-- Adventurer Avatar Compact Card -->
                                 <div id="avatar-section" class="p-4 sm:p-5 rounded-2xl bg-[#0B1120]/80 border border-slate-800 shadow-inner flex flex-col sm:flex-row sm:items-center justify-between gap-4">
                                     <div class="flex items-center gap-3.5">
+                                        <!-- Avatar Image Container -->
                                         <div class="w-14 h-14 rounded-2xl bg-[#172033] border-2 border-[#8F3033] p-1 shadow-lg shrink-0 flex items-center justify-center overflow-hidden">
-                                            <img :src="previewUrl" :alt="selectedSeed" class="w-full h-full object-cover rounded-xl" />
+                                            <img :src="previewUrl" :alt="selectedSeed" class="w-full h-full object-cover rounded-xl">
                                         </div>
                                         <div>
                                             <div class="flex items-center gap-2">
