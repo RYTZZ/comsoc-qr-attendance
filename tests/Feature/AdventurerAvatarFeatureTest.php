@@ -111,7 +111,7 @@ class AdventurerAvatarFeatureTest extends TestCase
 
         $postResponse = $this->post('/signup', $payload);
         $postResponse->assertSessionHasNoErrors();
-        $postResponse->assertRedirect('/dashboard');
+        $postResponse->assertRedirect('/verify-email');
 
         $user = User::where('email', 'geralt.rivia@sorsu.edu.ph')->first();
         $this->assertNotNull($user);

@@ -146,10 +146,15 @@ class StudentRegisterController extends Controller
         app(\App\Services\SessionSecurityService::class)->handleLogin($user, $request);
 
         // Automatically issue the six-digit email verification OTP (delivery failures never block registration)
-        app(\App\Services\EmailVerificationOtpService::class)->issueAndSend($user, $request->ip(), enforceCooldown: false);
+        $otpResult = app(\App\Services\EmailVerificationOtpService::class)->issueAndSend($user, $request->ip(), enforceCooldown: false);
 
-        return redirect()->route('dashboard')
-            ->with('status', 'Registration successful! Welcome to the COMSOC HUB community.')
-            ->with('success', 'Registration successful! Welcome to the COMSOC HUB community.');
+        $notificationMessage = $otpResult['sent']
+            ? 'Registration successful! A 6-digit verification code has been sent to your email.'
+            : 'Registration successful! Please verify your email address to continue.';
+
+        return redirect()->route('verification.notice')
+            ->with('status', 'verification-link-sent')
+            ->with('success', $notificationMessage)
+            ->with('cooldown_seconds', $otpResult['cooldown_seconds'] ?? 60);
     }
 }

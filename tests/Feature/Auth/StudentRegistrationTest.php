@@ -129,7 +129,7 @@ class StudentRegistrationTest extends TestCase
             'signature_consent' => '1',
         ]);
 
-        $response->assertRedirect('/dashboard');
+        $response->assertRedirect('/verify-email');
         $this->assertAuthenticated();
 
         $this->assertDatabaseHas('students', [
@@ -416,7 +416,7 @@ class StudentRegistrationTest extends TestCase
             'signature_consent' => '1',
         ]);
 
-        $response->assertRedirect('/dashboard');
+        $response->assertRedirect('/verify-email');
         $this->assertDatabaseHas('students', [
             'student_number' => '0024-0001',
         ]);
