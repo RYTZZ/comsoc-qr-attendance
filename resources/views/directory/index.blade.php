@@ -29,7 +29,7 @@
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-6">
 
             <div class="card bg-[#172033] border border-slate-800 p-4">
-                <div class="flex flex-col xl:flex-row xl:items-start justify-between gap-4">
+                <div class="flex flex-col xl:flex-row xl:items-center justify-between gap-4">
                     <div class="flex flex-col items-start gap-1 shrink-0">
                         <a href="{{ route('directory.index', ['tab' => 'directory', 'skill_id' => $selectedSkill, 'project_category' => $selectedCategory, 'program' => $selectedProgram, 'search' => $search]) }}"
                            class="px-3.5 py-1.5 rounded-lg text-xs font-semibold transition-colors flex items-center gap-2 {{ $tab === 'directory' ? 'bg-[#560E0F] text-white shadow-sm' : 'text-slate-400 hover:text-white hover:bg-slate-800' }}">
@@ -124,16 +124,10 @@
                                 </div>
                             </div>
 
-                            <div class="flex items-center gap-2">
+                            <div class="flex items-center">
                                 <button type="submit" class="btn-primary text-xs py-1.5 px-4 bg-[#560E0F] hover:bg-[#8F3033] border-[#8F3033]">
                                     Filter
                                 </button>
-
-                                @if($search || ($selectedSkill && $selectedSkill !== 'all') || ($selectedCategory && $selectedCategory !== 'all') || ($selectedProgram && $selectedProgram !== 'all') || ($selectedYearLevel && $selectedYearLevel !== 'all'))
-                                    <a href="{{ route('directory.index', ['tab' => 'directory']) }}" class="btn-secondary text-xs py-1.5 px-3">
-                                        Reset
-                                    </a>
-                                @endif
                             </div>
                         </form>
                     @endif
