@@ -29,8 +29,8 @@
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-6">
 
             <div class="card bg-[#172033] border border-slate-800 p-4">
-                <div class="flex flex-col md:flex-row md:items-center justify-between gap-4">
-                    <div class="flex flex-wrap items-center gap-2">
+                <div class="flex flex-col xl:flex-row xl:items-start justify-between gap-4">
+                    <div class="flex flex-col items-start gap-1 shrink-0">
                         <a href="{{ route('directory.index', ['tab' => 'directory', 'skill_id' => $selectedSkill, 'project_category' => $selectedCategory, 'program' => $selectedProgram, 'search' => $search]) }}"
                            class="px-3.5 py-1.5 rounded-lg text-xs font-semibold transition-colors flex items-center gap-2 {{ $tab === 'directory' ? 'bg-[#560E0F] text-white shadow-sm' : 'text-slate-400 hover:text-white hover:bg-slate-800' }}">
                             <i data-lucide="users" class="w-3.5 h-3.5"></i>
@@ -45,92 +45,96 @@
                     </div>
 
                     @if($tab === 'directory')
-                        <form method="GET" action="{{ route('directory.index') }}" class="flex flex-wrap items-center gap-2">
+                        <form method="GET" action="{{ route('directory.index') }}" class="flex flex-col gap-2.5 flex-1 min-w-0">
                             <input type="hidden" name="tab" value="directory">
 
-                            <div class="relative w-full sm:w-44">
-                                <span class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-slate-500">
-                                    <i data-lucide="search" class="w-3.5 h-3.5"></i>
-                                </span>
-                                <input type="text" name="search" value="{{ $search }}"
-                                       placeholder="Enter member search"
-                                       class="input-dark pl-9 pr-3 py-1.5 text-xs w-full">
+                            <div class="flex flex-wrap items-center gap-2">
+                                <div class="relative w-full sm:w-44">
+                                    <span class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-slate-500">
+                                        <i data-lucide="search" class="w-3.5 h-3.5"></i>
+                                    </span>
+                                    <input type="text" name="search" value="{{ $search }}"
+                                           placeholder="Enter member search"
+                                           class="input-dark pl-9 pr-3 py-1.5 text-xs w-full">
+                                </div>
+
+                                <div class="w-36">
+                                    @php
+                                        $programOptions = [['value' => 'all', 'label' => 'All Programs']];
+                                        foreach($programs as $p) {
+                                            $val = $p->abbreviation ?: ($p->name ?? '');
+                                            $programOptions[] = ['value' => $val, 'label' => $p->display_name ?: $val];
+                                        }
+                                    @endphp
+                                    <x-custom-dropdown
+                                        name="program"
+                                        :options="$programOptions"
+                                        :selected="$selectedProgram"
+                                        placeholder="Select your program"
+                                        onchange="this.closest('form').submit()"
+                                    />
+                                </div>
+
+                                <div class="w-36">
+                                    @php
+                                        $yearOptions = [['value' => 'all', 'label' => 'All Years']];
+                                        foreach($yearLevels as $yl) {
+                                            $yearOptions[] = ['value' => $yl, 'label' => $yl];
+                                        }
+                                    @endphp
+                                    <x-custom-dropdown
+                                        name="year_level"
+                                        :options="$yearOptions"
+                                        :selected="$selectedYearLevel"
+                                        placeholder="Select your year level"
+                                        onchange="this.closest('form').submit()"
+                                    />
+                                </div>
+
+                                <div class="w-36">
+                                    @php
+                                        $skillOptions = [['value' => 'all', 'label' => 'All Skills']];
+                                        foreach($skills as $s) {
+                                            $skillOptions[] = ['value' => $s->id, 'label' => $s->name];
+                                        }
+                                    @endphp
+                                    <x-custom-dropdown
+                                        name="skill_id"
+                                        :options="$skillOptions"
+                                        :selected="$selectedSkill"
+                                        placeholder="Select a skill"
+                                        onchange="this.closest('form').submit()"
+                                    />
+                                </div>
+
+                                <div class="w-40">
+                                    @php
+                                        $catOptions = [['value' => 'all', 'label' => 'All Domains']];
+                                        foreach($projectCategories as $pc) {
+                                            $catOptions[] = ['value' => $pc, 'label' => $pc];
+                                        }
+                                    @endphp
+                                    <x-custom-dropdown
+                                        name="project_category"
+                                        :options="$catOptions"
+                                        :selected="$selectedCategory"
+                                        placeholder="Project Domain"
+                                        onchange="this.closest('form').submit()"
+                                    />
+                                </div>
                             </div>
 
-                            <div class="w-36">
-                                @php
-                                    $programOptions = [['value' => 'all', 'label' => 'All Programs']];
-                                    foreach($programs as $p) {
-                                        $val = $p->abbreviation ?: ($p->name ?? '');
-                                        $programOptions[] = ['value' => $val, 'label' => $p->display_name ?: $val];
-                                    }
-                                @endphp
-                                <x-custom-dropdown
-                                    name="program"
-                                    :options="$programOptions"
-                                    :selected="$selectedProgram"
-                                    placeholder="Select your program"
-                                    onchange="this.closest('form').submit()"
-                                />
+                            <div class="flex items-center gap-2">
+                                <button type="submit" class="btn-primary text-xs py-1.5 px-4 bg-[#560E0F] hover:bg-[#8F3033] border-[#8F3033]">
+                                    Filter
+                                </button>
+
+                                @if($search || ($selectedSkill && $selectedSkill !== 'all') || ($selectedCategory && $selectedCategory !== 'all') || ($selectedProgram && $selectedProgram !== 'all') || ($selectedYearLevel && $selectedYearLevel !== 'all'))
+                                    <a href="{{ route('directory.index', ['tab' => 'directory']) }}" class="btn-secondary text-xs py-1.5 px-3">
+                                        Reset
+                                    </a>
+                                @endif
                             </div>
-
-                            <div class="w-36">
-                                @php
-                                    $yearOptions = [['value' => 'all', 'label' => 'All Years']];
-                                    foreach($yearLevels as $yl) {
-                                        $yearOptions[] = ['value' => $yl, 'label' => $yl];
-                                    }
-                                @endphp
-                                <x-custom-dropdown
-                                    name="year_level"
-                                    :options="$yearOptions"
-                                    :selected="$selectedYearLevel"
-                                    placeholder="Select your year level"
-                                    onchange="this.closest('form').submit()"
-                                />
-                            </div>
-
-                            <div class="w-36">
-                                @php
-                                    $skillOptions = [['value' => 'all', 'label' => 'All Skills']];
-                                    foreach($skills as $s) {
-                                        $skillOptions[] = ['value' => $s->id, 'label' => $s->name];
-                                    }
-                                @endphp
-                                <x-custom-dropdown
-                                    name="skill_id"
-                                    :options="$skillOptions"
-                                    :selected="$selectedSkill"
-                                    placeholder="Select a skill"
-                                    onchange="this.closest('form').submit()"
-                                />
-                            </div>
-
-                            <div class="w-40">
-                                @php
-                                    $catOptions = [['value' => 'all', 'label' => 'All Domains']];
-                                    foreach($projectCategories as $pc) {
-                                        $catOptions[] = ['value' => $pc, 'label' => $pc];
-                                    }
-                                @endphp
-                                <x-custom-dropdown
-                                    name="project_category"
-                                    :options="$catOptions"
-                                    :selected="$selectedCategory"
-                                    placeholder="Project Domain"
-                                    onchange="this.closest('form').submit()"
-                                />
-                            </div>
-
-                            <button type="submit" class="btn-primary text-xs py-1.5 px-3">
-                                Filter
-                            </button>
-
-                            @if($search || ($selectedSkill && $selectedSkill !== 'all') || ($selectedCategory && $selectedCategory !== 'all') || ($selectedProgram && $selectedProgram !== 'all') || ($selectedYearLevel && $selectedYearLevel !== 'all'))
-                                <a href="{{ route('directory.index', ['tab' => 'directory']) }}" class="btn-secondary text-xs py-1.5 px-2.5">
-                                    Reset
-                                </a>
-                            @endif
                         </form>
                     @endif
                 </div>
