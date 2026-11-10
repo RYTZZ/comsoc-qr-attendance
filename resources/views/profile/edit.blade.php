@@ -268,8 +268,8 @@
                                     </div>
 
                                     <div id="contact-info">
-                                        <label for="email" class="label text-xs text-slate-300">Institutional Email <span class="text-[#df747a]">*</span></label>
-                                        <input type="email" name="email" id="email" value="{{ old('email', $user->email) }}" class="input text-xs mt-1" placeholder="student@sorsu.edu.ph" required>
+                                        <label for="email" class="label text-xs text-slate-300">Email <span class="text-[#df747a]">*</span></label>
+                                        <input type="email" name="email" id="email" value="{{ old('email', $user->email) }}" class="input text-xs mt-1" placeholder="Enter your email" required>
                                         <x-input-error class="mt-1" :messages="$errors->get('email')" />
                                     </div>
                                 </div>

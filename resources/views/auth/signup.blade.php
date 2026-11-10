@@ -303,7 +303,7 @@
 
                   const trimmedEmail = (this.email || '').trim();
                   if (!trimmedEmail) {
-                      this.clientErrors.email = 'University email address is required.';
+                      this.clientErrors.email = 'Email address is required.';
                       valid = false;
                   } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(trimmedEmail)) {
                       this.clientErrors.email = 'Please provide a valid email address.';
@@ -684,10 +684,10 @@
                             </div>
                         </div>
 
-                        <!-- University Email Address -->
+                        <!-- Email Address -->
                         <div>
                             <label for="email" class="label mb-1">
-                                University Email <span class="text-rose-400">*</span>
+                                Email <span class="text-rose-400">*</span>
                             </label>
                             <input type="email"
                                    name="email"
@@ -695,11 +695,10 @@
                                    x-model="email"
                                    @input="clientErrors.email = ''"
                                    autocomplete="email"
-                                   placeholder="Enter your university email"
+                                   placeholder="Enter your email"
                                    class="input @error('email') border-rose-500 @enderror"
                                    :class="clientErrors.email ? 'border-rose-500' : ''"
                                    required>
-                            <p class="text-[11px] text-slate-400 mt-1">Must be your official university student email (<code class="font-mono text-slate-300">@sorsu.edu.ph</code>).</p>
                             <template x-if="clientErrors.email">
                                 <p class="text-xs text-rose-400 mt-1 font-medium" x-text="clientErrors.email"></p>
                             </template>
