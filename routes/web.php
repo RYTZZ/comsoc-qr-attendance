@@ -308,6 +308,12 @@ Route::middleware(['auth', 'verified', 'require_password_change'])->group(functi
             ->middleware('throttle:60,1')
             ->name('kiosk.snack.scan');
 
+        // PWA Offline Kiosk Endpoints
+        Route::get('/kiosk/{kiosk}/offline-manifest', [AttendanceKioskController::class, 'offlineManifest'])
+            ->name('kiosk.offline-manifest');
+        Route::post('/kiosk/{kiosk}/batch-sync', [AttendanceKioskController::class, 'batchSync'])
+            ->name('kiosk.batch-sync');
+
         Route::prefix('staff/incidents')->name('staff.incidents.')->group(function () {
             Route::get('/create', [\App\Http\Controllers\Staff\IncidentController::class, 'create'])->name('create');
             Route::post('/', [\App\Http\Controllers\Staff\IncidentController::class, 'store'])->name('store');

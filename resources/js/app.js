@@ -8,11 +8,14 @@ import signatureRegistration from './signature';
 import constitutionPdfViewer from './constitution-viewer';
 import announcementEngagement from './announcement-engagement';
 import { initMotionSystem } from './motion';
+import { initPWA } from './pwa';
+import { offlineScanner } from './offline-scanner';
 
 window.Alpine = Alpine;
 window.Html5Qrcode = Html5Qrcode;
 window.createIcons = createIcons;
 window.lucideIcons = icons;
+window.offlineScanner = offlineScanner;
 window.lucide = {
     createIcons: (options = {}) => createIcons({ icons, ...options }),
     icons
@@ -23,6 +26,7 @@ document.addEventListener('DOMContentLoaded', () => {
     createIcons({ icons });
     initMotionSystem();
     initScrollManagement();
+    initPWA();
 });
 
 /**
