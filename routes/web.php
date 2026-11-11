@@ -126,6 +126,18 @@ Route::middleware(['auth', 'verified', 'require_password_change'])->group(functi
     Route::get('/events/{event}/tracks', [\App\Http\Controllers\EventTrackController::class, 'index'])->name('events.tracks.index');
     Route::post('/events/tracks/{track}/register', [\App\Http\Controllers\EventTrackController::class, 'register'])->name('events.tracks.register');
 
+    // COMSOC Pulse: Anonymous Student Voice & Org Feedback
+    Route::get('/pulse', [\App\Http\Controllers\PulseController::class, 'indexView'])->name('pulse.index');
+    Route::get('/pulse/api/topics', [\App\Http\Controllers\PulseController::class, 'index'])->name('pulse.api.index');
+    Route::post('/pulse/api/topics', [\App\Http\Controllers\PulseController::class, 'store'])
+        ->middleware('throttle:10,1')
+        ->name('pulse.api.store');
+    Route::post('/pulse/topics/{topic}/vote', [\App\Http\Controllers\PulseController::class, 'vote'])
+        ->middleware('throttle:30,1')
+        ->name('pulse.api.vote');
+    Route::post('/pulse/topics/{topic}/respond', [\App\Http\Controllers\PulseController::class, 'respond'])
+        ->name('pulse.api.respond');
+
     // Dynamic Activity Registration & Multi-Session Event System (Student-Facing)
     Route::prefix('activities')->name('activities.')->group(function () {
         Route::get('/my-registrations', [\App\Http\Controllers\MemberActivityController::class, 'myRegistrations'])->name('my-registrations');
