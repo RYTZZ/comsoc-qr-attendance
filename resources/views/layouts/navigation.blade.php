@@ -127,17 +127,29 @@
                     <i data-lucide="trophy" class="w-4 h-4 shrink-0 {{ request()->routeIs('leaderboard.*') ? 'text-white' : 'text-[#94A3B8]' }}"></i>
                     <span>{{ __('Leaderboard & Badges') }}</span>
                 </a>
+
+                <a href="{{ route('arena.index') }}"
+                   class="flex items-center gap-3 px-3 py-2.5 rounded-xl text-xs font-semibold transition {{ request()->routeIs('arena.*') ? 'bg-burgundy-gradient text-white shadow-md' : 'text-[#94A3B8] hover:text-white hover:bg-[#1E293B]' }}">
+                    <i data-lucide="terminal" class="w-4 h-4 shrink-0 {{ request()->routeIs('arena.*') ? 'text-white' : 'text-[#94A3B8]' }}"></i>
+                    <span>{{ __('Code Arena (LeetCode)') }}</span>
+                </a>
             </div>
         </div>
 
         <!-- Organization -->
         <div>
-            <p class="px-3 mb-2 text-[10px] font-bold uppercase tracking-widest text-[#94A3B8]">Organization</p>
+            <p class="px-3 mb-2 text-[10px] font-bold uppercase tracking-widest text-[#94A3B8]">Organization & Voice</p>
             <div class="space-y-1">
                 <a href="{{ route('constitution.index') }}"
                    class="flex items-center gap-3 px-3 py-2.5 rounded-xl text-xs font-semibold transition {{ request()->routeIs('constitution.*') ? 'bg-burgundy-gradient text-white shadow-md' : 'text-[#94A3B8] hover:text-white hover:bg-[#1E293B]' }}">
                     <i data-lucide="scroll-text" class="w-4 h-4 shrink-0 {{ request()->routeIs('constitution.*') ? 'text-white' : 'text-[#94A3B8]' }}"></i>
                     <span>{{ __('Constitutional & By-Laws') }}</span>
+                </a>
+
+                <a href="{{ route('pulse.index') }}"
+                   class="flex items-center gap-3 px-3 py-2.5 rounded-xl text-xs font-semibold transition {{ request()->routeIs('pulse.*') ? 'bg-burgundy-gradient text-white shadow-md' : 'text-[#94A3B8] hover:text-white hover:bg-[#1E293B]' }}">
+                    <i data-lucide="radio" class="w-4 h-4 shrink-0 {{ request()->routeIs('pulse.*') ? 'text-white' : 'text-[#94A3B8]' }}"></i>
+                    <span>{{ __('COMSOC Pulse (Anonymous Voice)') }}</span>
                 </a>
             </div>
         </div>
@@ -150,6 +162,12 @@
                    class="flex items-center gap-3 px-3 py-2.5 rounded-xl text-xs font-semibold transition {{ request()->routeIs('directory.*') ? 'bg-burgundy-gradient text-white shadow-md' : 'text-[#94A3B8] hover:text-white hover:bg-[#1E293B]' }}">
                     <i data-lucide="users" class="w-4 h-4 shrink-0 {{ request()->routeIs('directory.*') ? 'text-white' : 'text-[#94A3B8]' }}"></i>
                     <span>{{ __('Member Directory') }}</span>
+                </a>
+
+                <a href="{{ route('critique.index') }}"
+                   class="flex items-center gap-3 px-3 py-2.5 rounded-xl text-xs font-semibold transition {{ request()->routeIs('critique.*') ? 'bg-burgundy-gradient text-white shadow-md' : 'text-[#94A3B8] hover:text-white hover:bg-[#1E293B]' }}">
+                    <i data-lucide="git-pull-request" class="w-4 h-4 shrink-0 {{ request()->routeIs('critique.*') ? 'text-white' : 'text-[#94A3B8]' }}"></i>
+                    <span>{{ __('Code Critique (Peer Review)') }}</span>
                 </a>
 
                 <a href="{{ route('announcements.index') }}"

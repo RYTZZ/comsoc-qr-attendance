@@ -146,6 +146,14 @@ Route::middleware(['auth', 'verified', 'require_password_change'])->group(functi
     Route::post('/critique/api/showcases/{showcase}/reviews', [\App\Http\Controllers\CodeCritiqueController::class, 'storeCritique'])->name('critique.api.reviews.store');
     Route::post('/critique/api/reviews/{critique}/accept', [\App\Http\Controllers\CodeCritiqueController::class, 'acceptCritique'])->name('critique.api.reviews.accept');
 
+    // COMSOC Code Arena: Algorithm Challenges & Competitive Coding
+    Route::get('/arena', [\App\Http\Controllers\ArenaController::class, 'indexView'])->name('arena.index');
+    Route::get('/arena/api/challenges', [\App\Http\Controllers\ArenaController::class, 'index'])->name('arena.api.index');
+    Route::get('/arena/api/challenges/{challenge}', [\App\Http\Controllers\ArenaController::class, 'show'])->name('arena.api.show');
+    Route::post('/arena/api/challenges/{challenge}/submit', [\App\Http\Controllers\ArenaController::class, 'submit'])
+        ->middleware('throttle:30,1')
+        ->name('arena.api.submit');
+
     // Dynamic Activity Registration & Multi-Session Event System (Student-Facing)
     Route::prefix('activities')->name('activities.')->group(function () {
         Route::get('/my-registrations', [\App\Http\Controllers\MemberActivityController::class, 'myRegistrations'])->name('my-registrations');
