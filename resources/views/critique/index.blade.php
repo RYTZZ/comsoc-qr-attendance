@@ -1,6 +1,4 @@
-@extends('layouts.app')
-
-@section('content')
+<x-app-layout>
 <div class="py-8 min-h-screen bg-[#0B1120]" x-data="{
     showcases: [],
     loading: true,
@@ -206,4 +204,5 @@
         </div>
     </div>
 </div>
-@endsection
+</x-app-layout>
+
