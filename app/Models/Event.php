@@ -124,6 +124,11 @@ class Event extends Model
         return $this->hasMany(AttendanceSession::class);
     }
 
+    public function tracks(): HasMany
+    {
+        return $this->hasMany(EventTrack::class);
+    }
+
     public function attendanceRecords(): HasMany
     {
         return $this->hasMany(AttendanceRecord::class);

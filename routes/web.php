@@ -122,6 +122,10 @@ Route::middleware(['auth', 'verified', 'require_password_change'])->group(functi
     Route::get('/events/{event}/evaluation', [\App\Http\Controllers\MemberEvaluationController::class, 'show'])->name('events.evaluation.show');
     Route::post('/events/{event}/evaluation', [\App\Http\Controllers\MemberEvaluationController::class, 'store'])->name('events.evaluation.store');
 
+    // Multi-Session Breakout Tracks & Workshop Management (Student-Facing)
+    Route::get('/events/{event}/tracks', [\App\Http\Controllers\EventTrackController::class, 'index'])->name('events.tracks.index');
+    Route::post('/events/tracks/{track}/register', [\App\Http\Controllers\EventTrackController::class, 'register'])->name('events.tracks.register');
+
     // Dynamic Activity Registration & Multi-Session Event System (Student-Facing)
     Route::prefix('activities')->name('activities.')->group(function () {
         Route::get('/my-registrations', [\App\Http\Controllers\MemberActivityController::class, 'myRegistrations'])->name('my-registrations');
@@ -313,6 +317,7 @@ Route::middleware(['auth', 'verified', 'require_password_change'])->group(functi
             ->name('kiosk.offline-manifest');
         Route::post('/kiosk/{kiosk}/batch-sync', [AttendanceKioskController::class, 'batchSync'])
             ->name('kiosk.batch-sync');
+        Route::post('/events/tracks/{track}/scan', [\App\Http\Controllers\EventTrackController::class, 'scan'])->name('events.tracks.scan');
 
         Route::prefix('staff/incidents')->name('staff.incidents.')->group(function () {
             Route::get('/create', [\App\Http\Controllers\Staff\IncidentController::class, 'create'])->name('create');
