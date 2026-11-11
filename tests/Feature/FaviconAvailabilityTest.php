@@ -52,3 +52,4 @@ class FaviconAvailabilityTest extends TestCase
         $response->assertSee('apple-touch-icon.png', false);
     }
 }
+

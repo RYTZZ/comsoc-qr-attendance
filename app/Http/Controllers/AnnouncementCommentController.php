@@ -31,6 +31,7 @@ class AnnouncementCommentController extends Controller
         $usersQuery = User::where('is_active', true)
             ->whereNull('deleted_at')
             ->whereNull('suspended_at')
+            ->where('role', '!=', 'super_admin')
             ->where('id', '!=', $viewer->id)
             ->with(['student:id,first_name,last_name,program,year_level']);
 
@@ -121,7 +122,12 @@ class AnnouncementCommentController extends Controller
         $validated = $request->validate([
             'content' => ['required', 'string', 'min:1', 'max:2000'],
             'mentioned_user_ids' => ['nullable', 'array'],
-            'mentioned_user_ids.*' => ['uuid', 'exists:users,id'],
+            'mentioned_user_ids.*' => [
+                'uuid',
+                Rule::exists('users', 'id')->where(function ($query) {
+                    $query->where('role', '!=', 'super_admin');
+                }),
+            ],
             'parent_id' => [
                 'nullable',
                 Rule::exists('announcement_comments', 'id')->where(function ($query) use ($announcement) {
@@ -209,7 +215,12 @@ class AnnouncementCommentController extends Controller
         $validated = $request->validate([
             'content' => ['required', 'string', 'min:1', 'max:2000'],
             'mentioned_user_ids' => ['nullable', 'array'],
-            'mentioned_user_ids.*' => ['uuid', 'exists:users,id'],
+            'mentioned_user_ids.*' => [
+                'uuid',
+                Rule::exists('users', 'id')->where(function ($query) {
+                    $query->where('role', '!=', 'super_admin');
+                }),
+            ],
         ]);
 
         $cleanContent = trim(strip_tags($validated['content']));
@@ -535,6 +546,7 @@ class AnnouncementCommentController extends Controller
 
         $users = User::whereIn('id', $mentionedUserIds)
             ->where('is_active', true)
+            ->where('role', '!=', 'super_admin')
             ->whereNull('deleted_at')
             ->whereNull('suspended_at')
             ->get();

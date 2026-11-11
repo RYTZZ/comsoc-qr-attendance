@@ -331,6 +331,8 @@ class AnnouncementEngagementTest extends TestCase
         $sender = $this->createMember('Alice', 'Sender');
         $receiver = $this->createMember('Charlie', 'Receiver');
         $receiver->update(['username' => 'charlie_r']);
+        $superAdmin = $this->createAdmin();
+        $superAdmin->update(['name' => 'Super Administrator']);
         $announcement = $this->createAnnouncement();
 
         // 1. Search mentionable users
@@ -343,6 +345,13 @@ class AnnouncementEngagementTest extends TestCase
         $this->assertNotEmpty($users);
         $this->assertSame($receiver->id, $users[0]['id']);
 
+        // Verify Super Administrator is NEVER returned in mentionable users search
+        $resSearchAdmin = $this->actingAs($sender)
+            ->getJson(route('announcements.mentionable-users', ['q' => 'Super']))
+            ->assertOk();
+        $adminUsers = $resSearchAdmin->json('users');
+        $this->assertEmpty(array_filter($adminUsers, fn($u) => $u['id'] === $superAdmin->id || $u['role'] === 'super_admin'));
+
         // Verify student number or sensitive attributes are NOT exposed in mentionable users API
         foreach ($users as $userPayload) {
             $this->assertArrayNotHasKey('student_number', $userPayload);
@@ -354,7 +363,22 @@ class AnnouncementEngagementTest extends TestCase
             $this->assertArrayHasKey('avatar', $userPayload);
         }
 
-        // 2. Post comment with mention
+        // 2. Reject manual attempt to submit super_admin in mentioned_user_ids
+        $this->actingAs($sender)
+            ->postJson(route('announcements.comments.store', $announcement), [
+                'content' => "Attempting to mention super admin @[Super Admin](user:{$superAdmin->id})",
+                'mentioned_user_ids' => [$superAdmin->id],
+            ])
+            ->assertStatus(422)
+            ->assertJsonValidationErrors(['mentioned_user_ids.0']);
+
+        // Verify no notification was created for super admin
+        $this->assertDatabaseMissing('notifications', [
+            'user_id' => $superAdmin->id,
+            'type' => 'announcement_mention',
+        ]);
+
+        // 3. Post comment with valid member mention
         $content = "Hey @[Charlie Receiver](user:{$receiver->id}) check this out!";
         $resComment = $this->actingAs($sender)
             ->postJson(route('announcements.comments.store', $announcement), [

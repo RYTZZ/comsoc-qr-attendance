@@ -528,7 +528,7 @@ export default (config) => ({
             const endpoint = this.routes.mentionableUsers || '/announcements/mentionable-users';
             const res = await window.axios.get(endpoint, { params: { q: '' } });
             if (res.data?.users) {
-                this.cachedMentionUsers = res.data.users;
+                this.cachedMentionUsers = (res.data.users || []).filter(u => u.role !== 'super_admin');
             }
         } catch (e) {
             // Silently ignore prefetch failure
@@ -555,7 +555,7 @@ export default (config) => ({
             if (this.cachedMentionUsers && this.cachedMentionUsers.length > 0) {
                 const q = this.mentionQuery.toLowerCase();
                 const filtered = this.cachedMentionUsers.filter(u =>
-                    (u.name && u.name.toLowerCase().includes(q))
+                    u.role !== 'super_admin' && (u.name && u.name.toLowerCase().includes(q))
                 );
                 if (filtered.length > 0) {
                     this.mentionSuggestions = filtered;
@@ -658,7 +658,7 @@ export default (config) => ({
                 const res = await window.axios.get(endpoint, {
                     params: { q: query }
                 });
-                this.mentionSuggestions = res.data.users || [];
+                this.mentionSuggestions = (res.data.users || []).filter(u => u.role !== 'super_admin');
                 if (!this.cachedMentionUsers && !query) {
                     this.cachedMentionUsers = this.mentionSuggestions;
                 }
