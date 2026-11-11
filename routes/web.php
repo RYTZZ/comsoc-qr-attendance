@@ -138,6 +138,14 @@ Route::middleware(['auth', 'verified', 'require_password_change'])->group(functi
     Route::post('/pulse/topics/{topic}/respond', [\App\Http\Controllers\PulseController::class, 'respond'])
         ->name('pulse.api.respond');
 
+    // COMSOC Code Critique: Peer Review & Git Showcase
+    Route::get('/critique', [\App\Http\Controllers\CodeCritiqueController::class, 'indexView'])->name('critique.index');
+    Route::get('/critique/api/showcases', [\App\Http\Controllers\CodeCritiqueController::class, 'index'])->name('critique.api.index');
+    Route::get('/critique/api/showcases/{showcase}', [\App\Http\Controllers\CodeCritiqueController::class, 'show'])->name('critique.api.show');
+    Route::post('/critique/api/showcases', [\App\Http\Controllers\CodeCritiqueController::class, 'store'])->name('critique.api.store');
+    Route::post('/critique/api/showcases/{showcase}/reviews', [\App\Http\Controllers\CodeCritiqueController::class, 'storeCritique'])->name('critique.api.reviews.store');
+    Route::post('/critique/api/reviews/{critique}/accept', [\App\Http\Controllers\CodeCritiqueController::class, 'acceptCritique'])->name('critique.api.reviews.accept');
+
     // Dynamic Activity Registration & Multi-Session Event System (Student-Facing)
     Route::prefix('activities')->name('activities.')->group(function () {
         Route::get('/my-registrations', [\App\Http\Controllers\MemberActivityController::class, 'myRegistrations'])->name('my-registrations');
