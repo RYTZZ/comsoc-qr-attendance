@@ -127,40 +127,46 @@ Route::middleware(['auth', 'verified', 'require_password_change'])->group(functi
     Route::post('/events/tracks/{track}/register', [\App\Http\Controllers\EventTrackController::class, 'register'])->name('events.tracks.register');
 
     // COMSOC Pulse: Anonymous Student Voice & Org Feedback
-    Route::get('/pulse', [\App\Http\Controllers\PulseController::class, 'indexView'])->name('pulse.index');
-    Route::get('/pulse/api/topics', [\App\Http\Controllers\PulseController::class, 'index'])->name('pulse.api.index');
-    Route::post('/pulse/api/topics', [\App\Http\Controllers\PulseController::class, 'store'])
-        ->middleware('throttle:10,1')
-        ->name('pulse.api.store');
-    Route::put('/pulse/api/topics/{topic}', [\App\Http\Controllers\PulseController::class, 'update'])
-        ->middleware('throttle:20,1')
-        ->name('pulse.api.update');
-    Route::delete('/pulse/api/topics/{topic}', [\App\Http\Controllers\PulseController::class, 'destroy'])
-        ->middleware('throttle:20,1')
-        ->name('pulse.api.destroy');
-    Route::post('/pulse/topics/{topic}/vote', [\App\Http\Controllers\PulseController::class, 'vote'])
-        ->middleware('throttle:30,1')
-        ->name('pulse.api.vote');
-    Route::post('/pulse/topics/{topic}/respond', [\App\Http\Controllers\PulseController::class, 'respond'])
-        ->name('pulse.api.respond');
+    Route::middleware('beta_module:pulse')->group(function () {
+        Route::get('/pulse', [\App\Http\Controllers\PulseController::class, 'indexView'])->name('pulse.index');
+        Route::get('/pulse/api/topics', [\App\Http\Controllers\PulseController::class, 'index'])->name('pulse.api.index');
+        Route::post('/pulse/api/topics', [\App\Http\Controllers\PulseController::class, 'store'])
+            ->middleware('throttle:10,1')
+            ->name('pulse.api.store');
+        Route::put('/pulse/api/topics/{topic}', [\App\Http\Controllers\PulseController::class, 'update'])
+            ->middleware('throttle:20,1')
+            ->name('pulse.api.update');
+        Route::delete('/pulse/api/topics/{topic}', [\App\Http\Controllers\PulseController::class, 'destroy'])
+            ->middleware('throttle:20,1')
+            ->name('pulse.api.destroy');
+        Route::post('/pulse/topics/{topic}/vote', [\App\Http\Controllers\PulseController::class, 'vote'])
+            ->middleware('throttle:30,1')
+            ->name('pulse.api.vote');
+        Route::post('/pulse/topics/{topic}/respond', [\App\Http\Controllers\PulseController::class, 'respond'])
+            ->name('pulse.api.respond');
+    });
 
     // COMSOC Code Critique: Peer Review & Git Showcase
-    Route::get('/critique', [\App\Http\Controllers\CodeCritiqueController::class, 'indexView'])->name('critique.index');
-    Route::get('/critique/api/showcases', [\App\Http\Controllers\CodeCritiqueController::class, 'index'])->name('critique.api.index');
-    Route::get('/critique/api/showcases/{showcase}', [\App\Http\Controllers\CodeCritiqueController::class, 'show'])->name('critique.api.show');
-    Route::post('/critique/api/showcases', [\App\Http\Controllers\CodeCritiqueController::class, 'store'])->name('critique.api.store');
-    Route::put('/critique/api/showcases/{showcase}', [\App\Http\Controllers\CodeCritiqueController::class, 'update'])->name('critique.api.update');
-    Route::delete('/critique/api/showcases/{showcase}', [\App\Http\Controllers\CodeCritiqueController::class, 'destroy'])->name('critique.api.destroy');
-    Route::post('/critique/api/showcases/{showcase}/reviews', [\App\Http\Controllers\CodeCritiqueController::class, 'storeCritique'])->name('critique.api.reviews.store');
-    Route::post('/critique/api/reviews/{critique}/accept', [\App\Http\Controllers\CodeCritiqueController::class, 'acceptCritique'])->name('critique.api.reviews.accept');
+    Route::middleware('beta_module:critique')->group(function () {
+        Route::get('/critique', [\App\Http\Controllers\CodeCritiqueController::class, 'indexView'])->name('critique.index');
+        Route::get('/critique/api/showcases', [\App\Http\Controllers\CodeCritiqueController::class, 'index'])->name('critique.api.index');
+        Route::get('/critique/api/showcases/{showcase}', [\App\Http\Controllers\CodeCritiqueController::class, 'show'])->name('critique.api.show');
+        Route::post('/critique/api/showcases', [\App\Http\Controllers\CodeCritiqueController::class, 'store'])->name('critique.api.store');
+        Route::put('/critique/api/showcases/{showcase}', [\App\Http\Controllers\CodeCritiqueController::class, 'update'])->name('critique.api.update');
+        Route::delete('/critique/api/showcases/{showcase}', [\App\Http\Controllers\CodeCritiqueController::class, 'destroy'])->name('critique.api.destroy');
+        Route::post('/critique/api/showcases/{showcase}/reviews', [\App\Http\Controllers\CodeCritiqueController::class, 'storeCritique'])->name('critique.api.reviews.store');
+        Route::post('/critique/api/reviews/{critique}/accept', [\App\Http\Controllers\CodeCritiqueController::class, 'acceptCritique'])->name('critique.api.reviews.accept');
+    });
 
     // COMSOC Code Arena: Algorithm Challenges & Competitive Coding
-    Route::get('/arena', [\App\Http\Controllers\ArenaController::class, 'indexView'])->name('arena.index');
-    Route::get('/arena/api/challenges', [\App\Http\Controllers\ArenaController::class, 'index'])->name('arena.api.index');
-    Route::get('/arena/api/challenges/{challenge}', [\App\Http\Controllers\ArenaController::class, 'show'])->name('arena.api.show');
-    Route::post('/arena/api/challenges/{challenge}/submit', [\App\Http\Controllers\ArenaController::class, 'submit'])
-        ->middleware('throttle:30,1')
-        ->name('arena.api.submit');
+    Route::middleware('beta_module:arena')->group(function () {
+        Route::get('/arena', [\App\Http\Controllers\ArenaController::class, 'indexView'])->name('arena.index');
+        Route::get('/arena/api/challenges', [\App\Http\Controllers\ArenaController::class, 'index'])->name('arena.api.index');
+        Route::get('/arena/api/challenges/{challenge}', [\App\Http\Controllers\ArenaController::class, 'show'])->name('arena.api.show');
+        Route::post('/arena/api/challenges/{challenge}/submit', [\App\Http\Controllers\ArenaController::class, 'submit'])
+            ->middleware('throttle:30,1')
+            ->name('arena.api.submit');
+    });
 
     // Dynamic Activity Registration & Multi-Session Event System (Student-Facing)
     Route::prefix('activities')->name('activities.')->group(function () {

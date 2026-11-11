@@ -22,13 +22,14 @@ class ComsocPulseAnonymousVoiceTest extends TestCase
         ]);
 
         $student = User::factory()->create(['role' => 'student']);
+        $headers = ['X-Bypass-Coming-Soon' => 'true'];
 
         // 1. Submit anonymous feedback with valid parameters
         $post = $this->actingAs($student)->postJson(route('pulse.api.store'), [
             'category' => 'lab_facilities',
             'title' => 'Lab 301 AC Needs Servicing',
             'content' => 'The aircon units in Lab 301 are turning off every few minutes during afternoon sessions.',
-        ]);
+        ], $headers);
 
         $post->assertStatus(201);
         $topicId = $post->json('topic_id');
@@ -40,7 +41,7 @@ class ComsocPulseAnonymousVoiceTest extends TestCase
         $this->assertEquals(1, $topic->votes_count);
 
         // 2. Fetch list of topics
-        $index = $this->actingAs($student)->getJson(route('pulse.api.index'));
+        $index = $this->actingAs($student)->getJson(route('pulse.api.index'), $headers);
         $index->assertStatus(200);
         $index->assertJsonFragment([
             'title' => 'Lab 301 AC Needs Servicing',
@@ -53,7 +54,7 @@ class ComsocPulseAnonymousVoiceTest extends TestCase
             'category' => 'lab_facilities',
             'title' => 'Lab 301 AC and Fans Need Servicing',
             'content' => 'Updated: The aircon units and ceiling fans in Lab 301 are turning off every few minutes.',
-        ]);
+        ], $headers);
         $update->assertStatus(200);
         $this->assertEquals('Lab 301 AC and Fans Need Servicing', $topic->fresh()->title);
 
@@ -63,14 +64,14 @@ class ComsocPulseAnonymousVoiceTest extends TestCase
             'category' => 'lab_facilities',
             'title' => 'Hacked Title By Other User',
             'content' => 'Malicious edit attempt by non-owner.',
-        ]);
+        ], $headers);
         $unauthEdit->assertStatus(403);
 
-        $unauthDelete = $this->actingAs($otherStudent)->deleteJson(route('pulse.api.destroy', $topic));
+        $unauthDelete = $this->actingAs($otherStudent)->deleteJson(route('pulse.api.destroy', $topic), [], $headers);
         $unauthDelete->assertStatus(403);
 
         // 5. Owner deletes topic
-        $delete = $this->actingAs($student)->deleteJson(route('pulse.api.destroy', $topic));
+        $delete = $this->actingAs($student)->deleteJson(route('pulse.api.destroy', $topic), [], $headers);
         $delete->assertStatus(200);
         $this->assertNull(PulseTopic::find($topicId));
     }

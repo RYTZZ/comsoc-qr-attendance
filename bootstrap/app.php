@@ -24,6 +24,7 @@ return Application::configure(basePath: dirname(__DIR__))
         $middleware->alias([
             'role' => EnsureRole::class,
             'require_password_change' => RequirePasswordChange::class,
+            'beta_module' => \App\Http\Middleware\EnsureBetaModuleAccessible::class,
         ]);
 
         $middleware->web(append: [

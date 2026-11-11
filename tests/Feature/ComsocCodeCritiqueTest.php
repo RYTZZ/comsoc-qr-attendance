@@ -24,6 +24,7 @@ class ComsocCodeCritiqueTest extends TestCase
 
         $author = User::factory()->create(['role' => 'student']);
         $reviewer = User::factory()->create(['role' => 'student']);
+        $headers = ['X-Bypass-Coming-Soon' => 'true'];
 
         // 1. Submit showcase
         $showcaseRes = $this->actingAs($author)->postJson(route('critique.api.store'), [
@@ -31,7 +32,7 @@ class ComsocCodeCritiqueTest extends TestCase
             'description' => 'Need advice on AVL balancing rotations and memory footprint in PHP.',
             'language' => 'php',
             'bounty_exp' => 75,
-        ]);
+        ], $headers);
 
         $showcaseRes->assertStatus(201);
         $showcaseId = $showcaseRes->json('showcase_id');
@@ -45,7 +46,7 @@ class ComsocCodeCritiqueTest extends TestCase
             'description' => 'Updated: Need advice on AVL balancing rotations in PHP with type hints.',
             'language' => 'php',
             'bounty_exp' => 75,
-        ]);
+        ], $headers);
         $updateRes->assertStatus(200);
         $this->assertEquals('Binary Search Tree AVL Balancing', $showcase->fresh()->title);
 
@@ -53,7 +54,7 @@ class ComsocCodeCritiqueTest extends TestCase
         $critiqueRes = $this->actingAs($reviewer)->postJson(route('critique.api.reviews.store', $showcase), [
             'summary' => 'You should check the node height recalculation after left-right double rotations.',
             'suggested_diff' => '+$this->updateHeight($node);',
-        ]);
+        ], $headers);
 
         $critiqueRes->assertStatus(201);
         $critiqueId = $critiqueRes->json('critique_id');
@@ -61,14 +62,14 @@ class ComsocCodeCritiqueTest extends TestCase
         $this->assertNotNull($critique);
 
         // 4. Accept solution and verify bounty EXP credited to reviewer
-        $acceptRes = $this->actingAs($author)->postJson(route('critique.api.reviews.accept', $critique));
+        $acceptRes = $this->actingAs($author)->postJson(route('critique.api.reviews.accept', $critique), [], $headers);
         $acceptRes->assertStatus(200);
 
         $reviewer->refresh();
         $this->assertEquals(75, $reviewer->getSpendableExp());
 
         // 5. Author can delete showcase
-        $deleteRes = $this->actingAs($author)->deleteJson(route('critique.api.destroy', $showcase));
+        $deleteRes = $this->actingAs($author)->deleteJson(route('critique.api.destroy', $showcase), [], $headers);
         $deleteRes->assertStatus(200);
         $this->assertNull(CodeShowcase::find($showcaseId));
     }

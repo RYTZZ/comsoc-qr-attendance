@@ -42,8 +42,10 @@ class ComsocCodeArenaTest extends TestCase
             'is_hidden' => false,
         ]);
 
+        $headers = ['X-Bypass-Coming-Soon' => 'true'];
+
         // 1. Fetch challenge listing
-        $response = $this->actingAs($user)->getJson(route('arena.api.index'));
+        $response = $this->actingAs($user)->getJson(route('arena.api.index'), $headers);
         $response->assertStatus(200);
         $response->assertJsonFragment(['title' => 'Palindrome Test']);
         $this->assertEquals(0, $response->json('user_stats.spendable_exp'));
@@ -52,7 +54,7 @@ class ComsocCodeArenaTest extends TestCase
         $submit = $this->actingAs($user)->postJson(route('arena.api.submit', $challenge), [
             'language' => 'javascript',
             'source_code' => 'function isPalindrome(s) { return true; }',
-        ]);
+        ], $headers);
 
         $submit->assertStatus(200);
         $submit->assertJson([
@@ -69,7 +71,7 @@ class ComsocCodeArenaTest extends TestCase
         $repeatSubmit = $this->actingAs($user)->postJson(route('arena.api.submit', $challenge), [
             'language' => 'javascript',
             'source_code' => 'function isPalindrome(s) { return true; }',
-        ]);
+        ], $headers);
 
         $repeatSubmit->assertStatus(200);
         $repeatSubmit->assertJson([

@@ -129,9 +129,12 @@
                 </a>
 
                 <a href="{{ route('arena.index') }}"
-                   class="flex items-center gap-3 px-3 py-2.5 rounded-xl text-xs font-semibold transition {{ request()->routeIs('arena.*') ? 'bg-burgundy-gradient text-white shadow-md' : 'text-[#94A3B8] hover:text-white hover:bg-[#1E293B]' }}">
-                    <i data-lucide="terminal" class="w-4 h-4 shrink-0 {{ request()->routeIs('arena.*') ? 'text-white' : 'text-[#94A3B8]' }}"></i>
-                    <span>{{ __('Code Arena (LeetCode)') }}</span>
+                   class="flex items-center justify-between px-3 py-2.5 rounded-xl text-xs font-semibold transition {{ request()->routeIs('arena.*') ? 'bg-burgundy-gradient text-white shadow-md' : 'text-[#94A3B8] hover:text-white hover:bg-[#1E293B]' }}">
+                    <div class="flex items-center gap-3">
+                        <i data-lucide="terminal" class="w-4 h-4 shrink-0 {{ request()->routeIs('arena.*') ? 'text-white' : 'text-[#94A3B8]' }}"></i>
+                        <span>{{ __('Code Arena (LeetCode)') }}</span>
+                    </div>
+                    <span class="text-[9px] font-extrabold uppercase px-1.5 py-0.5 rounded bg-rose-500/20 text-rose-300 border border-rose-500/30 tracking-tight shrink-0">SOON</span>
                 </a>
             </div>
         </div>
@@ -147,9 +150,12 @@
                 </a>
 
                 <a href="{{ route('pulse.index') }}"
-                   class="flex items-center gap-3 px-3 py-2.5 rounded-xl text-xs font-semibold transition {{ request()->routeIs('pulse.*') ? 'bg-burgundy-gradient text-white shadow-md' : 'text-[#94A3B8] hover:text-white hover:bg-[#1E293B]' }}">
-                    <i data-lucide="radio" class="w-4 h-4 shrink-0 {{ request()->routeIs('pulse.*') ? 'text-white' : 'text-[#94A3B8]' }}"></i>
-                    <span>{{ __('COMSOC Pulse (Anonymous Voice)') }}</span>
+                   class="flex items-center justify-between px-3 py-2.5 rounded-xl text-xs font-semibold transition {{ request()->routeIs('pulse.*') ? 'bg-burgundy-gradient text-white shadow-md' : 'text-[#94A3B8] hover:text-white hover:bg-[#1E293B]' }}">
+                    <div class="flex items-center gap-3">
+                        <i data-lucide="radio" class="w-4 h-4 shrink-0 {{ request()->routeIs('pulse.*') ? 'text-white' : 'text-[#94A3B8]' }}"></i>
+                        <span>{{ __('COMSOC Pulse (Anonymous Voice)') }}</span>
+                    </div>
+                    <span class="text-[9px] font-extrabold uppercase px-1.5 py-0.5 rounded bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 tracking-tight shrink-0">SOON</span>
                 </a>
             </div>
         </div>
@@ -165,9 +171,12 @@
                 </a>
 
                 <a href="{{ route('critique.index') }}"
-                   class="flex items-center gap-3 px-3 py-2.5 rounded-xl text-xs font-semibold transition {{ request()->routeIs('critique.*') ? 'bg-burgundy-gradient text-white shadow-md' : 'text-[#94A3B8] hover:text-white hover:bg-[#1E293B]' }}">
-                    <i data-lucide="git-pull-request" class="w-4 h-4 shrink-0 {{ request()->routeIs('critique.*') ? 'text-white' : 'text-[#94A3B8]' }}"></i>
-                    <span>{{ __('Code Critique (Peer Review)') }}</span>
+                   class="flex items-center justify-between px-3 py-2.5 rounded-xl text-xs font-semibold transition {{ request()->routeIs('critique.*') ? 'bg-burgundy-gradient text-white shadow-md' : 'text-[#94A3B8] hover:text-white hover:bg-[#1E293B]' }}">
+                    <div class="flex items-center gap-3">
+                        <i data-lucide="git-pull-request" class="w-4 h-4 shrink-0 {{ request()->routeIs('critique.*') ? 'text-white' : 'text-[#94A3B8]' }}"></i>
+                        <span>{{ __('Code Critique (Peer Review)') }}</span>
+                    </div>
+                    <span class="text-[9px] font-extrabold uppercase px-1.5 py-0.5 rounded bg-sky-500/20 text-sky-300 border border-sky-500/30 tracking-tight shrink-0">SOON</span>
                 </a>
 
                 <a href="{{ route('announcements.index') }}"
