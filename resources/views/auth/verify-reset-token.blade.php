@@ -7,6 +7,8 @@
 
     <title>Enter Reset Code - {{ config('app.name', 'COMSOC Hub') }}</title>
 
+    <x-favicon />
+
     <!-- Preconnect to Google Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>

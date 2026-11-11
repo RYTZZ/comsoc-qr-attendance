@@ -6,6 +6,7 @@
     <meta name="csrf-token" content="{{ csrf_token() }}">
     <meta name="description" content="COMSOC HUB Privacy Notice and Data Protection Policy pursuant to the Philippine Data Privacy Act of 2012 (RA 10173).">
     <title>Privacy Notice — COMSOC HUB</title>
+    <x-favicon />
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Manrope:wght@600;700;800&family=Space+Grotesk:wght@600;700&display=swap" rel="stylesheet">
