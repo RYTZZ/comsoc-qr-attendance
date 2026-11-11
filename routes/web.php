@@ -132,6 +132,12 @@ Route::middleware(['auth', 'verified', 'require_password_change'])->group(functi
     Route::post('/pulse/api/topics', [\App\Http\Controllers\PulseController::class, 'store'])
         ->middleware('throttle:10,1')
         ->name('pulse.api.store');
+    Route::put('/pulse/api/topics/{topic}', [\App\Http\Controllers\PulseController::class, 'update'])
+        ->middleware('throttle:20,1')
+        ->name('pulse.api.update');
+    Route::delete('/pulse/api/topics/{topic}', [\App\Http\Controllers\PulseController::class, 'destroy'])
+        ->middleware('throttle:20,1')
+        ->name('pulse.api.destroy');
     Route::post('/pulse/topics/{topic}/vote', [\App\Http\Controllers\PulseController::class, 'vote'])
         ->middleware('throttle:30,1')
         ->name('pulse.api.vote');
@@ -143,6 +149,8 @@ Route::middleware(['auth', 'verified', 'require_password_change'])->group(functi
     Route::get('/critique/api/showcases', [\App\Http\Controllers\CodeCritiqueController::class, 'index'])->name('critique.api.index');
     Route::get('/critique/api/showcases/{showcase}', [\App\Http\Controllers\CodeCritiqueController::class, 'show'])->name('critique.api.show');
     Route::post('/critique/api/showcases', [\App\Http\Controllers\CodeCritiqueController::class, 'store'])->name('critique.api.store');
+    Route::put('/critique/api/showcases/{showcase}', [\App\Http\Controllers\CodeCritiqueController::class, 'update'])->name('critique.api.update');
+    Route::delete('/critique/api/showcases/{showcase}', [\App\Http\Controllers\CodeCritiqueController::class, 'destroy'])->name('critique.api.destroy');
     Route::post('/critique/api/showcases/{showcase}/reviews', [\App\Http\Controllers\CodeCritiqueController::class, 'storeCritique'])->name('critique.api.reviews.store');
     Route::post('/critique/api/reviews/{critique}/accept', [\App\Http\Controllers\CodeCritiqueController::class, 'acceptCritique'])->name('critique.api.reviews.accept');
 

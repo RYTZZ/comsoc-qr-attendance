@@ -42,3 +42,4 @@ class ArenaChallenge extends Model
         return $this->hasMany(ArenaSubmission::class);
     }
 }
+

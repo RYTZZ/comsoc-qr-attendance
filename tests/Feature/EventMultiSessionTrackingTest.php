@@ -95,3 +95,4 @@ class EventMultiSessionTrackingTest extends TestCase
         ]);
     }
 }
+

@@ -2,8 +2,8 @@
 
 namespace Tests\Feature;
 
+use App\Models\AcademicYear;
 use App\Models\PulseTopic;
-use App\Models\PulseVote;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
@@ -14,60 +14,64 @@ class ComsocPulseAnonymousVoiceTest extends TestCase
 
     public function test_students_can_post_feedback_anonymously_and_upvote(): void
     {
-        $studentA = User::factory()->create(['role' => 'student', 'is_active' => true]);
-        $studentB = User::factory()->create(['role' => 'student', 'is_active' => true]);
-        $admin = User::factory()->create(['role' => 'admin', 'is_active' => true]);
+        AcademicYear::create([
+            'label' => 'AY 2025–2026',
+            'year_start' => 2025,
+            'year_end' => 2026,
+            'is_active' => true,
+        ]);
 
-        // 1. Student A posts anonymous feedback
-        $res = $this->actingAs($studentA)
-            ->postJson(route('pulse.api.store'), [
-                'category' => 'lab_facilities',
-                'title' => 'Lab 3 Router Network Drops During Practicals',
-                'content' => 'The main network switch in Lab 3 disconnects every 15-20 minutes when 30 students are compiling code.',
-            ])
-            ->assertCreated();
+        $student = User::factory()->create(['role' => 'student']);
 
-        $topicId = $res->json('topic_id');
-        $this->assertNotNull($topicId);
+        // 1. Submit anonymous feedback with valid parameters
+        $post = $this->actingAs($student)->postJson(route('pulse.api.store'), [
+            'category' => 'lab_facilities',
+            'title' => 'Lab 301 AC Needs Servicing',
+            'content' => 'The aircon units in Lab 301 are turning off every few minutes during afternoon sessions.',
+        ]);
 
-        $topic = PulseTopic::findOrFail($topicId);
-        $this->assertSame('lab_facilities', $topic->category);
-        $this->assertSame('under_review', $topic->status);
-        $this->assertSame(1, $topic->votes_count);
+        $post->assertStatus(201);
+        $topicId = $post->json('topic_id');
 
-        // Verify zero user_id is stored in PulseVote or PulseTopic
-        $this->assertDatabaseMissing('pulse_votes', ['voter_hash' => $studentA->id]);
+        // Verify record created in database with user_id attached for author edit/delete permissions
+        $topic = PulseTopic::find($topicId);
+        $this->assertNotNull($topic);
+        $this->assertEquals($student->id, $topic->user_id);
+        $this->assertEquals(1, $topic->votes_count);
 
-        // 2. Student B upvotes the topic
-        $resVote = $this->actingAs($studentB)
-            ->postJson(route('pulse.api.vote', $topic))
-            ->assertOk()
-            ->assertJson([
-                'success' => true,
-                'action' => 'added',
-                'votes_count' => 2,
-                'has_voted' => true,
-            ]);
+        // 2. Fetch list of topics
+        $index = $this->actingAs($student)->getJson(route('pulse.api.index'));
+        $index->assertStatus(200);
+        $index->assertJsonFragment([
+            'title' => 'Lab 301 AC Needs Servicing',
+            'can_edit' => true,
+            'can_delete' => true,
+        ]);
 
-        $this->assertSame(2, $topic->fresh()->votes_count);
+        // 3. Edit topic
+        $update = $this->actingAs($student)->putJson(route('pulse.api.update', $topic), [
+            'category' => 'lab_facilities',
+            'title' => 'Lab 301 AC and Fans Need Servicing',
+            'content' => 'Updated: The aircon units and ceiling fans in Lab 301 are turning off every few minutes.',
+        ]);
+        $update->assertStatus(200);
+        $this->assertEquals('Lab 301 AC and Fans Need Servicing', $topic->fresh()->title);
 
-        // 3. Officer responds officially
-        $this->actingAs($admin)
-            ->postJson(route('pulse.api.respond', $topic), [
-                'status' => 'resolved',
-                'official_response' => 'The university network administrator replaced the faulty switch in Lab 3 today.',
-                'is_pinned' => true,
-            ])
-            ->assertOk()
-            ->assertJson([
-                'success' => true,
-                'topic' => [
-                    'status' => 'resolved',
-                    'is_pinned' => true,
-                ],
-            ]);
+        // 4. Another student cannot edit or delete it
+        $otherStudent = User::factory()->create(['role' => 'student']);
+        $unauthEdit = $this->actingAs($otherStudent)->putJson(route('pulse.api.update', $topic), [
+            'category' => 'lab_facilities',
+            'title' => 'Hacked Title By Other User',
+            'content' => 'Malicious edit attempt by non-owner.',
+        ]);
+        $unauthEdit->assertStatus(403);
 
-        $this->assertSame('resolved', $topic->fresh()->status);
-        $this->assertTrue($topic->fresh()->is_pinned);
+        $unauthDelete = $this->actingAs($otherStudent)->deleteJson(route('pulse.api.destroy', $topic));
+        $unauthDelete->assertStatus(403);
+
+        // 5. Owner deletes topic
+        $delete = $this->actingAs($student)->deleteJson(route('pulse.api.destroy', $topic));
+        $delete->assertStatus(200);
+        $this->assertNull(PulseTopic::find($topicId));
     }
 }

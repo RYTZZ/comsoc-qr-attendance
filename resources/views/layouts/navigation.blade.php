@@ -1,4 +1,4 @@
-﻿<!-- Navigation Overlay Backdrop for both Desktop & Mobile -->
+<!-- Navigation Overlay Backdrop for both Desktop & Mobile -->
 <div x-show="drawerOpen"
      x-transition:enter="transition-opacity ease-linear duration-200"
      x-transition:enter-start="opacity-0"

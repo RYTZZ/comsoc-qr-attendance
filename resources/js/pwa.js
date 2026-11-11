@@ -57,3 +57,4 @@ export function initPWA() {
     window.addEventListener('online', updateOnlineStatus);
     window.addEventListener('offline', updateOnlineStatus);
 }
+

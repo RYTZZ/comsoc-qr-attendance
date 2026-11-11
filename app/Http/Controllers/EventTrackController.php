@@ -127,3 +127,4 @@ class EventTrackController extends Controller
         ]);
     }
 }
+

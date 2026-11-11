@@ -7,16 +7,26 @@
     language: 'javascript',
     submitting: false,
     verdictResult: null,
+    userStats: { spendable_exp: 0, lifetime_exp: 0, solved_count: 0 },
+    langOptions: [
+        { value: 'javascript', label: '⚡ JavaScript (Node)' },
+        { value: 'php', label: '🐘 PHP 8.2' },
+        { value: 'python', label: '🐍 Python 3.11' }
+    ],
     async fetchChallenges() {
         this.loading = true;
         try {
             const res = await window.axios.get('{{ route('arena.api.index') }}');
             this.challenges = res.data.challenges || [];
-            if (this.challenges.length > 0) {
+            if (res.data.user_stats) {
+                this.userStats = res.data.user_stats;
+            }
+            if (this.challenges.length > 0 && !this.activeChallenge) {
                 this.selectChallenge(this.challenges[0]);
             }
         } catch (e) {
             console.error(e);
+            if (window.toast) window.toast('Failed to load challenges. Please refresh.', 'error');
         } finally {
             this.loading = false;
         }
@@ -28,6 +38,7 @@
             this.verdictResult = null;
         } catch (e) {
             console.error(e);
+            if (window.toast) window.toast('Failed to load problem details.', 'error');
         }
     },
     async submitSolution() {
@@ -42,9 +53,25 @@
             this.verdictResult = res.data;
             if (res.data.verdict === 'accepted') {
                 this.activeChallenge.user_solved = true;
+                const matchInList = this.challenges.find(ch => ch.id === this.activeChallenge.id);
+                if (matchInList) matchInList.user_solved = true;
+
+                if (res.data.exp_earned > 0) {
+                    if (window.toast) window.toast(`🎉 Challenge Solved! +${res.data.exp_earned} EXP credited to your ledger.`, 'success', 5000);
+                    this.userStats.spendable_exp = res.data.spendable_exp;
+                    this.userStats.lifetime_exp = res.data.lifetime_exp;
+                    this.userStats.solved_count++;
+                } else if (res.data.already_claimed) {
+                    if (window.toast) window.toast('Challenge Solved! (Reward already claimed previously)', 'info', 4000);
+                }
+            } else {
+                if (window.toast) window.toast('Solution failed validation test cases. Check output and retry.', 'warning', 4000);
             }
         } catch (e) {
-            alert(e.response?.data?.message || 'Submission failed.');
+            const err = e.response?.data?.message || 'Submission failed. Please check your network and try again.';
+            if (window.toast) {
+                window.toast(err, 'error', 5000);
+            }
         } finally {
             this.submitting = false;
         }
@@ -52,7 +79,7 @@
 }" x-init="fetchChallenges()">
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-6">
         
-        <!-- Header -->
+        <!-- Header & User EXP Progression Bar -->
         <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-slate-800 pb-5">
             <div>
                 <div class="flex items-center gap-2">
@@ -62,6 +89,24 @@
                 </div>
                 <h1 class="text-2xl font-bold font-brand-display text-white mt-1">COMSOC Code Arena</h1>
                 <p class="text-xs text-slate-400 mt-0.5">Solve algorithmic puzzles, earn EXP, and sharpen your technical coding interview skills.</p>
+            </div>
+
+            <!-- User Stat Quick Badges -->
+            <div class="flex items-center gap-3 shrink-0">
+                <div class="bg-[#172033] border border-slate-800 px-3.5 py-2 rounded-xl flex items-center gap-2.5 shadow-sm">
+                    <i data-lucide="zap" class="w-4 h-4 text-amber-400"></i>
+                    <div>
+                        <span class="text-[9px] text-slate-400 uppercase tracking-wider font-bold block leading-none">Spendable EXP</span>
+                        <span class="text-sm font-bold text-amber-400 font-mono leading-tight" x-text="userStats.spendable_exp"></span>
+                    </div>
+                </div>
+                <div class="bg-[#172033] border border-slate-800 px-3.5 py-2 rounded-xl flex items-center gap-2.5 shadow-sm">
+                    <i data-lucide="check-circle-2" class="w-4 h-4 text-emerald-400"></i>
+                    <div>
+                        <span class="text-[9px] text-slate-400 uppercase tracking-wider font-bold block leading-none">Puzzles Solved</span>
+                        <span class="text-sm font-bold text-emerald-400 font-mono leading-tight" x-text="userStats.solved_count"></span>
+                    </div>
+                </div>
             </div>
         </div>
 
@@ -133,11 +178,20 @@
                         <div class="card bg-[#172033] border border-slate-800 p-5 rounded-2xl space-y-3">
                             <div class="flex items-center justify-between">
                                 <span class="text-xs font-bold text-slate-300 uppercase tracking-wider">Solution Editor</span>
-                                <select x-model="language" class="input-dark text-xs py-1 px-3 rounded-lg bg-slate-900 border-slate-700">
-                                    <option value="javascript">JavaScript (Node)</option>
-                                    <option value="php">PHP 8.2</option>
-                                    <option value="python">Python 3.11</option>
-                                </select>
+                                
+                                <!-- Customized Dropdown for Programming Language Selection -->
+                                <div class="w-52" @dropdown-selected.stop="language = $event.detail.value">
+                                    <x-custom-dropdown
+                                        name="arena_lang_selector"
+                                        :options="[
+                                            ['value' => 'javascript', 'label' => '⚡ JavaScript (Node)'],
+                                            ['value' => 'php', 'label' => '🐘 PHP 8.2'],
+                                            ['value' => 'python', 'label' => '🐍 Python 3.11']
+                                        ]"
+                                        value="javascript"
+                                        buttonClass="py-1.5 px-3 text-xs bg-[#0B1120] border-slate-700"
+                                    />
+                                </div>
                             </div>
 
                             <textarea x-model="sourceCode" rows="10" class="input-dark font-mono text-xs w-full p-4 rounded-xl bg-slate-950 border-slate-800 text-rose-100 focus:border-[#8F3033]"></textarea>
@@ -167,4 +221,3 @@
     </div>
 </div>
 </x-app-layout>
-

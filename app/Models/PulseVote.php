@@ -21,3 +21,4 @@ class PulseVote extends Model
         return $this->belongsTo(PulseTopic::class, 'pulse_topic_id');
     }
 }
+

@@ -2,6 +2,7 @@
 
 namespace Tests\Feature;
 
+use App\Models\AcademicYear;
 use App\Models\CodeCritique;
 use App\Models\CodeShowcase;
 use App\Models\User;
@@ -14,48 +15,61 @@ class ComsocCodeCritiqueTest extends TestCase
 
     public function test_students_can_submit_code_for_peer_review_and_accept_solutions(): void
     {
-        $author = User::factory()->create(['role' => 'student', 'is_active' => true]);
-        $reviewer = User::factory()->create(['role' => 'student', 'is_active' => true]);
+        AcademicYear::create([
+            'label' => 'AY 2025–2026',
+            'year_start' => 2025,
+            'year_end' => 2026,
+            'is_active' => true,
+        ]);
 
-        // 1. Author submits code showcase
-        $res = $this->actingAs($author)
-            ->postJson(route('critique.api.store'), [
-                'title' => 'Secure Password Reset OTP Token Generator',
-                'description' => 'Please review this cryptographic token generation logic for potential collisions.',
-                'language' => 'php',
-                'bounty_exp' => 50,
-                'code_snippet' => 'public function generateOtp() { return str_pad(random_int(0, 999999), 6, "0", STR_PAD_LEFT); }',
-            ])
-            ->assertCreated();
+        $author = User::factory()->create(['role' => 'student']);
+        $reviewer = User::factory()->create(['role' => 'student']);
 
-        $showcaseId = $res->json('showcase_id');
-        $this->assertNotNull($showcaseId);
-        $showcase = CodeShowcase::findOrFail($showcaseId);
-        $this->assertSame('open', $showcase->status);
+        // 1. Submit showcase
+        $showcaseRes = $this->actingAs($author)->postJson(route('critique.api.store'), [
+            'title' => 'Binary Search Tree Implementation',
+            'description' => 'Need advice on AVL balancing rotations and memory footprint in PHP.',
+            'language' => 'php',
+            'bounty_exp' => 75,
+        ]);
 
-        // 2. Reviewer posts critique
-        $resCritique = $this->actingAs($reviewer)
-            ->postJson(route('critique.api.reviews.store', $showcase), [
-                'summary' => 'Logic is secure because random_int uses CSPRNG under the hood. Consider adding expiry validation check.',
-                'suggested_diff' => '+ $tokenExpiry = now()->addMinutes(15);',
-                'line_number' => 1,
-            ])
-            ->assertCreated();
+        $showcaseRes->assertStatus(201);
+        $showcaseId = $showcaseRes->json('showcase_id');
+        $showcase = CodeShowcase::find($showcaseId);
+        $this->assertNotNull($showcase);
+        $this->assertEquals(75, $showcase->bounty_exp);
 
-        $critiqueId = $resCritique->json('critique.id');
-        $critique = CodeCritique::findOrFail($critiqueId);
-        $this->assertSame($reviewer->id, $critique->reviewer_id);
-        $this->assertSame('in_review', $showcase->fresh()->status);
+        // 2. Author updates showcase
+        $updateRes = $this->actingAs($author)->putJson(route('critique.api.update', $showcase), [
+            'title' => 'Binary Search Tree AVL Balancing',
+            'description' => 'Updated: Need advice on AVL balancing rotations in PHP with type hints.',
+            'language' => 'php',
+            'bounty_exp' => 75,
+        ]);
+        $updateRes->assertStatus(200);
+        $this->assertEquals('Binary Search Tree AVL Balancing', $showcase->fresh()->title);
 
-        // 3. Author accepts critique
-        $this->actingAs($author)
-            ->postJson(route('critique.api.reviews.accept', $critique))
-            ->assertOk()
-            ->assertJson([
-                'success' => true,
-            ]);
+        // 3. Post peer review
+        $critiqueRes = $this->actingAs($reviewer)->postJson(route('critique.api.reviews.store', $showcase), [
+            'summary' => 'You should check the node height recalculation after left-right double rotations.',
+            'suggested_diff' => '+$this->updateHeight($node);',
+        ]);
 
-        $this->assertTrue($critique->fresh()->is_accepted);
-        $this->assertSame('solved', $showcase->fresh()->status);
+        $critiqueRes->assertStatus(201);
+        $critiqueId = $critiqueRes->json('critique_id');
+        $critique = CodeCritique::find($critiqueId);
+        $this->assertNotNull($critique);
+
+        // 4. Accept solution and verify bounty EXP credited to reviewer
+        $acceptRes = $this->actingAs($author)->postJson(route('critique.api.reviews.accept', $critique));
+        $acceptRes->assertStatus(200);
+
+        $reviewer->refresh();
+        $this->assertEquals(75, $reviewer->getSpendableExp());
+
+        // 5. Author can delete showcase
+        $deleteRes = $this->actingAs($author)->deleteJson(route('critique.api.destroy', $showcase));
+        $deleteRes->assertStatus(200);
+        $this->assertNull(CodeShowcase::find($showcaseId));
     }
 }

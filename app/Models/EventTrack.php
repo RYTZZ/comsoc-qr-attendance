@@ -63,3 +63,4 @@ class EventTrack extends Model
         return max(0, $this->capacity_limit - $taken);
     }
 }
+

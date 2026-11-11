@@ -27,3 +27,4 @@ class ArenaTestCase extends Model
         return $this->belongsTo(ArenaChallenge::class, 'arena_challenge_id');
     }
 }
+

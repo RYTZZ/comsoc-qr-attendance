@@ -155,3 +155,4 @@ class OfflineScannerEngine {
 
 export const offlineScanner = new OfflineScannerEngine();
 window.offlineScanner = offlineScanner;
+

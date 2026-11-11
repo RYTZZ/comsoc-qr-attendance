@@ -13,6 +13,7 @@ class PulseTopic extends Model
     use HasFactory, HasUuids;
 
     protected $fillable = [
+        'user_id',
         'category',
         'title',
         'content',
@@ -36,6 +37,11 @@ class PulseTopic extends Model
         return $this->belongsTo(User::class, 'responded_by');
     }
 
+    public function user(): BelongsTo
+    {
+        return $this->belongsTo(User::class, 'user_id');
+    }
+
     public function votes(): HasMany
     {
         return $this->hasMany(PulseVote::class);
@@ -48,3 +54,4 @@ class PulseTopic extends Model
         return hash('sha256', $userId . $salt . $actionType);
     }
 }
+

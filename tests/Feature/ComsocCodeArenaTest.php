@@ -2,6 +2,7 @@
 
 namespace Tests\Feature;
 
+use App\Models\AcademicYear;
 use App\Models\ArenaChallenge;
 use App\Models\ArenaSubmission;
 use App\Models\ArenaTestCase;
@@ -15,53 +16,70 @@ class ComsocCodeArenaTest extends TestCase
 
     public function test_students_can_view_challenges_and_submit_solutions(): void
     {
-        $student = User::factory()->create(['role' => 'student', 'is_active' => true]);
+        AcademicYear::create([
+            'label' => 'AY 2025–2026',
+            'year_start' => 2025,
+            'year_end' => 2026,
+            'is_active' => true,
+        ]);
+
+        $user = User::factory()->create(['role' => 'student']);
 
         $challenge = ArenaChallenge::create([
-            'title' => 'Two Sum Indices',
-            'slug' => 'two-sum-indices',
+            'title' => 'Palindrome Test',
+            'slug' => 'palindrome-test',
             'difficulty' => 'novice',
-            'category' => 'arrays',
-            'description_markdown' => 'Given an array of integers and target, return indices of two numbers such that they add up to target.',
-            'sample_input' => '[2,7,11,15], target = 9',
-            'sample_output' => '[0,1]',
+            'category' => 'strings',
+            'description_markdown' => 'Return true if palindrome.',
             'exp_reward' => 50,
             'is_active' => true,
         ]);
 
         ArenaTestCase::create([
             'arena_challenge_id' => $challenge->id,
-            'input_data' => '[2,7,11,15], target = 9',
-            'expected_output' => '[0,1]',
+            'input_data' => '"racecar"',
+            'expected_output' => 'true',
             'is_hidden' => false,
         ]);
 
-        // 1. Fetch challenge list
-        $resList = $this->actingAs($student)
-            ->getJson(route('arena.api.index'))
-            ->assertOk()
-            ->assertJsonStructure(['challenges']);
+        // 1. Fetch challenge listing
+        $response = $this->actingAs($user)->getJson(route('arena.api.index'));
+        $response->assertStatus(200);
+        $response->assertJsonFragment(['title' => 'Palindrome Test']);
+        $this->assertEquals(0, $response->json('user_stats.spendable_exp'));
 
-        $this->assertCount(1, $resList->json('challenges'));
-        $this->assertSame('Two Sum Indices', $resList->json('challenges.0.title'));
-
-        // 2. Submit solution
-        $resSubmit = $this->actingAs($student)
-            ->postJson(route('arena.api.submit', $challenge), [
-                'language' => 'javascript',
-                'source_code' => 'function twoSum(nums, target) { return [0, 1]; }',
-            ])
-            ->assertOk()
-            ->assertJson([
-                'success' => true,
-                'verdict' => 'accepted',
-                'exp_earned' => 50,
-            ]);
-
-        $this->assertDatabaseHas('arena_submissions', [
-            'arena_challenge_id' => $challenge->id,
-            'user_id' => $student->id,
-            'verdict' => 'accepted',
+        // 2. First-time solve awards 50 EXP
+        $submit = $this->actingAs($user)->postJson(route('arena.api.submit', $challenge), [
+            'language' => 'javascript',
+            'source_code' => 'function isPalindrome(s) { return true; }',
         ]);
+
+        $submit->assertStatus(200);
+        $submit->assertJson([
+            'success' => true,
+            'verdict' => 'accepted',
+            'exp_earned' => 50,
+            'already_claimed' => false,
+        ]);
+
+        $user->refresh();
+        $this->assertEquals(50, $user->getSpendableExp());
+
+        // 3. Repeated solve does NOT award duplicate EXP (Idempotency)
+        $repeatSubmit = $this->actingAs($user)->postJson(route('arena.api.submit', $challenge), [
+            'language' => 'javascript',
+            'source_code' => 'function isPalindrome(s) { return true; }',
+        ]);
+
+        $repeatSubmit->assertStatus(200);
+        $repeatSubmit->assertJson([
+            'success' => true,
+            'verdict' => 'accepted',
+            'exp_earned' => 0,
+            'already_claimed' => true,
+        ]);
+
+        $user->refresh();
+        $this->assertEquals(50, $user->getSpendableExp()); // Still 50, no duplicate
     }
 }

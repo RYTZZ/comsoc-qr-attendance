@@ -46,3 +46,4 @@ class CodeShowcase extends Model
         return $this->hasMany(CodeCritique::class);
     }
 }
+

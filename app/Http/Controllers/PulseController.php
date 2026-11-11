@@ -53,8 +53,12 @@ class PulseController extends Controller
 
         $voterHash = $viewer ? PulseTopic::generateBlindHash($viewer->id, 'pulse_vote') : null;
 
-        $topics = $query->paginate(15)->through(function ($t) use ($voterHash) {
+        $topics = $query->paginate(15)->through(function ($t) use ($viewer, $voterHash) {
             $hasVoted = $voterHash ? PulseVote::where('pulse_topic_id', $t->id)->where('voter_hash', $voterHash)->exists() : false;
+
+            // Check if current user is owner (or authorized admin) for edit/delete permissions
+            $canEdit = $viewer && ($viewer->id === $t->user_id || $viewer->isAdmin() || $viewer->isSuperAdmin());
+            $canDelete = $viewer && ($viewer->id === $t->user_id || $viewer->isAdmin() || $viewer->isSuperAdmin());
 
             return [
                 'id' => $t->id,
@@ -65,6 +69,8 @@ class PulseController extends Controller
                 'votes_count' => $t->votes_count,
                 'has_voted' => $hasVoted,
                 'is_pinned' => $t->is_pinned,
+                'can_edit' => $canEdit,
+                'can_delete' => $canDelete,
                 'official_response' => $t->official_response,
                 'responder' => $t->responder ? [
                     'name' => $t->responder->name,
@@ -92,24 +98,30 @@ class PulseController extends Controller
             'category' => ['required', 'string', Rule::in(['lab_facilities', 'curriculum', 'org_governance', 'student_welfare', 'general'])],
             'title' => ['required', 'string', 'min:5', 'max:150'],
             'content' => ['required', 'string', 'min:15', 'max:2500'],
+        ], [
+            'title.min' => 'The topic summary must be at least 5 characters.',
+            'content.min' => 'Please provide at least 15 characters describing your concern or suggestion.',
         ]);
 
         $cleanTitle = trim(strip_tags($validated['title']));
         $cleanContent = trim(strip_tags($validated['content']));
 
-        // Blind token: no correlation to user_id saved
         $blindHash = PulseTopic::generateBlindHash($user->id, 'pulse_topic_' . date('Y-m-d'));
 
-        // Prevent duplicate spam submissions within the same day
+        // Prevent duplicate submissions within the same day
         $duplicate = PulseTopic::where('blind_session_hash', $blindHash)
             ->where('title', $cleanTitle)
             ->exists();
 
         if ($duplicate) {
-            return response()->json(['message' => 'You have already submitted this feedback topic today.'], 422);
+            return response()->json([
+                'message' => 'You have already submitted this feedback topic today.',
+                'errors' => ['title' => ['You have already submitted this feedback topic today.']],
+            ], 422);
         }
 
         $topic = PulseTopic::create([
+            'user_id' => $user->id,
             'category' => $validated['category'],
             'title' => $cleanTitle,
             'content' => $cleanContent,
@@ -130,6 +142,83 @@ class PulseController extends Controller
             'message' => 'Feedback submitted anonymously. Thank you for your voice!',
             'topic_id' => $topic->id,
         ], 201);
+    }
+
+    /**
+     * Update an existing submission (Owner or Officer)
+     */
+    public function update(Request $request, PulseTopic $topic): JsonResponse
+    {
+        $user = $request->user();
+        if (!$user) {
+            return response()->json(['message' => 'Unauthenticated.'], 401);
+        }
+
+        $isAuthorized = ($topic->user_id === $user->id || $user->isAdmin() || $user->isSuperAdmin());
+        if (!$isAuthorized) {
+            return response()->json(['message' => 'Unauthorized. You cannot edit this submission.'], 403);
+        }
+
+        $validated = $request->validate([
+            'category' => ['required', 'string', Rule::in(['lab_facilities', 'curriculum', 'org_governance', 'student_welfare', 'general'])],
+            'title' => ['required', 'string', 'min:5', 'max:150'],
+            'content' => ['required', 'string', 'min:15', 'max:2500'],
+        ], [
+            'title.min' => 'The topic summary must be at least 5 characters.',
+            'content.min' => 'Please provide at least 15 characters describing your concern or suggestion.',
+        ]);
+
+        $updateData = [
+            'category' => $validated['category'],
+            'title' => trim(strip_tags($validated['title'])),
+            'content' => trim(strip_tags($validated['content'])),
+        ];
+
+        // If an edited submission is already reviewed or altered by non-admin, reset to under_review
+        if (!$user->isAdmin() && !$user->isSuperAdmin()) {
+            $updateData['status'] = 'under_review';
+        }
+
+        $topic->update($updateData);
+
+        AuditLogger::log('pulse.topic.updated', $topic, [
+            'actor_id' => $user->id,
+            'title' => $topic->title,
+        ]);
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Feedback topic updated successfully.',
+            'topic' => $topic->fresh(),
+        ]);
+    }
+
+    /**
+     * Delete an existing submission (Owner or Officer)
+     */
+    public function destroy(Request $request, PulseTopic $topic): JsonResponse
+    {
+        $user = $request->user();
+        if (!$user) {
+            return response()->json(['message' => 'Unauthenticated.'], 401);
+        }
+
+        $isAuthorized = ($topic->user_id === $user->id || $user->isAdmin() || $user->isSuperAdmin());
+        if (!$isAuthorized) {
+            return response()->json(['message' => 'Unauthorized. You cannot delete this submission.'], 403);
+        }
+
+        AuditLogger::log('pulse.topic.deleted', $topic, [
+            'actor_id' => $user->id,
+            'title' => $topic->title,
+        ]);
+
+        $topic->delete();
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Feedback topic deleted successfully.',
+        ]);
     }
 
     /**
