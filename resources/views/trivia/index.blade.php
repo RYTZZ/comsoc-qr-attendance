@@ -19,7 +19,7 @@
         @if (session('error'))
             <div role="alert" class="rounded-xl border border-rose-500/30 bg-rose-500/10 px-4 py-3 text-xs text-rose-200">{{ session('error') }}</div>
         @endif
-        @if ($errors->any())
+        @if (isset($errors) && $errors->any())
             <div role="alert" class="rounded-xl border border-rose-500/30 bg-rose-500/10 px-4 py-3 text-xs text-rose-200">{{ $errors->first() }}</div>
         @endif
 
