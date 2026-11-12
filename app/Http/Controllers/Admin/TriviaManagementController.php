@@ -16,6 +16,8 @@ class TriviaManagementController extends Controller
 {
     public function index(): View
     {
+        \App\Support\TriviaSchema::ensureTables();
+
         $questions = TriviaQuestion::withCount('answers')->orderByDesc('publish_at')->orderByDesc('created_at')->paginate(15);
 
         return view('admin.trivia.index', compact('questions'));
@@ -23,6 +25,8 @@ class TriviaManagementController extends Controller
 
     public function create(): View
     {
+        \App\Support\TriviaSchema::ensureTables();
+
         return view('admin.trivia.form', ['question' => new TriviaQuestion([
             'options' => ['', '', '', ''],
             'points' => 10,
@@ -47,6 +51,8 @@ class TriviaManagementController extends Controller
 
     public function edit(TriviaQuestion $trivia): View
     {
+        \App\Support\TriviaSchema::ensureTables();
+
         return view('admin.trivia.form', [
             'question' => $trivia,
             'locked' => $trivia->answers()->exists(),

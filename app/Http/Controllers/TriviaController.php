@@ -14,6 +14,8 @@ class TriviaController extends Controller
 {
     public function index(Request $request, TriviaService $service): View
     {
+        \App\Support\TriviaSchema::ensureTables();
+
         $user = $request->user();
 
         $live = TriviaQuestion::live()->orderByDesc('publish_at')->get();
