@@ -60,12 +60,11 @@ class StudentRegisterController extends Controller
             $avatarSeed = \App\Services\AvatarService::sanitizeSeed($validated['avatar_seed']);
             $avatarStyle = $validated['avatar_style'] ?? 'adventurer';
 
-            $user = User::create([
+            $user = User::createUnverified([
                 'member_id' => User::generateUniqueMemberId(),
                 'name' => $fullName,
                 'username' => $username,
                 'email' => $email,
-                'email_verified_at' => null,
                 'password' => Hash::make($validated['password']),
                 'role' => 'student', // Never grant officer privileges during self-registration
                 'avatar_style' => $avatarStyle,
@@ -145,16 +144,18 @@ class StudentRegisterController extends Controller
 
         app(\App\Services\SessionSecurityService::class)->handleLogin($user, $request);
 
-        // Automatically issue the six-digit email verification OTP (delivery failures never block registration)
-        $otpResult = app(\App\Services\EmailVerificationOtpService::class)->issueAndSend($user, $request->ip(), enforceCooldown: false);
-
-        $notificationMessage = $otpResult['sent']
-            ? 'Registration successful! A 6-digit verification code has been sent to your email.'
-            : 'Registration successful! Please verify your email address to continue.';
+        // The Registered event already issued and emailed the OTP (User::sendEmailVerificationNotification).
+        // Only issue again if that delivery did not create a challenge, so users never receive two emails.
+        $otpService = app(\App\Services\EmailVerificationOtpService::class);
+        $cooldown = $otpService->remainingResendCooldownSeconds($user);
+        if ($cooldown === 0) {
+            $otpResult = $otpService->issueAndSend($user, $request->ip(), enforceCooldown: false);
+            $cooldown = $otpResult['cooldown_seconds'] ?? \App\Services\EmailVerificationOtpService::RESEND_COOLDOWN_SECONDS;
+        }
 
         return redirect()->route('verification.notice')
             ->with('status', 'verification-link-sent')
-            ->with('success', $notificationMessage)
-            ->with('cooldown_seconds', $otpResult['cooldown_seconds'] ?? 60);
+            ->with('success', 'Registration successful! A 6-digit verification code is being sent to your email. Enter it to verify your account.')
+            ->with('cooldown_seconds', $cooldown);
     }
 }

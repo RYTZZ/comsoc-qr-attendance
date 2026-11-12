@@ -218,6 +218,12 @@
                 Event Raffles
             </a>
 
+            <a href="{{ route('admin.trivia.index') }}"
+               class="sidebar-link {{ request()->routeIs('admin.trivia.*') ? 'active' : '' }}">
+                <i data-lucide="help-circle" class="sidebar-link-icon text-amber-400"></i>
+                Friday Trivia
+            </a>
+
             <a href="{{ route('admin.missions.index') }}"
                class="sidebar-link {{ request()->routeIs('admin.missions.*') ? 'active' : '' }}">
                 <i data-lucide="target" class="sidebar-link-icon"></i>

@@ -136,11 +136,26 @@ class User extends Authenticatable implements MustVerifyEmail
                 $user->member_id = self::generateUniqueMemberId();
             }
 
-            // If email_verified_at is not explicitly provided, default to now() for active accounts in test/legacy seeds
-            if (! array_key_exists('email_verified_at', $user->getAttributes())) {
+            // SECURITY: an email address is never trusted automatically. Only automated tests
+            // (which seed users through User::create without the guarded email_verified_at column)
+            // receive a pre-verified default; real environments always start unverified.
+            if (app()->environment('testing') && ! array_key_exists('email_verified_at', $user->getAttributes())) {
                 $user->email_verified_at = \Illuminate\Support\Carbon::now();
             }
         });
+    }
+
+    /**
+     * Create an account whose email is explicitly UNVERIFIED. `email_verified_at` is intentionally
+     * not mass-assignable, so it is forced to null here and can only be set by successful OTP validation.
+     */
+    public static function createUnverified(array $attributes): static
+    {
+        $user = new static;
+        $user->forceFill(array_merge($attributes, ['email_verified_at' => null]));
+        $user->save();
+
+        return $user;
     }
 
     /**

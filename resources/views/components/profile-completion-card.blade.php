@@ -138,9 +138,18 @@
                                             </svg>
                                         @endif
                                         <span>{{ $item['label'] }}</span>
+                                        @if (($item['key'] ?? null) === 'email')
+                                            <span class="rounded-full px-1.5 py-0.5 text-[10px] font-bold {{ $item['completed'] ? 'bg-emerald-500/15 text-emerald-300' : 'bg-amber-500/15 text-amber-300' }}">
+                                                {{ $item['completed'] ? 'Verified' : 'Unverified' }}
+                                            </span>
+                                        @endif
                                     </span>
                                     @if (! $item['completed'])
-                                        @if ($item['editable_by_member'])
+                                        @if (($item['key'] ?? null) === 'email')
+                                            <a href="{{ route('verification.notice') }}" class="shrink-0 font-semibold text-indigo-400 hover:text-indigo-300">
+                                                Verify
+                                            </a>
+                                        @elseif ($item['editable_by_member'])
                                             <a href="{{ $item['action_url'] }}" class="shrink-0 font-semibold text-indigo-400 hover:text-indigo-300">
                                                 Edit
                                             </a>

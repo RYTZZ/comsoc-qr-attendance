@@ -256,12 +256,27 @@
         </template>
 
         <template x-if="!loadingComments && comments.length === 0">
-            <div class="text-center py-8 px-4 rounded-xl border border-dashed border-slate-800 text-slate-500 text-xs">
-                <i data-lucide="message-square-dashed" class="w-6 h-6 mx-auto mb-1.5 text-slate-600"></i>
-                <p class="font-medium text-slate-400">No comments yet</p>
-                <p class="mt-0.5">Start the conversation by leaving the first thought above!</p>
+            <div class="flex flex-col items-center justify-center text-center rounded-2xl bg-[#25282B] px-4 py-10 sm:py-14 md:py-16" data-testid="comments-empty-state">
+                <svg class="w-20 h-20 sm:w-24 sm:h-24 md:w-28 md:h-28" viewBox="0 0 120 100" fill="none" aria-hidden="true">
+                    <defs>
+                        <linearGradient id="cmtBubbleBlue" x1="40" y1="8" x2="100" y2="66" gradientUnits="userSpaceOnUse">
+                            <stop stop-color="#38A0FF"/>
+                            <stop offset="1" stop-color="#2563EB"/>
+                        </linearGradient>
+                    </defs>
+                    <!-- Back outlined bubble -->
+                    <path d="M14 48c0-8 6-14 14-14h34c8 0 14 6 14 14v12c0 8-6 14-14 14H34l-14 8 3-10c-5-2-9-6-9-12V48z" stroke="#E5E7EB" stroke-width="3.5" stroke-linejoin="round"/>
+                    <!-- Front filled bubble -->
+                    <path d="M54 22c0-9 7-16 16-16h18c9 0 16 7 16 16v14c0 9-7 16-16 16h-6l-18 8 4-10c-8-1-14-8-14-16V22z" fill="url(#cmtBubbleBlue)"/>
+                    <circle cx="68" cy="29" r="4" fill="#fff"/>
+                    <circle cx="80" cy="29" r="4" fill="#fff"/>
+                    <circle cx="92" cy="29" r="4" fill="#fff"/>
+                </svg>
+                <p class="mt-5 text-base sm:text-lg font-bold text-slate-300">This space is yours</p>
+                <p class="mt-1 text-xs sm:text-sm text-slate-400">Share your thoughts in the comments.</p>
             </div>
         </template>
+
 
         <!-- Main Comments Loop -->
         <template x-for="comment in comments" :key="comment.id">

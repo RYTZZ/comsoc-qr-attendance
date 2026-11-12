@@ -304,8 +304,15 @@
                                     </div>
 
                                     <div id="contact-info">
-                                        <label for="email" class="label text-xs text-slate-300">Email <span
-                                                class="text-[#df747a]">*</span></label>
+                                        <label for="email" class="label text-xs text-slate-300 flex items-center gap-2">Email <span
+                                                class="text-[#df747a]">*</span>
+                                            @if ($user->hasVerifiedEmail())
+                                                <span class="rounded-full bg-emerald-500/15 px-2 py-0.5 text-[10px] font-bold text-emerald-300">Verified</span>
+                                            @else
+                                                <span class="rounded-full bg-amber-500/15 px-2 py-0.5 text-[10px] font-bold text-amber-300">Unverified</span>
+                                                <a href="{{ route('verification.notice') }}" class="text-[10px] font-semibold text-indigo-400 hover:text-indigo-300">Verify now</a>
+                                            @endif
+                                        </label>
                                         <input type="email" name="email" id="email"
                                             value="{{ old('email', $user->email) }}" class="input text-xs mt-1"
                                             placeholder="Enter your email" required>

@@ -168,6 +168,12 @@ Route::middleware(['auth', 'verified', 'require_password_change'])->group(functi
             ->name('arena.api.submit');
     });
 
+    // Friday Trivia: Weekly Algorithm & Computing Challenges
+    Route::get('/trivia', [\App\Http\Controllers\TriviaController::class, 'index'])->name('trivia.index');
+    Route::post('/trivia/{question}/answer', [\App\Http\Controllers\TriviaController::class, 'answer'])
+        ->middleware('throttle:15,1')
+        ->name('trivia.answer');
+
     // Dynamic Activity Registration & Multi-Session Event System (Student-Facing)
     Route::prefix('activities')->name('activities.')->group(function () {
         Route::get('/my-registrations', [\App\Http\Controllers\MemberActivityController::class, 'myRegistrations'])->name('my-registrations');
@@ -407,6 +413,17 @@ Route::middleware(['auth', 'verified', 'require_password_change'])->group(functi
             Route::get('/{raffle}', [\App\Http\Controllers\Admin\RaffleController::class, 'show'])->name('show');
             Route::post('/{raffle}/draw', [\App\Http\Controllers\Admin\RaffleController::class, 'draw'])->name('draw');
             Route::post('/winners/{winner}/claim', [\App\Http\Controllers\Admin\RaffleController::class, 'claim'])->name('claim');
+        });
+
+        // Friday Trivia Management
+        Route::prefix('trivia')->name('trivia.')->group(function () {
+            Route::get('/', [\App\Http\Controllers\Admin\TriviaManagementController::class, 'index'])->name('index');
+            Route::get('/create', [\App\Http\Controllers\Admin\TriviaManagementController::class, 'create'])->name('create');
+            Route::post('/', [\App\Http\Controllers\Admin\TriviaManagementController::class, 'store'])->name('store');
+            Route::get('/{trivia}/edit', [\App\Http\Controllers\Admin\TriviaManagementController::class, 'edit'])->name('edit');
+            Route::put('/{trivia}', [\App\Http\Controllers\Admin\TriviaManagementController::class, 'update'])->name('update');
+            Route::post('/{trivia}/toggle', [\App\Http\Controllers\Admin\TriviaManagementController::class, 'toggle'])->name('toggle');
+            Route::delete('/{trivia}', [\App\Http\Controllers\Admin\TriviaManagementController::class, 'destroy'])->name('destroy');
         });
 
         Route::middleware(['role:super_admin'])->group(function () {
