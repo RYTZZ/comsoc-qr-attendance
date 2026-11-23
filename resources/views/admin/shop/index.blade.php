@@ -1,4 +1,4 @@
-<x-layouts.admin :title="'Reward Management & Publishing Catalog'">
+<x-layouts.admin :title="'Reward Management & Publishing Catalog'" :hideSuccessBanner="true">
 <div class="space-y-6">
     <div class="page-header flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
@@ -61,13 +61,6 @@
             <p class="text-xl font-bold font-mono text-cyan-300">{{ number_format($summary['pending_claims']) }}</p>
         </div>
     </div>
-
-            @if(session('success'))
-                <div class="p-4 rounded-xl bg-emerald-500/10 border border-emerald-500/30 text-emerald-400 text-sm flex items-center gap-3">
-                    <i data-lucide="check-circle" class="w-5 h-5 flex-shrink-0"></i>
-                    <span>{{ session('success') }}</span>
-                </div>
-            @endif
 
             @if(session('error'))
                 <div class="p-4 rounded-xl bg-rose-500/10 border border-rose-500/30 text-rose-400 text-sm flex items-center gap-3">
