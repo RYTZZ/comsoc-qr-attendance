@@ -170,6 +170,9 @@ Route::middleware(['auth', 'verified', 'require_password_change'])->group(functi
 
     // Friday Trivia: Weekly Algorithm & Computing Challenges
     Route::get('/trivia', [\App\Http\Controllers\TriviaController::class, 'index'])->name('trivia.index');
+    Route::post('/trivia/sessions/{session}/submit', [\App\Http\Controllers\TriviaController::class, 'submitSession'])
+        ->middleware('throttle:15,1')
+        ->name('trivia.session.submit');
     Route::post('/trivia/{question}/answer', [\App\Http\Controllers\TriviaController::class, 'answer'])
         ->middleware('throttle:15,1')
         ->name('trivia.answer');
@@ -418,6 +421,9 @@ Route::middleware(['auth', 'verified', 'require_password_change'])->group(functi
         // Friday Trivia Management
         Route::prefix('trivia')->name('trivia.')->group(function () {
             Route::get('/', [\App\Http\Controllers\Admin\TriviaManagementController::class, 'index'])->name('index');
+            Route::post('/trigger-weekly', [\App\Http\Controllers\Admin\TriviaManagementController::class, 'triggerWeekly'])->name('trigger');
+            Route::post('/bulk-parse', [\App\Http\Controllers\Admin\TriviaManagementController::class, 'bulkParse'])->name('bulk-parse');
+            Route::post('/bulk-import', [\App\Http\Controllers\Admin\TriviaManagementController::class, 'bulkImport'])->name('bulk-import');
             Route::get('/create', [\App\Http\Controllers\Admin\TriviaManagementController::class, 'create'])->name('create');
             Route::post('/', [\App\Http\Controllers\Admin\TriviaManagementController::class, 'store'])->name('store');
             Route::get('/{trivia}/edit', [\App\Http\Controllers\Admin\TriviaManagementController::class, 'edit'])->name('edit');

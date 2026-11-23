@@ -4,7 +4,10 @@ namespace App\Services;
 
 use App\Models\TriviaAnswer;
 use App\Models\TriviaQuestion;
+use App\Models\TriviaSession;
+use App\Models\TriviaSessionCompletion;
 use App\Models\User;
+use App\Support\RowLock;
 use Illuminate\Database\QueryException;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
@@ -86,6 +89,104 @@ class TriviaService
             'correct_count' => (int) $r->correct_count,
             'answered_count' => (int) $r->answered_count,
         ])->filter(fn ($r) => $r->user !== null)->values();
+    }
+
+    /**
+     * Submit all answers for a weekly Friday Trivia session and award exactly 15 EXP once.
+     *
+     * @param  array<string, int|string>  $submittedAnswers  Map of trivia_question_id => display_index
+     *
+     * @throws InvalidArgumentException
+     */
+    public function submitSessionAnswers(
+        User $user,
+        TriviaSession $session,
+        array $submittedAnswers,
+        ExpLedgerService $expLedgerService
+    ): TriviaSessionCompletion {
+        try {
+            return DB::transaction(function () use ($user, $session, $submittedAnswers, $expLedgerService) {
+                RowLock::acquire(User::class, $user->id);
+
+                $lockedSession = TriviaSession::whereKey($session->id)->lockForUpdate()->firstOrFail();
+                if ($lockedSession->status !== 'active') {
+                    throw new InvalidArgumentException('This weekly Friday Trivia session is no longer active.');
+                }
+
+                if (TriviaSessionCompletion::where('trivia_session_id', $lockedSession->id)
+                    ->where('user_id', $user->id)
+                    ->exists()) {
+                    throw new InvalidArgumentException('You have already completed this week\'s Friday Trivia.');
+                }
+
+                $sessionQuestions = $lockedSession->sessionQuestions()->with('question')->get();
+                if ($sessionQuestions->isEmpty()) {
+                    throw new InvalidArgumentException('This trivia session has no questions.');
+                }
+
+                $correctCount = 0;
+                foreach ($sessionQuestions as $sq) {
+                    $q = $sq->question;
+                    if (! $q) {
+                        continue;
+                    }
+
+                    if (! array_key_exists($q->id, $submittedAnswers)) {
+                        throw new InvalidArgumentException('Please answer all questions before submitting.');
+                    }
+
+                    $displayIdx = (int) $submittedAnswers[$q->id];
+                    $originalIdx = $sq->originalIndexFor($displayIdx);
+                    if ($originalIdx === null) {
+                        throw new InvalidArgumentException('Invalid answer choice selected.');
+                    }
+
+                    $isCorrect = $originalIdx === (int) $q->correct_index;
+                    if ($isCorrect) {
+                        $correctCount++;
+                    }
+
+                    TriviaAnswer::updateOrCreate(
+                        [
+                            'trivia_question_id' => $q->id,
+                            'user_id' => $user->id,
+                        ],
+                        [
+                            'trivia_session_id' => $lockedSession->id,
+                            'selected_index' => $originalIdx,
+                            'is_correct' => $isCorrect,
+                            'points_awarded' => $isCorrect ? 10 : 0,
+                        ]
+                    );
+                }
+
+                $fixedExp = TriviaSession::FIXED_EXP_REWARD; // Strictly fixed at 15 EXP
+                $idempotencyKey = "friday_trivia:{$lockedSession->id}:{$user->id}";
+
+                $expResult = $expLedgerService->creditExp(
+                    user: $user,
+                    amount: $fixedExp,
+                    sourceType: 'contribution',
+                    sourceId: $lockedSession->id,
+                    description: "Completed {$lockedSession->title} (Friday Trivia)",
+                    expirationDays: null,
+                    idempotencyKey: $idempotencyKey,
+                    actor: $user
+                );
+
+                return TriviaSessionCompletion::create([
+                    'trivia_session_id' => $lockedSession->id,
+                    'user_id' => $user->id,
+                    'answers_count' => $sessionQuestions->count(),
+                    'correct_count' => $correctCount,
+                    'exp_awarded' => $fixedExp,
+                    'xp_transaction_id' => $expResult['transaction']->id ?? null,
+                    'completed_at' => now(),
+                ]);
+            });
+        } catch (QueryException $e) {
+            throw new InvalidArgumentException('You have already completed this week\'s Friday Trivia.');
+        }
     }
 }
 

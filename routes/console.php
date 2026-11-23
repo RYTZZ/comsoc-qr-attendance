@@ -10,6 +10,12 @@ Artisan::command('inspire', function () {
 
 Schedule::command('incidents:archive')->daily();
 
+// Fully Automated Friday Trivia: Activate every Friday at 12:00 AM Asia/Manila
+Schedule::command('trivia:run-weekly')
+    ->weeklyOn(5, '00:00')
+    ->timezone('Asia/Manila')
+    ->withoutOverlapping();
+
 Artisan::command('make:superadmin {email=admin@comsoc.local} {password=Admin@123456}', function (string $email, string $password) {
     $user = \App\Models\User::updateOrCreate(
         ['email' => $email],

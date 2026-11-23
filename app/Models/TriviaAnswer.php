@@ -11,7 +11,7 @@ class TriviaAnswer extends Model
     use HasUuids;
 
     protected $fillable = [
-        'trivia_question_id', 'user_id', 'selected_index', 'is_correct', 'points_awarded',
+        'trivia_question_id', 'trivia_session_id', 'user_id', 'selected_index', 'is_correct', 'points_awarded',
     ];
 
     protected function casts(): array

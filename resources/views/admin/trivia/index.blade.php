@@ -24,6 +24,50 @@
     </div>
 @endif
 
+{{-- Automation Status & Manual Trigger --}}
+<div class="grid grid-cols-1 lg:grid-cols-3 gap-4 mb-6">
+    <div class="card p-4 bg-[#172033] border border-slate-800 space-y-2">
+        <div class="flex items-center justify-between">
+            <span class="text-[10px] font-bold uppercase tracking-wider text-emerald-400">Automated Schedule</span>
+            <span class="px-2 py-0.5 rounded text-[10px] font-bold bg-emerald-500/15 text-emerald-300 border border-emerald-500/30">ACTIVE</span>
+        </div>
+        <p class="text-sm font-bold text-white">Every Friday · 12:00 AM PHT</p>
+        <p class="text-[11px] text-slate-400">Timezone: Asia/Manila (UTC+8) · Fixed Reward: 15 EXP</p>
+        <form method="POST" action="{{ route('admin.trivia.trigger') }}" class="pt-1">
+            @csrf
+            <button type="submit" class="btn-secondary text-xs py-1.5 px-3">
+                Trigger This Week's Session Now
+            </button>
+        </form>
+    </div>
+
+    <div class="card p-4 bg-[#172033] border border-slate-800 space-y-1">
+        <span class="text-[10px] font-bold uppercase tracking-wider text-slate-400">Question Bank</span>
+        <div class="flex items-baseline gap-4 pt-1">
+            <div>
+                <p class="text-xl font-bold font-mono text-white">{{ $bankStats['total'] ?? 0 }}</p>
+                <p class="text-[10px] text-slate-400">Active</p>
+            </div>
+            <div>
+                <p class="text-xl font-bold font-mono text-emerald-400">{{ $bankStats['unused'] ?? 0 }}</p>
+                <p class="text-[10px] text-slate-400">Unused</p>
+            </div>
+        </div>
+    </div>
+
+    <div class="card p-4 bg-[#172033] border border-slate-800 space-y-1.5">
+        <span class="text-[10px] font-bold uppercase tracking-wider text-slate-400">Recent Automation Logs</span>
+        @forelse(($automationLogs ?? collect())->take(3) as $log)
+            <div class="text-[11px] text-slate-300 truncate" title="{{ $log->summary }}">
+                <span class="font-mono text-[10px] {{ $log->status === 'success' ? 'text-emerald-400' : ($log->status === 'failed' ? 'text-rose-400' : 'text-amber-300') }}">[{{ strtoupper($log->status) }}]</span>
+                {{ $log->summary }}
+            </div>
+        @empty
+            <p class="text-[11px] text-slate-500">No automation runs recorded yet.</p>
+        @endforelse
+    </div>
+</div>
+
 <div class="card overflow-hidden">
     <div class="overflow-x-auto">
         <table class="w-full text-left text-xs">

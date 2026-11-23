@@ -26,6 +26,111 @@
         <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
             <div class="lg:col-span-2 space-y-6">
 
+                {{-- Automated Weekly Friday Trivia Session --}}
+                @if (isset($activeSession) && $activeSession)
+                    <section class="card bg-[#172033] border border-amber-500/30 rounded-2xl p-5 sm:p-6 space-y-5" data-testid="weekly-session">
+                        <div class="flex flex-wrap items-center justify-between gap-2 border-b border-slate-800 pb-4">
+                            <div>
+                                <div class="flex items-center gap-2">
+                                    <span class="px-2 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider bg-emerald-500/15 text-emerald-300 border border-emerald-500/30">Active Weekly Session</span>
+                                    <span class="text-[11px] font-mono text-slate-400">{{ $activeSession->week_key }}</span>
+                                </div>
+                                <h2 class="text-lg font-bold text-white mt-1">{{ $activeSession->title }}</h2>
+                                @if ($activeSession->theme)
+                                    <p class="text-xs text-slate-400">{{ $activeSession->theme }}</p>
+                                @endif
+                            </div>
+                            <div class="text-right">
+                                <span class="inline-flex items-center gap-1 rounded-xl bg-amber-500/15 border border-amber-500/30 px-3 py-1.5 text-xs font-extrabold text-amber-300">
+                                    +{{ \App\Models\TriviaSession::FIXED_EXP_REWARD }} EXP
+                                </span>
+                                <p class="text-[10px] text-slate-400 mt-1">Fixed completion reward</p>
+                            </div>
+                        </div>
+
+                        @if ($sessionCompletion)
+                            <div class="rounded-xl border border-emerald-500/30 bg-emerald-500/10 p-4 flex flex-wrap items-center justify-between gap-3">
+                                <div>
+                                    <p class="text-sm font-bold text-emerald-300">Completed! You earned +{{ $sessionCompletion->exp_awarded }} EXP</p>
+                                    <p class="text-xs text-slate-300 mt-0.5">Score: {{ $sessionCompletion->correct_count }}/{{ $sessionCompletion->answers_count }} correct · Submitted {{ $sessionCompletion->completed_at->timezone($tz)->format('M j, g:i A') }} PHT</p>
+                                </div>
+                            </div>
+
+                            <div class="space-y-4">
+                                @foreach ($sessionQuestions as $idx => $sq)
+                                    @php
+                                        $q = $sq->question;
+                                        if (! $q) continue;
+                                        $opts = $sq->shuffledOptions();
+                                        $correctDisp = $sq->correctDisplayIndex();
+                                        $ans = $sessionAnswers->get($q->id);
+                                        $mineOrig = $ans?->selected_index;
+                                    @endphp
+                                    <div class="rounded-xl border border-slate-800 bg-[#0B1120] p-4 space-y-2.5">
+                                        <div class="flex items-center justify-between gap-2 text-[11px] text-slate-400">
+                                            <span>Question {{ $idx + 1 }} · {{ \App\Models\TriviaQuestion::CATEGORIES[$q->category] ?? 'Tech' }}</span>
+                                            @if ($ans)
+                                                <span class="font-bold {{ $ans->is_correct ? 'text-emerald-400' : 'text-rose-400' }}">{{ $ans->is_correct ? 'Correct' : 'Incorrect' }}</span>
+                                            @endif
+                                        </div>
+                                        <p class="text-sm font-semibold text-white">{{ $q->question }}</p>
+                                        <ul class="space-y-1.5">
+                                            @foreach ($opts as $di => $optText)
+                                                @php
+                                                    $origIdx = $sq->originalIndexFor($di);
+                                                    $isCorrectOpt = $di === $correctDisp;
+                                                    $isMyOpt = $origIdx !== null && $mineOrig === $origIdx;
+                                                    $cls = $isCorrectOpt
+                                                        ? 'border-emerald-500/40 bg-emerald-500/10 text-emerald-200'
+                                                        : ($isMyOpt ? 'border-rose-500/40 bg-rose-500/10 text-rose-200' : 'border-slate-800 bg-[#172033]/60 text-slate-300');
+                                                @endphp
+                                                <li class="flex items-center gap-2 rounded-lg border px-3 py-2 text-xs {{ $cls }}">
+                                                    <span class="font-mono text-slate-400">{{ $letters[$di] ?? ($di + 1) }}</span>
+                                                    <span class="flex-1">{{ $optText }}</span>
+                                                    @if ($isCorrectOpt) <span class="text-[10px] font-bold uppercase">Correct</span> @endif
+                                                </li>
+                                            @endforeach
+                                        </ul>
+                                        @if ($q->explanation)
+                                            <p class="text-xs text-slate-300"><span class="font-bold text-amber-300">Explanation:</span> {{ $q->explanation }}</p>
+                                        @endif
+                                    </div>
+                                @endforeach
+                            </div>
+                        @else
+                            <form method="POST" action="{{ route('trivia.session.submit', $activeSession) }}" class="space-y-5" x-data="{ submitting: false }" @submit="submitting = true">
+                                @csrf
+                                @foreach ($sessionQuestions as $idx => $sq)
+                                    @php
+                                        $q = $sq->question;
+                                        if (! $q) continue;
+                                        $opts = $sq->shuffledOptions();
+                                    @endphp
+                                    <div class="rounded-xl border border-slate-800 bg-[#0B1120] p-4 space-y-3">
+                                        <div class="flex items-center justify-between gap-2 text-[11px] text-slate-400">
+                                            <span class="font-semibold text-amber-300">Question {{ $idx + 1 }} of {{ $sessionQuestions->count() }}</span>
+                                            <span>{{ \App\Models\TriviaQuestion::CATEGORIES[$q->category] ?? 'Tech' }} · {{ ucfirst($q->difficulty ?? 'medium') }}</span>
+                                        </div>
+                                        <p class="text-sm font-semibold text-white">{{ $q->question }}</p>
+                                        <div class="space-y-2">
+                                            @foreach ($opts as $di => $optText)
+                                                <label class="flex items-center gap-3 rounded-xl border border-slate-800 bg-[#172033]/70 px-3 py-2.5 text-xs sm:text-sm text-slate-200 cursor-pointer hover:border-slate-600 transition has-[:checked]:border-indigo-500/60 has-[:checked]:bg-indigo-500/10">
+                                                    <input type="radio" name="answers[{{ $q->id }}]" value="{{ $di }}" class="accent-indigo-500" required>
+                                                    <span class="font-mono text-xs text-slate-400">{{ $letters[$di] ?? ($di + 1) }}</span>
+                                                    <span>{{ $optText }}</span>
+                                                </label>
+                                            @endforeach
+                                        </div>
+                                    </div>
+                                @endforeach
+                                <button type="submit" :disabled="submitting" class="btn-primary text-xs py-2.5 px-6 disabled:opacity-50">
+                                    <span x-text="submitting ? 'Submitting...' : 'Submit Friday Trivia (+15 EXP)'">Submit Friday Trivia (+15 EXP)</span>
+                                </button>
+                            </form>
+                        @endif
+                    </section>
+                @endif
+
                 {{-- Live question(s) --}}
                 @forelse ($live as $q)
                     @php $mine = $myAnswers->get($q->id); @endphp

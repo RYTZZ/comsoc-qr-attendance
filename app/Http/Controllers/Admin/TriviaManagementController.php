@@ -3,9 +3,14 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
+use App\Models\TriviaAutomationLog;
 use App\Models\TriviaQuestion;
+use App\Models\TriviaSession;
 use App\Services\AuditLogger;
+use App\Services\FridayTriviaAutomationService;
+use App\Services\TriviaBulkImportService;
 use Illuminate\Contracts\View\View;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Carbon;
@@ -19,8 +24,59 @@ class TriviaManagementController extends Controller
         \App\Support\TriviaSchema::ensureTables();
 
         $questions = TriviaQuestion::withCount('answers')->orderByDesc('publish_at')->orderByDesc('created_at')->paginate(15);
+        $sessions = TriviaSession::withCount(['sessionQuestions', 'completions'])->orderByDesc('starts_at')->take(8)->get();
+        $automationLogs = TriviaAutomationLog::orderByDesc('executed_at')->take(10)->get();
+        $bankStats = [
+            'total' => TriviaQuestion::where('is_active', true)->count(),
+            'unused' => TriviaQuestion::where('is_active', true)->where('usage_count', 0)->count(),
+        ];
 
-        return view('admin.trivia.index', compact('questions'));
+        return view('admin.trivia.index', compact('questions', 'sessions', 'automationLogs', 'bankStats'));
+    }
+
+    public function triggerWeekly(FridayTriviaAutomationService $automation): RedirectResponse
+    {
+        $result = $automation->activateWeeklySession(nowManila: null, manual: true);
+
+        return back()->with(
+            $result['status'] === 'failed' ? 'error' : 'success',
+            $result['message']
+        );
+    }
+
+    public function bulkParse(Request $request, TriviaBulkImportService $importer): JsonResponse
+    {
+        $data = $request->validate([
+            'raw_text' => ['required', 'string', 'min:10'],
+        ]);
+
+        return response()->json($importer->parse($data['raw_text']));
+    }
+
+    public function bulkImport(Request $request, TriviaBulkImportService $importer): RedirectResponse
+    {
+        $data = $request->validate([
+            'items' => ['required', 'array', 'min:1'],
+            'feedback_mode' => ['required', Rule::in(array_keys(TriviaQuestion::FEEDBACK_MODES))],
+            'points' => ['required', 'integer', 'min:1', 'max:100'],
+            'status' => ['required', Rule::in(['draft', 'published'])],
+        ]);
+
+        $result = $importer->import(
+            $data['items'],
+            [
+                'feedback_mode' => $data['feedback_mode'],
+                'points' => $data['points'],
+                'status' => $data['status'],
+            ],
+            $request->user()?->id
+        );
+
+        AuditLogger::log('trivia.bulk_imported', null, [], $result);
+
+        $summary = "Import completed: {$result['detected']} detected, {$result['imported']} imported, {$result['duplicates_skipped']} duplicate(s) skipped, {$result['invalid_skipped']} invalid skipped.";
+
+        return redirect()->route('admin.trivia.index')->with('success', $summary);
     }
 
     public function create(): View

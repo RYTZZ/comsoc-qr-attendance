@@ -20,9 +20,16 @@ class TriviaQuestion extends Model
         'programming' => 'Programming',
         'computer_science' => 'Computer Science',
         'cybersecurity' => 'Cybersecurity',
+        'artificial_intelligence' => 'Artificial Intelligence',
+        'networking' => 'Networking',
+        'software_development' => 'Software Development',
+        'digital_innovation' => 'Digital Innovation',
         'general_tech' => 'General Technology',
+        'general_knowledge' => 'General Knowledge',
         'other_computing' => 'Other Computing Topics',
     ];
+
+    public const DIFFICULTIES = ['easy', 'medium', 'hard'];
 
     public const FEEDBACK_MODES = [
         'immediate' => 'Immediate (right/wrong shown right after answering)',
@@ -30,7 +37,8 @@ class TriviaQuestion extends Model
     ];
 
     protected $fillable = [
-        'question', 'category', 'options', 'correct_index', 'explanation', 'points',
+        'question', 'category', 'difficulty', 'options', 'correct_index', 'explanation', 'points',
+        'usage_count', 'last_used_at', 'is_ai_generated', 'is_active',
         'feedback_mode', 'status', 'publish_at', 'closes_at', 'created_by',
     ];
 
@@ -40,6 +48,10 @@ class TriviaQuestion extends Model
             'options' => 'array',
             'correct_index' => 'integer',
             'points' => 'integer',
+            'usage_count' => 'integer',
+            'is_ai_generated' => 'boolean',
+            'is_active' => 'boolean',
+            'last_used_at' => 'datetime',
             'publish_at' => 'datetime',
             'closes_at' => 'datetime',
         ];
